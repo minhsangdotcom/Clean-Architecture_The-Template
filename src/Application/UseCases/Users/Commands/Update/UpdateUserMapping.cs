@@ -8,6 +8,6 @@ public class UpdateUserMapping : Profile
     public UpdateUserMapping()
     {
         CreateMap<UpdateUser, User>();
-        CreateMap<User, UpdateUserResponse>();
+        CreateMap<User, UpdateUserResponse>(); 
     }
 }

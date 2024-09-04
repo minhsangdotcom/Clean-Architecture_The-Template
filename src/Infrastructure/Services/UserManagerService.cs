@@ -176,43 +176,52 @@ public class UserManagerService(
     public async Task UpdateClaimsToUserAsync(User user, IEnumerable<UserClaimType> claims)
     {
         User? currentUser = Guard.Against.NotFound(
-            $"{user.Id}",
+            $"{user}",
            await userContext.Where(x => x.Id == user.Id)
-                .Include(x => x.UserClaims!.Where(p => p.Type == KindaUserClaimType.Custom))
-                .AsNoTracking()
+                .Include(x => x.UserClaims)
                 .FirstOrDefaultAsync(),
             nameof(user)
         );
 
-        IEnumerable<UserClaim> currentUserClaims = currentUser.UserClaims ?? [];
+        IEnumerable<UserClaim> customClaims = currentUser.UserClaims!.Where(x => x.Type == KindaUserClaimType.Custom).ToList();
         IEnumerable<UserClaimType> updatingClaims = claims.Where(x => x.Id != null);
 
-        IEnumerable<UserClaimType> shouldInserting = claims.Where(x => !currentUserClaims.Any(p => p.Id == x.Id));
+        IEnumerable<UserClaimType> shouldInserting = claims.Where(x => !customClaims.Any(p => p.Id == x.Id));
         IEnumerable<UserClaimType> shouldUpdating = updatingClaims.Where(
-            x => currentUserClaims.Any(p => p.Id == x.Id)
+            x => customClaims.Any(p => p.Id == x.Id)
         );
-        IEnumerable<Ulid> shouldRemoving = currentUserClaims.Where(
+
+        IEnumerable<Ulid> shouldRemoving = customClaims.Where(
             x => !updatingClaims.Select(x => x.Id).Contains(x.Id)
         ).Select(x => x.Id);
 
-        await RemoveClaimsToUserAsync(user, shouldRemoving);
-        if (shouldUpdating.Any())
+        foreach (UserClaim claim in customClaims)
         {
-            foreach (UserClaim claim in currentUserClaims)
-            {
-                var c = shouldUpdating.FirstOrDefault(x => x.Id == claim.Id);
+            var correspondenceClaim = shouldUpdating.FirstOrDefault(x => x.Id == claim.Id);
 
-                if (c == null)
-                {
-                    continue;
-                }
-                userClaimsContext.Entry(claim).State = EntityState.Modified;
-                claim.ClaimValue = c.ClaimValue!;
+            if (correspondenceClaim == null)
+            {
+                continue;
             }
-            userClaimsContext.UpdateRange(currentUserClaims);
+            claim.ClaimValue = correspondenceClaim.ClaimValue!;
         }
-        await AddClaimsToUserAsync(currentUser, shouldInserting);
-        await context.SaveChangesAsync();
+
+        try
+        {
+            await context.Database.BeginTransactionAsync();
+
+            await RemoveClaimsToUserAsync(currentUser, shouldRemoving);
+            userClaimsContext.UpdateRange(currentUser.UserClaims!);
+            await context.SaveChangesAsync();
+            await AddClaimsToUserAsync(currentUser, shouldInserting);
+
+            await context.Database.CommitTransactionAsync();
+        }
+        catch (Exception)
+        {
+            await context.Database.RollbackTransactionAsync();
+            throw;
+        }
     }
 
     public async Task RemoveClaimsToUserAsync(User user, IEnumerable<Ulid> claimIds)
