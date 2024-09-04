@@ -18,9 +18,9 @@ public interface IRoleManagerService : IScope
 
     Task<IEnumerable<Role>> ListAsync();
 
-    Task<Role> FindByIdAsync(Ulid id);
+    Task<Role?> FindByIdAsync(Ulid id);
 
-    Task<Role> FindByNameAsync(string name);
+    Task<Role?> FindByNameAsync(string name);
 
     Task UpdateRoleClaimAsync(Role role, IEnumerable<RoleClaim> roleClaims);
 

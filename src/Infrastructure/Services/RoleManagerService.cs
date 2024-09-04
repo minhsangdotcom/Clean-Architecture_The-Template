@@ -55,28 +55,25 @@ public class RoleManagerService(TheDbContext context) :
         }
     }
 
-    public async Task<Role> FindByIdAsync(Ulid id) =>
-        Guard.Against.NotFound(
-            $"{id}",
-            await roleContext.Where(x => x.Id == id)
-                .Include(x => x.RoleClaims)
-                .FirstOrDefaultAsync(),
-            NOT_FOUND_MESSAGE);
+    public async Task<Role?> FindByIdAsync(Ulid id) =>
+        await roleContext.Where(x => x.Id == id)
+                    .Include(x => x.RoleClaims)
+                    .FirstOrDefaultAsync();
 
-    public async Task<Role> FindByNameAsync(string name) =>
-        Guard.Against.NotFound(
-            $"{name}",
-            await roleContext.Where(x => x.Name == name)
+    public async Task<Role?> FindByNameAsync(string name) =>
+       await roleContext.Where(x => x.Name == name)
                 .Include(x => x.RoleClaims)
-                .FirstOrDefaultAsync(),
-            NOT_FOUND_MESSAGE
-        );
+                .FirstOrDefaultAsync();
 
     public async Task<IEnumerable<Role>> ListAsync() => await roleContext.ToListAsync();
 
     public async Task UpdateRoleClaimAsync(Role role, IEnumerable<RoleClaim> roleClaims)
     {
-        Role currentRole = await FindByIdAsync(role.Id);
+        Role currentRole = Guard.Against.NotFound(
+            $"{role.Id}",
+            await FindByIdAsync(role.Id),
+            NOT_FOUND_MESSAGE);
+
         Guard.Against.Null(roleClaims, nameof(roleClaims), $"{nameof(roleClaims)} is not null");
 
         IEnumerable<RoleClaim> currentRoleClaims = currentRole.RoleClaims;
@@ -128,7 +125,10 @@ public class RoleManagerService(TheDbContext context) :
             return;
         }
 
-        Role currentRole = await FindByIdAsync(role.Id);
+        Role currentRole = Guard.Against.NotFound(
+            $"{role.Id}",
+            await FindByIdAsync(role.Id),
+            NOT_FOUND_MESSAGE);
 
         if (!claimIds.All(x => new HashSet<Ulid>(currentRole.RoleClaims.Select(p => p.Id)).Contains(x)))
         {
