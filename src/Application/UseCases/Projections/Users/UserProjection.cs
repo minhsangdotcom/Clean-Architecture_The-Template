@@ -1,7 +1,8 @@
+using Contracts.Dtos.Models;
 using Domain.Aggregates.Users.Enums;
 namespace Application.UseCases.Projections.Users;
 
-public class UserProjection
+public class UserProjection : BaseResponse
 {
     public string? FirstName { get; set; }
 

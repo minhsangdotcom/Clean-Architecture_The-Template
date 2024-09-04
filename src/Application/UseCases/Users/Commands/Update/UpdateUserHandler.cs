@@ -33,15 +33,21 @@ public class UpdateUserHandler(
 
         await unitOfWork.Repository<User>().UpdateAsync(user);
         await unitOfWork.SaveAsync(cancellationToken);
-
+        
+        // update role for user
         await userManagerService.UpdateRolesToUserAsync(user, command.User.RoleIds!);
+        
+        // update default user claim
         var claims = user.GetUserClaims().ToDictionary(x => x.ClaimType!, x => x.ClaimValue!);
         await userManagerService.ReplaceDefaultClaimsToUserAsync(user, claims);
-        var a = mapper.Map<List<UserClaimType>>(command.User.Claims, opt => opt.Items[nameof(UserClaimType.Type)] = KindaUserClaimType.Custom);
+
+        // update custom user claim
         await userManagerService.UpdateClaimsToUserAsync(
             user,
-            a
+            mapper.Map<List<UserClaimType>>(command.User.Claims, opt => opt.Items[nameof(UserClaimType.Type)] = KindaUserClaimType.Custom)
         );
+
+        await avatarUpdate.DeleteAvatarAsync(oldAvatar);
 
         return (await unitOfWork.Repository<User>()
                      .GetByConditionSpecificationAsync<UpdateUserResponse>(new GetUserByIdSpecification(user.Id)))!;

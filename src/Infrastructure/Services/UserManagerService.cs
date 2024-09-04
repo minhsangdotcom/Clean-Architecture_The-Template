@@ -198,7 +198,7 @@ public class UserManagerService(
         await RemoveClaimsToUserAsync(user, shouldRemoving);
         if (shouldUpdating.Any())
         {
-            foreach (var claim in currentUserClaims)
+            foreach (UserClaim claim in currentUserClaims)
             {
                 var c = shouldUpdating.FirstOrDefault(x => x.Id == claim.Id);
 
@@ -206,7 +206,7 @@ public class UserManagerService(
                 {
                     continue;
                 }
-
+                userClaimsContext.Entry(claim).State = EntityState.Modified;
                 claim.ClaimValue = c.ClaimValue!;
             }
             userClaimsContext.UpdateRange(currentUserClaims);
