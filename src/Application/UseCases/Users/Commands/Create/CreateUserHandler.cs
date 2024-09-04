@@ -25,7 +25,10 @@ public class CreateUserHandler(
         User user = await unitOfWork.Repository<User>().AddAsync(userCreation);
         await unitOfWork.SaveAsync(cancellationToken);
 
+        //Add role to user
         await userManagerService.AddRoleToUserAsync(user, [.. command.RoleIds!]);
+
+        // update claim to user consist of default and custom claims
         var claims = user.GetUserClaims().Concat(mapper.Map<IEnumerable<UserClaimType>>(command.Claims, opt => opt.Items[nameof(UserClaimType.Type)] = KindaUserClaimType.Custom));
         await userManagerService.AddClaimsToUserAsync(user, claims);
 
