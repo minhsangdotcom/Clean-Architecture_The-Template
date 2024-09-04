@@ -1,3 +1,4 @@
+using Application.Common.Security;
 using Contracts.Dtos.Models;
 using Domain.Aggregates.Users.Enums;
 namespace Application.UseCases.Projections.Users;
@@ -22,6 +23,7 @@ public class UserProjection : BaseResponse
 
     public string? Address { get; set; }
 
+    [File]
     public string? Avatar { get; set; }
 
     public UserStatus Status { get; set; }

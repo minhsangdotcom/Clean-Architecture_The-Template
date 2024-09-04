@@ -9,6 +9,6 @@ public class CreateRoleHandler(
     IRoleManagerService roleManagerService,
     IMapper mapper) : IRequestHandler<CreateRoleCommand, CreateRoleResponse>
 {
-    public async ValueTask<CreateRoleResponse> Handle(CreateRoleCommand request, CancellationToken cancellationToken) =>
-        mapper.Map<CreateRoleResponse>(await roleManagerService.CreateRoleAsync(mapper.Map<Role>(request)));
+    public async ValueTask<CreateRoleResponse> Handle(CreateRoleCommand command, CancellationToken cancellationToken) =>
+        mapper.Map<CreateRoleResponse>(await roleManagerService.CreateRoleAsync(mapper.Map<Role>(command)));
 }
