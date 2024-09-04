@@ -1,0 +1,17 @@
+using Domain.Aggregates.Users;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Infrastructure.Data.Configurations.Identity;
+
+public class RoleClaimConfiguration : IEntityTypeConfiguration<RoleClaim>
+{
+    public void Configure(EntityTypeBuilder<RoleClaim> builder)
+    {
+        builder.HasKey(x => x.Id);
+
+        builder.HasOne(x => x.Role)
+            .WithMany(x => x.RoleClaims)
+            .HasForeignKey(x => x.RoleId);
+    }
+}
