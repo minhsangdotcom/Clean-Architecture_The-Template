@@ -1,7 +1,7 @@
 using Domain.Aggregates.Users;
 using Domain.Specs;
 
-namespace web.Specification.Specs;
+namespace Domain.Aggregates.Users.Specifications;
 
 
 public class GetUserByUsernameSpecification : Specification<User>
