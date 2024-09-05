@@ -33,10 +33,10 @@ public class UpdateUserHandler(
 
         await unitOfWork.Repository<User>().UpdateAsync(user);
         await unitOfWork.SaveAsync(cancellationToken);
-        
+
         // update role for user
         await userManagerService.UpdateRolesToUserAsync(user, command.User.RoleIds!);
-        
+
         // update default user claim
         var claims = user.GetUserClaims().ToDictionary(x => x.ClaimType!, x => x.ClaimValue!);
         await userManagerService.ReplaceDefaultClaimsToUserAsync(user, claims);
@@ -49,7 +49,6 @@ public class UpdateUserHandler(
 
         await avatarUpdate.DeleteAvatarAsync(oldAvatar);
 
-        return (await unitOfWork.Repository<User>()
-                     .GetByConditionSpecificationAsync<UpdateUserResponse>(new GetUserByIdSpecification(user.Id)))!;
+        return mapper.Map<UpdateUserResponse>(user);
     }
 }
