@@ -9,7 +9,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.User;
 
-public class LoginEndpoint(ISender sender) : EndpointBaseAsync.WithRequest<LoginUserCommand>.WithActionResult<ApiResponse>
+public class LoginEndpoint(ISender sender) : EndpointBaseAsync.WithRequest<UserLoginCommand>.WithActionResult<ApiResponse>
 {
 
     [HttpPost(Router.AuthRoute.Auths)]
@@ -17,6 +17,6 @@ public class LoginEndpoint(ISender sender) : EndpointBaseAsync.WithRequest<Login
             Tags = [Router.AuthRoute.Tags],
             Summary = "Auth User"
         )]
-    public async override Task<ActionResult<ApiResponse>> HandleAsync(LoginUserCommand request, CancellationToken cancellationToken = default) =>
+    public async override Task<ActionResult<ApiResponse>> HandleAsync(UserLoginCommand request, CancellationToken cancellationToken = default) =>
         this.Ok200(await sender.Send(request, cancellationToken));
 }

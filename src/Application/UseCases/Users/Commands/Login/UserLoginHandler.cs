@@ -14,15 +14,15 @@ using Wangkanai.Detection.Services;
 
 namespace Application.UseCases.Users.Commands.Login;
 
-public class LoginUserHandler(
+public class UserLoginHandler(
     IUnitOfWork unitOfWork,
     ITokenFactory tokenFactory,
     IDetectionService detectionService,
     ICurrentUser currentUser,
     IMapper mapper
-) : IRequestHandler<LoginUserCommand, LoginUserResponse>
+) : IRequestHandler<UserLoginCommand, UserLoginResponse>
 {
-    public async ValueTask<LoginUserResponse> Handle(LoginUserCommand request, CancellationToken cancellationToken)
+    public async ValueTask<UserLoginResponse> Handle(UserLoginCommand request, CancellationToken cancellationToken)
     {
         User user = await unitOfWork.Repository<User>().GetByConditionSpecificationAsync(
             new GetUserByUsernameSpecification(request.Username!)
@@ -67,7 +67,7 @@ public class LoginUserHandler(
         await unitOfWork.Repository<UserToken>().AddAsync(userToken);
         await unitOfWork.SaveAsync(cancellationToken);
 
-        return new LoginUserResponse()
+        return new UserLoginResponse()
         {
             Token = accessToken,
             Refresh = refreshToken,

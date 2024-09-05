@@ -4,9 +4,9 @@ using Domain.Aggregates.Users;
 
 namespace Application.UseCases.Users.Commands.Login;
 
-public class LoginUserMapping : Profile
+public class UserLoginMapping : Profile
 {
-    public LoginUserMapping()
+    public UserLoginMapping()
     {
         CreateMap<User, UserProjection>();
     }

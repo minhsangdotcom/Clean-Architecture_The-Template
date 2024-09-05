@@ -2,7 +2,7 @@ using Mediator;
 
 namespace Application.UseCases.Users.Commands.Login;
 
-public class LoginUserCommand : IRequest<LoginUserResponse>
+public class UserLoginCommand : IRequest<UserLoginResponse>
 {
     public string? Username { get; set; }
 
