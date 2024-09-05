@@ -36,7 +36,11 @@ public static class Router
     public static class AuthRoute
     {
         public const string Auths = $"{prefix}{nameof(Auths)}";
-        public const string Refresh = $"{prefix}{nameof(Refresh)}";
+
+        /// <summary>
+        /// Refresh token
+        /// </summary>
+        public const string Token = $"{prefix}{nameof(Token)}";
 
         public const string Tags = $"{nameof(Auths)} endpoint";
     }

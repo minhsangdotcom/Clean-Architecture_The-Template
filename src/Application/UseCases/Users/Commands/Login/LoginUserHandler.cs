@@ -30,7 +30,7 @@ public class LoginUserHandler(
 
         if (!Verify(request.Password, user.Password))
         {
-            throw new BadRequestException($"{nameof(User)}_PASSWORD_NOTCORRECT");
+            throw new BadRequestException($"{nameof(User).ToUpper()}_PASSWORD_NOTCORRECT");
         }
 
         DateTime refreshExpireTime = tokenFactory.RefreshtokenExpiredTime;
