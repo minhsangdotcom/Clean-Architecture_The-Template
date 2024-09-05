@@ -16,9 +16,9 @@ public class DeleteUserHandler(IUnitOfWork unitOfWork, IAvatarUpdateService<User
                 throw new BadRequestException($"{nameof(User).ToUpper()}_NOTFOUND");
         string? avatar = user.Avatar;
         await unitOfWork.Repository<User>().DeleteAsync(user);
+        await unitOfWork.SaveAsync(cancellationToken);
 
         await avatarUpdateService.DeleteAvatarAsync(avatar);
-
         return Unit.Value;
     }
 }
