@@ -6,12 +6,12 @@ using Mediator;
 
 namespace Application.UseCases.Users.Queries.Detail;
 
-public class GetDetailUserHandler(IUnitOfWork unitOfWork) : IRequestHandler<GetDetailUserQuery, GetDetailUserResponse>
+public class GetUserDetailHandler(IUnitOfWork unitOfWork) : IRequestHandler<GetUserDetailQuery, GetUserDetailResponse>
 {
-    public async ValueTask<GetDetailUserResponse> Handle(GetDetailUserQuery query, CancellationToken cancellationToken)
+    public async ValueTask<GetUserDetailResponse> Handle(GetUserDetailQuery query, CancellationToken cancellationToken)
     {
         return await unitOfWork.Repository<User>()
-            .GetByConditionSpecificationAsync<GetDetailUserResponse>(new GetUserByIdSpecification(Ulid.Parse(query.UserId))) ??
+            .GetByConditionSpecificationAsync<GetUserDetailResponse>(new GetUserByIdSpecification(query.UserId)) ??
             throw new BadRequestException($"{nameof(User).ToUpper()}_NOTFOUND");
     }
 }

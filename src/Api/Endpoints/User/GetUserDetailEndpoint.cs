@@ -3,14 +3,13 @@ using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Routers;
 using Contracts.Routes;
-using IdGen;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.User;
 
-public class GetDetailUserEndpoint(ISender sender) : EndpointBaseAsync.WithRequest<string>.WithActionResult<ApiResponse>
+public class GetUserDetailEndpoint(ISender sender) : EndpointBaseAsync.WithRequest<string>.WithActionResult<ApiResponse>
 {
 
     [HttpGet(Router.UserRoute.GetUpdateDelete, Name = Router.UserRoute.GetRouteName)]
@@ -19,5 +18,5 @@ public class GetDetailUserEndpoint(ISender sender) : EndpointBaseAsync.WithReque
             Summary = "Detail User"
         )]
     public override async Task<ActionResult<ApiResponse>> HandleAsync([FromRoute(Name = Router.Id)] string userId, CancellationToken cancellationToken = default) =>
-        this.Ok200(await sender.Send(new GetDetailUserQuery(userId), cancellationToken));
+        this.Ok200(await sender.Send(new GetUserDetailQuery(Ulid.Parse(userId)), cancellationToken));
 }
