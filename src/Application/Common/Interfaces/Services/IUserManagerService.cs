@@ -38,7 +38,7 @@ public interface IUserManagerService : IScope
 
     Task<bool> HasRolesInUserAsync(Ulid id, IEnumerable<string> roleNames);
 
-    Task<bool> HasClaimsInUserAsync(Ulid id, IEnumerable<string> claimNames);
+    Task<bool> HasClaimsInUserAsync(Ulid id, Dictionary<string, string> claimNames);
 
-    Task<bool> HasClaimsAndRoleInUserAsync(Ulid id, IEnumerable<string> roles, IEnumerable<string> claims);
+    Task<bool> HasClaimsAndRoleInUserAsync(Ulid id, IEnumerable<string> roles, Dictionary<string, string> claims);
 }

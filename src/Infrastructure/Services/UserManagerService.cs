@@ -266,23 +266,47 @@ public class UserManagerService(
             )
         );
 
-    public async Task<bool> HasClaimsInUserAsync(Ulid id, IEnumerable<string> claimNames) =>
-        await userContext.AnyAsync(
+    // public async Task<bool> HasClaimsInUserAsync(Ulid id, IEnumerable<string> claimNames) =>
+    //     await userContext.AnyAsync(
+    //             x =>
+    //                 x.Id == id
+    //                 && x.UserClaims!.Any(p => claimNames.Contains(p.ClaimValue)
+    //     )
+    // );
+
+    public async Task<bool> HasClaimsInUserAsync(Ulid id, Dictionary<string, string> claimNames)
+    {
+        var claimList = claimNames.Select(kv => new { kv.Key, kv.Value }).ToList();
+        return await userContext.AnyAsync(
                 x =>
                     x.Id == id
-                    && x.UserClaims!.Any(p => claimNames.Contains(p.ClaimValue)
-        )
-    );
+                    && x.UserClaims!.Any(p => claimList.Any(c => c.Key == p.ClaimType && c.Value == p.ClaimValue)
+            )
+        );
+    }
 
-    public async Task<bool> HasClaimsAndRoleInUserAsync(Ulid id, IEnumerable<string> roles, IEnumerable<string> claims) =>
-        await userContext.AnyAsync(
-            x =>
-                x.Id == id
+    // public async Task<bool> HasClaimsAndRoleInUserAsync(Ulid id, IEnumerable<string> roles, Dictionary<string, string> claims) =>
+    //     await userContext.AnyAsync(
+    //         x =>
+    //             x.Id == id
+    //             && (
+    //                 x.UserRoles!.Any(p => roles.Contains(p.Role!.Name))
+    //                 || x.UserClaims!.Any(p => claims.Any(k => k.Key == p.ClaimType && k.Value == p.ClaimValue))
+    //             )
+    //     );
+
+    public async Task<bool> HasClaimsAndRoleInUserAsync(Ulid id, IEnumerable<string> roles, Dictionary<string, string> claims)
+    {
+        var claimList = claims.Select(kv => new { kv.Key, kv.Value }).ToList();
+
+        return await userContext.AnyAsync(
+            x => x.Id == id
                 && (
                     x.UserRoles!.Any(p => roles.Contains(p.Role!.Name))
-                    || x.UserClaims!.Any(p => claims.Contains(p.ClaimValue))
+                    || x.UserClaims!.Any(p => claimList.Any(c => c.Key == p.ClaimType && c.Value == p.ClaimValue))
                 )
         );
+    }
 
     private async Task<User> GetUserAsync(Ulid id) =>
          Guard.Against.NotFound(

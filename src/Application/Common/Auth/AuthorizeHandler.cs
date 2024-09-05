@@ -46,23 +46,24 @@ public class AuthorizeHandler(IServiceProvider serviceProvider) : AuthorizationH
 
         (RequireType type, string[]? require) = GetRequireType(requirement.Requirement());
 
-        if (type == RequireType.None)
+        if (type == RequireType.None && require == null)
         {
             context.Succeed(requirement);
             return;
         }
 
-        string[] requireData = require![0].Trim().Split(",");
+        IEnumerable<string> requireData = require![0].Trim().Split(",").Select(x => x.Trim());
         
-        if (require.Length == 2)
+        if (type == RequireType.Both && require.Length == 2)
         {
+            IEnumerable<string> claims = require[1].Trim().Split(",").Select(x => x.Trim());
             SuccessOrFailiureHandler(
                 context,
                 requirement,
                 await userManagerService.HasClaimsAndRoleInUserAsync(
                     userId.Value,
                     requireData,
-                    require[1].Trim().Split(",")
+                    claims.Any(x => !x.Contains(':')) ? [] : GetClaimKeyValues(claims)
                 )
             );
         }
@@ -82,7 +83,10 @@ public class AuthorizeHandler(IServiceProvider serviceProvider) : AuthorizationH
             SuccessOrFailiureHandler(
                 context,
                 requirement,
-                await userManagerService.HasClaimsInUserAsync(userId.Value, requireData)
+                await userManagerService.HasClaimsInUserAsync(
+                    userId.Value,
+                    requireData.Any(x => !x.Contains('.')) ? [] : GetClaimKeyValues(requireData)
+                )
             );
 
             return;
@@ -100,6 +104,18 @@ public class AuthorizeHandler(IServiceProvider serviceProvider) : AuthorizationH
         }
 
         context.Succeed(requirement);
+    }
+
+    private static Dictionary<string, string> GetClaimKeyValues(IEnumerable<string> claims)
+    {
+       return claims.Select(claim => 
+        {
+            var claimArr = claim.Split(":");
+            return new {
+                Key = claimArr.First(),
+                Value = claimArr.Last()
+            };
+        }).ToDictionary(x => x.Key, x => x.Value);
     }
 
     private enum RequireType
