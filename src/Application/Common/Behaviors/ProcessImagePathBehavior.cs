@@ -20,7 +20,7 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
 
     protected override ValueTask Handle(TMessage message, TResponse response, CancellationToken cancellationToken)
     {
-        if (typeof(TResponse).GetGenericTypeDefinition() == typeof(PaginationResponse<>))
+        if (typeof(TResponse).IsGenericType && typeof(TResponse).GetGenericTypeDefinition() == typeof(PaginationResponse<>))
         {
             PropertyInfo? dataProperty = typeof(TResponse).GetProperty(nameof(PaginationResponse<object>.Data));
             object? dataPropertyValue = dataProperty?.GetValue(response);
