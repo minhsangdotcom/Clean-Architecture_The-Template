@@ -1,7 +1,9 @@
+using System.Collections;
 using System.Reflection;
 using Application.Common.Interfaces.Services;
 using Application.Common.Security;
 using Contracts.Common.Settings;
+using Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -18,6 +20,45 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
 
     protected override ValueTask Handle(TMessage message, TResponse response, CancellationToken cancellationToken)
     {
+        if (typeof(TResponse).GetGenericTypeDefinition() == typeof(PaginationResponse<>))
+        {
+            PropertyInfo? dataProperty = typeof(TResponse).GetProperty(nameof(PaginationResponse<object>.Data));
+            object? dataPropertyValue = dataProperty?.GetValue(response);
+
+            if (dataPropertyValue is IEnumerable dataEnumerable)
+            {
+                foreach (var data in dataEnumerable)
+                {
+                    var propertiesWithFileAttribute = data.GetType()
+                        .GetProperties()
+                        .Where(prop => prop.CustomAttributes
+                            .Any(attr => attr.AttributeType == typeof(FileAttribute)));
+
+                    foreach (var prop in propertiesWithFileAttribute)
+                    {
+                        object? imageKey = prop.GetValue(data);
+
+                        if (imageKey == null)
+                        {
+                            continue;
+                        }
+
+                        logger.LogInformation("image key {value}", imageKey);
+
+                        string imageKeyStr = imageKey.ToString()!;
+                        if (!imageKeyStr.StartsWith(s3AwsSettings.PublicUrl!))
+                        {
+                            string? fullPath = awsAmazonService.GetFullpath(imageKeyStr);
+                            logger.LogInformation("image path {value}", fullPath);
+                            prop.SetValue(data, fullPath);
+                        }
+                    }
+                }
+            }
+
+            return default!;
+        }
+
         PropertyInfo? property = typeof(TResponse).GetProperties()
             .FirstOrDefault(
                 prop =>
@@ -48,7 +89,7 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
         logger.LogInformation("image path {value}", path);
 
         property.SetValue(response, path);
-        
+
         return default!;
     }
 }
