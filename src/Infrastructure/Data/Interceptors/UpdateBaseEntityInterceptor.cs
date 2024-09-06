@@ -1,5 +1,4 @@
 using Application.Common.Interfaces.Services;
-using Domain.Aggregates.Users;
 using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -31,11 +30,6 @@ public class UpdateBaseEntityInterceptor(ICurrentUser currentUser) : SaveChanges
 
         foreach (EntityEntry<BaseEntity> entry in entities)
         {
-            if(entry.Entity.GetType() == typeof(UserToken))
-            {
-                continue;
-            }
-
             if (entry.State == EntityState.Added)
             {
                 entry.Property(nameof(BaseEntity.CreatedBy)).CurrentValue = currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
