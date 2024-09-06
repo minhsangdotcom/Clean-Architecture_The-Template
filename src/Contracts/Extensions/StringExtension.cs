@@ -90,7 +90,27 @@ public static partial class StringExtension
         return result.ToString();
     }
 
+    public static string ToScreamingSnakeCase(this string input)
+    {
+        // Handle PascalCase and camelCase by inserting underscores before capital letters
+        string result = PascalAndCamelRegex().Replace(input, "$1_$2");
+        
+        // Handle consecutive uppercase letters (e.g., "HTTPServer" -> "HTTP_SERVER")
+        result = MyRegex().Replace(result, "$1_$2");
+        
+        // Replace dashes (for kebab-case and Train-Case) with underscores
+        result = result.Replace("-", "_");
+
+        // Convert the entire string to uppercase for SCREAMING_SNAKE_CASE
+        return result.ToUpper();
+    }
+
     [GeneratedRegex("[^A-Za-z0-9_.]+")]
     private static partial Regex RemoveSpecialCharacterRegex();
 
+    [GeneratedRegex(@"([a-z])([A-Z])")]
+    private static partial Regex PascalAndCamelRegex();
+    
+    [GeneratedRegex(@"([A-Z]+)([A-Z][a-z])")]
+    private static partial Regex MyRegex();
 }
