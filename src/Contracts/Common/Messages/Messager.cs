@@ -5,7 +5,7 @@ namespace Contracts.Common.Messages;
 
 public static class Messager
 {
-    public static Message<T> Create<T>() where T : class => new();
+    public static Message<T> Create<T>(string? objectName = null) where T : class => new(objectName);
 
     public static Message<T> Property<T>(this Message<T> message, Expression<Func<T,object>> prop) where T : class
     {

@@ -16,7 +16,7 @@ public static class Message
     public const string TOKEN_EXPIRED = "TOKEN EXPIRED";
 }
 
-public class Message<T> where T : class
+public class Message<T>(string? subjectName = null) where T : class
 {
     private bool isNegative = false;
 
@@ -24,18 +24,13 @@ public class Message<T> where T : class
 
     private string propertyName = string.Empty;
 
-    private readonly string subjectName = typeof(T).Name.ToUpper();
+    private readonly string subjectName = string.IsNullOrWhiteSpace(subjectName) ? typeof(T).Name : subjectName;
 
     private string CustomMessage = string.Empty;
 
     private MessageType type = 0;
 
-    private readonly Dictionary<MessageType, string> Messages = [];
-
-    public Message()
-    {
-        Messages = CommonMessage();
-    }
+    private readonly Dictionary<MessageType, string> Messages = CommonMessage();
 
     public void SetNegative(bool value) => isNegative = value;
 
@@ -53,19 +48,19 @@ public class Message<T> where T : class
 
         if (isNegative)
         {
-            messageBuilder.AppendJoin("_","not".ToScreamingSnakeCase());
+            messageBuilder.Append($"_{"not".ToScreamingSnakeCase()}");
         }
 
         string message = string.IsNullOrWhiteSpace(CustomMessage) ? Messages[type] : CustomMessage.ToScreamingSnakeCase();
 
-        messageBuilder.AppendJoin("_", message);
+        messageBuilder.Append($"_{message}");
 
         if (!string.IsNullOrWhiteSpace(objectName))
         {
-            messageBuilder.AppendJoin("_", objectName);
+            messageBuilder.Append($"_{objectName}");
         }
 
-        return messageBuilder.ToString();
+        return messageBuilder.ToString().ToUpper();
     }
 
     private static Dictionary<MessageType, string> CommonMessage() => new()
@@ -84,6 +79,7 @@ public class Message<T> where T : class
         {MessageType.LessThanEqual, "LESS_THAN_EQUAL"},
         {MessageType.Null, "NULL"},
         {MessageType.Empty, "EMPTY"},
+        {MessageType.NonUnique, "NON_UNIQUE"},
     };
 }
 
@@ -103,4 +99,5 @@ public enum MessageType
     LessThanEqual = 12,
     Empty = 13,
     Null = 14,
+    NonUnique = 15,
 }
