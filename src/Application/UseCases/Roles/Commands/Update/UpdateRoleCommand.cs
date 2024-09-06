@@ -13,5 +13,4 @@ public class UpdateRoleCommand : IRequest<UpdateRoleResponse>
 
 public class UpdateRole : RoleModel
 {
-    public List<RoleClaimModel>? RoleClaims { get; set; }
 }

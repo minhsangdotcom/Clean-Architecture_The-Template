@@ -15,7 +15,7 @@ public class UpdateRoleHandler(IRoleManagerService roleManagerService, IMapper m
 
         mapper.Map(command.Role, role);
 
-        List<RoleClaim> roleClaims = mapper.Map<List<RoleClaim>>(command.Role.RoleClaims) ?? [];
+        List<RoleClaim> roleClaims = mapper.Map<List<RoleClaim>>(command.Role.Claims) ?? [];
         roleClaims.ForEach(x => x.RoleId = role.Id);
 
         await roleManagerService.UpdateRoleAsync(role, roleClaims);

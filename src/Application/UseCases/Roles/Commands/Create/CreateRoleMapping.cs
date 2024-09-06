@@ -9,6 +9,7 @@ public class CreateRoleMapping : Profile
     public CreateRoleMapping()
     {
         CreateMap<CreateRoleCommand, Role>()
+        .ForMember(dest => dest.RoleClaims, opt => opt.MapFrom(src => src.Claims))
         .AfterMap((src,dest) =>
         {
             dest.Name = src.Name!.ToUpper();
