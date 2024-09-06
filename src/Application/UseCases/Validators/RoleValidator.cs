@@ -26,7 +26,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     .Property(x => x.Name!)
                     .Message(MessageType.MaximumLength)
                     .BuildMessage()
-            ).MustAsync((name, CancellationToken) => roleManagerService.Roles.AnyAsync(x => x.Name == name,CancellationToken))
+            ).MustAsync((name, CancellationToken) => IsExistedName(roleManagerService, name, CancellationToken))
             .WithMessage(
                 messageBuilder
                     .Property(x => x.Name)
@@ -43,5 +43,10 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     .Message(MessageType.MaximumLength)
                     .BuildMessage()
             );
+    }
+
+    private static async Task<bool> IsExistedName(IRoleManagerService roleManagerService, string name, CancellationToken cancellationToken)
+    {
+        return !await roleManagerService.Roles.AnyAsync(x => EF.Functions.ILike(x.Name, name), cancellationToken);
     }
 }

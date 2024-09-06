@@ -18,7 +18,7 @@ public static class Message
 
 public class Message<T>(string? subjectName = null) where T : class
 {
-    private bool isNegative = false;
+    private bool? isNegative;
 
     private string objectName = string.Empty;
 
@@ -46,7 +46,7 @@ public class Message<T>(string? subjectName = null) where T : class
     {
         var messageBuilder = new StringBuilder($"{subjectName}_{propertyName.ToScreamingSnakeCase()}");
 
-        if (isNegative)
+        if (isNegative == false)
         {
             messageBuilder.Append($"_{"not".ToScreamingSnakeCase()}");
         }
