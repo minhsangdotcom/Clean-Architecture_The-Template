@@ -153,6 +153,21 @@ public class RoleManagerService(TheDbContext context) :
     public async Task<bool> HasClaimInRoleAsync(Ulid roleId, string claimName) =>
         await roleContext.AnyAsync(x => x.Id == roleId && x.RoleClaims.Any(p => p.ClaimType == claimName));
 
+    public async Task<bool> HasClaimInRoleAsync(Ulid roleId, string claimName, string claimValue) =>
+        await roleContext.AnyAsync(x => x.Id == roleId && x.RoleClaims.Any(p => p.ClaimType == claimName && p.ClaimValue == claimValue));
+
+    public Task<bool> HasClaimInRoleAsync(Ulid roleId, Dictionary<string, string> claims)
+    {
+        var transformClaims = claims.Select(x => new { x.Key, x.Value });
+        return roleContext.AnyAsync(
+            x =>
+                x.Id == roleId
+                && x.RoleClaims!.Any(
+                    p => transformClaims.Any(k => k.Key == p.ClaimType && k.Value == p.ClaimValue)
+            )
+        );
+    }
+
     private async Task<Role> GetAsync(Ulid id) =>
         Guard.Against.NotFound(
             $"{id}",

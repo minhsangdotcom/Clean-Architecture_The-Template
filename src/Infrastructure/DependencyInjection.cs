@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Application.Common.Interfaces.Registers;
 using Contracts.Extensions.Registers;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 namespace Infrastructure;
 
 public static class DependencyInjection
@@ -39,6 +40,6 @@ public static class DependencyInjection
                             .AddClasses(classes => classes.AssignableTo<ITransient>())
                                 .AsImplementedInterfaces()
                                 .WithTransientLifetime()
-                        );
+                        ).AddSingleton<IActionContextAccessor, ActionContextAccessor>();
     }
 }

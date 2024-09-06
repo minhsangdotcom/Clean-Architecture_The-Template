@@ -35,4 +35,8 @@ public interface IRoleManagerService : IScope
     Task<bool> HasClaimInRoleAsync(Ulid roleId, Ulid claimId);
 
     Task<bool> HasClaimInRoleAsync(Ulid roleId, string claimName);
+
+    Task<bool> HasClaimInRoleAsync(Ulid roleId, string claimName, string ClaimValue);
+
+    Task<bool> HasClaimInRoleAsync(Ulid roleId, Dictionary<string, string> claims);
 }
