@@ -9,11 +9,11 @@ public class RoleClaimValidator : AbstractValidator<RoleClaimModel>
 {
     public RoleClaimValidator()
     {
-        Message<RoleClaimModel> messageBuilder = Messager.Create<RoleClaimModel>(nameof(RoleClaim));
         RuleFor(x => x.ClaimType)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage(
-                messageBuilder
+                Messager.Create<RoleClaimModel>(nameof(RoleClaim))
                     .Property(x => x.ClaimType!)
                     .Message(MessageType.Null)
                     .Negative()
@@ -21,9 +21,10 @@ public class RoleClaimValidator : AbstractValidator<RoleClaimModel>
             );
 
         RuleFor(x => x.ClaimValue)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage(
-                messageBuilder
+                Messager.Create<RoleClaimModel>(nameof(RoleClaim))
                     .Property(x => x.ClaimValue!)
                     .Message(MessageType.Null)
                     .Negative()

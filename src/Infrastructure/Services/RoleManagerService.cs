@@ -1,13 +1,14 @@
+using System.Linq.Expressions;
 using Application.Common.Interfaces.Services;
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Users;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Infrastructure.Services;
 
-public class RoleManagerService(TheDbContext context) :
-    IRoleManagerService
+public class RoleManagerService(TheDbContext context) : IRoleManagerService
 {
     private readonly DbSet<Role> roleContext = context.Set<Role>();
     public DbSet<Role> Roles => roleContext;
@@ -56,14 +57,13 @@ public class RoleManagerService(TheDbContext context) :
     }
 
     public async Task<Role?> FindByIdAsync(Ulid id) =>
-        await roleContext.Where(x => x.Id == id)
-                    .Include(x => x.RoleClaims)
-                    .FirstOrDefaultAsync();
+        await roleContext.Where(x => x.Id == id).Include(x => x.RoleClaims).FirstOrDefaultAsync();
 
     public async Task<Role?> FindByNameAsync(string name) =>
-       await roleContext.Where(x => x.Name == name)
-                .Include(x => x.RoleClaims)
-                .FirstOrDefaultAsync();
+        await roleContext
+            .Where(x => x.Name == name)
+            .Include(x => x.RoleClaims)
+            .FirstOrDefaultAsync();
 
     public async Task<IEnumerable<Role>> ListAsync() => await roleContext.ToListAsync();
 
@@ -72,14 +72,21 @@ public class RoleManagerService(TheDbContext context) :
         Role currentRole = Guard.Against.NotFound(
             $"{role.Id}",
             await FindByIdAsync(role.Id),
-            NOT_FOUND_MESSAGE);
+            NOT_FOUND_MESSAGE
+        );
 
         Guard.Against.Null(roleClaims, nameof(roleClaims), $"{nameof(roleClaims)} is not null");
 
         IEnumerable<RoleClaim> currentRoleClaims = currentRole.RoleClaims;
-        IEnumerable<RoleClaim> shouldInserting = roleClaims.Where(x => !currentRoleClaims.Any(p => p.Id == x.Id));
-        IEnumerable<RoleClaim> shouldModifying = currentRoleClaims.Where(x => roleClaims.Any(p => p.Id == x.Id));
-        IEnumerable<RoleClaim> shouldRemoving = currentRoleClaims.Where(x => !roleClaims.Any(p => p.Id == x.Id));
+        IEnumerable<RoleClaim> shouldInserting = roleClaims.Where(x =>
+            !currentRoleClaims.Any(p => p.Id == x.Id)
+        );
+        IEnumerable<RoleClaim> shouldModifying = currentRoleClaims.Where(x =>
+            roleClaims.Any(p => p.Id == x.Id)
+        );
+        IEnumerable<RoleClaim> shouldRemoving = currentRoleClaims.Where(x =>
+            !roleClaims.Any(p => p.Id == x.Id)
+        );
 
         // remove
         await RemoveClaimsFromRoleAsync(role, shouldRemoving.Select(x => x.Id));
@@ -100,7 +107,10 @@ public class RoleManagerService(TheDbContext context) :
         await context.SaveChangesAsync();
 
         // insert
-        await AddClaimsToRoleAsync(role, shouldInserting.ToDictionary(x => x.ClaimType, x => x.ClaimValue));
+        await AddClaimsToRoleAsync(
+            role,
+            shouldInserting.ToDictionary(x => x.ClaimType, x => x.ClaimValue)
+        );
     }
 
     public async Task AddClaimsToRoleAsync(Role role, Dictionary<string, string> claims)
@@ -128,14 +138,21 @@ public class RoleManagerService(TheDbContext context) :
         Role currentRole = Guard.Against.NotFound(
             $"{role.Id}",
             await FindByIdAsync(role.Id),
-            NOT_FOUND_MESSAGE);
+            NOT_FOUND_MESSAGE
+        );
 
-        if (!claimIds.All(x => new HashSet<Ulid>(currentRole.RoleClaims.Select(p => p.Id)).Contains(x)))
+        if (
+            !claimIds.All(x =>
+                new HashSet<Ulid>(currentRole.RoleClaims.Select(p => p.Id)).Contains(x)
+            )
+        )
         {
             throw new Exception($"{nameof(claimIds)} is not existed in role {nameof(role.Id)}.");
         }
 
-        IEnumerable<RoleClaim> roleClaims = currentRole.RoleClaims.Where(x => claimIds.Contains(x.Id));
+        IEnumerable<RoleClaim> roleClaims = currentRole.RoleClaims.Where(x =>
+            claimIds.Contains(x.Id)
+        );
 
         roleClaimContext.RemoveRange(roleClaims);
         await context.SaveChangesAsync();
@@ -151,21 +168,24 @@ public class RoleManagerService(TheDbContext context) :
         await roleContext.AnyAsync(x => x.Id == roleId && x.RoleClaims.Any(p => p.Id == claimId));
 
     public async Task<bool> HasClaimInRoleAsync(Ulid roleId, string claimName) =>
-        await roleContext.AnyAsync(x => x.Id == roleId && x.RoleClaims.Any(p => p.ClaimType == claimName));
+        await roleContext.AnyAsync(x =>
+            x.Id == roleId && x.RoleClaims.Any(p => p.ClaimType == claimName)
+        );
 
     public async Task<bool> HasClaimInRoleAsync(Ulid roleId, string claimName, string claimValue) =>
-        await roleContext.AnyAsync(x => x.Id == roleId && x.RoleClaims.Any(p => p.ClaimType == claimName && p.ClaimValue == claimValue));
-
-    public Task<bool> HasClaimInRoleAsync(Ulid roleId, Dictionary<string, string> claims)
-    {
-        var transformClaims = claims.Select(x => new { x.Key, x.Value });
-        return roleContext.AnyAsync(
-            x =>
-                x.Id == roleId
-                && x.RoleClaims!.Any(
-                    p => transformClaims.Any(k => k.Key == p.ClaimType && k.Value == p.ClaimValue)
-            )
+        await roleContext.AnyAsync(x =>
+            x.Id == roleId
+            && x.RoleClaims.Any(p => p.ClaimType == claimName && p.ClaimValue == claimValue)
         );
+
+    public async Task<bool> HasClaimInRoleAsync(Ulid roleId, Dictionary<string, string> claims)
+    {
+        Dictionary<string, string> roleClaims = await roleContext
+            .Where(x => x.Id == roleId)
+            .SelectMany(x => x.RoleClaims)
+            .ToDictionaryAsync(x => x.ClaimType, x => x.ClaimValue);
+
+        return roleClaims.Any(x => claims.Contains(x));
     }
 
     private async Task<Role> GetAsync(Ulid id) =>
@@ -173,5 +193,5 @@ public class RoleManagerService(TheDbContext context) :
             $"{id}",
             await roleContext.Where(x => x.Id == id).FirstOrDefaultAsync(),
             NOT_FOUND_MESSAGE
-    );
+        );
 }
