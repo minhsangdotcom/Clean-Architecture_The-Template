@@ -11,19 +11,21 @@ public class RoleClaimValidator : AbstractValidator<RoleClaimModel>
     {
         Message<RoleClaimModel> messageBuilder = Messager.Create<RoleClaimModel>(nameof(RoleClaim));
         RuleFor(x => x.ClaimType)
-            .NotEmpty().WithMessage(
+            .NotEmpty()
+            .WithMessage(
                 messageBuilder
                     .Property(x => x.ClaimType!)
-                    .Message(MessageType.Existence)
+                    .Message(MessageType.Null)
                     .Negative()
                     .BuildMessage()
             );
-        
+
         RuleFor(x => x.ClaimValue)
-            .NotEmpty().WithMessage(
+            .NotEmpty()
+            .WithMessage(
                 messageBuilder
                     .Property(x => x.ClaimValue!)
-                    .Message(MessageType.Existence)
+                    .Message(MessageType.Null)
                     .Negative()
                     .BuildMessage()
             );
