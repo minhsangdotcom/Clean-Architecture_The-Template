@@ -13,7 +13,7 @@ public static class Messager
         return message;
     }
 
-    public static Message<T> Negative<T>(this Message<T> message, bool isNegative = false) where T : class
+    public static Message<T> Negative<T>(this Message<T> message, bool isNegative = true) where T : class
     {
         message.SetNegative(isNegative);
         return message;

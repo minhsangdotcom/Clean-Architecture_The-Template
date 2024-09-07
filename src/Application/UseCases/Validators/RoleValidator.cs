@@ -74,9 +74,24 @@ public class RoleValidator : AbstractValidator<RoleModel>
             x => x.Claims != null,
             () =>
             {
-
                 RuleForEach(x => x.Claims).SetValidator(new RoleClaimValidator());
-                
+
+                RuleFor(x => x.Claims)
+                    .Must(x =>
+                        x!
+                            .FindAll(x => x.Id == null)
+                            .DistinctBy(x => new { x.ClaimType, x.ClaimValue })
+                            .Count() == x.FindAll(x => x.Id == null).Count
+                    )
+                    .WithMessage(
+                        Messager
+                            .Create<RoleModel>(nameof(Role))
+                            .Property(x => x.Claims!)
+                            .Message(MessageType.Unique)
+                            .Negative()
+                            .BuildMessage()
+                    );
+
                 RuleFor(x => x.Claims)
                     .MustAsync(
                         (roleClaim, CancellationToken) =>
@@ -97,21 +112,6 @@ public class RoleValidator : AbstractValidator<RoleModel>
                             .Create<RoleModel>(nameof(Role))
                             .Property(x => x.Claims!)
                             .Message(MessageType.Existence)
-                            .BuildMessage()
-                    );
-
-                RuleFor(x => x.Claims)
-                    .Must(x =>
-                        x!
-                            .FindAll(x => x.Id == null)
-                            .DistinctBy(x => new { x.ClaimType, x.ClaimValue })
-                            .Count() == x.FindAll(x => x.Id == null).Count
-                    )
-                    .WithMessage(
-                        Messager
-                            .Create<RoleModel>(nameof(Role))
-                            .Property(x => x.Claims!)
-                            .Message(MessageType.NonUnique)
                             .BuildMessage()
                     );
             }

@@ -43,30 +43,40 @@ public static partial class StringExtension
 
     private static bool ShouldUnderscore(int i, string s)
     {
-        if (i == 0 || i >= s.Length || s[i] == '_') return false;
+        if (i == 0 || i >= s.Length || s[i] == '_')
+            return false;
 
         var curr = s[i];
         var prev = s[i - 1];
         var next = i < s.Length - 2 ? s[i + 1] : '_';
 
-        return prev != '_' && ((char.IsUpper(curr) && (char.IsLower(prev) || char.IsLower(next))) ||
-            (char.IsNumber(curr) && (!char.IsNumber(prev))));
+        return prev != '_'
+            && (
+                (char.IsUpper(curr) && (char.IsLower(prev) || char.IsLower(next)))
+                || (char.IsNumber(curr) && (!char.IsNumber(prev)))
+            );
     }
 
     public static string GenerateRandomString(int codeLength = 16)
     {
-        const string allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-";
+        const string allowedChars =
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-";
 
         if (codeLength < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(codeLength), "length cannot be less than zero.");
+            throw new ArgumentOutOfRangeException(
+                nameof(codeLength),
+                "length cannot be less than zero."
+            );
         }
 
         const int byteSize = 0x100;
         var allowedCharSet = new HashSet<char>(allowedChars).ToArray();
         if (allowedCharSet.Length > byteSize)
         {
-            throw new ArgumentException(string.Format("allowedChars may contain no more than {0} characters.", byteSize));
+            throw new ArgumentException(
+                string.Format("allowedChars may contain no more than {0} characters.", byteSize)
+            );
         }
 
         using var rng = RandomNumberGenerator.Create();
@@ -90,14 +100,19 @@ public static partial class StringExtension
         return result.ToString();
     }
 
-    public static string ToScreamingSnakeCase(this string input)
+    public static string ToScreamingSnakeCase(this string? input)
     {
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return string.Empty;
+        }
+
         // Handle PascalCase and camelCase by inserting underscores before capital letters
         string result = PascalAndCamelRegex().Replace(input, "$1_$2");
-        
+
         // Handle consecutive uppercase letters (e.g., "HTTPServer" -> "HTTP_SERVER")
         result = MyRegex().Replace(result, "$1_$2");
-        
+
         // Replace dashes (for kebab-case and Train-Case) with underscores
         result = result.Replace("-", "_");
 
@@ -110,7 +125,7 @@ public static partial class StringExtension
 
     [GeneratedRegex(@"([a-z])([A-Z])")]
     private static partial Regex PascalAndCamelRegex();
-    
+
     [GeneratedRegex(@"([A-Z]+)([A-Z][a-z])")]
     private static partial Regex MyRegex();
 }
