@@ -18,6 +18,11 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) :
         modelBuilder.HasPostgresExtension("citext");
     }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseSnakeCaseNamingConvention();
+    }
+
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder
