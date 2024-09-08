@@ -4,7 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Common.Auth;
 
-public class AuthorizeHandler(IServiceProvider serviceProvider) : AuthorizationHandler<AuthorizationRequirement>
+public class AuthorizeHandler(IServiceProvider serviceProvider)
+    : AuthorizationHandler<AuthorizationRequirement>
 {
     private readonly IServiceProvider serviceProvider = serviceProvider;
 
@@ -30,10 +31,14 @@ public class AuthorizeHandler(IServiceProvider serviceProvider) : AuthorizationH
         return new(RequireType.Both, require);
     }
 
-    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, AuthorizationRequirement requirement)
+    protected override async Task HandleRequirementAsync(
+        AuthorizationHandlerContext context,
+        AuthorizationRequirement requirement
+    )
     {
         using var scope = serviceProvider.CreateScope();
-        IUserManagerService userManagerService = scope.ServiceProvider.GetRequiredService<IUserManagerService>();
+        IUserManagerService userManagerService =
+            scope.ServiceProvider.GetRequiredService<IUserManagerService>();
         ICurrentUser currentUser = scope.ServiceProvider.GetRequiredService<ICurrentUser>();
 
         Ulid? userId = currentUser.Id;
@@ -53,18 +58,19 @@ public class AuthorizeHandler(IServiceProvider serviceProvider) : AuthorizationH
         }
 
         IEnumerable<string> requireData = require![0].Trim().Split(",").Select(x => x.Trim());
-        
+
         if (type == RequireType.Both && require.Length == 2)
         {
             IEnumerable<string> claims = require[1].Trim().Split(",").Select(x => x.Trim());
             SuccessOrFailiureHandler(
                 context,
                 requirement,
-                await userManagerService.HasClaimsAndRoleInUserAsync(
-                    userId.Value,
-                    requireData,
-                    claims.Any(x => !x.Contains(':')) ? [] : GetClaimKeyValues(claims)
-                )
+                claims.Any(x => x.Contains(':'))
+                    && await userManagerService.HasClaimsAndRoleInUserAsync(
+                        userId.Value,
+                        requireData,
+                        GetClaimKeyValues(claims)
+                    )
             );
         }
 
@@ -73,7 +79,8 @@ public class AuthorizeHandler(IServiceProvider serviceProvider) : AuthorizationH
             SuccessOrFailiureHandler(
                 context,
                 requirement,
-                await userManagerService.HasRolesInUserAsync(userId.Value, requireData));
+                await userManagerService.HasRolesInUserAsync(userId.Value, requireData)
+            );
 
             return;
         }
@@ -83,10 +90,11 @@ public class AuthorizeHandler(IServiceProvider serviceProvider) : AuthorizationH
             SuccessOrFailiureHandler(
                 context,
                 requirement,
-                await userManagerService.HasClaimsInUserAsync(
-                    userId.Value,
-                    requireData.Any(x => !x.Contains('.')) ? [] : GetClaimKeyValues(requireData)
-                )
+                requireData.Any(x => x.Contains(':'))
+                    && await userManagerService.HasClaimsInUserAsync(
+                        userId.Value,
+                        GetClaimKeyValues(requireData)
+                    )
             );
 
             return;
@@ -95,7 +103,11 @@ public class AuthorizeHandler(IServiceProvider serviceProvider) : AuthorizationH
         await Task.CompletedTask;
     }
 
-    private static void SuccessOrFailiureHandler(AuthorizationHandlerContext context, AuthorizationRequirement requirement, bool isSuccess = false)
+    private static void SuccessOrFailiureHandler(
+        AuthorizationHandlerContext context,
+        AuthorizationRequirement requirement,
+        bool isSuccess = false
+    )
     {
         if (!isSuccess)
         {
@@ -108,14 +120,13 @@ public class AuthorizeHandler(IServiceProvider serviceProvider) : AuthorizationH
 
     private static Dictionary<string, string> GetClaimKeyValues(IEnumerable<string> claims)
     {
-       return claims.Select(claim => 
-        {
-            var claimArr = claim.Split(":");
-            return new {
-                Key = claimArr.First(),
-                Value = claimArr.Last()
-            };
-        }).ToDictionary(x => x.Key, x => x.Value);
+        return claims
+            .Select(claim =>
+            {
+                var claimArr = claim.Split(":");
+                return new { Key = claimArr.First(), Value = claimArr.Last() };
+            })
+            .ToDictionary(x => x.Key, x => x.Value);
     }
 
     private enum RequireType

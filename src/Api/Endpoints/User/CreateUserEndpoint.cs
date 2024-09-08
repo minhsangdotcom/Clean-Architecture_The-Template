@@ -1,3 +1,4 @@
+using Application.Common.Auth;
 using Application.UseCases.Users.Commands.Create;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
@@ -16,6 +17,7 @@ public class CreateUserEndpoint(ISender sender) : EndpointBaseAsync.WithRequest<
             Tags = [Router.UserRoute.Tags],
             Summary = "create User"
         )]
+        [Restrict(claims: "permission:create.user")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync([FromForm] CreateUserCommand request, CancellationToken cancellationToken = default)
     {
         CreateUserResponse user = await sender.Send(request, cancellationToken);

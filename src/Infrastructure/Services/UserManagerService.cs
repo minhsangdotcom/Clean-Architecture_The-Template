@@ -9,10 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
-public class UserManagerService(
-    IRoleManagerService roleManagerService,
-    TheDbContext context
-) : IUserManagerService
+public class UserManagerService(IRoleManagerService roleManagerService, TheDbContext context)
+    : IUserManagerService
 {
     private readonly DbSet<UserRole> userRoleContext = context.Set<UserRole>();
     public DbSet<UserRole> UserRoles => userRoleContext;
@@ -32,8 +30,10 @@ public class UserManagerService(
             return;
         }
 
-        User? currentUser = await userContext.Where(x => x.Id == user.Id)
-            .Include(x => x.UserRoles).FirstOrDefaultAsync();
+        User? currentUser = await userContext
+            .Where(x => x.Id == user.Id)
+            .Include(x => x.UserRoles)
+            .FirstOrDefaultAsync();
 
         Guard.Against.NotFound($"{user.Id}", currentUser, nameof(user));
 
@@ -42,11 +42,7 @@ public class UserManagerService(
             throw new ArgumentException($"{nameof(roleIds)} is invalid", nameof(roleIds));
         }
 
-        if (await userRoleContext.AnyAsync(
-                x =>
-                    x.UserId == user.Id
-                    && roleIds.Contains(x.RoleId)
-        ))
+        if (await userRoleContext.AnyAsync(x => x.UserId == user.Id && roleIds.Contains(x.RoleId)))
         {
             throw new ArgumentException($"{nameof(roleIds)} is existence in user", nameof(roleIds));
         }
@@ -57,16 +53,20 @@ public class UserManagerService(
         try
         {
             await context.Database.BeginTransactionAsync();
-            await userRoleContext.AddRangeAsync(newRoleIds.Select(x => new UserRole { RoleId = x, UserId = currentUser.Id }));
+            await userRoleContext.AddRangeAsync(
+                newRoleIds.Select(x => new UserRole { RoleId = x, UserId = currentUser.Id })
+            );
             await context.SaveChangesAsync();
 
             //derive all role claims for users if user is assigned specific role.
-            IEnumerable<RoleClaim> roleClaims = await roleManagerService.GetClaimsByRolesAsync(newRoleIds);
+            IEnumerable<RoleClaim> roleClaims = await roleManagerService.GetClaimsByRolesAsync(
+                newRoleIds
+            );
             IEnumerable<UserClaim> userClaims = roleClaims.Select(x => new UserClaim
             {
                 UserId = user.Id,
                 ClaimType = x.ClaimType,
-                ClaimValue = x.ClaimValue
+                ClaimValue = x.ClaimValue,
             });
 
             await userClaimsContext.AddRangeAsync(userClaims);
@@ -85,8 +85,9 @@ public class UserManagerService(
         roleIds ??= [];
         User currentUser = Guard.Against.NotFound(
             $"{user.Id}",
-            await userContext.Where(x => x.Id == user.Id)
-            .Include(x => x.UserRoles)
+            await userContext
+                .Where(x => x.Id == user.Id)
+                .Include(x => x.UserRoles)
                 .FirstOrDefaultAsync(),
             nameof(user)
         );
@@ -98,8 +99,12 @@ public class UserManagerService(
 
         IEnumerable<UserRole> currentUserRoles = currentUser.UserRoles ?? [];
 
-        IEnumerable<Ulid> shouldRemoving = currentUserRoles.Where(x => !roleIds.Contains(x.RoleId)).Select(x => x.RoleId);
-        IEnumerable<Ulid> shouldInserting = roleIds.Where(x => !currentUserRoles.Any(p => p.RoleId == x));
+        IEnumerable<Ulid> shouldRemoving = currentUserRoles
+            .Where(x => !roleIds.Contains(x.RoleId))
+            .Select(x => x.RoleId);
+        IEnumerable<Ulid> shouldInserting = roleIds.Where(x =>
+            !currentUserRoles.Any(p => p.RoleId == x)
+        );
 
         await RemoveRoleFromUserAsync(currentUser, shouldRemoving);
         await AddRoleToUserAsync(currentUser, shouldInserting.ToList());
@@ -114,8 +119,10 @@ public class UserManagerService(
 
         User currentUser = Guard.Against.NotFound(
             $"{user.Id}",
-            await userContext.Where(x => x.Id == user.Id)
-            .Include(x => x.UserRoles).FirstOrDefaultAsync(),
+            await userContext
+                .Where(x => x.Id == user.Id)
+                .Include(x => x.UserRoles)
+                .FirstOrDefaultAsync(),
             nameof(user)
         );
 
@@ -127,7 +134,9 @@ public class UserManagerService(
         IEnumerable<UserRole> currentUserRoles = currentUser.UserRoles ?? [];
         if (roleIds.All(x => new HashSet<Ulid>(currentUserRoles.Select(p => p.RoleId)).Contains(x)))
         {
-            throw new ArgumentException($"{nameof(roleIds)} is not existed in user {nameof(user.Id)}");
+            throw new ArgumentException(
+                $"{nameof(roleIds)} is not existed in user {nameof(user.Id)}"
+            );
         }
 
         userRoleContext.RemoveRange(currentUserRoles.Where(x => roleIds.Contains(x.RoleId)));
@@ -152,11 +161,9 @@ public class UserManagerService(
 
     public async Task ReplaceDefaultClaimsToUserAsync(User user, Dictionary<string, string> claims)
     {
-        IEnumerable<UserClaim> userClaims = await userClaimsContext.Where(
-            x =>
-                x.UserId == user.Id
-                    && x.Type == KindaUserClaimType.Default
-        ).ToListAsync();
+        IEnumerable<UserClaim> userClaims = await userClaimsContext
+            .Where(x => x.UserId == user.Id && x.Type == KindaUserClaimType.Default)
+            .ToListAsync();
 
         foreach (UserClaim claim in userClaims)
         {
@@ -175,25 +182,35 @@ public class UserManagerService(
 
     public async Task UpdateClaimsToUserAsync(User user, IEnumerable<UserClaimType> claims)
     {
+        if(!claims.Any())
+        {
+            return;
+        }
+
         User? currentUser = Guard.Against.NotFound(
             $"{user}",
-           await userContext.Where(x => x.Id == user.Id)
+            await userContext
+                .Where(x => x.Id == user.Id)
                 .Include(x => x.UserClaims)
                 .FirstOrDefaultAsync(),
             nameof(user)
         );
 
-        IEnumerable<UserClaim> customClaims = currentUser.UserClaims!.Where(x => x.Type == KindaUserClaimType.Custom).ToList();
+        IEnumerable<UserClaim> customClaims = currentUser
+            .UserClaims!.Where(x => x.Type == KindaUserClaimType.Custom)
+            .ToList();
         IEnumerable<UserClaimType> updatingClaims = claims.Where(x => x.Id != null);
 
-        IEnumerable<UserClaimType> shouldInserting = claims.Where(x => !customClaims.Any(p => p.Id == x.Id));
-        IEnumerable<UserClaimType> shouldUpdating = updatingClaims.Where(
-            x => customClaims.Any(p => p.Id == x.Id)
+        IEnumerable<UserClaimType> shouldInserting = claims.Where(x =>
+            !customClaims.Any(p => p.Id == x.Id)
+        );
+        IEnumerable<UserClaimType> shouldUpdating = updatingClaims.Where(x =>
+            customClaims.Any(p => p.Id == x.Id)
         );
 
-        IEnumerable<Ulid> shouldRemoving = customClaims.Where(
-            x => !updatingClaims.Select(x => x.Id).Contains(x.Id)
-        ).Select(x => x.Id);
+        IEnumerable<Ulid> shouldRemoving = customClaims
+            .Where(x => !updatingClaims.Select(x => x.Id).Contains(x.Id))
+            .Select(x => x.Id);
 
         foreach (UserClaim claim in customClaims)
         {
@@ -233,8 +250,9 @@ public class UserManagerService(
 
         User currentUser = Guard.Against.NotFound(
             $"{user.Id}",
-            await userContext.Where(x => x.Id == user.Id)
-            .Include(x => x.UserClaims!.Where(p => p.Type == KindaUserClaimType.Custom))
+            await userContext
+                .Where(x => x.Id == user.Id)
+                .Include(x => x.UserClaims!.Where(p => p.Type == KindaUserClaimType.Custom))
                 .FirstOrDefaultAsync(),
             nameof(user)
         );
@@ -243,7 +261,9 @@ public class UserManagerService(
 
         if (!claimIds.All(x => new HashSet<Ulid>(currentUserClaims.Select(p => p.Id)).Contains(x)))
         {
-            throw new ArgumentException($"{nameof(claimIds)} is not existed in user {nameof(user.Id)}.");
+            throw new ArgumentException(
+                $"{nameof(claimIds)} is not existed in user {nameof(user.Id)}."
+            );
         }
 
         IEnumerable<UserClaim> claims = currentUserClaims.Where(x => claimIds.Contains(x.Id));
@@ -259,57 +279,39 @@ public class UserManagerService(
         await userClaimsContext.Where(x => x.UserId == userId).ToListAsync();
 
     public async Task<bool> HasRolesInUserAsync(Ulid id, IEnumerable<string> roleNames) =>
-        await userContext.AnyAsync(
-                x =>
-                    x.Id == id
-                    && x.UserRoles!.Any(p => roleNames.Contains(p.Role!.Name)
-            )
+        await userContext.AnyAsync(x =>
+            x.Id == id && x.UserRoles!.Any(p => roleNames.Contains(p.Role!.Name))
         );
 
-    // public async Task<bool> HasClaimsInUserAsync(Ulid id, IEnumerable<string> claimNames) =>
-    //     await userContext.AnyAsync(
-    //             x =>
-    //                 x.Id == id
-    //                 && x.UserClaims!.Any(p => claimNames.Contains(p.ClaimValue)
-    //     )
-    // );
-
-    public async Task<bool> HasClaimsInUserAsync(Ulid id, Dictionary<string, string> claimNames)
+    public async Task<bool> HasClaimsInUserAsync(Ulid id, Dictionary<string, string> claims)
     {
-        var claimList = claimNames.Select(kv => new { kv.Key, kv.Value }).ToList();
-        return await userContext.AnyAsync(
-                x =>
-                    x.Id == id
-                    && x.UserClaims!.Any(p => claimList.Any(c => c.Key == p.ClaimType && c.Value == p.ClaimValue)
-            )
-        );
+        var userClaims = await userContext
+            .Where(x => x.Id == id)
+            .SelectMany(x => x.UserClaims!)
+            .ToListAsync();
+
+        return userClaims.Any(x => claims.Contains(new(x.ClaimType, x.ClaimValue)));
     }
 
-    // public async Task<bool> HasClaimsAndRoleInUserAsync(Ulid id, IEnumerable<string> roles, Dictionary<string, string> claims) =>
-    //     await userContext.AnyAsync(
-    //         x =>
-    //             x.Id == id
-    //             && (
-    //                 x.UserRoles!.Any(p => roles.Contains(p.Role!.Name))
-    //                 || x.UserClaims!.Any(p => claims.Any(k => k.Key == p.ClaimType && k.Value == p.ClaimValue))
-    //             )
-    //     );
-
-    public async Task<bool> HasClaimsAndRoleInUserAsync(Ulid id, IEnumerable<string> roles, Dictionary<string, string> claims)
+    public async Task<bool> HasClaimsAndRoleInUserAsync(
+        Ulid id,
+        IEnumerable<string> roles,
+        Dictionary<string, string> claims
+    )
     {
-        var claimList = claims.Select(kv => new { kv.Key, kv.Value }).ToList();
-
-        return await userContext.AnyAsync(
-            x => x.Id == id
-                && (
-                    x.UserRoles!.Any(p => roles.Contains(p.Role!.Name))
-                    || x.UserClaims!.Any(p => claimList.Any(c => c.Key == p.ClaimType && c.Value == p.ClaimValue))
-                )
+        bool isHaRole = await userContext.AnyAsync(x =>
+            x.Id == id && x.UserRoles!.Any(p => roles.Contains(p.Role!.Name))
         );
+
+        bool isHasClaim = (await userClaimsContext.Where(x => x.UserId == id).ToListAsync()).Any(
+            x => claims.Contains(new(x.ClaimType, x.ClaimValue))
+        );
+
+        return isHaRole && isHasClaim;
     }
 
     private async Task<User> GetUserAsync(Ulid id) =>
-         Guard.Against.NotFound(
+        Guard.Against.NotFound(
             $"{id}",
             await userContext.Where(x => x.Id == id).FirstOrDefaultAsync(),
             nameof(id)

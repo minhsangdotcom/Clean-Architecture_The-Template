@@ -1,3 +1,4 @@
+using Application.Common.Auth;
 using Application.UseCases.Users.Commands.Update;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
@@ -16,6 +17,7 @@ public class UpdateUserEndpoint(ISender sender) : EndpointBaseAsync.WithRequest<
             Tags = [Router.UserRoute.Tags],
             Summary = "Update User"
         )]
+        [Restrict(claims: "permission:update.user")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(UpdateUserCommand command, CancellationToken cancellationToken = default) =>
         this.Ok200(await sender.Send(command, cancellationToken));
 }

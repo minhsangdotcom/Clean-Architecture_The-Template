@@ -180,12 +180,12 @@ public class RoleManagerService(TheDbContext context) : IRoleManagerService
 
     public async Task<bool> HasClaimInRoleAsync(Ulid roleId, Dictionary<string, string> claims)
     {
-        Dictionary<string, string> roleClaims = await roleContext
+        var roleClaims = await roleContext
             .Where(x => x.Id == roleId)
             .SelectMany(x => x.RoleClaims)
-            .ToDictionaryAsync(x => x.ClaimType, x => x.ClaimValue);
+            .ToListAsync();
 
-        return roleClaims.Any(x => claims.Contains(x));
+        return roleClaims.Any(x => claims.Contains(new(x.ClaimType, x.ClaimValue)));
     }
 
     private async Task<Role> GetAsync(Ulid id) =>
