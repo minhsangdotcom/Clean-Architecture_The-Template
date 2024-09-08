@@ -12,5 +12,15 @@ public class RoleClaim : DefaultEntity
 
     public Ulid RoleId { get; set; }
 
-    public ICollection<UserClaim>? UserClaims { get; set; }
+    public ICollection<UserClaim>? UserClaims { get; set; } = [];
+
+    public void UpdateUserClaim()
+    {
+        if(UserClaims?.Count == 0)
+        {
+            return;
+        }
+
+        UserClaims!.ToList().ForEach(x => x.ClaimValue = ClaimValue);
+    }
 }

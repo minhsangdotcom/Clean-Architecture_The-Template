@@ -1,7 +1,5 @@
-using Amazon.Runtime.Internal.Util;
 using Application.Common.Interfaces.Services;
 using Ardalis.GuardClauses;
-using AutoMapper;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Infrastructure.Data;
@@ -67,6 +65,7 @@ public class UserManagerService(IRoleManagerService roleManagerService, TheDbCon
                 UserId = user.Id,
                 ClaimType = x.ClaimType,
                 ClaimValue = x.ClaimValue,
+                RoleClaimId = x.Id,
             });
 
             await userClaimsContext.AddRangeAsync(userClaims);
@@ -106,8 +105,20 @@ public class UserManagerService(IRoleManagerService roleManagerService, TheDbCon
             !currentUserRoles.Any(p => p.RoleId == x)
         );
 
-        await RemoveRoleFromUserAsync(currentUser, shouldRemoving);
-        await AddRoleToUserAsync(currentUser, shouldInserting.ToList());
+        try
+        {
+            await context.Database.BeginTransactionAsync();
+
+            await RemoveRoleFromUserAsync(currentUser, shouldRemoving);
+            await AddRoleToUserAsync(currentUser, shouldInserting.ToList());
+
+            await context.Database.CommitTransactionAsync();
+        }
+        catch (Exception)
+        {
+            await context.Database.RollbackTransactionAsync();
+            throw;
+        }
     }
 
     public async Task RemoveRoleFromUserAsync(User user, IEnumerable<Ulid> roleIds)
@@ -121,7 +132,10 @@ public class UserManagerService(IRoleManagerService roleManagerService, TheDbCon
             $"{user.Id}",
             await userContext
                 .Where(x => x.Id == user.Id)
-                .Include(x => x.UserRoles)
+                .Include(x => x.UserRoles)!
+                .ThenInclude(x => x.Role)
+                .ThenInclude(x => x!.RoleClaims)
+                .ThenInclude(x => x.UserClaims)
                 .FirstOrDefaultAsync(),
             nameof(user)
         );
@@ -139,7 +153,15 @@ public class UserManagerService(IRoleManagerService roleManagerService, TheDbCon
             );
         }
 
-        userRoleContext.RemoveRange(currentUserRoles.Where(x => roleIds.Contains(x.RoleId)));
+        IEnumerable<UserRole> userRoles = currentUserRoles.Where(x => roleIds.Contains(x.RoleId));
+
+        IEnumerable<UserClaim> userClaims = userRoles
+            .Select(x => x.Role)
+            .SelectMany(x => x!.RoleClaims)
+            .SelectMany(x => x.UserClaims!);
+
+        userRoleContext.RemoveRange(userRoles);
+        userClaimsContext.RemoveRange(userClaims);
         await context.SaveChangesAsync();
     }
 
@@ -182,7 +204,7 @@ public class UserManagerService(IRoleManagerService roleManagerService, TheDbCon
 
     public async Task UpdateClaimsToUserAsync(User user, IEnumerable<UserClaimType> claims)
     {
-        if(!claims.Any())
+        if (!claims.Any())
         {
             return;
         }

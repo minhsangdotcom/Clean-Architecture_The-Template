@@ -1,10 +1,8 @@
-using System.Linq.Expressions;
 using Application.Common.Interfaces.Services;
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Users;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Infrastructure.Services;
 
@@ -15,6 +13,8 @@ public class RoleManagerService(TheDbContext context) : IRoleManagerService
 
     private readonly DbSet<RoleClaim> roleClaimContext = context.Set<RoleClaim>();
     public DbSet<RoleClaim> RoleClaims => roleClaimContext;
+
+    public DbSet<UserClaim> UserClaimsContext = context.Set<UserClaim>();
 
     private const string NOT_FOUND_MESSAGE = $"{nameof(Role)} is not found";
 
@@ -71,7 +71,11 @@ public class RoleManagerService(TheDbContext context) : IRoleManagerService
     {
         Role currentRole = Guard.Against.NotFound(
             $"{role.Id}",
-            await FindByIdAsync(role.Id),
+            await roleContext
+                .Where(x => x.Id == role.Id)
+                .Include(x => x.RoleClaims)
+                .ThenInclude(x => x.UserClaims)
+                .FirstOrDefaultAsync(),
             NOT_FOUND_MESSAGE
         );
 
@@ -88,9 +92,6 @@ public class RoleManagerService(TheDbContext context) : IRoleManagerService
             !roleClaims.Any(p => p.Id == x.Id)
         );
 
-        // remove
-        await RemoveClaimsFromRoleAsync(role, shouldRemoving.Select(x => x.Id));
-
         foreach (var claim in shouldModifying)
         {
             var current = roleClaims.FirstOrDefault(x => x.Id == claim.Id);
@@ -101,9 +102,15 @@ public class RoleManagerService(TheDbContext context) : IRoleManagerService
             }
 
             claim.ClaimValue = current.ClaimValue;
+            claim.UpdateUserClaim();
         }
 
+        // remove
+        await RemoveClaimsFromRoleAsync(role, shouldRemoving.Select(x => x.Id));
+
+        //update
         roleClaimContext.UpdateRange(currentRoleClaims);
+        UserClaimsContext.UpdateRange(currentRoleClaims.SelectMany(x => x.UserClaims!));
         await context.SaveChangesAsync();
 
         // insert
@@ -124,7 +131,15 @@ public class RoleManagerService(TheDbContext context) : IRoleManagerService
             RoleId = currentRole.Id,
         });
 
+        IEnumerable<UserClaim> userClaims = roleClaims.Select(x => new UserClaim()
+        {
+            ClaimType = x.ClaimType,
+            ClaimValue = x.ClaimValue,
+            RoleClaimId = x.Id,
+        });
+
         await roleClaimContext.AddRangeAsync(roleClaims);
+        await UserClaimsContext.AddRangeAsync(userClaims);
         await context.SaveChangesAsync();
     }
 
@@ -137,7 +152,11 @@ public class RoleManagerService(TheDbContext context) : IRoleManagerService
 
         Role currentRole = Guard.Against.NotFound(
             $"{role.Id}",
-            await FindByIdAsync(role.Id),
+            await roleContext
+                .Where(x => x.Id == role.Id)
+                .Include(x => x.RoleClaims)
+                .ThenInclude(x => x.UserClaims)
+                .FirstOrDefaultAsync(),
             NOT_FOUND_MESSAGE
         );
 
@@ -153,8 +172,10 @@ public class RoleManagerService(TheDbContext context) : IRoleManagerService
         IEnumerable<RoleClaim> roleClaims = currentRole.RoleClaims.Where(x =>
             claimIds.Contains(x.Id)
         );
+        IEnumerable<UserClaim> userClaims = roleClaims.SelectMany(x => x.UserClaims!);
 
         roleClaimContext.RemoveRange(roleClaims);
+        UserClaimsContext.RemoveRange(userClaims);
         await context.SaveChangesAsync();
     }
 
