@@ -3,7 +3,7 @@ using Domain.Common;
 
 namespace Domain.Aggregates.Users;
 
-public class UserClaim : BaseEntity
+public class UserClaim : DefaultEntity
 {
     public string ClaimType { get; set; } = string.Empty;
 
