@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitalCreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -36,7 +36,7 @@ namespace Infrastructure.Data.Migrations
                     id = table.Column<string>(type: "character varying(26)", nullable: false),
                     first_name = table.Column<string>(type: "text", nullable: false),
                     last_name = table.Column<string>(type: "text", nullable: false),
-                    user_name = table.Column<string>(type: "text", nullable: false),
+                    user_name = table.Column<string>(type: "citext", nullable: false),
                     password = table.Column<string>(type: "text", nullable: false),
                     email = table.Column<string>(type: "text", nullable: false),
                     phone_number = table.Column<string>(type: "text", nullable: false),
@@ -60,9 +60,9 @@ namespace Infrastructure.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    role_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     claim_type = table.Column<string>(type: "text", nullable: false),
                     claim_value = table.Column<string>(type: "text", nullable: false),
+                    role_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -72,31 +72,6 @@ namespace Infrastructure.Data.Migrations
                         name: "fk_role_claim_role_role_id",
                         column: x => x.role_id,
                         principalTable: "role",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "user_claim",
-                columns: table => new
-                {
-                    id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    user_id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    claim_type = table.Column<string>(type: "text", nullable: false),
-                    claim_value = table.Column<string>(type: "text", nullable: false),
-                    type = table.Column<int>(type: "integer", nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<string>(type: "text", nullable: false),
-                    updated_by = table.Column<string>(type: "text", nullable: true),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_user_claim", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_user_claim_user_user_id",
-                        column: x => x.user_id,
-                        principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -153,6 +128,34 @@ namespace Infrastructure.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "user_claim",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    claim_type = table.Column<string>(type: "text", nullable: false),
+                    claim_value = table.Column<string>(type: "text", nullable: false),
+                    type = table.Column<int>(type: "integer", nullable: false),
+                    user_id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    role_claim_id = table.Column<string>(type: "character varying(26)", nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_user_claim", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_user_claim_role_claim_role_claim_id",
+                        column: x => x.role_claim_id,
+                        principalTable: "role_claim",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "fk_user_claim_user_user_id",
+                        column: x => x.user_id,
+                        principalTable: "user",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "ix_role_name",
                 table: "role",
@@ -163,6 +166,17 @@ namespace Infrastructure.Data.Migrations
                 name: "ix_role_claim_role_id",
                 table: "role_claim",
                 column: "role_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_user_user_name",
+                table: "user",
+                column: "user_name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_user_claim_role_claim_id",
+                table: "user_claim",
+                column: "role_claim_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_user_claim_user_id",
@@ -184,9 +198,6 @@ namespace Infrastructure.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "role_claim");
-
-            migrationBuilder.DropTable(
                 name: "user_claim");
 
             migrationBuilder.DropTable(
@@ -196,10 +207,13 @@ namespace Infrastructure.Data.Migrations
                 name: "user_token");
 
             migrationBuilder.DropTable(
-                name: "role");
+                name: "role_claim");
 
             migrationBuilder.DropTable(
                 name: "user");
+
+            migrationBuilder.DropTable(
+                name: "role");
         }
     }
 }

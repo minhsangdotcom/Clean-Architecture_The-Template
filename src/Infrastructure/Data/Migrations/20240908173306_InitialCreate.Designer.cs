@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    [Migration("20240907092550_InitalCreate")]
-    partial class InitalCreate
+    [Migration("20240908173306_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -163,11 +163,15 @@ namespace Infrastructure.Data.Migrations
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("user_name");
 
                     b.HasKey("Id")
                         .HasName("pk_user");
+
+                    b.HasIndex("UserName")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_user_name");
 
                     b.ToTable("user", (string)null);
                 });
@@ -192,22 +196,13 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
+                    b.Property<string>("RoleClaimId")
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("role_claim_id");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer")
                         .HasColumnName("type");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -216,6 +211,9 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_user_claim");
+
+                    b.HasIndex("RoleClaimId")
+                        .HasDatabaseName("ix_user_claim_role_claim_id");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_user_claim_user_id");
@@ -317,12 +315,19 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Users.UserClaim", b =>
                 {
+                    b.HasOne("Domain.Aggregates.Users.RoleClaim", "RoleClaim")
+                        .WithMany("UserClaims")
+                        .HasForeignKey("RoleClaimId")
+                        .HasConstraintName("fk_user_claim_role_claim_role_claim_id");
+
                     b.HasOne("Domain.Aggregates.Users.User", "User")
                         .WithMany("UserClaims")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_user_claim_user_user_id");
+
+                    b.Navigation("RoleClaim");
 
                     b.Navigation("User");
                 });
@@ -365,6 +370,11 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("RoleClaims");
 
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Users.RoleClaim", b =>
+                {
+                    b.Navigation("UserClaims");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
