@@ -99,8 +99,11 @@ public class RoleValidator : AbstractValidator<RoleModel>
                                 roleManagerService,
                                 id,
                                 roleClaim!
-                                    .Where(x => x.Id == null)!
-                                    .ToDictionary(x => x.ClaimType!, x => x.ClaimValue!)!
+                                    .Where(x => x.Id == null)
+                                    .Select(x => new KeyValuePair<string, string>(
+                                        x.ClaimType!,
+                                        x.ClaimValue!
+                                    ))
                             )
                     )
                     .When(
@@ -136,6 +139,6 @@ public class RoleValidator : AbstractValidator<RoleModel>
     public static async Task<bool> IsExistClaimAsync(
         IRoleManagerService roleManagerService,
         Ulid id,
-        Dictionary<string, string> roleClaims
+        IEnumerable<KeyValuePair<string, string>> roleClaims
     ) => !await roleManagerService.HasClaimInRoleAsync(id, roleClaims);
 }

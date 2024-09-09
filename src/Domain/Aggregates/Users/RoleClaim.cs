@@ -16,7 +16,7 @@ public class RoleClaim : DefaultEntity
 
     public void UpdateUserClaim()
     {
-        if(UserClaims?.Count == 0)
+        if (UserClaims?.Count == 0)
         {
             return;
         }

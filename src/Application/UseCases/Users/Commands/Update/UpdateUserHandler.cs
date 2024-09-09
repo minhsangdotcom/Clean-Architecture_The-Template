@@ -17,11 +17,17 @@ public class UpdateUserHandler(
     IUserManagerService userManagerService
 ) : IRequestHandler<UpdateUserCommand, UpdateUserResponse>
 {
-    public async ValueTask<UpdateUserResponse> Handle(UpdateUserCommand command, CancellationToken cancellationToken)
+    public async ValueTask<UpdateUserResponse> Handle(
+        UpdateUserCommand command,
+        CancellationToken cancellationToken
+    )
     {
-        User user = await unitOfWork.Repository<User>()
-               .GetByConditionSpecificationAsync(new GetUserByIdSpecification(Ulid.Parse(command.UserId))) ??
-               throw new BadRequestException($"{nameof(User).ToUpper()}_NOTFOUND");
+        User user =
+            await unitOfWork
+                .Repository<User>()
+                .GetByConditionSpecificationAsync(
+                    new GetUserByIdSpecification(Ulid.Parse(command.UserId))
+                ) ?? throw new BadRequestException($"{nameof(User).ToUpper()}_NOTFOUND");
 
         IFormFile? avatar = command.User!.Avatar;
         string? oldAvatar = user.Avatar;
@@ -31,24 +37,34 @@ public class UpdateUserHandler(
         string? key = avatarUpdate.GetKey(avatar);
         user.Avatar = await avatarUpdate.UploadAvatarAsync(avatar, key);
 
-        await unitOfWork.Repository<User>().UpdateAsync(user);
-        await unitOfWork.SaveAsync(cancellationToken);
+        try
+        {
+            await unitOfWork.CreateTransactionAsync();
 
-        // update role for user
-        await userManagerService.UpdateRolesToUserAsync(user, command.User.RoleIds!);
+            await unitOfWork.Repository<User>().UpdateAsync(user);
+            await unitOfWork.SaveAsync(cancellationToken);
+            await userManagerService.UpdateUserAsync(
+                user,
+                command.User.RoleIds!,
+                mapper.Map<List<UserClaimType>>(
+                    command.User.Claims,
+                    opt => opt.Items[nameof(UserClaimType.Type)] = KindaUserClaimType.Custom
+                ),
+                unitOfWork.Transaction
+            );
 
-        // update default user claim
-        var claims = user.GetUserClaims().ToDictionary(x => x.ClaimType!, x => x.ClaimValue!);
-        await userManagerService.ReplaceDefaultClaimsToUserAsync(user, claims);
+            await unitOfWork.CommitAsync();
 
-        // update custom user claim
-        await userManagerService.UpdateClaimsToUserAsync(
-            user,
-            mapper.Map<List<UserClaimType>>(command.User.Claims, opt => opt.Items[nameof(UserClaimType.Type)] = KindaUserClaimType.Custom)
-        );
-
-        await avatarUpdate.DeleteAvatarAsync(oldAvatar);
-
-        return mapper.Map<UpdateUserResponse>(user);
+            await avatarUpdate.DeleteAvatarAsync(oldAvatar);
+            return mapper.Map<UpdateUserResponse>(user);
+        }
+        catch (Exception)
+        {
+            if (!string.IsNullOrWhiteSpace(user.Avatar))
+            {
+                await avatarUpdate.DeleteAvatarAsync(user.Avatar);
+            }
+            throw;
+        }
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
-public class RoleManagerService(TheDbContext context) : IRoleManagerService
+public class RoleManagerService(IDbContext context) : IRoleManagerService
 {
     private readonly DbSet<Role> roleContext = context.Set<Role>();
     public DbSet<Role> Roles => roleContext;
@@ -36,7 +36,7 @@ public class RoleManagerService(TheDbContext context) : IRoleManagerService
     {
         try
         {
-            await context.Database.BeginTransactionAsync();
+            await context.DatabaseFacade.BeginTransactionAsync();
 
             roleContext.Update(role);
             await context.SaveChangesAsync();
@@ -46,12 +46,12 @@ public class RoleManagerService(TheDbContext context) : IRoleManagerService
                 await UpdateRoleClaimAsync(role, roleClaims);
             }
 
-            await context.Database.CommitTransactionAsync();
+            await context.DatabaseFacade.CommitTransactionAsync();
             return role;
         }
         catch (Exception)
         {
-            await context.Database.RollbackTransactionAsync();
+            await context.DatabaseFacade.RollbackTransactionAsync();
             throw;
         }
     }
@@ -116,13 +116,25 @@ public class RoleManagerService(TheDbContext context) : IRoleManagerService
         // insert
         await AddClaimsToRoleAsync(
             role,
-            shouldInserting.ToDictionary(x => x.ClaimType, x => x.ClaimValue)
+            shouldInserting.Select(x => new KeyValuePair<string, string>(x.ClaimType, x.ClaimValue))
         );
     }
 
-    public async Task AddClaimsToRoleAsync(Role role, Dictionary<string, string> claims)
+    public async Task AddClaimsToRoleAsync(
+        Role role,
+        IEnumerable<KeyValuePair<string, string>> claims
+    )
     {
-        Role currentRole = await GetAsync(role.Id);
+        Role currentRole = Guard.Against.NotFound(
+            $"{role.Id}",
+            await roleContext
+                .Where(x => x.Id == role.Id)
+                .Include(x => x.UserRoles)
+                .ThenInclude(x => x.User)
+                .ThenInclude(x => x!.UserClaims)
+                .FirstOrDefaultAsync(),
+            NOT_FOUND_MESSAGE
+        );
 
         IEnumerable<RoleClaim> roleClaims = claims.Select(x => new RoleClaim
         {
@@ -131,15 +143,22 @@ public class RoleManagerService(TheDbContext context) : IRoleManagerService
             RoleId = currentRole.Id,
         });
 
-        IEnumerable<UserClaim> userClaims = roleClaims.Select(x => new UserClaim()
-        {
-            ClaimType = x.ClaimType,
-            ClaimValue = x.ClaimValue,
-            RoleClaimId = x.Id,
-        });
+        List<User> users = currentRole.UserRoles.Select(x => x.User!).ToList();
+
+        users.ForEach(user =>
+            user!.AddUserClaim(
+                roleClaims.Select(roleClaim => new UserClaim()
+                {
+                    ClaimType = roleClaim.ClaimType,
+                    ClaimValue = roleClaim.ClaimValue,
+                    RoleClaimId = roleClaim.Id,
+                })
+            )
+        );
 
         await roleClaimContext.AddRangeAsync(roleClaims);
-        await UserClaimsContext.AddRangeAsync(userClaims);
+        await context.SaveChangesAsync();
+        context.Set<User>().UpdateRange(users);
         await context.SaveChangesAsync();
     }
 
@@ -199,7 +218,10 @@ public class RoleManagerService(TheDbContext context) : IRoleManagerService
             && x.RoleClaims.Any(p => p.ClaimType == claimName && p.ClaimValue == claimValue)
         );
 
-    public async Task<bool> HasClaimInRoleAsync(Ulid roleId, Dictionary<string, string> claims)
+    public async Task<bool> HasClaimInRoleAsync(
+        Ulid roleId,
+        IEnumerable<KeyValuePair<string, string>> claims
+    )
     {
         var roleClaims = await roleContext
             .Where(x => x.Id == roleId)

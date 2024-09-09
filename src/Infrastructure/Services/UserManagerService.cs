@@ -1,14 +1,20 @@
+using System.Data;
+using System.Data.Common;
 using Application.Common.Interfaces.Services;
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 
-public class UserManagerService(IRoleManagerService roleManagerService, TheDbContext context)
-    : IUserManagerService
+public class UserManagerService(
+    IRoleManagerService roleManagerService,
+    IDbContext context,
+    ILogger<UserManagerService> logger
+) : IUserManagerService
 {
     private readonly DbSet<UserRole> userRoleContext = context.Set<UserRole>();
     public DbSet<UserRole> UserRoles => userRoleContext;
@@ -20,6 +26,106 @@ public class UserManagerService(IRoleManagerService roleManagerService, TheDbCon
     public DbSet<UserClaim> UserClaims => userClaimsContext;
 
     private readonly DbSet<User> userContext = context.Set<User>();
+
+    public async Task CreateUserAsync(
+        User user,
+        IEnumerable<Ulid> roleIds,
+        IEnumerable<UserClaimType> claims,
+        DbTransaction? transaction = null
+    )
+    {
+        try
+        {
+            if (transaction == null)
+            {
+                await context.DatabaseFacade.BeginTransactionAsync();
+            }
+            else
+            {
+                await context.UseTransactionAsync(transaction);
+            }
+
+            await AddRoleToUserAsync(user, [.. roleIds]);
+            await AddClaimsToUserAsync(user, claims);
+
+            if (transaction == null)
+            {
+                await context.DatabaseFacade.CommitTransactionAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Error in method {MethodName}. Exception Type: {ExceptionType}. Error Message: {ErrorMessage}. StackTrace: {StackTrace}",
+                nameof(CreateUserAsync),
+                ex.GetType().Name,
+                ex.Message,
+                ex.StackTrace
+            );
+            if (transaction == null)
+            {
+                await context.DatabaseFacade.RollbackTransactionAsync();
+            }
+
+            throw;
+        }
+    }
+
+    public async Task UpdateUserAsync(
+        User user,
+        IEnumerable<Ulid> roleIds,
+        IEnumerable<UserClaimType> claims,
+        DbTransaction? transaction = null
+    )
+    {
+        try
+        {
+            if (transaction == null)
+            {
+                await context.DatabaseFacade.BeginTransactionAsync();
+            }
+            else
+            {
+                await context.UseTransactionAsync(transaction);
+            }
+
+            // update role for user
+            await UpdateRolesToUserAsync(user, roleIds);
+
+            // update default user claim
+            var defautClaims = userClaimsContext
+                .Where(x => x.UserId == user.Id && x.Type == KindaUserClaimType.Default)
+                .ToDictionary(x => x.ClaimType, x => x.ClaimValue);
+
+            await ReplaceDefaultClaimsToUserAsync(user, defautClaims);
+
+            // update custom user claim
+            await UpdateClaimsToUserAsync(user, claims);
+
+            if (transaction == null)
+            {
+                await context.DatabaseFacade.CommitTransactionAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Error in method {MethodName}. Exception Type: {ExceptionType}. Error Message: {ErrorMessage}. StackTrace: {StackTrace}",
+                nameof(UpdateUserAsync),
+                ex.GetType().Name,
+                ex.Message,
+                ex.StackTrace
+            );
+            if (transaction == null)
+            {
+                await context.DatabaseFacade.RollbackTransactionAsync();
+            }
+
+            throw;
+        }
+    }
 
     public async Task AddRoleToUserAsync(User user, List<Ulid> roleIds)
     {
@@ -37,7 +143,7 @@ public class UserManagerService(IRoleManagerService roleManagerService, TheDbCon
 
         if (await roleContext.CountAsync(x => roleIds.Contains(x.Id)) != roleIds.Count)
         {
-            throw new ArgumentException($"{nameof(roleIds)} is invalid", nameof(roleIds));
+            throw new ArgumentException($"{nameof(roleIds)} is not found", nameof(roleIds));
         }
 
         if (await userRoleContext.AnyAsync(x => x.UserId == user.Id && roleIds.Contains(x.RoleId)))
@@ -48,35 +154,26 @@ public class UserManagerService(IRoleManagerService roleManagerService, TheDbCon
         IEnumerable<UserRole> currentUserRoles = currentUser.UserRoles ?? [];
         List<Ulid> newRoleIds = roleIds.FindAll(x => !currentUserRoles.Any(p => p.RoleId == x));
 
-        try
-        {
-            await context.Database.BeginTransactionAsync();
-            await userRoleContext.AddRangeAsync(
-                newRoleIds.Select(x => new UserRole { RoleId = x, UserId = currentUser.Id })
-            );
-            await context.SaveChangesAsync();
+        await userRoleContext.AddRangeAsync(
+            newRoleIds.Select(x => new UserRole { RoleId = x, UserId = currentUser.Id })
+        );
+        await context.SaveChangesAsync();
 
-            //derive all role claims for users if user is assigned specific role.
-            IEnumerable<RoleClaim> roleClaims = await roleManagerService.GetClaimsByRolesAsync(
-                newRoleIds
-            );
-            IEnumerable<UserClaim> userClaims = roleClaims.Select(x => new UserClaim
-            {
-                UserId = user.Id,
-                ClaimType = x.ClaimType,
-                ClaimValue = x.ClaimValue,
-                RoleClaimId = x.Id,
-            });
-
-            await userClaimsContext.AddRangeAsync(userClaims);
-            await context.SaveChangesAsync();
-            await context.Database.CommitTransactionAsync();
-        }
-        catch (Exception)
+        //derive all role claims for users if user is assigned specific role.
+        IEnumerable<RoleClaim> roleClaims = await roleManagerService.GetClaimsByRolesAsync(
+            newRoleIds
+        );
+        IEnumerable<UserClaim> userClaims = roleClaims.Select(x => new UserClaim
         {
-            await context.Database.RollbackTransactionAsync();
-            throw;
-        }
+            UserId = user.Id,
+            ClaimType = x.ClaimType,
+            ClaimValue = x.ClaimValue,
+            RoleClaimId = x.Id,
+            Type = KindaUserClaimType.Custom,
+        });
+
+        await userClaimsContext.AddRangeAsync(userClaims);
+        await context.SaveChangesAsync();
     }
 
     public async Task UpdateRolesToUserAsync(User user, IEnumerable<Ulid>? roleIds)
@@ -105,20 +202,8 @@ public class UserManagerService(IRoleManagerService roleManagerService, TheDbCon
             !currentUserRoles.Any(p => p.RoleId == x)
         );
 
-        try
-        {
-            await context.Database.BeginTransactionAsync();
-
-            await RemoveRoleFromUserAsync(currentUser, shouldRemoving);
-            await AddRoleToUserAsync(currentUser, shouldInserting.ToList());
-
-            await context.Database.CommitTransactionAsync();
-        }
-        catch (Exception)
-        {
-            await context.Database.RollbackTransactionAsync();
-            throw;
-        }
+        await RemoveRoleFromUserAsync(currentUser, shouldRemoving);
+        await AddRoleToUserAsync(currentUser, shouldInserting.ToList());
     }
 
     public async Task RemoveRoleFromUserAsync(User user, IEnumerable<Ulid> roleIds)
@@ -245,22 +330,10 @@ public class UserManagerService(IRoleManagerService roleManagerService, TheDbCon
             claim.ClaimValue = correspondenceClaim.ClaimValue!;
         }
 
-        try
-        {
-            await context.Database.BeginTransactionAsync();
-
-            await RemoveClaimsToUserAsync(currentUser, shouldRemoving);
-            userClaimsContext.UpdateRange(currentUser.UserClaims!);
-            await context.SaveChangesAsync();
-            await AddClaimsToUserAsync(currentUser, shouldInserting);
-
-            await context.Database.CommitTransactionAsync();
-        }
-        catch (Exception)
-        {
-            await context.Database.RollbackTransactionAsync();
-            throw;
-        }
+        await RemoveClaimsToUserAsync(currentUser, shouldRemoving);
+        userClaimsContext.UpdateRange(currentUser.UserClaims!);
+        await context.SaveChangesAsync();
+        await AddClaimsToUserAsync(currentUser, shouldInserting);
     }
 
     public async Task RemoveClaimsToUserAsync(User user, IEnumerable<Ulid> claimIds)
@@ -305,7 +378,10 @@ public class UserManagerService(IRoleManagerService roleManagerService, TheDbCon
             x.Id == id && x.UserRoles!.Any(p => roleNames.Contains(p.Role!.Name))
         );
 
-    public async Task<bool> HasClaimsInUserAsync(Ulid id, Dictionary<string, string> claims)
+    public async Task<bool> HasClaimsInUserAsync(
+        Ulid id,
+        IEnumerable<KeyValuePair<string, string>> claims
+    )
     {
         var userClaims = await userContext
             .Where(x => x.Id == id)
@@ -318,7 +394,7 @@ public class UserManagerService(IRoleManagerService roleManagerService, TheDbCon
     public async Task<bool> HasClaimsAndRoleInUserAsync(
         Ulid id,
         IEnumerable<string> roles,
-        Dictionary<string, string> claims
+        IEnumerable<KeyValuePair<string, string>> claims
     )
     {
         bool isHaRole = await userContext.AnyAsync(x =>

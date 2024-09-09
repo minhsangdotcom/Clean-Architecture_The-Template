@@ -24,7 +24,7 @@ public interface IRoleManagerService : IScope
 
     Task UpdateRoleClaimAsync(Role role, IEnumerable<RoleClaim> roleClaims);
 
-    Task AddClaimsToRoleAsync(Role role, Dictionary<string, string> claims);
+    Task AddClaimsToRoleAsync(Role role, IEnumerable<KeyValuePair<string, string>> claims);
 
     Task RemoveClaimsFromRoleAsync(Role role, IEnumerable<Ulid> claimIds);
 
@@ -38,5 +38,5 @@ public interface IRoleManagerService : IScope
 
     Task<bool> HasClaimInRoleAsync(Ulid roleId, string claimName, string ClaimValue);
 
-    Task<bool> HasClaimInRoleAsync(Ulid roleId, Dictionary<string, string> claims);
+    Task<bool> HasClaimInRoleAsync(Ulid roleId, IEnumerable<KeyValuePair<string, string>> claims);
 }

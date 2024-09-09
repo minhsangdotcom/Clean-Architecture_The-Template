@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Application.Common.Interfaces.Registers;
 using Domain.Aggregates.Users;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +13,20 @@ public interface IUserManagerService : IScope
 
     public DbSet<UserClaim> UserClaims { get; }
 
-    /// <summary>
-    /// Add existence roles to specific user
-    /// </summary>
-    /// <param name="user"></param>
-    /// <param name="roleIds"></param>
-    /// <returns></returns>
+    Task CreateUserAsync(
+        User user,
+        IEnumerable<Ulid> roleIds,
+        IEnumerable<UserClaimType> claims,
+        DbTransaction? transaction = null
+    );
+
+    Task UpdateUserAsync(
+        User user,
+        IEnumerable<Ulid> roleIds,
+        IEnumerable<UserClaimType> claims,
+        DbTransaction? transaction = null
+    );
+
     Task AddRoleToUserAsync(User user, List<Ulid> roleIds);
 
     Task UpdateRolesToUserAsync(User user, IEnumerable<Ulid>? roleIds);
@@ -38,7 +47,11 @@ public interface IUserManagerService : IScope
 
     Task<bool> HasRolesInUserAsync(Ulid id, IEnumerable<string> roleNames);
 
-    Task<bool> HasClaimsInUserAsync(Ulid id, Dictionary<string, string> claims);
+    Task<bool> HasClaimsInUserAsync(Ulid id, IEnumerable<KeyValuePair<string, string>> claims);
 
-    Task<bool> HasClaimsAndRoleInUserAsync(Ulid id, IEnumerable<string> roles, Dictionary<string, string> claims);
+    Task<bool> HasClaimsAndRoleInUserAsync(
+        Ulid id,
+        IEnumerable<string> roles,
+        IEnumerable<KeyValuePair<string, string>> claims
+    );
 }

@@ -13,26 +13,47 @@ public class CreateUserHandler(
     IMapper mapper,
     IAvatarUpdateService<User> avatarUpdateService,
     IUserManagerService userManagerService
-    ) : IRequestHandler<CreateUserCommand, CreateUserResponse>
+) : IRequestHandler<CreateUserCommand, CreateUserResponse>
 {
-    public async ValueTask<CreateUserResponse> Handle(CreateUserCommand command, CancellationToken cancellationToken)
+    public async ValueTask<CreateUserResponse> Handle(
+        CreateUserCommand command,
+        CancellationToken cancellationToken
+    )
     {
         User userCreation = mapper.Map<User>(command);
 
         string? key = avatarUpdateService.GetKey(command.Avatar);
         userCreation.Avatar = await avatarUpdateService.UploadAvatarAsync(command.Avatar, key);
 
+        await unitOfWork.CreateTransactionAsync();
+
         User user = await unitOfWork.Repository<User>().AddAsync(userCreation);
         await unitOfWork.SaveAsync(cancellationToken);
 
-        //Add role to user
-        await userManagerService.AddRoleToUserAsync(user, [.. command.RoleIds!]);
-
         // update claim to user consist of default and custom claims
-        var claims = user.GetUserClaims().Concat(mapper.Map<IEnumerable<UserClaimType>>(command.Claims, opt => opt.Items[nameof(UserClaimType.Type)] = KindaUserClaimType.Custom));
-        await userManagerService.AddClaimsToUserAsync(user, claims);
+        var claims = user.GetUserClaims()
+            .Concat(
+                mapper.Map<IEnumerable<UserClaimType>>(
+                    command.Claims,
+                    opt => opt.Items[nameof(UserClaimType.Type)] = KindaUserClaimType.Custom
+                )
+            );
 
-        return (await unitOfWork.Repository<User>()
-                     .GetByConditionSpecificationAsync<CreateUserResponse>(new GetUserByIdSpecification(user.Id)))!;
+        await userManagerService.CreateUserAsync(
+            user,
+            [.. command.RoleIds!],
+            claims,
+            unitOfWork.Transaction
+        );
+
+        await unitOfWork.CommitAsync();
+
+        return (
+            await unitOfWork
+                .Repository<User>()
+                .GetByConditionSpecificationAsync<CreateUserResponse>(
+                    new GetUserByIdSpecification(user.Id)
+                )
+        )!;
     }
 }

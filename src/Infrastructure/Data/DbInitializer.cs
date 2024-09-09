@@ -1,4 +1,6 @@
+using System.Data.Common;
 using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Services;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Infrastructure.Constants;
@@ -12,28 +14,53 @@ public class DbInitializer
     {
         var unitOfWork = provider.GetRequiredService<IUnitOfWork>();
 
-        if (
-            await unitOfWork.Repository<User>().AnyAsync(x => true)
-        )
+        var roleManagerService = provider.GetRequiredService<IRoleManagerService>();
+        var userManagerService = provider.GetRequiredService<IUserManagerService>();
+
+        if (await unitOfWork.Repository<User>().AnyAsync(x => true))
         {
             return;
         }
 
-        try
-        {
-            User user = new("Chloe", "Kim", "chloe.kim", HashPassword(Credential.UserDefaultPassword), "chloe.kim@gmail.com", "0925123123")
+        _ = await unitOfWork.CreateTransactionAsync();
+
+        User user =
+            new(
+                "Chloe",
+                "Kim",
+                "chloe.kim",
+                HashPassword(Credential.USER_DEFAULT_PASSWORD),
+                "chloe.kim@gmail.com",
+                "0925123123"
+            )
             {
                 Address = "NYC",
                 DayOfBirth = new DateTime(1990, 10, 1),
                 Status = UserStatus.Active,
             };
 
-            await unitOfWork.Repository<User>().AddAsync(user);
-            await unitOfWork.SaveAsync();
-        }
-        catch (Exception)
-        {
-            throw;
-        }
+        Role role =
+            new()
+            {
+                Id = Ulid.Parse(Credential.ADMIN_ROLE_ID),
+                Name = Credential.ADMIN_ROLE,
+                RoleClaims = Credential
+                    .CLAIMS.Select(x => new RoleClaim { ClaimType = x.Key, ClaimValue = x.Value })
+                    .ToList(),
+            };
+
+        await unitOfWork.Repository<User>().AddAsync(user);
+        await unitOfWork.SaveAsync();
+
+        await roleManagerService.CreateRoleAsync(role);
+
+        await userManagerService.CreateUserAsync(
+            user,
+            [role.Id],
+            user.GetUserClaims(),
+            unitOfWork.Transaction
+        );
+
+        await unitOfWork.CommitAsync();
     }
 }

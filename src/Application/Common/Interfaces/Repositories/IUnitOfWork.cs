@@ -1,18 +1,24 @@
+using System.Data.Common;
 using Domain.Common;
 
 namespace Application.Common.Interfaces.Repositories;
 
 public interface IUnitOfWork : IDisposable
 {
-        IRepository<TEntity> Repository<TEntity>() where TEntity : BaseEntity;
+    public DbConnection? Connection { get; protected set; }
 
-        Task CreateTransactionAsync();
+    public DbTransaction? Transaction { get; protected set; }
 
-        Task CommitAsync();
+    IRepository<TEntity> Repository<TEntity>()
+        where TEntity : BaseEntity;
 
-        Task RollbackAsync();
+    Task<DbTransaction> CreateTransactionAsync();
 
-        int ExecuteSqlCommand(string sql, params object[] parameters);
+    Task CommitAsync();
 
-        Task SaveAsync(CancellationToken cancellationToken = default);
+    Task RollbackAsync();
+
+    int ExecuteSqlCommand(string sql, params object[] parameters);
+
+    Task SaveAsync(CancellationToken cancellationToken = default);
 }

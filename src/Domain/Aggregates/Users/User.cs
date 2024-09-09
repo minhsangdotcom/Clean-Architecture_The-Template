@@ -3,6 +3,7 @@ using Contracts.Constants;
 using Contracts.Extensions.Reflections;
 using Domain.Aggregates.Users.Enums;
 using Domain.Common;
+
 namespace Domain.Aggregates.Users;
 
 public class User(
@@ -14,7 +15,8 @@ public class User(
     string phoneNumber
 ) : BaseEntity
 {
-    public string FirstName { get; private set; } = Guard.Against.NullOrEmpty(firstName, nameof(FirstName));
+    public string FirstName { get; private set; } =
+        Guard.Against.NullOrEmpty(firstName, nameof(FirstName));
 
     public string LastName { get; private set; } = Guard.Against.Null(lastName, nameof(LastName));
 
@@ -36,58 +38,59 @@ public class User(
 
     public UserStatus Status { get; set; } = UserStatus.Active;
 
-    public ICollection<UserClaim>? UserClaims { get; set; }
+    public ICollection<UserClaim>? UserClaims { get; set; } = [];
 
-    public ICollection<UserRole>? UserRoles { get; set; }
+    public ICollection<UserRole>? UserRoles { get; set; } = [];
 
-    public ICollection<UserToken>? UserTokens { get; set; }
+    public ICollection<UserToken>? UserTokens { get; set; } = [];
 
     public void SetPassword(string password) =>
-        Password = Guard.Against.NullOrWhiteSpace(password,nameof(password));
+        Password = Guard.Against.NullOrWhiteSpace(password, nameof(password));
+
+    public void AddUserClaim(IEnumerable<UserClaim> userClaims)
+    {
+        Guard.Against.NullOrEmpty(userClaims, nameof(userClaims));
+
+        Guard.Against.InvalidInput(
+            userClaims,
+            nameof(userClaims),
+            userClaims =>
+                userClaims.DistinctBy(x => new { x.ClaimType, x.ClaimValue }).Count()
+                != userClaims.Count(),
+            $"{nameof(userClaims)} is duplicated"
+        );
+
+        UserClaims!.ToList().AddRange(userClaims);
+    }
 
     public IEnumerable<UserClaimType> GetUserClaims()
     {
-        return [
+        return
+        [
             new()
             {
                 ClaimType = ClaimTypes.GivenName,
-                ClaimValue = this.GetValue(x => x.FirstName!)
+                ClaimValue = this.GetValue(x => x.FirstName!),
             },
             new()
             {
                 ClaimType = ClaimTypes.FamilyName,
-                ClaimValue = this.GetValue(x => x.LastName!)
+                ClaimValue = this.GetValue(x => x.LastName!),
             },
-             new()
+            new()
             {
                 ClaimType = ClaimTypes.PreferredUsername,
-                ClaimValue = this.GetValue(x => x.UserName!)
+                ClaimValue = this.GetValue(x => x.UserName!),
             },
             new()
             {
                 ClaimType = ClaimTypes.BirthDate,
-                ClaimValue = this.GetValue(x => x.DayOfBirth!)
+                ClaimValue = this.GetValue(x => x.DayOfBirth!),
             },
-            new()
-            {
-                ClaimType = ClaimTypes.Address,
-                ClaimValue = this.GetValue(x => x.Address!)
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.Picture,
-                ClaimValue = this.GetValue(x => x.Avatar!)
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.Gender,
-                ClaimValue = this.GetValue(x => x.Gender!)
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.Email,
-                ClaimValue = this.GetValue(x => x.Email!)
-            },
+            new() { ClaimType = ClaimTypes.Address, ClaimValue = this.GetValue(x => x.Address!) },
+            new() { ClaimType = ClaimTypes.Picture, ClaimValue = this.GetValue(x => x.Avatar!) },
+            new() { ClaimType = ClaimTypes.Gender, ClaimValue = this.GetValue(x => x.Gender!) },
+            new() { ClaimType = ClaimTypes.Email, ClaimValue = this.GetValue(x => x.Email!) },
         ];
     }
 }
