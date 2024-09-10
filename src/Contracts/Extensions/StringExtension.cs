@@ -120,6 +120,21 @@ public static partial class StringExtension
         return result.ToUpper();
     }
 
+    public static string ToKebabCase(this string? input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return string.Empty;
+
+        // Convert camelCase or PascalCase to words separated by spaces
+        string result = MyRegex1().Replace(input, "$1 $2");
+
+        // Replace underscores (_) or spaces with hyphens
+        result = MyRegex2().Replace(result, "-");
+
+        // Convert the whole string to lowercase
+        return result.ToLower();
+    }
+
     [GeneratedRegex("[^A-Za-z0-9_.]+")]
     private static partial Regex RemoveSpecialCharacterRegex();
 
@@ -128,4 +143,10 @@ public static partial class StringExtension
 
     [GeneratedRegex(@"([A-Z]+)([A-Z][a-z])")]
     private static partial Regex MyRegex();
+
+    [GeneratedRegex("([a-z])([A-Z])")]
+    private static partial Regex MyRegex1();
+
+    [GeneratedRegex(@"[\s_]+")]
+    private static partial Regex MyRegex2();
 }

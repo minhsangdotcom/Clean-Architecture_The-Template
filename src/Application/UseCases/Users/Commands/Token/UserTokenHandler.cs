@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
+using Contracts.Common.Messages;
 using Contracts.Constants;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;
@@ -19,36 +20,53 @@ public class UserTokenHandler(
     ICurrentUser currentUser
 ) : IRequestHandler<UserTokenCommand, UserTokenResponse>
 {
-    public async ValueTask<UserTokenResponse> Handle(UserTokenCommand command, CancellationToken cancellationToken)
+    public async ValueTask<UserTokenResponse> Handle(
+        UserTokenCommand command,
+        CancellationToken cancellationToken
+    )
     {
         DecodeTokenResponse decodeToken = tokenFactory.DecodeToken(command.RefreshToken!);
 
-        UserToken? refresh = await unitOfWork.Repository<UserToken>().GetByConditionSpecificationAsync(
-            new GetRefreshtokenSpecification(
-                command.RefreshToken!,
-                Ulid.Parse(decodeToken.Sub!)
-            )
-        );
+        UserToken? refresh = await unitOfWork
+            .Repository<UserToken>()
+            .GetByConditionSpecificationAsync(
+                new GetRefreshtokenSpecification(
+                    command.RefreshToken!,
+                    Ulid.Parse(decodeToken.Sub!)
+                )
+            );
 
-        IEnumerable<UserToken> refreshTokens = await unitOfWork.Repository<UserToken>()
+        IEnumerable<UserToken> refreshTokens = await unitOfWork
+            .Repository<UserToken>()
             .ListWithSpecificationAsync(
-                new ListRefreshtokenByFamillyIdSpecification(decodeToken.FamilyId!, Ulid.Parse(decodeToken.Sub!)),
-                new()
-                {
-                    Order = $"{nameof(UserToken.CreatedAt)} desc",
-                }
+                new ListRefreshtokenByFamillyIdSpecification(
+                    decodeToken.FamilyId!,
+                    Ulid.Parse(decodeToken.Sub!)
+                ),
+                new() { Order = $"{nameof(UserToken.CreatedAt)} desc" }
             );
 
         if (refresh == null)
         {
             await unitOfWork.Repository<UserToken>().DeleteRangeAsync(refreshTokens);
             await unitOfWork.SaveAsync(cancellationToken);
-            throw new BadRequestException($"{nameof(User).ToUpper()}_INVALID_TOKEN");
+            throw new BadRequestException(
+                [
+                    Messager
+                        .Create<UserToken>(nameof(User))
+                        .Property(x => x.RefreshToken!)
+                        .Message(MessageType.Correct)
+                        .Negative()
+                        .BuildMessage(),
+                ]
+            );
         }
 
         if (refresh.User!.Status == UserStatus.DeActive)
         {
-            throw new BadRequestException($"{nameof(User).ToUpper()}_DEACTIVE");
+            throw new BadRequestException(
+                [Messager.Create<User>().Message(MessageType.Active).Negative().BuildMessage()]
+            );
         }
 
         await unitOfWork.Repository<UserToken>().DeleteRangeAsync(refreshTokens);
@@ -66,7 +84,10 @@ public class UserTokenHandler(
             [
                 new(JwtRegisteredClaimNames.Sub.ToString(), decodeToken.Sub!.ToString()),
                 new(ClaimTypes.TokenFamilyId, decodeToken.FamilyId!),
-                new(JwtRegisteredClaimNames.UniqueName, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString())
+                new(
+                    JwtRegisteredClaimNames.UniqueName,
+                    DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()
+                ),
             ],
             refreshTokenExpiredTime
         );
@@ -84,10 +105,6 @@ public class UserTokenHandler(
         await unitOfWork.Repository<UserToken>().AddAsync(userToken);
         await unitOfWork.SaveAsync(cancellationToken);
 
-        return new UserTokenResponse()
-        {
-            Token = accessToken,
-            RefreshToken = refreshToken,
-        };
+        return new UserTokenResponse() { Token = accessToken, RefreshToken = refreshToken };
     }
 }

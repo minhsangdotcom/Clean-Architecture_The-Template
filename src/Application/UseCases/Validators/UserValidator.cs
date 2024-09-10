@@ -10,87 +10,113 @@ public partial class UserValidator : AbstractValidator<UserModel>
 {
     public UserValidator()
     {
-         RuleFor(x => x.LastName)
-            .NotEmpty().WithMessage(
-                Messager.Create<User>()
+        RuleFor(x => x.LastName)
+            .NotEmpty()
+            .WithMessage(
+                Messager
+                    .Create<User>()
                     .Property(x => x.LastName)
                     .Message(MessageType.Null)
                     .Negative()
                     .BuildMessage()
+                    .Message
             )
-            .MaximumLength(256).WithMessage(
-                Messager.Create<User>()
+            .MaximumLength(256)
+            .WithMessage(
+                Messager
+                    .Create<User>()
                     .Property(x => x.LastName)
                     .Message(MessageType.MaximumLength)
                     .BuildMessage()
+                    .Message
             );
 
         RuleFor(x => x.FirstName)
-            .NotEmpty().WithMessage(
-                Messager.Create<User>()
+            .NotEmpty()
+            .WithMessage(
+                Messager
+                    .Create<User>()
                     .Property(x => x.FirstName)
                     .Message(MessageType.Null)
                     .Negative()
                     .BuildMessage()
-        )
-        .MaximumLength(256).WithMessage(
-                Messager.Create<User>()
+                    .Message
+            )
+            .MaximumLength(256)
+            .WithMessage(
+                Messager
+                    .Create<User>()
                     .Property(x => x.FirstName)
                     .Message(MessageType.MaximumLength)
                     .BuildMessage()
-        );
+                    .Message
+            );
 
-         RuleFor(x => x.Email)
-            .NotEmpty().WithMessage(
-                Messager.Create<User>()
+        RuleFor(x => x.Email)
+            .NotEmpty()
+            .WithMessage(
+                Messager
+                    .Create<User>()
                     .Property(x => x.Email)
                     .Message(MessageType.Null)
                     .Negative()
                     .BuildMessage()
+                    .Message
             )
             .Must(x =>
             {
                 Regex regex = EmailValidationRegex();
                 return regex.IsMatch(x!);
-            }).WithMessage(
-                Messager.Create<User>()
+            })
+            .WithMessage(
+                Messager
+                    .Create<User>()
                     .Property(x => x.Email)
                     .Message(MessageType.ValidFormat)
                     .Negative()
                     .BuildMessage()
+                    .Message
             );
 
         RuleFor(x => x.PhoneNumber)
-            .NotEmpty().WithMessage(
-                 Messager.Create<User>()
+            .NotEmpty()
+            .WithMessage(
+                Messager
+                    .Create<User>()
                     .Property(x => x.PhoneNumber)
                     .Message(MessageType.Null)
                     .Negative()
                     .BuildMessage()
+                    .Message
             )
             .Must(x =>
             {
                 Regex regex = VietnamesePhoneValidationRegex();
                 return regex.IsMatch(x!);
-            }).WithMessage(Messager.Create<User>()
+            })
+            .WithMessage(
+                Messager
+                    .Create<User>()
                     .Property(x => x.PhoneNumber)
                     .Message(MessageType.ValidFormat)
                     .Negative()
                     .BuildMessage()
+                    .Message
             );
 
         RuleFor(x => x.Address)
             .MaximumLength(1000)
             .When(x => x.Address != null)
             .WithMessage(
-                Messager.Create<User>()
+                Messager
+                    .Create<User>()
                     .Property(x => x.Address!)
                     .Message(MessageType.MaximumLength)
                     .BuildMessage()
+                    .Message
             );
     }
 
-    
     [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
     private static partial Regex EmailValidationRegex();
 

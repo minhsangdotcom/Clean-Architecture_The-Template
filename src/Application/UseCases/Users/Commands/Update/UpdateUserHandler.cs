@@ -2,6 +2,7 @@ using Application.Common.Exceptions;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using AutoMapper;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
@@ -27,7 +28,10 @@ public class UpdateUserHandler(
                 .Repository<User>()
                 .GetByConditionSpecificationAsync(
                     new GetUserByIdSpecification(Ulid.Parse(command.UserId))
-                ) ?? throw new BadRequestException($"{nameof(User).ToUpper()}_NOTFOUND");
+                )
+            ?? throw new BadRequestException(
+                [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
+            );
 
         IFormFile? avatar = command.User!.Avatar;
         string? oldAvatar = user.Avatar;

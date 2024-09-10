@@ -4,6 +4,7 @@ using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using Application.UseCases.Projections.Users;
 using AutoMapper;
+using Contracts.Common.Messages;
 using Contracts.Constants;
 using Contracts.Extensions;
 using Domain.Aggregates.Users;
@@ -22,15 +23,33 @@ public class UserLoginHandler(
     IMapper mapper
 ) : IRequestHandler<UserLoginCommand, UserLoginResponse>
 {
-    public async ValueTask<UserLoginResponse> Handle(UserLoginCommand request, CancellationToken cancellationToken)
+    public async ValueTask<UserLoginResponse> Handle(
+        UserLoginCommand request,
+        CancellationToken cancellationToken
+    )
     {
-        User user = await unitOfWork.Repository<User>().GetByConditionSpecificationAsync(
-            new GetUserByUsernameSpecification(request.Username!)
-        ) ?? throw new BadRequestException($"{nameof(User).ToUpper()}_NOTFOUND");
+        User user =
+            await unitOfWork
+                .Repository<User>()
+                .GetByConditionSpecificationAsync(
+                    new GetUserByUsernameSpecification(request.Username!)
+                )
+            ?? throw new BadRequestException(
+                [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
+            );
 
         if (!Verify(request.Password, user.Password))
         {
-            throw new BadRequestException($"{nameof(User).ToUpper()}_PASSWORD_NOTCORRECT");
+            throw new BadRequestException(
+                [
+                    Messager
+                        .Create<User>()
+                        .Property(x => x.Password)
+                        .Message(MessageType.Correct)
+                        .Negative()
+                        .BuildMessage(),
+                ]
+            );
         }
 
         DateTime refreshExpireTime = tokenFactory.RefreshtokenExpiredTime;
@@ -57,7 +76,7 @@ public class UserLoginHandler(
         string refreshToken = tokenFactory.CreateToken(
             [
                 new(ClaimTypes.TokenFamilyId, familyId),
-                new(JwtRegisteredClaimNames.Sub, user.Id.ToString())
+                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             ],
             refreshExpireTime
         );
@@ -71,7 +90,8 @@ public class UserLoginHandler(
         {
             Token = accessToken,
             Refresh = refreshToken,
-            AccessTokenExpiredIn = (long)Math.Ceiling((accesstokenExpiredTime - DateTime.UtcNow).TotalSeconds),
+            AccessTokenExpiredIn = (long)
+                Math.Ceiling((accesstokenExpiredTime - DateTime.UtcNow).TotalSeconds),
             TokenType = JwtBearerDefaults.AuthenticationScheme,
             User = mapper.Map<UserProjection>(user),
         };

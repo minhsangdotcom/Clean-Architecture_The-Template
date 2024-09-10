@@ -15,7 +15,7 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
                     .Property(x => x.User!)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage()
+                    .BuildMessage().Message
             )
             .SetValidator(new UserValidator()!);
     }

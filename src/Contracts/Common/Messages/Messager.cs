@@ -37,7 +37,7 @@ public static class Messager
         return message;
     }
 
-    public static string Build<T>(this Message<T> message) where T : class
+    public static MessageResult Build<T>(this Message<T> message) where T : class
     {
         return message.BuildMessage();
     }

@@ -13,22 +13,26 @@ public class RoleClaimValidator : AbstractValidator<RoleClaimModel>
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage(
-                Messager.Create<RoleClaimModel>(nameof(RoleClaim))
+                Messager
+                    .Create<RoleClaimModel>(nameof(RoleClaim))
                     .Property(x => x.ClaimType!)
                     .Message(MessageType.Null)
                     .Negative()
                     .BuildMessage()
+                    .Message
             );
 
         RuleFor(x => x.ClaimValue)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage(
-                Messager.Create<RoleClaimModel>(nameof(RoleClaim))
+                Messager
+                    .Create<RoleClaimModel>(nameof(RoleClaim))
                     .Property(x => x.ClaimValue!)
                     .Message(MessageType.Null)
                     .Negative()
                     .BuildMessage()
+                    .Message
             );
     }
 }

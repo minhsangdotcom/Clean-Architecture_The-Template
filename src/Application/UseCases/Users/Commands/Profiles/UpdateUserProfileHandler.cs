@@ -2,6 +2,7 @@ using Application.Common.Exceptions;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using AutoMapper;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
@@ -17,11 +18,20 @@ public class UpdateUserProfileHandler(
     IAvatarUpdateService<User> avatarUpdate
 ) : IRequestHandler<UpdateUserProfileQuery, UpdateUserProfileResponse>
 {
-    public async ValueTask<UpdateUserProfileResponse> Handle(UpdateUserProfileQuery command, CancellationToken cancellationToken)
+    public async ValueTask<UpdateUserProfileResponse> Handle(
+        UpdateUserProfileQuery command,
+        CancellationToken cancellationToken
+    )
     {
-        User user = await unitOfWork.Repository<User>()
-            .GetByConditionSpecificationAsync(new GetUserByIdWithoutIncludeSpecification(currentUser.Id ?? Ulid.Empty)) ??
-                throw new BadRequestException($"{nameof(User).ToUpper()}_NOTFOUND");
+        User user =
+            await unitOfWork
+                .Repository<User>()
+                .GetByConditionSpecificationAsync(
+                    new GetUserByIdWithoutIncludeSpecification(currentUser.Id ?? Ulid.Empty)
+                )
+            ?? throw new BadRequestException(
+                [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
+            );
 
         IFormFile? avatar = command.Avatar;
         string? oldAvatar = user.Avatar;
@@ -36,7 +46,12 @@ public class UpdateUserProfileHandler(
 
         await avatarUpdate.DeleteAvatarAsync(oldAvatar);
 
-        return (await unitOfWork.Repository<User>()
-                     .GetByConditionSpecificationAsync<UpdateUserProfileResponse>(new GetUserByIdSpecification(user.Id)))!;
+        return (
+            await unitOfWork
+                .Repository<User>()
+                .GetByConditionSpecificationAsync<UpdateUserProfileResponse>(
+                    new GetUserByIdSpecification(user.Id)
+                )
+        )!;
     }
 }

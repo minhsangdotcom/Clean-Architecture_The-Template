@@ -33,8 +33,7 @@ public class Message<T>(string? subjectName = null)
 
     private MessageType type = 0;
 
-    private readonly Dictionary<MessageType, KeyValuePair<string, string?>> Messages =
-        CommonMessage();
+    private readonly Dictionary<MessageType, MessageDictionary> Messages = CommonMessage();
 
     public void SetNegative(bool value) => isNegative = value;
 
@@ -46,56 +45,182 @@ public class Message<T>(string? subjectName = null)
 
     public void SetMessage(MessageType value) => type = value;
 
-    public string BuildMessage()
+    public MessageResult BuildMessage()
     {
-        var messageBuilder = new StringBuilder(
-            $"{subjectName}_{propertyName.ToScreamingSnakeCase()}"
-        );
+        string subjectProperty = subjectName.ToKebabCase();
 
-        if (isNegative == true && (type == 0 || string.IsNullOrWhiteSpace(Messages[type].Value)))
+        if (!string.IsNullOrWhiteSpace(propertyName))
         {
-            messageBuilder.Append($"_{"not".ToScreamingSnakeCase()}");
+            subjectProperty += $"_{propertyName.ToKebabCase()}";
         }
 
-        string message = CustomMessage.ToScreamingSnakeCase();
+        var messageBuilder = new StringBuilder($"{subjectProperty}");
+
+        if (
+            isNegative == true
+            && (type == 0 || string.IsNullOrWhiteSpace(Messages[type].NegativeMessage))
+        )
+        {
+            messageBuilder.Append("_not");
+        }
+
+        string message = CustomMessage.ToKebabCase();
 
         if (string.IsNullOrWhiteSpace(message))
         {
             message =
-                isNegative == true && !string.IsNullOrWhiteSpace(Messages[type].Value)
-                    ? Messages[type].Value!
-                    : Messages[type].Key;
+                isNegative == true && !string.IsNullOrWhiteSpace(Messages[type].NegativeMessage)
+                    ? Messages[type].NegativeMessage!
+                    : Messages[type].Message!;
         }
 
         messageBuilder.Append($"_{message}");
 
         if (!string.IsNullOrWhiteSpace(objectName))
         {
-            messageBuilder.Append($"_{objectName}");
+            messageBuilder.Append($"_{objectName.ToKebabCase()}");
         }
 
-        return messageBuilder.ToString().ToUpper();
+        return new()
+        {
+            Message = messageBuilder.ToString().ToLower(),
+            En = "",
+            Vi = "",
+        };
     }
 
-    private static Dictionary<MessageType, KeyValuePair<string, string?>> CommonMessage() =>
+    private static Dictionary<MessageType, MessageDictionary> CommonMessage() =>
         new()
         {
-            { MessageType.MaximumLength, new("TOO_LONG", "TOO_LONG") },
-            { MessageType.MinumumLength, new("TOO_SHORT", "TOO_SHORT") },
-            { MessageType.ValidFormat, new("VALID_FORMAT", "INVALID_FORMAT") },
-            { MessageType.Found, new("FOUND", null) },
-            { MessageType.Existence, new("EXISTENCE", null) },
-            { MessageType.Correct, new("CORRECT", "INCORRECT") },
-            { MessageType.Active, new("ACTIVE", "DEACTIVE") },
-            { MessageType.OuttaOption, new("OUTTA_OPTIONS", null) },
-            { MessageType.GreaterThan, new("GREATER_THAN", null) },
-            { MessageType.GreaterThanEqual, new("GREATER_THAN_EQUAL", null) },
-            { MessageType.LessThan, new("LESS_THAN", null) },
-            { MessageType.LessThanEqual, new("LESS_THAN_EQUAL", null) },
-            { MessageType.Null, new("NULL", null) },
-            { MessageType.Empty, new("EMPTY", null) },
-            { MessageType.Unique, new("UNIQUE", "NON_UNIQUE") },
-            { MessageType.Strong, new("STRONG_ENOUGH", null) },
+            {
+                MessageType.MaximumLength,
+                new("too-long", "too long", "quá dài", MessageType.MaximumLength)
+            },
+            {
+                MessageType.MinumumLength,
+                new("too-short", " too short", "quá ngắn", MessageType.MinumumLength)
+            },
+            {
+                MessageType.ValidFormat,
+                new(
+                    MessageType.ValidFormat.ToString().ToKebabCase(),
+                    "valid format",
+                    "đúng định dạng",
+                    MessageType.ValidFormat,
+                    "invalid format"
+                )
+            },
+            {
+                MessageType.Found,
+                new(
+                    MessageType.Found.ToString().ToKebabCase(),
+                    "found",
+                    "tìm thấy",
+                    MessageType.Found
+                )
+            },
+            {
+                MessageType.Existence,
+                new(
+                    MessageType.Existence.ToString().ToKebabCase(),
+                    MessageType.Existence.ToString().ToKebabCase(),
+                    "tồn tại",
+                    MessageType.Existence
+                )
+            },
+            {
+                MessageType.Correct,
+                new(
+                    MessageType.Correct.ToString().ToKebabCase(),
+                    MessageType.Correct.ToString().ToKebabCase(),
+                    "đúng",
+                    MessageType.Correct,
+                    "incorrect"
+                )
+            },
+            {
+                MessageType.Active,
+                new(
+                    MessageType.Active.ToString().ToKebabCase(),
+                    "active",
+                    "hoạt động",
+                    MessageType.Active,
+                    "inactive"
+                )
+            },
+            {
+                MessageType.OuttaOption,
+                new(
+                    MessageType.OuttaOption.ToString().ToKebabCase(),
+                    "outta options",
+                    "hết tùy chọn",
+                    MessageType.OuttaOption
+                )
+            },
+            {
+                MessageType.GreaterThan,
+                new(
+                    MessageType.GreaterThan.ToString().ToKebabCase(),
+                    "greater than",
+                    "lớn hơn",
+                    MessageType.GreaterThan
+                )
+            },
+            {
+                MessageType.GreaterThanEqual,
+                new(
+                    MessageType.GreaterThanEqual.ToString().ToKebabCase(),
+                    "greater than or equal",
+                    "lớn hơn hoặc bằng",
+                    MessageType.GreaterThanEqual
+                )
+            },
+            {
+                MessageType.LessThan,
+                new(
+                    MessageType.LessThan.ToString().ToKebabCase(),
+                    "less than",
+                    "nhỏ hơn",
+                    MessageType.LessThan
+                )
+            },
+            {
+                MessageType.LessThanEqual,
+                new(
+                    MessageType.LessThanEqual.ToString().ToKebabCase(),
+                    "less than or equal",
+                    "nhỏ hơn hoặc bằng",
+                    MessageType.LessThanEqual
+                )
+            },
+            {
+                MessageType.Null,
+                new(MessageType.Null.ToString().ToKebabCase(), "null", "rỗng", MessageType.Null)
+            },
+            {
+                MessageType.Empty,
+                new(MessageType.Empty.ToString().ToKebabCase(), "empty", "trống", MessageType.Empty)
+            },
+            {
+                MessageType.Unique,
+                new(
+                    MessageType.Unique.ToString().ToKebabCase(),
+                    "unique",
+                    "duy nhất",
+                    MessageType.Unique,
+                    "non-unique"
+                )
+            },
+            {
+                MessageType.Strong,
+                new(
+                    MessageType.Strong.ToString().ToKebabCase(),
+                    "strong enough",
+                    "đủ mạnh",
+                    MessageType.Strong,
+                    "weak"
+                )
+            },
         };
 }
 

@@ -25,6 +25,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     .Negative()
                     .Message(MessageType.Null)
                     .BuildMessage()
+                    .Message
             )
             .MaximumLength(256)
             .WithMessage(
@@ -33,6 +34,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     .Property(x => x.Name!)
                     .Message(MessageType.MaximumLength)
                     .BuildMessage()
+                    .Message
             )
             .MustAsync(
                 (name, CancellationToken) =>
@@ -45,6 +47,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     .Property(x => x.Name!)
                     .Message(MessageType.Existence)
                     .BuildMessage()
+                    .Message
             )
             .MustAsync(
                 (name, CancellationToken) =>
@@ -57,6 +60,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     .Property(x => x.Name!)
                     .Message(MessageType.Existence)
                     .BuildMessage()
+                    .Message
             );
 
         RuleFor(x => x.Description)
@@ -68,6 +72,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     .Property(x => x.Name!)
                     .Message(MessageType.MaximumLength)
                     .BuildMessage()
+                    .Message
             );
 
         When(
@@ -90,6 +95,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                             .Message(MessageType.Unique)
                             .Negative()
                             .BuildMessage()
+                            .Message
                     );
 
                 RuleFor(x => x.Claims)
@@ -116,6 +122,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                             .Property(x => x.Claims!)
                             .Message(MessageType.Existence)
                             .BuildMessage()
+                            .Message
                     );
             }
         );

@@ -15,7 +15,7 @@ public class UpdateRoleCommandValidator : AbstractValidator<UpdateRoleCommand>
                     .Property(x => x.Role!)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage()
+                    .BuildMessage().Message
             )
             .SetValidator(new RoleValidator(roleManagerService, actionAccessorService));
     }

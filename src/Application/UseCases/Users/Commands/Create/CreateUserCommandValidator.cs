@@ -19,7 +19,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     .Property(x => x.UserName!)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage()
+                    .BuildMessage().Message
             )
             .Must((_, x) =>
             {
@@ -30,7 +30,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     .Property(x => x.UserName!)
                     .Message(MessageType.ValidFormat)
                     .Negative()
-                    .BuildMessage()
+                    .BuildMessage().Message
             );
 
         RuleFor(x => x.Password)
@@ -39,7 +39,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     .Property(x => x.Password!)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage()
+                    .BuildMessage().Message
             )
             .Must((_, x) =>
             {
@@ -50,7 +50,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     .Property(x => x.Password!)
                     .Message(MessageType.Strong)
                     .Negative()
-                    .BuildMessage()
+                    .BuildMessage().Message
             );
 
 
@@ -60,13 +60,13 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     .Property(x => x.Gender!)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage()
+                    .BuildMessage().Message
             )
             .IsInEnum().WithMessage(
                 Messager.Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Gender!)
                     .Message(MessageType.OuttaOption)
-                    .BuildMessage()
+                    .BuildMessage().Message
             );
 
          RuleFor(x => x.Status)
@@ -75,13 +75,13 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     .Property(x => x.Status!)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage()
+                    .BuildMessage().Message
             )
             .IsInEnum().WithMessage(
                 Messager.Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Status!)
                     .Message(MessageType.OuttaOption)
-                    .BuildMessage()
+                    .BuildMessage().Message
             );
     }
 
