@@ -171,11 +171,12 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
 
         Role currentRole = Guard.Against.NotFound(
             $"{role.Id}",
-            await roleContext
-                .Where(x => x.Id == role.Id)
-                .Include(x => x.RoleClaims)
-                .ThenInclude(x => x.UserClaims)
-                .FirstOrDefaultAsync(),
+            // await roleContext
+            //     .Where(x => x.Id == role.Id)
+            //     .Include(x => x.RoleClaims)
+            //     .ThenInclude(x => x.UserClaims)
+            //     .FirstOrDefaultAsync(),
+            await FindByIdAsync(role.Id),
             NOT_FOUND_MESSAGE
         );
 
@@ -191,10 +192,10 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         IEnumerable<RoleClaim> roleClaims = currentRole.RoleClaims.Where(x =>
             claimIds.Contains(x.Id)
         );
-        IEnumerable<UserClaim> userClaims = roleClaims.SelectMany(x => x.UserClaims!);
+        //IEnumerable<UserClaim> userClaims = roleClaims.SelectMany(x => x.UserClaims!);
 
         roleClaimContext.RemoveRange(roleClaims);
-        UserClaimsContext.RemoveRange(userClaims);
+        //UserClaimsContext.RemoveRange(userClaims);
         await context.SaveChangesAsync();
     }
 
