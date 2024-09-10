@@ -7,52 +7,47 @@ namespace Contracts.ApiWrapper;
 
 public class ErrorResponse : ApiBaseResponse
 {
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string Type { get; } = "InternalServerException";
+
     public Guid? TraceId { get; set; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public object? ResponseException { get; set; }
+    public object? Exception { get; set; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public ICollection<ValidationError>? ValidationErrors { get; }
-
-    public string Title { get; } = "InternalServerException";
-
-    public ErrorResponse()
-    {
-    }
+    public ICollection<BadRequestError>? Errors { get; }
 
     public ErrorResponse(
         string message,
-        string? title = null,
+        string? type = null,
         Guid? traceId = null,
-        object? responseException = null,
+        object? exception = null,
         int? statusCode = StatusCodes.Status500InternalServerError
     )
     {
         StatusCode = statusCode!.Value;
-        ResponseException = responseException;
+        Exception = exception;
         Message = message;
         TraceId = traceId;
-        
-        if(!string.IsNullOrWhiteSpace(title))
+
+        if (!string.IsNullOrWhiteSpace(type))
         {
-            Title = title;
+            Type = type;
         }
     }
 
     public ErrorResponse(
-        ICollection<ValidationError>? validationErrors,
-        string message,
+        IEnumerable<BadRequestError> badRequestErrors,
         int? statusCode = StatusCodes.Status400BadRequest
     )
     {
         StatusCode = statusCode!.Value;
-        ValidationErrors = validationErrors;
-        Message = message;
-        Title = nameof(ValidationException);
+        Errors = badRequestErrors?.ToList();
+        Message = "Several errors have occured";
+        Type = nameof(ValidationException);
     }
 
     public override string ToString() =>
-        SerializerExtension.Serialize(this);
+        SerializerExtension.Serialize(
+            this,
+            options => options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        );
 }

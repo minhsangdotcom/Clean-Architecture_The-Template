@@ -5,14 +5,18 @@ namespace Contracts.Extensions;
 
 public class SerializerExtension
 {
-    public static string Serialize(object data)
+    public static string Serialize(object data, Action<JsonSerializerOptions>? optionalOptions = null)
     {
-        return JsonSerializer.Serialize(data, CreateOptions());
+        var options = CreateOptions();
+        optionalOptions?.Invoke(options);
+        return JsonSerializer.Serialize(data, options);
     }
 
-    public static T? Deserialize<T>(string json)
+    public static T? Deserialize<T>(string json, Action<JsonSerializerOptions>? optionalOptions = null)
     {
-        return JsonSerializer.Deserialize<T>(json, CreateOptions());
+        var options = CreateOptions();
+        optionalOptions?.Invoke(options);
+        return JsonSerializer.Deserialize<T>(json, options);
     }
 
     private static JsonSerializerOptions CreateOptions() => 

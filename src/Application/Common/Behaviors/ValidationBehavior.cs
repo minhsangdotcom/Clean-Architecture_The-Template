@@ -1,6 +1,7 @@
 using FluentValidation;
+using FluentValidation.Results;
 using Mediator;
-using ValidationException = Domain.Exceptions.ValidationException;
+using ValidationException = Application.Common.Exceptions.ValidationException;
 
 namespace Application.Common.Behaviors;
 public sealed class ValidationBehavior<TMessage, TResponse>(IEnumerable<IValidator<TMessage>> validators) : MessagePreProcessor<TMessage, TResponse>
@@ -12,11 +13,11 @@ public sealed class ValidationBehavior<TMessage, TResponse>(IEnumerable<IValidat
         {
             var context = new ValidationContext<TMessage>(message);
 
-            var validationResults = await Task.WhenAll(
+            IEnumerable<ValidationResult> validationResults = await Task.WhenAll(
                 validators.Select(v =>
                     v.ValidateAsync(context, cancellationToken)));
 
-            var failures = validationResults
+            List<ValidationFailure> failures = validationResults
                 .Where(r => r.Errors.Count != 0)
                 .SelectMany(r => r.Errors)
                 .ToList();

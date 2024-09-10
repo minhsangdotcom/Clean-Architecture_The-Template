@@ -1,28 +1,26 @@
-using FluentValidation.Results;
 using Contracts.ApiWrapper;
+using Domain.Exceptions;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 
-namespace Domain.Exceptions;
+namespace Application.Common.Exceptions;
 
 public class ValidationException : CustomException
 {
     public int HttpStatusCode { get; private set; } = StatusCodes.Status400BadRequest;
 
-    public IEnumerable<ValidationError> ValidationErrors { get;}
+    public IEnumerable<BadRequestError> ValidationErrors { get;}
 
-     public ValidationException()
-        : base("One or more validation failures have occurred.")
-    {
-        ValidationErrors = [];
-    }
-
-    public ValidationException(IEnumerable<ValidationFailure> failures) : this()
+    public ValidationException(IEnumerable<ValidationFailure> failures)
     {
         ValidationErrors = failures.GroupBy(x => x.PropertyName)
-            .Select(x => new ValidationError
+            .Select(failureGroups => new BadRequestError
             {
-                Property = x.Key,
-                Reasons = x.Select(x => x.ErrorMessage).ToList(),
-            }).ToList();
+                PropertyName = failureGroups.Key,
+                Reasons = failureGroups.Select(failure => new ReasonTranslation()
+                {
+                    Message = failure.ErrorMessage,
+                }),
+            });
     }
 }

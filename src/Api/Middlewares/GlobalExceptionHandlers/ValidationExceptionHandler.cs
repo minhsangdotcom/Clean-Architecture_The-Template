@@ -1,6 +1,5 @@
+using Application.Common.Exceptions;
 using Contracts.ApiWrapper;
-using Domain.Exceptions;
-using Microsoft.AspNetCore.Http;
 
 namespace Api.Middlewares.GlobalExceptionHandlers;
 
@@ -14,6 +13,6 @@ public class ValidationExceptionHandler : IHandlerException<ValidationException>
 
         httpContext.Response.StatusCode = statusCode;
 
-        await httpContext.Response.WriteAsJsonAsync(new ErrorResponse(exception.ValidationErrors.ToList(), exception.Message));
+        await httpContext.Response.WriteAsJsonAsync(new ErrorResponse(exception.ValidationErrors));
     }
 }
