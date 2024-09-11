@@ -20,8 +20,8 @@ public class InternalServerExceptionHandler(ILogger<InternalServerExceptionHandl
             DateTimeOffset.UtcNow
         );
 
-        await httpContext.Response.WriteAsJsonAsync(
-            new ErrorResponse(ex.Message, traceId: traceId)
-        );
+        var error = new ErrorResponse(ex.Message, traceId: traceId);
+
+        await httpContext.Response.WriteAsJsonAsync(error, error.Serialize().Options);
     }
 }
