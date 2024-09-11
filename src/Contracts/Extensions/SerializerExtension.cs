@@ -5,21 +5,27 @@ namespace Contracts.Extensions;
 
 public class SerializerExtension
 {
-    public static string Serialize(object data, Action<JsonSerializerOptions>? optionalOptions = null)
+    public static SerializeResult Serialize(
+        object data,
+        Action<JsonSerializerOptions>? optionalOptions = null
+    )
     {
         var options = CreateOptions();
         optionalOptions?.Invoke(options);
-        return JsonSerializer.Serialize(data, options);
+        return new(JsonSerializer.Serialize(data, options), options);
     }
 
-    public static T? Deserialize<T>(string json, Action<JsonSerializerOptions>? optionalOptions = null)
+    public static DeserializeResult<T?> Deserialize<T>(
+        string json,
+        Action<JsonSerializerOptions>? optionalOptions = null
+    )
     {
         var options = CreateOptions();
         optionalOptions?.Invoke(options);
-        return JsonSerializer.Deserialize<T>(json, options);
+        return new(JsonSerializer.Deserialize<T>(json, options), options);
     }
 
-    private static JsonSerializerOptions CreateOptions() => 
+    private static JsonSerializerOptions CreateOptions() =>
         new()
         {
             AllowTrailingCommas = true,
@@ -29,3 +35,7 @@ public class SerializerExtension
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         };
 }
+
+public record SerializeResult(string StringJson, JsonSerializerOptions Options);
+
+public record DeserializeResult<T>(T? Object, JsonSerializerOptions Options);

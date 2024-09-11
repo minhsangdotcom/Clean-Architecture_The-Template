@@ -41,7 +41,7 @@ public class TokenFactoryService(IOptions<JwtSettings> jwtSettings) : ITokenFact
                 .MustVerifySignature()
                 .Decode(token);
 
-        return SerializerExtension.Deserialize<DecodeTokenResponse>(json)!;
+        return SerializerExtension.Deserialize<DecodeTokenResponse>(json).Object!;
     }
 
     private DateTime GetAccesstokenExpiredTime() =>

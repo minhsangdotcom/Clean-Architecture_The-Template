@@ -45,7 +45,7 @@ public class ErrorResponse : ApiBaseResponse
         Type = nameof(ValidationException);
     }
 
-    public override string ToString() =>
+    public SerializeResult Serialize() =>
         SerializerExtension.Serialize(
             this,
             options => options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull

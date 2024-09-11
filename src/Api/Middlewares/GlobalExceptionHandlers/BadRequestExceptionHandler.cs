@@ -9,10 +9,10 @@ public class BadRequestExceptionHandler : IHandlerException<BadRequestException>
     {
         var exception = (BadRequestException)ex;
 
-        int statusCode = exception.HttpStatusCode;
+        httpContext.Response.StatusCode = exception.HttpStatusCode;
 
-        httpContext.Response.StatusCode = statusCode;
+        ErrorResponse error = new(exception.Errors);
 
-        await httpContext.Response.WriteAsJsonAsync(new ErrorResponse(exception.Message, nameof(BadRequestException), statusCode: statusCode));
+        await httpContext.Response.WriteAsJsonAsync(error, error.Serialize().Options);
     }
 }

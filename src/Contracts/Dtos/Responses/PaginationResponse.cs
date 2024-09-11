@@ -23,10 +23,18 @@ public class PaginationResponse<T>
         T? FirstPage = default,
         T? LastPage = default,
         string? PreviousCursor = null,
-        string? NextCursor = null)
+        string? NextCursor = null
+    )
     {
         Data = data;
-        Paging = new Paging<T>(totalPage, pageSize, FirstPage, LastPage, PreviousCursor, NextCursor);
+        Paging = new Paging<T>(
+            totalPage,
+            pageSize,
+            FirstPage,
+            LastPage,
+            PreviousCursor,
+            NextCursor
+        );
     }
 }
 
@@ -68,7 +76,8 @@ public class Paging<T>
         T? FirstPage = default,
         T? LastPage = default,
         string? PreviousCursor = null,
-        string? NextCursor = null)
+        string? NextCursor = null
+    )
     {
         PageSize = pageSize;
         TotalPage = totalPage;
@@ -76,8 +85,10 @@ public class Paging<T>
         this.FirstPage = FirstPage;
         this.LastPage = LastPage;
 
-
-        bool isNext = Convert.ToBase64String(Encoding.UTF8.GetBytes(SerializerExtension.Serialize(LastPage!))) == NextCursor;
+        bool isNext =
+            Convert.ToBase64String(
+                Encoding.UTF8.GetBytes(SerializerExtension.Serialize(LastPage!).StringJson)
+            ) == NextCursor;
 
         if (!isNext)
         {
@@ -86,7 +97,10 @@ public class Paging<T>
 
         HasNextPage = !isNext;
 
-        bool isPrevious = Convert.ToBase64String(Encoding.UTF8.GetBytes(SerializerExtension.Serialize(FirstPage!))) == PreviousCursor;
+        bool isPrevious =
+            Convert.ToBase64String(
+                Encoding.UTF8.GetBytes(SerializerExtension.Serialize(FirstPage!).StringJson)
+            ) == PreviousCursor;
 
         if (!isPrevious)
         {

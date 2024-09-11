@@ -11,21 +11,37 @@ namespace Contracts.Extensions.QueryExtensions;
 
 public static class PaginationExtension
 {
-    public static async Task<PaginationResponse<T>> PaginateAsync<T>(this IQueryable<T> entities, int current, int size)
+    public static async Task<PaginationResponse<T>> PaginateAsync<T>(
+        this IQueryable<T> entities,
+        int current,
+        int size
+    )
     {
         int totalPage = entities.Count();
 
-        return new PaginationResponse<T>(await entities.Skip((current - 1) * size).Take(size).ToListAsync(), totalPage, current, size);
+        return new PaginationResponse<T>(
+            await entities.Skip((current - 1) * size).Take(size).ToListAsync(),
+            totalPage,
+            current,
+            size
+        );
     }
 
-    public static PaginationResponse<T> Paginate<T>(this IEnumerable<T> entities, int current, int size) =>
-        new(entities.Skip((current - 1) * size).Take(size), entities.Count(), current, size);
+    public static PaginationResponse<T> Paginate<T>(
+        this IEnumerable<T> entities,
+        int current,
+        int size
+    ) => new(entities.Skip((current - 1) * size).Take(size), entities.Count(), current, size);
 
-    public static async Task<PaginationResponse<T>> PointerPaginateAsync<T>(this IQueryable<T> entities, CursorPaginationRequest request)
+    public static async Task<PaginationResponse<T>> PointerPaginateAsync<T>(
+        this IQueryable<T> entities,
+        CursorPaginationRequest request
+    )
     {
-        string sortRequests = request.Order != null ?
-            $"{request.Order},{request.UniqueOrdering}" :
-                $"{request.UniqueOrdering}";
+        string sortRequests =
+            request.Order != null
+                ? $"{request.Order},{request.UniqueOrdering}"
+                : $"{request.UniqueOrdering}";
 
         IQueryable<T> sortData = entities.Sort(sortRequests);
 
@@ -40,15 +56,20 @@ public static class PaginationExtension
         string cursorQuery = request.AfterCursor!;
         string sort = sortRequests;
 
-        if(isBefore)
+        if (isBefore)
         {
             sort = GetReverseSort(sortRequests);
             sortData = sortData.Sort(sort);
             cursorQuery = request.BeforeCursor!;
         }
 
-
-        PaginationMetadata<T> metadata = await GetMetadata(sortData, request.Size, sort, cursorQuery, isBefore);
+        PaginationMetadata<T> metadata = await GetMetadata(
+            sortData,
+            request.Size,
+            sort,
+            cursorQuery,
+            isBefore
+        );
 
         return new PaginationResponse<T>(
             metadata.Entities,
@@ -57,14 +78,26 @@ public static class PaginationExtension
             firstPage,
             lastPage,
             metadata.PreviousCursor,
-            metadata.NextCursor);
+            metadata.NextCursor
+        );
     }
 
-    private static async Task<PaginationMetadata<T>> GetMetadata<T>(IQueryable<T> entities, int size, string sortRequest, string? cursor = null, bool isBefore = false)
+    private static async Task<PaginationMetadata<T>> GetMetadata<T>(
+        IQueryable<T> entities,
+        int size,
+        string sortRequest,
+        string? cursor = null,
+        bool isBefore = false
+    )
     {
         ParameterExpression parameter = Expression.Parameter(typeof(T), "x");
 
-        Expression<Func<T, bool>> lamda = GetlamdaExpression<T>(parameter, cursor == null, cursor!, sortRequest);
+        Expression<Func<T, bool>> lamda = GetlamdaExpression<T>(
+            parameter,
+            cursor == null,
+            cursor!,
+            sortRequest
+        );
 
         IQueryable<T> query = entities.Where(lamda).Take(size);
 
@@ -80,14 +113,27 @@ public static class PaginationExtension
 
         if (dataEntities.Count != 0)
         {
-            previousCursor = Convert.ToBase64String(Encoding.UTF8.GetBytes(SerializerExtension.Serialize(dataEntities.FirstOrDefault()!)));
-            nextCursor = Convert.ToBase64String(Encoding.UTF8.GetBytes(SerializerExtension.Serialize(dataEntities.LastOrDefault()!)));
+            previousCursor = Convert.ToBase64String(
+                Encoding.UTF8.GetBytes(
+                    SerializerExtension.Serialize(dataEntities.FirstOrDefault()!).StringJson
+                )
+            );
+            nextCursor = Convert.ToBase64String(
+                Encoding.UTF8.GetBytes(
+                    SerializerExtension.Serialize(dataEntities.LastOrDefault()!).StringJson
+                )
+            );
         }
 
         return new PaginationMetadata<T>(dataEntities, nextCursor, previousCursor);
     }
 
-    private static Expression<Func<T, bool>> GetlamdaExpression<T>(ParameterExpression parameter, bool isFirstPage, string cursor, string sortRequest)
+    private static Expression<Func<T, bool>> GetlamdaExpression<T>(
+        ParameterExpression parameter,
+        bool isFirstPage,
+        string cursor,
+        string sortRequest
+    )
     {
         if (isFirstPage)
         {
@@ -104,11 +150,17 @@ public static class PaginationExtension
 
             Expression currentOperation = GetBodyExpression<T>(orderInfo, cursor, parameter);
 
-            Expression previousOperation = GetPreviousExpression<T>(orders, parameter, cursor, orderInfo.Propertyname);
+            Expression previousOperation = GetPreviousExpression<T>(
+                orders,
+                parameter,
+                cursor,
+                orderInfo.Propertyname
+            );
 
-            Expression operation = previousOperation != null ?
-                Expression.And(previousOperation, currentOperation) :
-                    currentOperation;
+            Expression operation =
+                previousOperation != null
+                    ? Expression.And(previousOperation, currentOperation)
+                    : currentOperation;
 
             body = body == null ? operation : Expression.OrElse(body, operation);
         }
@@ -116,7 +168,12 @@ public static class PaginationExtension
         return Expression.Lambda<Func<T, bool>>(body, parameter);
     }
 
-    private static Expression GetPreviousExpression<T>(IEnumerable<OrderInfo> orders, ParameterExpression parameter, string cursor, string breakProperty)
+    private static Expression GetPreviousExpression<T>(
+        IEnumerable<OrderInfo> orders,
+        ParameterExpression parameter,
+        string cursor,
+        string breakProperty
+    )
     {
         Expression body = null!;
 
@@ -129,7 +186,10 @@ public static class PaginationExtension
 
             OperationInfo operationInfo = GetOperationInfo<T>(parameter, cursor, order);
 
-            Expression operation = Expression.Equal(operationInfo.MemberExpression, operationInfo.ConstantExpression);
+            Expression operation = Expression.Equal(
+                operationInfo.MemberExpression,
+                operationInfo.ConstantExpression
+            );
 
             body = body == null ? operation : Expression.AndAlso(body, operation);
         }
@@ -137,39 +197,73 @@ public static class PaginationExtension
         return body;
     }
 
-    private static Expression GetBodyExpression<T>(OrderInfo orderInfo, string cursor, ParameterExpression parameter)
+    private static Expression GetBodyExpression<T>(
+        OrderInfo orderInfo,
+        string cursor,
+        ParameterExpression parameter
+    )
     {
         OperationInfo operationInfo = GetOperationInfo<T>(parameter, cursor, orderInfo);
 
         Expression operation = true switch
         {
-            bool when operationInfo.PropertyType == typeof(string)
-            =>
-                orderInfo.OrderType == RequestType.DescOrderType
-                ? Expression.LessThan(StringCompareExpression(operationInfo.MemberExpression, operationInfo.ConstantExpression), Expression.Constant(0))
-                    : Expression.GreaterThan(StringCompareExpression(operationInfo.MemberExpression, operationInfo.ConstantExpression), Expression.Constant(0)),
+            bool when operationInfo.PropertyType == typeof(string) => orderInfo.OrderType
+            == RequestType.DescOrderType
+                ? Expression.LessThan(
+                    StringCompareExpression(
+                        operationInfo.MemberExpression,
+                        operationInfo.ConstantExpression
+                    ),
+                    Expression.Constant(0)
+                )
+                : Expression.GreaterThan(
+                    StringCompareExpression(
+                        operationInfo.MemberExpression,
+                        operationInfo.ConstantExpression
+                    ),
+                    Expression.Constant(0)
+                ),
 
-            _ =>
-                orderInfo.OrderType == RequestType.DescOrderType
-                    ? Expression.LessThan(operationInfo.MemberExpression, operationInfo.ConstantExpression)
-                        : Expression.GreaterThan(operationInfo.MemberExpression, operationInfo.ConstantExpression),
+            _ => orderInfo.OrderType == RequestType.DescOrderType
+                ? Expression.LessThan(
+                    operationInfo.MemberExpression,
+                    operationInfo.ConstantExpression
+                )
+                : Expression.GreaterThan(
+                    operationInfo.MemberExpression,
+                    operationInfo.ConstantExpression
+                ),
         };
 
         return operation;
     }
 
-    private static OperationInfo GetOperationInfo<T>(ParameterExpression parameter, string cursor, OrderInfo orderInfo)
+    private static OperationInfo GetOperationInfo<T>(
+        ParameterExpression parameter,
+        string cursor,
+        OrderInfo orderInfo
+    )
     {
-        var memberExpression = ExpressionExtension.GetExpressionMember<T>(orderInfo.Propertyname, parameter, false);
+        var memberExpression = ExpressionExtension.GetExpressionMember<T>(
+            orderInfo.Propertyname,
+            parameter,
+            false
+        );
 
         T? cursorObject = GetCursor<T>(cursor);
 
-        PropertyInfo propertyInfo = cursorObject?.GetType()?.GetProperty(orderInfo.Propertyname) ??
-            throw new Exception($"{orderInfo.Propertyname} is not found.");
+        PropertyInfo propertyInfo =
+            cursorObject?.GetType()?.GetProperty(orderInfo.Propertyname)
+            ?? throw new Exception($"{orderInfo.Propertyname} is not found.");
 
         ConstantExpression expressionValue = GetExpresionValue(propertyInfo, cursorObject!);
 
-        return new OperationInfo { MemberExpression = memberExpression, ConstantExpression = expressionValue, PropertyType = propertyInfo.PropertyType };
+        return new OperationInfo
+        {
+            MemberExpression = memberExpression,
+            ConstantExpression = expressionValue,
+            PropertyType = propertyInfo.PropertyType,
+        };
     }
 
     private static T? GetCursor<T>(string cursor)
@@ -178,10 +272,13 @@ public static class PaginationExtension
 
         string jsonBack = Encoding.UTF8.GetString(byteArray);
 
-        return SerializerExtension.Deserialize<T>(jsonBack);
+        return SerializerExtension.Deserialize<T>(jsonBack).Object;
     }
 
-    private static ConstantExpression GetExpresionValue(PropertyInfo propertyInfo, object cursorObject)
+    private static ConstantExpression GetExpresionValue(
+        PropertyInfo propertyInfo,
+        object cursorObject
+    )
     {
         var value = propertyInfo?.GetValue(cursorObject, null);
 
@@ -207,11 +304,7 @@ public static class PaginationExtension
 
     private static MethodCallExpression StringCompareExpression(Expression left, Expression right)
     {
-        return Expression.Call(
-                        typeof(string),
-                        nameof(string.Compare),
-                        null,
-                        [left, right]);
+        return Expression.Call(typeof(string), nameof(string.Compare), null, [left, right]);
     }
 
     private static string GetReverseSort(string sortQuery)

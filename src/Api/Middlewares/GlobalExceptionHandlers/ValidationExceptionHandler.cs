@@ -9,10 +9,10 @@ public class ValidationExceptionHandler : IHandlerException<ValidationException>
     {
         var exception = (ValidationException)ex;
 
-        int statusCode = exception.HttpStatusCode;
+        httpContext.Response.StatusCode = exception.HttpStatusCode;
 
-        httpContext.Response.StatusCode = statusCode;
+        var error = new ErrorResponse(exception.ValidationErrors);
 
-        await httpContext.Response.WriteAsJsonAsync(new ErrorResponse(exception.ValidationErrors));
+        await httpContext.Response.WriteAsJsonAsync(error, error.Serialize().Options);
     }
 }

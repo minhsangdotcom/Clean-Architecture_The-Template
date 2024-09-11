@@ -1,3 +1,4 @@
+using System.Resources;
 using System.Text;
 using Contracts.Extensions;
 
@@ -16,7 +17,7 @@ public static class Message
     public const string TOKEN_EXPIRED = "TOKEN EXPIRED";
 }
 
-public class Message<T>(string? subjectName = null)
+public class Message<T>(string? entityName = null)
     where T : class
 {
     private bool? isNegative = null;
@@ -25,9 +26,9 @@ public class Message<T>(string? subjectName = null)
 
     private string propertyName = string.Empty;
 
-    private readonly string subjectName = string.IsNullOrWhiteSpace(subjectName)
+    private readonly string entityName = string.IsNullOrWhiteSpace(entityName)
         ? typeof(T).Name
-        : subjectName;
+        : entityName;
 
     private string CustomMessage = string.Empty;
 
@@ -47,7 +48,7 @@ public class Message<T>(string? subjectName = null)
 
     public MessageResult BuildMessage()
     {
-        string subjectProperty = subjectName.ToKebabCase();
+        string subjectProperty = entityName.ToKebabCase();
 
         if (!string.IsNullOrWhiteSpace(propertyName))
         {
@@ -81,12 +82,68 @@ public class Message<T>(string? subjectName = null)
             messageBuilder.Append($"_{objectName.ToKebabCase()}");
         }
 
+        var en = Translation(LanguageType.En);
+        var vi = Translation(LanguageType.Vi);
+
         return new()
         {
             Message = messageBuilder.ToString().ToLower(),
-            En = "",
-            Vi = "",
+            En = en,
+            Vi = vi,
         };
+    }
+
+    private string Translation(LanguageType languageType)
+    {
+        string rootPath = Directory.GetParent(Directory.GetCurrentDirectory())!.Parent!.FullName;
+        string path = languageType switch
+        {
+            LanguageType.Vi => Path.Join(rootPath, "public", "Resources", "Message.vi.resx"),
+
+            LanguageType.En => Path.Join(rootPath, "public", "Resources", "Message.en.resx"),
+            _ => string.Empty,
+        };
+
+        Dictionary<string, ResourceResult> translation = ResourceExtension.ReadResxFile(path);
+
+        var propertyTranslation = translation.GetValueOrDefault(propertyName);
+
+        string property = propertyTranslation?.Value ?? string.Empty;
+        string entity = translation.GetValueOrDefault(entityName)?.Value ?? string.Empty;
+        string negative =
+            isNegative == true ? (languageType == LanguageType.Vi ? "Không" : "not") : string.Empty;
+        string obj = translation.GetValueOrDefault(objectName)?.Value ?? string.Empty;
+
+        MessageDictionary mess = Messages[type];
+
+        string message = mess.Translation[languageType.ToString()];
+
+        if (languageType == LanguageType.En && isNegative == true)
+        {
+            message = mess.EnNegativeMessage ?? mess.Message!;
+        }
+
+        string verb = string.Empty;
+
+        if (languageType == LanguageType.En)
+        {
+            var comment = propertyTranslation?.Comment?.Trim()?.Split(",");
+
+            bool isPlural =
+                comment != null
+                && comment.Any(x =>
+                {
+                    var c = x.Split("=");
+
+                    return c[0] == "isPlural" && c[1] == "true";
+                });
+
+            verb = isPlural ? "are" : "is";
+        }
+
+        IEnumerable<string> results = [property, entity, verb, negative, message, obj];
+
+        return string.Join(" ", results.Where(x => !string.IsNullOrWhiteSpace(x)));
     }
 
     private static Dictionary<MessageType, MessageDictionary> CommonMessage() =>
@@ -94,18 +151,37 @@ public class Message<T>(string? subjectName = null)
         {
             {
                 MessageType.MaximumLength,
-                new("too-long", "too long", "quá dài", MessageType.MaximumLength)
+                new(
+                    "too-long",
+                    new Dictionary<string, string>()
+                    {
+                        { LanguageType.En.ToString(), "too long" },
+                        { LanguageType.Vi.ToString(), "quá dài" },
+                    },
+                    MessageType.MaximumLength
+                )
             },
             {
                 MessageType.MinumumLength,
-                new("too-short", " too short", "quá ngắn", MessageType.MinumumLength)
+                new(
+                    "too-short",
+                    new Dictionary<string, string>()
+                    {
+                        { LanguageType.En.ToString(), "too short" },
+                        { LanguageType.Vi.ToString(), "quá ngắn" },
+                    },
+                    MessageType.MinumumLength
+                )
             },
             {
                 MessageType.ValidFormat,
                 new(
                     MessageType.ValidFormat.ToString().ToKebabCase(),
-                    "valid format",
-                    "đúng định dạng",
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "valid format" },
+                        { LanguageType.Vi.ToString(), "đúng định dạng" },
+                    },
                     MessageType.ValidFormat,
                     "invalid format"
                 )
@@ -114,8 +190,11 @@ public class Message<T>(string? subjectName = null)
                 MessageType.Found,
                 new(
                     MessageType.Found.ToString().ToKebabCase(),
-                    "found",
-                    "tìm thấy",
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "found" },
+                        { LanguageType.Vi.ToString(), "tìm thấy" },
+                    },
                     MessageType.Found
                 )
             },
@@ -123,8 +202,14 @@ public class Message<T>(string? subjectName = null)
                 MessageType.Existence,
                 new(
                     MessageType.Existence.ToString().ToKebabCase(),
-                    MessageType.Existence.ToString().ToKebabCase(),
-                    "tồn tại",
+                    new Dictionary<string, string>
+                    {
+                        {
+                            LanguageType.En.ToString(),
+                            MessageType.Existence.ToString().ToKebabCase()
+                        },
+                        { LanguageType.Vi.ToString(), "tồn tại" },
+                    },
                     MessageType.Existence
                 )
             },
@@ -132,8 +217,14 @@ public class Message<T>(string? subjectName = null)
                 MessageType.Correct,
                 new(
                     MessageType.Correct.ToString().ToKebabCase(),
-                    MessageType.Correct.ToString().ToKebabCase(),
-                    "đúng",
+                    new Dictionary<string, string>
+                    {
+                        {
+                            LanguageType.En.ToString(),
+                            MessageType.Correct.ToString().ToKebabCase()
+                        },
+                        { LanguageType.Vi.ToString(), "đúng" },
+                    },
                     MessageType.Correct,
                     "incorrect"
                 )
@@ -142,8 +233,11 @@ public class Message<T>(string? subjectName = null)
                 MessageType.Active,
                 new(
                     MessageType.Active.ToString().ToKebabCase(),
-                    "active",
-                    "hoạt động",
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "active" },
+                        { LanguageType.Vi.ToString(), "hoạt động" },
+                    },
                     MessageType.Active,
                     "inactive"
                 )
@@ -152,8 +246,11 @@ public class Message<T>(string? subjectName = null)
                 MessageType.OuttaOption,
                 new(
                     MessageType.OuttaOption.ToString().ToKebabCase(),
-                    "outta options",
-                    "hết tùy chọn",
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "outta options" },
+                        { LanguageType.Vi.ToString(), "hết tùy chọn" },
+                    },
                     MessageType.OuttaOption
                 )
             },
@@ -161,8 +258,11 @@ public class Message<T>(string? subjectName = null)
                 MessageType.GreaterThan,
                 new(
                     MessageType.GreaterThan.ToString().ToKebabCase(),
-                    "greater than",
-                    "lớn hơn",
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "greater than" },
+                        { LanguageType.Vi.ToString(), "lớn hơn" },
+                    },
                     MessageType.GreaterThan
                 )
             },
@@ -170,8 +270,11 @@ public class Message<T>(string? subjectName = null)
                 MessageType.GreaterThanEqual,
                 new(
                     MessageType.GreaterThanEqual.ToString().ToKebabCase(),
-                    "greater than or equal",
-                    "lớn hơn hoặc bằng",
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "greater than or equal" },
+                        { LanguageType.Vi.ToString(), "lớn hơn hoặc bằng" },
+                    },
                     MessageType.GreaterThanEqual
                 )
             },
@@ -179,8 +282,11 @@ public class Message<T>(string? subjectName = null)
                 MessageType.LessThan,
                 new(
                     MessageType.LessThan.ToString().ToKebabCase(),
-                    "less than",
-                    "nhỏ hơn",
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "less than" },
+                        { LanguageType.Vi.ToString(), "nhỏ hơn" },
+                    },
                     MessageType.LessThan
                 )
             },
@@ -188,25 +294,47 @@ public class Message<T>(string? subjectName = null)
                 MessageType.LessThanEqual,
                 new(
                     MessageType.LessThanEqual.ToString().ToKebabCase(),
-                    "less than or equal",
-                    "nhỏ hơn hoặc bằng",
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "less than or equal" },
+                        { LanguageType.Vi.ToString(), "nhỏ hơn hoặc bằng" },
+                    },
                     MessageType.LessThanEqual
                 )
             },
             {
                 MessageType.Null,
-                new(MessageType.Null.ToString().ToKebabCase(), "null", "rỗng", MessageType.Null)
+                new(
+                    MessageType.Null.ToString().ToKebabCase(),
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "null" },
+                        { LanguageType.Vi.ToString(), "rỗng" },
+                    },
+                    MessageType.Null
+                )
             },
             {
                 MessageType.Empty,
-                new(MessageType.Empty.ToString().ToKebabCase(), "empty", "trống", MessageType.Empty)
+                new(
+                    MessageType.Empty.ToString().ToKebabCase(),
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "empty" },
+                        { LanguageType.Vi.ToString(), "trống" },
+                    },
+                    MessageType.Empty
+                )
             },
             {
                 MessageType.Unique,
                 new(
                     MessageType.Unique.ToString().ToKebabCase(),
-                    "unique",
-                    "duy nhất",
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "unique" },
+                        { LanguageType.Vi.ToString(), "duy nhất" },
+                    },
                     MessageType.Unique,
                     "non-unique"
                 )
@@ -215,8 +343,11 @@ public class Message<T>(string? subjectName = null)
                 MessageType.Strong,
                 new(
                     MessageType.Strong.ToString().ToKebabCase(),
-                    "strong enough",
-                    "đủ mạnh",
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "strong enough" },
+                        { LanguageType.Vi.ToString(), "đủ mạnh" },
+                    },
                     MessageType.Strong,
                     "weak"
                 )
