@@ -110,13 +110,22 @@ public class Message<T>(string? entityName = null)
 
         string property = propertyTranslation?.Value ?? string.Empty;
         string entity = translation.GetValueOrDefault(entityName)?.Value ?? string.Empty;
-        string negative =
-            isNegative == true ? (languageType == LanguageType.Vi ? "Không" : "not") : string.Empty;
         string obj = translation.GetValueOrDefault(objectName)?.Value ?? string.Empty;
 
         MessageDictionary mess = Messages[type];
-
         string message = mess.Translation[languageType.ToString()];
+
+        string negative = string.Empty;
+
+        if (
+            isNegative == true
+            && (
+                string.IsNullOrWhiteSpace(mess.EnNegativeMessage) || languageType == LanguageType.Vi
+            )
+        )
+        {
+            negative = languageType == LanguageType.Vi ? "Không" : "not";
+        }
 
         if (languageType == LanguageType.En && isNegative == true)
         {
@@ -135,13 +144,15 @@ public class Message<T>(string? entityName = null)
                 {
                     var c = x.Split("=");
 
-                    return c[0] == "isPlural" && c[1] == "true";
+                    return c[0] == "IsPlural" && c[1] == "true";
                 });
 
             verb = isPlural ? "are" : "is";
         }
 
-        IEnumerable<string> results = [property, entity, verb, negative, message, obj];
+        string prePosition = languageType == LanguageType.En ? "of" : "của";
+
+        IEnumerable<string> results = [property, prePosition, entity, verb, negative, message, obj];
 
         return string.Join(" ", results.Where(x => !string.IsNullOrWhiteSpace(x)));
     }
@@ -333,10 +344,9 @@ public class Message<T>(string? entityName = null)
                     new Dictionary<string, string>
                     {
                         { LanguageType.En.ToString(), "unique" },
-                        { LanguageType.Vi.ToString(), "duy nhất" },
+                        { LanguageType.Vi.ToString(), "là duy nhất" },
                     },
-                    MessageType.Unique,
-                    "non-unique"
+                    MessageType.Unique
                 )
             },
             {

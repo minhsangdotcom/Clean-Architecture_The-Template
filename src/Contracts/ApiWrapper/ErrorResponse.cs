@@ -41,7 +41,7 @@ public class ErrorResponse : ApiBaseResponse
     {
         StatusCode = statusCode!.Value;
         Errors = badRequestErrors?.ToList();
-        Message = "Several errors have occured";
+        Message = "One or several errors have occured";
         Type = nameof(ValidationException);
     }
 

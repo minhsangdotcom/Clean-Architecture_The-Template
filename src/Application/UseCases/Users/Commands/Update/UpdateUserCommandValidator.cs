@@ -1,4 +1,3 @@
-using Application.UseCases.Projections.Users;
 using Application.UseCases.Validators;
 using Contracts.Common.Messages;
 using FluentValidation;
@@ -10,12 +9,14 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
     public UpdateUserCommandValidator()
     {
         RuleFor(x => x.User)
-            .NotEmpty().WithMessage(
-                Messager.Create<UpdateUserCommand>()
+            .NotEmpty()
+            .WithState(x =>
+                Messager
+                    .Create<UpdateUserCommand>()
                     .Property(x => x.User!)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage().Message
+                    .BuildMessage()
             )
             .SetValidator(new UserValidator()!);
     }

@@ -10,78 +10,96 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
 {
     public CreateUserCommandValidator()
     {
-
         Include(new UserValidator());
 
         RuleFor(x => x.UserName)
-            .NotEmpty().WithMessage(
-                Messager.Create<CreateUserCommand>(nameof(User))
+            .NotEmpty()
+            .WithState(x =>
+                Messager
+                    .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.UserName!)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage().Message
+                    .BuildMessage()
             )
-            .Must((_, x) =>
-            {
-                Regex regex = UserNamValidationRegex();
-                return regex.IsMatch(x!);
-            }).WithMessage(
-                Messager.Create<CreateUserCommand>(nameof(User))
+            .Must(
+                (_, x) =>
+                {
+                    Regex regex = UserNamValidationRegex();
+                    return regex.IsMatch(x!);
+                }
+            )
+            .WithState(x =>
+                Messager
+                    .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.UserName!)
                     .Message(MessageType.ValidFormat)
                     .Negative()
-                    .BuildMessage().Message
+                    .BuildMessage()
             );
 
         RuleFor(x => x.Password)
-            .NotEmpty().WithMessage(
-                Messager.Create<CreateUserCommand>(nameof(User))
+            .NotEmpty()
+            .WithState(x =>
+                Messager
+                    .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Password!)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage().Message
+                    .BuildMessage()
             )
-            .Must((_, x) =>
-            {
-                Regex regex = PassowrdValidationRegex();
-                return regex.IsMatch(x!);
-            }).WithMessage(
-                Messager.Create<CreateUserCommand>(nameof(User))
+            .Must(
+                (_, x) =>
+                {
+                    Regex regex = PassowrdValidationRegex();
+                    return regex.IsMatch(x!);
+                }
+            )
+            .WithState(x =>
+                Messager
+                    .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Password!)
                     .Message(MessageType.Strong)
                     .Negative()
-                    .BuildMessage().Message
+                    .BuildMessage()
             );
-
 
         RuleFor(x => x.Gender)
-            .NotEmpty().WithMessage(
-                 Messager.Create<CreateUserCommand>(nameof(User))
+            .NotEmpty()
+            .WithState(x =>
+                Messager
+                    .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Gender!)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage().Message
+                    .BuildMessage()
             )
-            .IsInEnum().WithMessage(
-                Messager.Create<CreateUserCommand>(nameof(User))
+            .IsInEnum()
+            .WithState(x =>
+                Messager
+                    .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Gender!)
                     .Message(MessageType.OuttaOption)
-                    .BuildMessage().Message
+                    .BuildMessage()
             );
 
-         RuleFor(x => x.Status)
-            .NotEmpty().WithMessage(
-                Messager.Create<CreateUserCommand>(nameof(User))
+        RuleFor(x => x.Status)
+            .NotEmpty()
+            .WithState(x =>
+                Messager
+                    .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Status!)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage().Message
+                    .BuildMessage()
             )
-            .IsInEnum().WithMessage(
-                Messager.Create<CreateUserCommand>(nameof(User))
+            .IsInEnum()
+            .WithState(x =>
+                Messager
+                    .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Status!)
                     .Message(MessageType.OuttaOption)
-                    .BuildMessage().Message
+                    .BuildMessage()
             );
     }
 

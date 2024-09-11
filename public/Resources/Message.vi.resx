@@ -133,7 +133,7 @@
     <value>Thông tin xác nhận</value>
     <comment/>
   </data>
-  <data name="RoleClaims" xml:space="preserve">
+  <data name="RoleClaim" xml:space="preserve">
     <value>Thông tin xác nhận</value>
     <comment/>
   </data>
@@ -197,11 +197,11 @@
     <value>Danh sách vai trò</value>
     <comment> </comment>
   </data>
-  <data name="UserRoles" xml:space="preserve">
+  <data name="UserRole" xml:space="preserve">
     <value>Danh sách vai trò</value>
     <comment/>
   </data>
-  <data name="UserClaims" xml:space="preserve">
+  <data name="UserClaim" xml:space="preserve">
     <value>Thông tin xác nhận</value>
     <comment> </comment>
   </data>

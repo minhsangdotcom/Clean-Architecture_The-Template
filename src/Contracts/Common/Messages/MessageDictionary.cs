@@ -18,15 +18,14 @@ public class MessageDictionary(
     public Dictionary<string, string> Translation { get; set; } =
         Guard.Against.Null(translation, nameof(translation));
 
-    // public string? En { get; set; } = Guard.Against.NullOrEmpty(en, nameof(en));
-
-    // public string? Vi { get; set; } = Guard.Against.NullOrEmpty(vi, nameof(vi));
-
     /// <summary>
     /// a better meanful of message in negative
     /// </summary>
     public string? NegativeMessage { get; set; } = negativeMessage?.ToKebabCase();
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string? EnNegativeMessage { get; set; } = negativeMessage;
 
     public MessageType Type { get; set; } = type;

@@ -12,102 +12,94 @@ public partial class UserValidator : AbstractValidator<UserModel>
     {
         RuleFor(x => x.LastName)
             .NotEmpty()
-            .WithMessage(
+            .WithState(x =>
                 Messager
                     .Create<User>()
                     .Property(x => x.LastName)
                     .Message(MessageType.Null)
                     .Negative()
                     .BuildMessage()
-                    .Message
             )
             .MaximumLength(256)
-            .WithMessage(
+            .WithState(x =>
                 Messager
                     .Create<User>()
                     .Property(x => x.LastName)
                     .Message(MessageType.MaximumLength)
                     .BuildMessage()
-                    .Message
             );
 
         RuleFor(x => x.FirstName)
             .NotEmpty()
-            .WithMessage(
+            .WithState(x =>
                 Messager
                     .Create<User>()
                     .Property(x => x.FirstName)
                     .Message(MessageType.Null)
                     .Negative()
                     .BuildMessage()
-                    .Message
             )
             .MaximumLength(256)
-            .WithMessage(
+            .WithState(x =>
                 Messager
                     .Create<User>()
                     .Property(x => x.FirstName)
                     .Message(MessageType.MaximumLength)
                     .BuildMessage()
-                    .Message
             );
 
         RuleFor(x => x.Email)
             .NotEmpty()
-            .WithMessage(
+            .WithState(x =>
                 Messager
                     .Create<User>()
                     .Property(x => x.Email)
                     .Message(MessageType.Null)
                     .Negative()
                     .BuildMessage()
-                    .Message
             )
             .Must(x =>
             {
                 Regex regex = EmailValidationRegex();
                 return regex.IsMatch(x!);
             })
-            .WithMessage(
+            .WithState(x =>
                 Messager
                     .Create<User>()
                     .Property(x => x.Email)
                     .Message(MessageType.ValidFormat)
                     .Negative()
                     .BuildMessage()
-                    .Message
             );
 
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
-            .WithMessage(
+            .WithState(x =>
                 Messager
                     .Create<User>()
                     .Property(x => x.PhoneNumber)
                     .Message(MessageType.Null)
                     .Negative()
                     .BuildMessage()
-                    .Message
             )
             .Must(x =>
             {
                 Regex regex = VietnamesePhoneValidationRegex();
                 return regex.IsMatch(x!);
             })
-            .WithMessage(
+            .WithState(x =>
                 Messager
                     .Create<User>()
                     .Property(x => x.PhoneNumber)
                     .Message(MessageType.ValidFormat)
                     .Negative()
                     .BuildMessage()
-                    .Message
             );
 
         RuleFor(x => x.Address)
             .MaximumLength(1000)
             .When(x => x.Address != null)
-            .WithMessage(
+            .WithState(x =>
                 Messager
                     .Create<User>()
                     .Property(x => x.Address!)

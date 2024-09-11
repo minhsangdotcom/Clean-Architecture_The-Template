@@ -18,61 +18,62 @@ public class RoleValidator : AbstractValidator<RoleModel>
 
         RuleFor(x => x.Name)
             .NotEmpty()
-            .WithMessage(
+            .WithState(x =>
                 Messager
                     .Create<RoleModel>(nameof(Role))
                     .Property(x => x.Name!)
                     .Negative()
                     .Message(MessageType.Null)
                     .BuildMessage()
-                    .Message
             )
             .MaximumLength(256)
-            .WithMessage(
+            .WithState(x =>
                 Messager
                     .Create<RoleModel>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.MaximumLength)
                     .BuildMessage()
-                    .Message
             )
             .MustAsync(
                 (name, CancellationToken) =>
                     IsExistedNameAsync(roleManagerService, name, CancellationToken)
             )
-            .When(_ => actionAccessorService.GetHttpMethod() == HttpMethod.Post.ToString())
-            .WithMessage(
+            .When(
+                _ => actionAccessorService.GetHttpMethod() == HttpMethod.Post.ToString(),
+                ApplyConditionTo.CurrentValidator
+            )
+            .WithState(x =>
                 Messager
                     .Create<RoleModel>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.Existence)
                     .BuildMessage()
-                    .Message
             )
             .MustAsync(
                 (name, CancellationToken) =>
                     IsExistedNameAsync(roleManagerService, name, CancellationToken, id)
             )
-            .When(_ => actionAccessorService.GetHttpMethod() == HttpMethod.Put.ToString())
-            .WithMessage(
+            .When(
+                _ => actionAccessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
+                ApplyConditionTo.CurrentValidator
+            )
+            .WithState(x =>
                 Messager
                     .Create<RoleModel>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.Existence)
                     .BuildMessage()
-                    .Message
             );
 
         RuleFor(x => x.Description)
             .MaximumLength(256)
             .When(x => x.Description != null, ApplyConditionTo.CurrentValidator)
-            .WithMessage(
+            .WithState(x =>
                 Messager
                     .Create<RoleModel>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.MaximumLength)
                     .BuildMessage()
-                    .Message
             );
 
         When(
@@ -88,14 +89,13 @@ public class RoleValidator : AbstractValidator<RoleModel>
                             .DistinctBy(x => new { x.ClaimType, x.ClaimValue })
                             .Count() == x.FindAll(x => x.Id == null).Count
                     )
-                    .WithMessage(
+                    .WithState(x =>
                         Messager
                             .Create<RoleModel>(nameof(Role))
                             .Property(x => x.Claims!)
                             .Message(MessageType.Unique)
                             .Negative()
                             .BuildMessage()
-                            .Message
                     );
 
                 RuleFor(x => x.Claims)
@@ -116,13 +116,12 @@ public class RoleValidator : AbstractValidator<RoleModel>
                         _ => actionAccessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
                         ApplyConditionTo.CurrentValidator
                     )
-                    .WithMessage(
+                    .WithState(x =>
                         Messager
                             .Create<RoleModel>(nameof(Role))
                             .Property(x => x.Claims!)
                             .Message(MessageType.Existence)
                             .BuildMessage()
-                            .Message
                     );
             }
         );
@@ -137,8 +136,9 @@ public class RoleValidator : AbstractValidator<RoleModel>
     {
         return !await roleManagerService.Roles.AnyAsync(
             x =>
-                (!id.HasValue && EF.Functions.ILike(x.Name, name))
-                || (x.Id != id && EF.Functions.ILike(x.Name, name)),
+                // (!id.HasValue && EF.Functions.ILike(x.Name, name))
+                // || (x.Id != id && EF.Functions.ILike(x.Name, name)),
+                (!id.HasValue || x.Id != id) && EF.Functions.ILike(x.Name, name),
             cancellationToken
         );
     }

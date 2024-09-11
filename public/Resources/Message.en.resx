@@ -133,7 +133,7 @@
     <value>Claims</value>
     <comment>IsPlural=true</comment>
   </data>
-  <data name="RoleClaims" xml:space="preserve">
+  <data name="RoleClaim" xml:space="preserve">
     <value>Claims</value>
     <comment>IsPlural=true</comment>
   </data>
@@ -142,8 +142,8 @@
     <comment/>
   </data>
   <data name="ClaimValue" xml:space="preserve">
-    <value>Value data</value>
-    <comment> </comment>
+    <value>Value</value>
+    <comment/>
   </data>
   <data name="User" xml:space="preserve">
     <value>user</value>
@@ -197,11 +197,11 @@
     <value>role</value>
     <comment>IsPlural=true</comment>
   </data>
-  <data name="UserRoles" xml:space="preserve">
+  <data name="UserRole" xml:space="preserve">
     <value>role</value>
     <comment>IsPlural=true</comment>
   </data>
-  <data name="UserClaims" xml:space="preserve">
+  <data name="UserClaim" xml:space="preserve">
     <value>claims</value>
     <comment>IsPlural=true</comment>
   </data>
