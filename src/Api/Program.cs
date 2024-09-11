@@ -1,5 +1,6 @@
 using Api.Converters;
 using Api.Extensions;
+using Api.Middlewares;
 using Application;
 using Infrastructure;
 using Infrastructure.Data;
@@ -7,15 +8,21 @@ using Infrastructure.Data;
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
+
 // ---------------------------------------------
-builder.Services.AddControllers().AddJsonOptions(option =>
-{
-    option.JsonSerializerOptions.Converters.Add(new DatetimeConverter());
-    option.JsonSerializerOptions.Converters.Add(new DateTimeOffsetConvert());
-    option.JsonSerializerOptions.Converters.Add(new Cysharp.Serialization.Json.UlidJsonConverter());
-});
+builder
+    .Services.AddControllers()
+    .AddJsonOptions(option =>
+    {
+        option.JsonSerializerOptions.Converters.Add(new DatetimeConverter());
+        option.JsonSerializerOptions.Converters.Add(new DateTimeOffsetConvert());
+        option.JsonSerializerOptions.Converters.Add(
+            new Cysharp.Serialization.Json.UlidJsonConverter()
+        );
+    });
 services.AddSwagger();
 services.AddJwtAuth(configuration);
+
 //-----------------------------
 
 services.AddInfrastructureServices(configuration);
@@ -44,6 +51,7 @@ app.UseAuthentication();
 app.CurrentUser();
 app.UseAuthorization();
 app.UseDetection();
+
 app.ExceptionHandler();
 app.MapControllers();
 

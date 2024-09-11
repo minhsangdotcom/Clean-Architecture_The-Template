@@ -9,7 +9,7 @@ public class ErrorResponse : ApiBaseResponse
 {
     public string Type { get; } = "InternalServerException";
 
-    public Guid? TraceId { get; set; }
+    public string? TraceId { get; set; }
 
     public object? Exception { get; set; }
 
@@ -18,7 +18,7 @@ public class ErrorResponse : ApiBaseResponse
     public ErrorResponse(
         string message,
         string? type = null,
-        Guid? traceId = null,
+        string? traceId = null,
         object? exception = null,
         int? statusCode = StatusCodes.Status500InternalServerError
     )

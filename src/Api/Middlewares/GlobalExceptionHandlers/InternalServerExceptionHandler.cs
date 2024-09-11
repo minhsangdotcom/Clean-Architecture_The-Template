@@ -1,24 +1,16 @@
 using Contracts.ApiWrapper;
+using Contracts.Constants;
 
 namespace Api.Middlewares.GlobalExceptionHandlers;
 
-public class InternalServerExceptionHandler(ILogger<InternalServerExceptionHandler> logger)
+public class InternalServerExceptionHandler()
     : IHandlerException
 {
     public async Task Handle(HttpContext httpContext, Exception ex)
     {
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-        Guid traceId = Guid.NewGuid();
-
-        logger.LogError(
-            "Server {exception} error has id {Id} with message '{Message}'\n {StackTrace}\n at {DatetimeUTC}",
-            ex.GetType().Name,
-            traceId,
-            ex.Message,
-            ex.StackTrace?.TrimStart(),
-            DateTimeOffset.UtcNow
-        );
+        string? traceId = httpContext.Items[Global.TRACE_ID]?.ToString();
 
         var error = new ErrorResponse(ex.Message, traceId: traceId);
 

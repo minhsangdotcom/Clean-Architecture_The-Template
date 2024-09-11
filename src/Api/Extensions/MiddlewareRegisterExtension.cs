@@ -1,4 +1,4 @@
-using Api.Middlewares.GlobalExceptionHandlers;
+using Api.Middlewares;
 namespace Api.Extensions;
 
 public static class MiddlewareRegisterExtension

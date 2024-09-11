@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Services;
 
-namespace Api.Middlewares.GlobalExceptionHandlers;
+namespace Api.Middlewares;
 
 public class UserMiddleware(RequestDelegate next)
 {

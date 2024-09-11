@@ -23,6 +23,7 @@ public static class DependencyInjection
         
         return services
             .AddMediator(options => options.ServiceLifetime = ServiceLifetime.Transient)
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(ErrorLoggingBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformaceBehavior<,>))
