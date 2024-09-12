@@ -21,12 +21,11 @@ builder
         );
     });
 services.AddSwagger();
-services.AddJwtAuth(configuration);
 
 //-----------------------------
 
 services.AddInfrastructureServices(configuration);
-services.AddApplicationServices(configuration);
+services.AddApplicationServices();
 
 var app = builder.Build();
 app.Logger.LogInformation("Application is starting....");
