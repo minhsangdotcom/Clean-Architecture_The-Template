@@ -1,5 +1,4 @@
 using Amazon.S3;
-using Contracts.Common.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
