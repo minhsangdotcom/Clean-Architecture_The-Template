@@ -1,8 +1,7 @@
-using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Contracts.Extensions;
 using Microsoft.AspNetCore.Http;
-
 namespace Contracts.ApiWrapper;
 
 public class ErrorResponse : ApiBaseResponse
@@ -42,12 +41,17 @@ public class ErrorResponse : ApiBaseResponse
         StatusCode = statusCode!.Value;
         Errors = badRequestErrors?.ToList();
         Message = "One or several errors have occured";
-        Type = nameof(ValidationException);
+        Type = "BadRequestException";
     }
 
-    public SerializeResult Serialize() =>
-        SerializerExtension.Serialize(
+    public override string ToString() => SerializerExtension.Serialize(
             this,
-            options => options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        );
+            ActionOptions
+        ).StringJson;
+
+    public JsonSerializerOptions GetOptions() => SerializerExtension.Options(ActionOptions);
+    
+
+    private readonly Action<JsonSerializerOptions> ActionOptions = options =>
+        options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 }

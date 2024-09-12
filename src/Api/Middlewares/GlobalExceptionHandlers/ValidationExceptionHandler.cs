@@ -13,6 +13,6 @@ public class ValidationExceptionHandler : IHandlerException<ValidationException>
 
         var error = new ErrorResponse(exception.ValidationErrors);
 
-        await httpContext.Response.WriteAsJsonAsync(error, error.Serialize().Options);
+        await httpContext.Response.WriteAsJsonAsync(error, error.GetOptions());
     }
 }

@@ -150,7 +150,9 @@ public class Message<T>(string? entityName = null)
             verb = isPlural ? "are" : "is";
         }
 
-        string prePosition = languageType == LanguageType.En ? "of" : "của";
+        string prePosition = !string.IsNullOrWhiteSpace(property)
+            ? (languageType == LanguageType.En ? "of" : "của")
+            : string.Empty;
 
         IEnumerable<string> results = [property, prePosition, entity, verb, negative, message, obj];
 

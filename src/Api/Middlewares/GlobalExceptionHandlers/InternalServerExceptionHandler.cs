@@ -14,6 +14,6 @@ public class InternalServerExceptionHandler()
 
         var error = new ErrorResponse(ex.Message, traceId: traceId);
 
-        await httpContext.Response.WriteAsJsonAsync(error, error.Serialize().Options);
+        await httpContext.Response.WriteAsJsonAsync(error, error.GetOptions());
     }
 }

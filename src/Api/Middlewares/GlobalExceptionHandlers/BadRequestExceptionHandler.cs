@@ -13,6 +13,6 @@ public class BadRequestExceptionHandler : IHandlerException<BadRequestException>
 
         ErrorResponse error = new(exception.Errors);
 
-        await httpContext.Response.WriteAsJsonAsync(error, error.Serialize().Options);
+        await httpContext.Response.WriteAsJsonAsync(error, error.GetOptions());
     }
 }

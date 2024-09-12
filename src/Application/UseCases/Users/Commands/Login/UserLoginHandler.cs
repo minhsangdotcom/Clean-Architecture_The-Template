@@ -28,7 +28,6 @@ public class UserLoginHandler(
         CancellationToken cancellationToken
     )
     {
-        throw new Exception("^^");
         User user =
             await unitOfWork
                 .Repository<User>()

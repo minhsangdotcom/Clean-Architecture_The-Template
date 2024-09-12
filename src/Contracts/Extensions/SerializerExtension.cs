@@ -1,5 +1,6 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace Contracts.Extensions;
 
@@ -10,8 +11,7 @@ public class SerializerExtension
         Action<JsonSerializerOptions>? optionalOptions = null
     )
     {
-        var options = CreateOptions();
-        optionalOptions?.Invoke(options);
+        var options = Options(optionalOptions);
         return new(JsonSerializer.Serialize(data, options), options);
     }
 
@@ -20,9 +20,17 @@ public class SerializerExtension
         Action<JsonSerializerOptions>? optionalOptions = null
     )
     {
+        var options = Options(optionalOptions);
+        return new(JsonSerializer.Deserialize<T>(json, options), options);
+    }
+
+    public static JsonSerializerOptions Options(
+        Action<JsonSerializerOptions>? optionalOptions = null
+    )
+    {
         var options = CreateOptions();
         optionalOptions?.Invoke(options);
-        return new(JsonSerializer.Deserialize<T>(json, options), options);
+        return options;
     }
 
     private static JsonSerializerOptions CreateOptions() =>
