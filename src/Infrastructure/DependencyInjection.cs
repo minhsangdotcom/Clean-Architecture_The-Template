@@ -1,11 +1,13 @@
 using Application.Common.Interfaces.Registers;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
-using Contracts.Extensions.Registers;
+using Application.Common.Interfaces.Services.Identity;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
+using Infrastructure.Services.Aws;
+using Infrastructure.Services.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
