@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Identity;
 using AutoMapper;
 using Domain.Aggregates.Users;
 using Mediator;

@@ -9,7 +9,6 @@
   <ItemGroup>
     <PackageReference Include="Ardalis.GuardClauses" Version="4.6.0" />
     <PackageReference Include="Ardalis.Result.AspNetCore" Version="8.0.0" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.402.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
     <PackageReference Include="Ulid" Version="1.3.4" />
   </ItemGroup>

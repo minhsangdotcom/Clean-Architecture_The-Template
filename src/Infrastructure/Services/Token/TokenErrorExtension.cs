@@ -1,12 +1,23 @@
 using Application.Common.Exceptions;
 using Contracts.ApiWrapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 
-namespace Api.Middlewares.GlobalExceptionHandlers;
+namespace Infrastructure.Services.Token;
 
-public class UnAuthorizeExceptionHandler
+public class TokenErrorExtension
 {
-    public static async Task Handle(
+    public static async Task ForbiddenException(ForbiddenContext httpContext, ForbiddenException exception)
+    {
+        int statusCode = exception.HttpStatusCode;
+        httpContext.Response.StatusCode = statusCode;
+
+        await httpContext.Response.WriteAsJsonAsync(
+            new ErrorResponse(exception.Message, nameof(ForbiddenException), statusCode: statusCode)
+        );
+    }
+
+    public static async Task UnauthorizedException(
         JwtBearerChallengeContext httpContext,
         UnauthorizedException exception
     )

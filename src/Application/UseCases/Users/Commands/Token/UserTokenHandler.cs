@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Token;
 using Contracts.Common.Messages;
 using Contracts.Constants;
 using Contracts.Dtos.Responses;

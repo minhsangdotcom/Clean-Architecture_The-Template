@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Token;
 using Contracts.Common.Settings;
 using Contracts.Dtos.Responses;
 using Contracts.Extensions;
@@ -8,7 +8,7 @@ using JWT.Algorithms;
 using JWT.Builder;
 using Microsoft.Extensions.Options;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Services.Token;
 
 public class TokenFactoryService(IOptions<JwtSettings> jwtSettings) : ITokenFactory
 {

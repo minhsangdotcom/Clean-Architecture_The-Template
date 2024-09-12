@@ -1,6 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Identity;
 using AutoMapper;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Users;

@@ -2,7 +2,7 @@ using Application.Common.Interfaces.Registers;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
 
-namespace Application.Common.Interfaces.Services;
+namespace Application.Common.Interfaces.Services.Aws;
 
 public interface IAwsAmazonService : ISingleton
 {
@@ -17,4 +17,6 @@ public interface IAwsAmazonService : ISingleton
     string? GetFullpath(string? key);
 
     string UniqueFileName(string fileName);
+
+    string? GetPublicUrl();
 }
