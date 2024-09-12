@@ -1,10 +1,10 @@
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Identity;
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Users;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Services.Identity;
 
 public class RoleManagerService(IDbContext context) : IRoleManagerService
 {

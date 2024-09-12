@@ -1,9 +1,10 @@
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Aws;
+using Application.Common.Interfaces.Services.Identity;
 using Contracts.Dtos.Responses;
 using Domain.Common;
 using Microsoft.AspNetCore.Http;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Services.Identity;
 
 public class AvatarUpdateService<T>(IAwsAmazonService awsAmazonService) : IAvatarUpdateService<T> where T : BaseEntity
 {

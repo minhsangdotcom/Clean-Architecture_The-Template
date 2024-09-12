@@ -1,4 +1,4 @@
-namespace Contracts.Common.Settings;
+namespace Infrastructure.Services.Token;
 
 public class JwtSettings
 {

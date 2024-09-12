@@ -1,7 +1,7 @@
 using Domain.Common;
 using Microsoft.AspNetCore.Http;
 
-namespace Application.Common.Interfaces.Services;
+namespace Application.Common.Interfaces.Services.Identity;
 
 public interface IAvatarUpdateService<T> where T : BaseEntity
 {

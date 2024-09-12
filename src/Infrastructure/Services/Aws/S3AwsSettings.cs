@@ -1,4 +1,4 @@
-namespace Contracts.Common.Settings;
+namespace Infrastructure.Services.Aws;
 
 public class S3AwsSettings
 {

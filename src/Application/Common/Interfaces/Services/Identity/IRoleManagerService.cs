@@ -2,7 +2,7 @@ using Application.Common.Interfaces.Registers;
 using Domain.Aggregates.Users;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Common.Interfaces.Services;
+namespace Application.Common.Interfaces.Services.Identity;
 
 public interface IRoleManagerService : IScope
 {

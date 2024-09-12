@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 

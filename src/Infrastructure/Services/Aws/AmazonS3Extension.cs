@@ -3,7 +3,7 @@ using Contracts.Common.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Contracts.Extensions.Registers;
+namespace Infrastructure.Services.Aws;
 
 public static class AmazonS3Extension
 {

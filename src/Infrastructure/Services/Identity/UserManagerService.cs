@@ -1,6 +1,6 @@
 using System.Data;
 using System.Data.Common;
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Identity;
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -8,7 +8,7 @@ using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Services.Identity;
 
 public class UserManagerService(
     IRoleManagerService roleManagerService,
