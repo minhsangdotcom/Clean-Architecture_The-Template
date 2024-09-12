@@ -8,6 +8,7 @@ using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.Identity;
+using Infrastructure.Services.Token;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -50,6 +51,7 @@ public static class DependencyInjection
                     .AsImplementedInterfaces()
                     .WithTransientLifetime()
             )
-            .AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
+            .AddJwtAuth(configuration);
     }
 }
