@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Http;
 
 namespace Application.Common.Exceptions;
 
-public class ValidationException : CustomException
+public class ValidationException() : CustomException("One or more validation errors have occured")
 {
     public int HttpStatusCode { get; private set; } = StatusCodes.Status400BadRequest;
 
-    public IEnumerable<BadRequestError> ValidationErrors { get; }
+    public IEnumerable<BadRequestError> ValidationErrors { get; } = [];
 
-    public ValidationException(IEnumerable<ValidationFailure> failures)
+    public ValidationException(IEnumerable<ValidationFailure> failures) : this()
     {
         ValidationErrors = failures
             .GroupBy(x => x.PropertyName)

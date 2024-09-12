@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Application.Common.Exceptions;
 using Contracts.ApiWrapper;
 
@@ -11,7 +12,14 @@ public class ValidationExceptionHandler : IHandlerException<ValidationException>
 
         httpContext.Response.StatusCode = exception.HttpStatusCode;
 
-        var error = new ErrorResponse(exception.ValidationErrors);
+        string? traceId = Activity.Current?.Context.TraceId.ToString();
+
+        var error = new ErrorResponse(
+            exception.ValidationErrors,
+            exception.GetType().Name,
+            exception.Message,
+            traceId
+        );
 
         await httpContext.Response.WriteAsJsonAsync(error, error.GetOptions());
     }

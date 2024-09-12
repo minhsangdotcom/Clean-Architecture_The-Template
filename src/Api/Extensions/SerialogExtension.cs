@@ -1,5 +1,5 @@
 using System.Reflection;
-using Contracts.Common.Settings;
+using Api.Settings;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
 using Serilog.Sinks.SystemConsole.Themes;

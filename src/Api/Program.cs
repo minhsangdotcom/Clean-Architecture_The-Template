@@ -21,6 +21,7 @@ builder
         );
     });
 services.AddSwagger();
+services.AddOpenTelemetryTracing(configuration);
 
 //-----------------------------
 
@@ -51,6 +52,7 @@ app.CurrentUser();
 app.UseAuthorization();
 app.UseDetection();
 
+app.LogContext();
 app.ExceptionHandler();
 app.MapControllers();
 

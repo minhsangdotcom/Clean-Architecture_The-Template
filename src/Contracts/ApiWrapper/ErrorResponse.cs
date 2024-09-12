@@ -37,6 +37,7 @@ public class ErrorResponse : ApiBaseResponse
         IEnumerable<BadRequestError> badRequestErrors,
         string? type = null,
         string? message = null!,
+        string? traceId = null!,
         int? statusCode = StatusCodes.Status400BadRequest
     )
     {
@@ -44,6 +45,7 @@ public class ErrorResponse : ApiBaseResponse
         Errors = badRequestErrors?.ToList();
         Message = message ?? "One or several errors have occured";
         Type = type ?? "BadRequestException";
+        TraceId = traceId;
     }
 
     public override string ToString() => SerializerExtension.Serialize(

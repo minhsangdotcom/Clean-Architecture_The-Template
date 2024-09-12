@@ -12,4 +12,9 @@ public static class MiddlewareRegisterExtension
     {
         app.UseMiddleware<UserMiddleware>();
     }
+
+    public static void LogContext(this IApplicationBuilder app)
+    {
+        app.UseMiddleware<LogContextMiddleware>();
+    }
 }

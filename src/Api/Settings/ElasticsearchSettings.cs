@@ -1,4 +1,4 @@
-namespace Contracts.Common.Settings;
+namespace Api.Settings;
 
 public class ElasticsearchSettings
 {
