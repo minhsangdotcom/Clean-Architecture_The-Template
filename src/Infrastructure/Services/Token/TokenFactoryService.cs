@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using Application.Common.Interfaces.Services.Token;
-using Contracts.Common.Settings;
 using Contracts.Dtos.Responses;
 using Contracts.Extensions;
 using JWT;
