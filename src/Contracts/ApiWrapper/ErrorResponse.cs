@@ -35,13 +35,15 @@ public class ErrorResponse : ApiBaseResponse
 
     public ErrorResponse(
         IEnumerable<BadRequestError> badRequestErrors,
+        string? type = null,
+        string? message = null!,
         int? statusCode = StatusCodes.Status400BadRequest
     )
     {
         StatusCode = statusCode!.Value;
         Errors = badRequestErrors?.ToList();
-        Message = "One or several errors have occured";
-        Type = "BadRequestException";
+        Message = message ?? "One or several errors have occured";
+        Type = type ?? "BadRequestException";
     }
 
     public override string ToString() => SerializerExtension.Serialize(

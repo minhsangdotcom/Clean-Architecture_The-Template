@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Application.Common.Exceptions;
 
-public class BadRequestException(IEnumerable<MessageResult> errors) : CustomException(string.Empty)
+public class BadRequestException(IEnumerable<MessageResult> errors) : CustomException("One or several errors have occured")
 {
     public int HttpStatusCode { get; private set; } = StatusCodes.Status400BadRequest;
 

@@ -11,7 +11,8 @@ public class BadRequestExceptionHandler : IHandlerException<BadRequestException>
 
         httpContext.Response.StatusCode = exception.HttpStatusCode;
 
-        ErrorResponse error = new(exception.Errors);
+        ErrorResponse error =
+            new(exception.Errors, exception.GetType().Name, exception.Message);
 
         await httpContext.Response.WriteAsJsonAsync(error, error.GetOptions());
     }
