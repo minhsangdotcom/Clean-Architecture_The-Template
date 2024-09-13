@@ -37,10 +37,10 @@ public static class OpenTelemetryExtensions
                     .AddSource(openTelemetrySettings!.ActivitySourceName!)
                     .AddHttpClientInstrumentation();
 
-                options.AddAspNetCoreInstrumentation(o =>
+                options.AddAspNetCoreInstrumentation(options =>
                 {
                     // to trace only api requests
-                    o.Filter = (context) =>
+                    options.Filter = (context) =>
                         !string.IsNullOrEmpty(context.Request.Path.Value)
                         && context.Request.Path.Value.Contains(
                             Router.prefix.Replace("/", string.Empty),
@@ -48,21 +48,21 @@ public static class OpenTelemetryExtensions
                         );
 
                     // enrich activity with http request and response
-                    o.EnrichWithHttpRequest = (activity, httpRequest) =>
+                    options.EnrichWithHttpRequest = (activity, httpRequest) =>
                     {
                         activity.SetTag("requestProtocol", httpRequest.Protocol);
                     };
-                    o.EnrichWithHttpResponse = (activity, httpResponse) =>
+                    options.EnrichWithHttpResponse = (activity, httpResponse) =>
                     {
                         activity.SetTag("responseLength", httpResponse.ContentLength);
                     };
 
                     // automatically sets Activity Status to Error if an unhandled exception is thrown
-                    o.RecordException = true;
-                    o.EnrichWithException = (activity, exception) =>
+                    options.RecordException = true;
+                    options.EnrichWithException = (activity, exception) =>
                     {
-                        activity.SetTag("exceptionType", exception.GetType().ToString());
-                        activity.SetTag("stackTrace", exception.StackTrace);
+                        activity.SetTag("exceptionType", exception?.GetType().ToString());
+                        activity.SetTag("stackTrace", exception?.StackTrace);
                     };
                 });
 
@@ -77,8 +77,16 @@ public static class OpenTelemetryExtensions
                     };
                 });
 
+                if (openTelemetrySettings.IsOtelp)
+                {
+                    options.AddOtlpExporter(options =>
+                    {
+                        options.Endpoint = new Uri(openTelemetrySettings.Otelp!.ToString());
+                        options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                        options.TimeoutMilliseconds = 300000;
+                    });
+                }
                 options.AddConsoleExporter();
-                //options.AddOtlpExporter();
             });
 
         return services;
