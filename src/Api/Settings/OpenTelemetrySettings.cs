@@ -8,5 +8,12 @@ public class OpenTelemetrySettings
 
     public string? Otelp { get; set; }
 
-    public bool IsOtelp { get; set; } = false;
+    public OtelpOption OtelpOption { get; set; } = OtelpOption.Non;
+}
+
+public enum OtelpOption
+{
+    Active = 1,
+    Inactive = 2,
+    Non = 3,
 }

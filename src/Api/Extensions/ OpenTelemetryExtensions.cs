@@ -77,18 +77,21 @@ public static class OpenTelemetryExtensions
                     };
                 });
 
-                if (openTelemetrySettings.IsOtelp)
+                switch (openTelemetrySettings.OtelpOption)
                 {
-                    options.AddOtlpExporter(options =>
-                    {
-                        options.Endpoint = new Uri(openTelemetrySettings.Otelp!.ToString());
-                        options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
-                        options.TimeoutMilliseconds = 300000;
-                    });
-                }
-                else
-                {
-                    options.AddConsoleExporter();
+                    case OtelpOption.Active:
+                        options.AddOtlpExporter(options =>
+                        {
+                            options.Endpoint = new Uri(openTelemetrySettings.Otelp!.ToString());
+                            options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                            options.TimeoutMilliseconds = 300000;
+                        });
+                        break;
+                    case OtelpOption.Inactive:
+                        options.AddConsoleExporter();
+                        break;
+                    default:
+                        break;
                 }
             });
 

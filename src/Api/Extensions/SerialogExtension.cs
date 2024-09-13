@@ -44,35 +44,31 @@ public static class SerialogExtension
         web.Host.UseSerilog(
             (context, config) =>
             {
+                OpenTelemetrySettings? openTelemetrySettings = web
+                    .Configuration.GetSection(nameof(OpenTelemetrySettings))
+                    .Get<OpenTelemetrySettings>();
                 config
                     .Enrich.FromLogContext()
                     .Enrich.WithMachineName()
-                    .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                     .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName!)
+                    .WriteTo.Console(theme: AnsiConsoleTheme.Code)
+                    .WriteTo.OpenTelemetry(options =>
+                    {
+                        options.Endpoint = openTelemetrySettings!.Otelp;
+                        options.ResourceAttributes = new Dictionary<string, object>
+                        {
+                            ["service.name"] = openTelemetrySettings.ServiceName!,
+                            ["index"] = 10,
+                            ["flag"] = true,
+                            ["value"] = 3.14,
+                        };
+                        options.IncludedData =
+                            Serilog.Sinks.OpenTelemetry.IncludedData.TraceIdField
+                            | Serilog.Sinks.OpenTelemetry.IncludedData.SpanIdField
+                            | Serilog.Sinks.OpenTelemetry.IncludedData.MessageTemplateTextAttribute;
+                    })
                     .ReadFrom.Configuration(context.Configuration);
             }
         );
-
-        OpenTelemetrySettings? openTelemetrySettings = web
-            .Configuration.GetSection(nameof(OpenTelemetrySettings))
-            .Get<OpenTelemetrySettings>();
-
-        Log.Logger = new LoggerConfiguration()
-            .WriteTo.OpenTelemetry(options =>
-            {
-                options.Endpoint = openTelemetrySettings!.Otelp;
-                options.ResourceAttributes = new Dictionary<string, object>
-                {
-                    ["service.name"] = openTelemetrySettings.ServiceName!,
-                    ["index"] = 10,
-                    ["flag"] = true,
-                    ["value"] = 3.14,
-                };
-                options.IncludedData =
-                    Serilog.Sinks.OpenTelemetry.IncludedData.TraceIdField
-                    | Serilog.Sinks.OpenTelemetry.IncludedData.SpanIdField
-                    | Serilog.Sinks.OpenTelemetry.IncludedData.MessageTemplateTextAttribute;
-            })
-            .CreateLogger();
     }
 }
