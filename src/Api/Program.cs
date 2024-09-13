@@ -23,6 +23,8 @@ builder
 services.AddSwagger();
 services.AddOpenTelemetryTracing(configuration);
 
+builder.AddSerialogsToOtelp();
+
 //-----------------------------
 
 services.AddInfrastructureServices(configuration);

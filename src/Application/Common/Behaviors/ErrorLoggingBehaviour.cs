@@ -5,23 +5,29 @@ namespace Application.Common.Behaviors;
 
 public sealed class ErrorLoggingBehaviour<TMessage, TResponse>(
     ILogger<ErrorLoggingBehaviour<TMessage, TResponse>> logger
-) : MessageExceptionHandler<TMessage, TResponse>
-    where TMessage : notnull, IMessage
+) : IPipelineBehavior<TMessage, TResponse>
+    where TMessage : IMessage
 {
-    protected override ValueTask<ExceptionHandlingResult<TResponse>> Handle(
+    public async ValueTask<TResponse> Handle(
         TMessage message,
-        Exception exception,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        MessageHandlerDelegate<TMessage, TResponse> next
     )
     {
-        logger.LogError(
-            "Server {exception} error is with message '{Message}'\n {StackTrace}\n at {DatetimeUTC}",
-            exception.GetType().Name,
-            exception.Message,
-            exception.StackTrace?.TrimStart(),
-            DateTimeOffset.UtcNow
-        );
-
-        return NotHandled;
+        try
+        {
+            return await next(message, cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(
+                "\n\n Server {exception} error is with message '{Message}'\n {StackTrace}\n at {DatetimeUTC} \n",
+                exception.GetType().Name,
+                exception.Message,
+                exception.StackTrace?.TrimStart(),
+                DateTimeOffset.UtcNow
+            );
+            throw;
+        }
     }
 }

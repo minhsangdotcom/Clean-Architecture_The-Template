@@ -17,7 +17,7 @@ public class LoggingBehavior<TMessage, TResponse>(
         var id = currentUser.Id;
 
         logger.LogInformation(
-            "Application logging incomming request: {Name} with userId {userId} and \n {@Request}",
+            "\n\n Application logging incomming request: {Name} has userId {userId} with payload \n {@Request} \n",
             requestName,
             id,
             message

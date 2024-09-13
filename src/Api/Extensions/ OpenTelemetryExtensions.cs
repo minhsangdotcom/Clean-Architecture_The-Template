@@ -86,7 +86,10 @@ public static class OpenTelemetryExtensions
                         options.TimeoutMilliseconds = 300000;
                     });
                 }
-                options.AddConsoleExporter();
+                else
+                {
+                    options.AddConsoleExporter();
+                }
             });
 
         return services;
