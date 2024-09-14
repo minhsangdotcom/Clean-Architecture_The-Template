@@ -2,12 +2,14 @@ using Application.Common.Interfaces.Registers;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.Services.Mail;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.Identity;
+using Infrastructure.Services.Mail;
 using Infrastructure.Services.Token;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +41,15 @@ public static class DependencyInjection
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentUser, CurrentUserService>()
             .AddScoped(typeof(IAvatarUpdateService<>), typeof(AvatarUpdateService<>))
+            .AddTransient<KitMailService>()
+            .AddTransient<IMailService, KitMailService>(provider =>
+                provider.GetService<KitMailService>()!
+            )
+            .AddTransient<FluentMailService>()
+            .AddTransient<IMailService, FluentMailService>(provider =>
+                provider.GetService<FluentMailService>()!
+            )
+            .AddSingleton<Mailer>()
             .Scan(scan =>
                 scan.FromCallingAssembly()
                     .AddClasses(classes => classes.AssignableTo<IScope>())
