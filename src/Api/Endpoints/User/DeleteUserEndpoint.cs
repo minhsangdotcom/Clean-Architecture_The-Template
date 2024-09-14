@@ -1,7 +1,7 @@
 using Application.UseCases.Users.Commands.Delete;
 using Ardalis.ApiEndpoints;
 using Contracts.Routers;
-using Contracts.Routes;
+using Contracts.RouteResults;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;

@@ -3,7 +3,7 @@ using Application.UseCases.Users.Commands.Update;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Routers;
-using Contracts.Routes;
+using Contracts.RouteResults;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;

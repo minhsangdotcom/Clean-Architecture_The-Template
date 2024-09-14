@@ -2,7 +2,7 @@ using Application.UseCases.Users.Commands.Profiles;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Routers;
-using Contracts.Routes;
+using Contracts.RouteResults;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;

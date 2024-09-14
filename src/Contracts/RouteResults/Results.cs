@@ -5,7 +5,7 @@ using Contracts.Common.Messages;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Contracts.Routes;
+namespace Contracts.RouteResults;
 
 public static class Results
 {
