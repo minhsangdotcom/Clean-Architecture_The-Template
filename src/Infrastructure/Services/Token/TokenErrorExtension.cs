@@ -12,8 +12,11 @@ public class TokenErrorExtension
         int statusCode = exception.HttpStatusCode;
         httpContext.Response.StatusCode = statusCode;
 
+        ErrorResponse error = new(exception.Message, nameof(ForbiddenException), statusCode: statusCode);
+
         await httpContext.Response.WriteAsJsonAsync(
-            new ErrorResponse(exception.Message, nameof(ForbiddenException), statusCode: statusCode)
+            error,
+            error.GetOptions()
         );
     }
 
@@ -25,12 +28,15 @@ public class TokenErrorExtension
         int statusCode = exception.HttpStatusCode;
         httpContext.Response.StatusCode = statusCode;
 
-        await httpContext.Response.WriteAsJsonAsync(
-            new ErrorResponse(
+        ErrorResponse error = new(
                 exception.Message,
                 nameof(UnauthorizedException),
                 statusCode: statusCode
-            )
+            );
+
+        await httpContext.Response.WriteAsJsonAsync(
+            error,
+            error.GetOptions()
         );
     }
 }
