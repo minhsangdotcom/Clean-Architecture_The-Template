@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Api.Settings;
 using Contracts.Routers;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
