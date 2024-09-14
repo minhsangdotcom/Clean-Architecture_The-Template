@@ -6,81 +6,112 @@ using Domain.Specs.Interfaces;
 
 namespace Application.Common.Interfaces.Repositories;
 
-public interface IRepository<T> : IRepositoryAsync<T>, IRepositorySync<T>, IRepositorySpecification<T>
-        where T : BaseEntity
+public interface IRepository<T>
+    : IRepositoryAsync<T>,
+        IRepositorySync<T>,
+        IRepositorySpecification<T>
+    where T : BaseEntity { }
+
+public interface IRepositoryAsync<T>
+    where T : BaseEntity
 {
-        IQueryable<T> ApplyQuery(Expression<Func<T, bool>> criteria = null!);
+    Task<IEnumerable<T>> ListAsync();
 
-        Task<bool> AnyAsync(Expression<Func<T, bool>> expression);
+    Task<T?> GetAsync(object id);
 
-        Task<int> CountAsync(Expression<Func<T, bool>> expression);
+    Task<T> AddAsync(T entity);
 
-        IQueryable<T> Fromsql(string sqlQuery, params object[] parameters);
+    Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities);
+
+    Task ModifyAsync(T entity);
+
+    Task UpdateAsync(T entity);
+
+    Task UpdateRangeAsync(IEnumerable<T> entities);
+
+    Task DeleteAsync(T entity);
+
+    Task DeleteRangeAsync(IEnumerable<T> entities);
+
+    IQueryable<T> ApplyQuery(Expression<Func<T, bool>> criteria = null!);
+
+    Task<bool> AnyAsync(Expression<Func<T, bool>> expression);
+
+    Task<int> CountAsync(Expression<Func<T, bool>> expression);
+
+    IQueryable<T> Fromsql(string sqlQuery, params object[] parameters);
 }
 
-public interface IRepositoryAsync<T> where T : BaseEntity
+public interface IRepositorySync<T>
+    where T : BaseEntity
 {
-        Task<IEnumerable<T>> ListAsync();
+    IEnumerable<T> List();
 
-        Task<T?> GetAsync(object id);
+    T? Get(object id);
 
-        Task<T> AddAsync(T entity);
+    T Add(T entity);
 
-        Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities);
+    IEnumerable<T> AddRange(IEnumerable<T> entities);
 
-        Task ModifyAsync(T entity);
+    void Modify(T entity);
 
-        Task UpdateAsync(T entity);
+    void Update(T entity);
 
-        Task UpdateRangeAsync(IEnumerable<T> entities);
+    void UpdateRange(IEnumerable<T> entities);
 
-        Task DeleteAsync(T entity);
+    void Delete(T entity);
 
-        Task DeleteRangeAsync(IEnumerable<T> entities);
+    void DeleteRange(IEnumerable<T> entities);
+
+    bool Any(Expression<Func<T, bool>> expression);
+
+    int Count(Expression<Func<T, bool>> expression);
 }
 
-public interface IRepositorySync<T> where T : BaseEntity
+public interface IRepositorySpecification<T>
+    where T : BaseEntity
 {
-        IEnumerable<T> List();
+    IQueryable<T> ApplyQuery(ISpecification<T> spec);
 
-        T? Get(object id);
+    Task<TResult?> GetByConditionSpecificationAsync<TResult>(ISpecification<T> spec);
 
-        T Add(T entity);
+    Task<T?> GetByConditionSpecificationAsync(ISpecification<T> spec);
 
-        IEnumerable<T> AddRange(IEnumerable<T> entities);
+    Task<IEnumerable<T>> ListWithSpecificationAsync(ISpecification<T> spec, QueryRequest request);
 
-        void Modify(T entity);
+    Task<IEnumerable<TResult>> ListSpecificationWithGroupbyAsync<TGroupProperty, TResult>(
+        ISpecification<T> spec,
+        QueryRequest request,
+        Expression<Func<T, TGroupProperty>> groupByExpression
+    );
 
-        void Update(T entity);
+    Task<PaginationResponse<TResult>> PaginatedListSpecificationAsync<TResult>(
+        ISpecification<T> spec,
+        QueryRequest request
+    );
 
-        void UpdateRange(IEnumerable<T> entities);
+    Task<PaginationResponse<TResult>> PaginatedListSpecificationWithGroupByAsync<
+        TGroupProperty,
+        TResult
+    >(
+        ISpecification<T> spec,
+        QueryRequest request,
+        Expression<Func<T, TGroupProperty>> groupByExpression
+    );
 
-        void Delete(T entity);
+    Task<PaginationResponse<TResult>> CursorPaginatedListSpecificationAsync<TResult>(
+        ISpecification<T> spec,
+        QueryRequest request,
+        string? uniqueSort = null!
+    );
 
-        void DeleteRange(IEnumerable<T> entities);
-
-        bool Any(Expression<Func<T, bool>> expression);
-
-        int Count(Expression<Func<T, bool>> expression);
-}
-
-public interface IRepositorySpecification<T> where T : BaseEntity
-{
-        IQueryable<T> ApplyQuery(ISpecification<T> spec);
-
-        Task<TResult?> GetByConditionSpecificationAsync<TResult>(ISpecification<T> spec);
-
-        Task<T?> GetByConditionSpecificationAsync(ISpecification<T> spec);
-
-        Task<IEnumerable<T>> ListWithSpecificationAsync(ISpecification<T> spec, QueryRequest request);
-
-        Task<IEnumerable<TResult>> ListSpecificationWithGroupbyAsync<TGroupProperty, TResult>(ISpecification<T> spec, QueryRequest request, Expression<Func<T, TGroupProperty>> groupByExpression);
-
-        Task<PaginationResponse<TResult>> PaginatedListSpecificationAsync<TResult>(ISpecification<T> spec, QueryRequest request);
-
-        Task<PaginationResponse<TResult>> PaginatedListSpecificationWithGroupByAsync<TGroupProperty, TResult>(ISpecification<T> spec, QueryRequest request, Expression<Func<T, TGroupProperty>> groupByExpression);
-
-        Task<PaginationResponse<TResult>> CursorPaginatedListSpecificationAsync<TResult>(ISpecification<T> spec, QueryRequest request, string? uniqueSort = null!);
-
-        Task<PaginationResponse<TResult>> CursorPaginatedListSpecificationWithGroupByAsync<TGroupProperty, TResult>(ISpecification<T> spec, QueryRequest request, Expression<Func<T, TGroupProperty>> groupByExpression, string? uniqueSort = null!);
+    Task<PaginationResponse<TResult>> CursorPaginatedListSpecificationWithGroupByAsync<
+        TGroupProperty,
+        TResult
+    >(
+        ISpecification<T> spec,
+        QueryRequest request,
+        Expression<Func<T, TGroupProperty>> groupByExpression,
+        string? uniqueSort = null!
+    );
 }
