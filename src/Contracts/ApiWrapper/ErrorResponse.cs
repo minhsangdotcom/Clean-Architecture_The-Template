@@ -8,7 +8,7 @@ public class ErrorResponse : ApiBaseResponse
 {
     public string Type { get; } = "InternalServerException";
 
-    public string? TraceId { get; set; }
+    public TraceLogging? Trace { get; set; }
 
     public object? Exception { get; set; }
 
@@ -17,7 +17,7 @@ public class ErrorResponse : ApiBaseResponse
     public ErrorResponse(
         string message,
         string? type = null,
-        string? traceId = null,
+        TraceLogging? trace = null,
         object? exception = null,
         int? statusCode = StatusCodes.Status500InternalServerError
     )
@@ -25,7 +25,7 @@ public class ErrorResponse : ApiBaseResponse
         StatusCode = statusCode!.Value;
         Exception = exception;
         Message = message;
-        TraceId = traceId;
+        Trace = trace;
 
         if (!string.IsNullOrWhiteSpace(type))
         {
@@ -37,7 +37,7 @@ public class ErrorResponse : ApiBaseResponse
         IEnumerable<BadRequestError> badRequestErrors,
         string? type = null,
         string? message = null!,
-        string? traceId = null!,
+        TraceLogging? trace = null!,
         int? statusCode = StatusCodes.Status400BadRequest
     )
     {
@@ -45,7 +45,7 @@ public class ErrorResponse : ApiBaseResponse
         Errors = badRequestErrors?.ToList();
         Message = message ?? "One or several errors have occured";
         Type = type ?? "BadRequestException";
-        TraceId = traceId;
+        Trace = trace;
     }
 
     public override string ToString() => SerializerExtension.Serialize(

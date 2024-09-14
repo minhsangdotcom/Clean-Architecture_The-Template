@@ -12,13 +12,15 @@ public class ValidationExceptionHandler : IHandlerException<ValidationException>
 
         httpContext.Response.StatusCode = exception.HttpStatusCode;
 
-        string? traceId = Activity.Current?.Context.TraceId.ToString();
-
         var error = new ErrorResponse(
             exception.ValidationErrors,
             exception.GetType().Name,
             exception.Message,
-            traceId
+            new()
+            {
+                TraceId = Activity.Current?.Context.TraceId.ToString(),
+                SpanId = Activity.Current?.Context.SpanId.ToString(),
+            }
         );
 
         await httpContext.Response.WriteAsJsonAsync(error, error.GetOptions());

@@ -20,7 +20,7 @@ public class PerformaceBehavior<TMessage, TResponse>(ILogger<TResponse> logger) 
 
         string requestName = typeof(TMessage).Name;
 
-        logger.LogInformation("\n\nApplication run {Name} request in ({ElapsedMilliseconds} milliseconds)",
+        logger.LogInformation("\n\nApplication run {Name} request in ({ElapsedMilliseconds} milliseconds)\n\n",
                 requestName, elapsedMilliseconds);
 
         return response;

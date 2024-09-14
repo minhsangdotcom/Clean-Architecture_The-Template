@@ -12,11 +12,17 @@ public class BadRequestExceptionHandler : IHandlerException<BadRequestException>
 
         httpContext.Response.StatusCode = exception.HttpStatusCode;
 
-        string? traceId = Activity.Current?.Context.TraceId.ToString();
-        string? spanId = Activity.Current?.Context.SpanId.ToString();
-
         ErrorResponse error =
-            new(exception.Errors, exception.GetType().Name, exception.Message, traceId);
+            new(
+                exception.Errors,
+                exception.GetType().Name,
+                exception.Message,
+                new()
+                {
+                    TraceId = Activity.Current?.Context.TraceId.ToString(),
+                    SpanId = Activity.Current?.Context.SpanId.ToString(),
+                }
+            );
 
         await httpContext.Response.WriteAsJsonAsync(error, error.GetOptions());
     }

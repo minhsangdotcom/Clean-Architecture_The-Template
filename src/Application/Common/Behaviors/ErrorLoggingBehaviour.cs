@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Contracts.ApiWrapper;
 using Mediator;
 using Microsoft.Extensions.Logging;
 
@@ -15,8 +17,13 @@ public sealed class ErrorLoggingBehaviour<TMessage, TResponse>(
     )
     {
         logger.LogError(
-            "\n\n Server {exception} error is with message '{Message}'\n {StackTrace}\n at {DatetimeUTC} \n",
+            "\n\n Server {exception} error has {@trace}  error is with message '{Message}'\n {StackTrace}\n at {DatetimeUTC} \n",
             exception.GetType().Name,
+            new TraceLogging()
+            {
+                TraceId = Activity.Current?.TraceId.ToString(),
+                SpanId = Activity.Current?.SpanId.ToString()
+            },
             exception.Message,
             exception.StackTrace?.TrimStart(),
             DateTimeOffset.UtcNow
