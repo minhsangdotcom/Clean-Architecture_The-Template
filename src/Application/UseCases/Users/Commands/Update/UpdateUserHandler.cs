@@ -15,7 +15,7 @@ namespace Application.UseCases.Users.Commands.Update;
 public class UpdateUserHandler(
     IUnitOfWork unitOfWork,
     IMapper mapper,
-    IAvatarUpdateService<User> avatarUpdate,
+    IMediaUpdateService<User> avatarUpdate,
     IUserManagerService userManagerService
 ) : IRequestHandler<UpdateUserCommand, UpdateUserResponse>
 {

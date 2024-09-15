@@ -16,7 +16,7 @@ public class UpdateUserProfileHandler(
     IUnitOfWork unitOfWork,
     ICurrentUser currentUser,
     IMapper mapper,
-    IAvatarUpdateService<User> avatarUpdate
+    IMediaUpdateService<User> avatarUpdate
 ) : IRequestHandler<UpdateUserProfileQuery, UpdateUserProfileResponse>
 {
     public async ValueTask<UpdateUserProfileResponse> Handle(

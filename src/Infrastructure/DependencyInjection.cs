@@ -40,7 +40,7 @@ public static class DependencyInjection
             )
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentUser, CurrentUserService>()
-            .AddScoped(typeof(IAvatarUpdateService<>), typeof(AvatarUpdateService<>))
+            .AddSingleton(typeof(IMediaUpdateService<>), typeof(MediaUpdateService<>))
             .AddTransient<KitMailService>()
             .AddTransient<IMailService, KitMailService>(provider =>
                 provider.GetService<KitMailService>()!

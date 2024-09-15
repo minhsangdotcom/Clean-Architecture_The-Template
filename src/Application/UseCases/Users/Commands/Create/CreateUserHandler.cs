@@ -11,7 +11,7 @@ namespace Application.UseCases.Users.Commands.Create;
 public class CreateUserHandler(
     IUnitOfWork unitOfWork,
     IMapper mapper,
-    IAvatarUpdateService<User> avatarUpdateService,
+    IMediaUpdateService<User> MediaUpdateService,
     IUserManagerService userManagerService
 ) : IRequestHandler<CreateUserCommand, CreateUserResponse>
 {
@@ -22,8 +22,8 @@ public class CreateUserHandler(
     {
         User userCreation = mapper.Map<User>(command);
 
-        string? key = avatarUpdateService.GetKey(command.Avatar);
-        userCreation.Avatar = await avatarUpdateService.UploadAvatarAsync(command.Avatar, key);
+        string? key = MediaUpdateService.GetKey(command.Avatar);
+        userCreation.Avatar = await MediaUpdateService.UploadAvatarAsync(command.Avatar, key);
 
         try
         {

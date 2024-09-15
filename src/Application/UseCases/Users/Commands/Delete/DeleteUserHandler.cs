@@ -8,7 +8,7 @@ using web.Specification.Specs;
 
 namespace Application.UseCases.Users.Commands.Delete;
 
-public class DeleteUserHandler(IUnitOfWork unitOfWork, IAvatarUpdateService<User> avatarUpdateService) : IRequestHandler<DeleteUserCommand>
+public class DeleteUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User> MediaUpdateService) : IRequestHandler<DeleteUserCommand>
 {
     public async ValueTask<Unit> Handle(DeleteUserCommand command, CancellationToken cancellationToken)
     {
@@ -21,7 +21,7 @@ public class DeleteUserHandler(IUnitOfWork unitOfWork, IAvatarUpdateService<User
         await unitOfWork.Repository<User>().DeleteAsync(user);
         await unitOfWork.SaveAsync(cancellationToken);
 
-        await avatarUpdateService.DeleteAvatarAsync(avatar);
+        await MediaUpdateService.DeleteAvatarAsync(avatar);
         return Unit.Value;
     }
 }

@@ -7,8 +7,8 @@ using Serilog;
 
 namespace Infrastructure.Services.Identity;
 
-public class AvatarUpdateService<T>(IAwsAmazonService awsAmazonService, ILogger logger)
-    : IAvatarUpdateService<T>
+public class MediaUpdateService<T>(IAwsAmazonService awsAmazonService, ILogger logger)
+    : IMediaUpdateService<T>
     where T : BaseEntity
 {
     private readonly string Directory = $"{typeof(T).Name}s";

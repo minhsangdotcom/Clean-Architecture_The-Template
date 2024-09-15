@@ -18,12 +18,12 @@ public static class DependencyInjection
         ValidatorOptions.Global.DefaultClassLevelCascadeMode = CascadeMode.Stop;
 
         return services
-            .AddMediator(options => options.ServiceLifetime = ServiceLifetime.Transient)
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(ErrorLoggingBehaviour<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformaceBehavior<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(ProcessImagePathBehavior<,>))
+            .AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped)
+            .AddScoped(typeof(IPipelineBehavior<,>), typeof(ErrorLoggingBehaviour<,>))
+            .AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>))
+            .AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>))
+            .AddScoped(typeof(IPipelineBehavior<,>), typeof(PerformaceBehavior<,>))
+            .AddScoped(typeof(IPipelineBehavior<,>), typeof(ProcessImagePathBehavior<,>))
             .AddValidatorsFromAssembly(currentAssembly)
             .AddAutoMapper(currentAssembly)
             .AddSingleton<IAuthorizationPolicyProvider, AuthorizePolicyProvider>()
