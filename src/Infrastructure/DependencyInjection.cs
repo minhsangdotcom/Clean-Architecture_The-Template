@@ -50,6 +50,7 @@ public static class DependencyInjection
                 provider.GetService<FluentMailService>()!
             )
             .AddSingleton<Mailer>()
+            .AddFluentMail(configuration)
             .Scan(scan =>
                 scan.FromCallingAssembly()
                     .AddClasses(classes => classes.AssignableTo<IScope>())

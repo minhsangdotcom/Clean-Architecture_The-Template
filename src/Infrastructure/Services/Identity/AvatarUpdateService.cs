@@ -3,10 +3,13 @@ using Application.Common.Interfaces.Services.Identity;
 using Contracts.Dtos.Responses;
 using Domain.Common;
 using Microsoft.AspNetCore.Http;
+using Serilog;
 
 namespace Infrastructure.Services.Identity;
 
-public class AvatarUpdateService<T>(IAwsAmazonService awsAmazonService) : IAvatarUpdateService<T> where T : BaseEntity
+public class AvatarUpdateService<T>(IAwsAmazonService awsAmazonService, ILogger logger)
+    : IAvatarUpdateService<T>
+    where T : BaseEntity
 {
     private readonly string Directory = $"{typeof(T).Name}s";
 
@@ -21,13 +24,13 @@ public class AvatarUpdateService<T>(IAwsAmazonService awsAmazonService) : IAvata
 
         if (!response.IsSuccess)
         {
-            Console.WriteLine($"remove object {key} fail with error:{response.Error}");
+            logger.Information("Remove object {key} fail with error: {error}", key, response.Error);
             return;
         }
 
-        Console.WriteLine($"remove object {key} successfully.");
+        logger.Information("Remove object {key} successfully.", key);
     }
- 
+
     public string? GetKey(IFormFile? avatar)
     {
         if (avatar == null)
@@ -45,19 +48,21 @@ public class AvatarUpdateService<T>(IAwsAmazonService awsAmazonService) : IAvata
             return null;
         }
 
-        AwsResponse response = await awsAmazonService.UploadAsync(
-               avatar!.OpenReadStream(),
-               key
-           );
+        AwsResponse response = await awsAmazonService.UploadAsync(avatar!.OpenReadStream(), key);
 
         if (!response.IsSuccess)
         {
-            Console.WriteLine($"\nUpdate User has had error with file upload: {response.Error}.\n");
+            logger.Information(
+                "\nUpdate User has had error with file upload: {error}.\n",
+                response.Error
+            );
             return null;
         }
 
-        Console.WriteLine($"Update avatar success full with the path:{response.S3UploadedPath}.\n");
-
+        logger.Information(
+            "\nUpdate avatar success full with the path: {path}.\n",
+            response.S3UploadedPath
+        );
         return key;
     }
 }

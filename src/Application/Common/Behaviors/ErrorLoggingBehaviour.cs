@@ -1,12 +1,12 @@
 using System.Diagnostics;
 using Contracts.ApiWrapper;
 using Mediator;
-using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace Application.Common.Behaviors;
 
 public sealed class ErrorLoggingBehaviour<TMessage, TResponse>(
-    ILogger<ErrorLoggingBehaviour<TMessage, TResponse>> logger
+    ILogger logger
 ) : MessageExceptionHandler<TMessage, TResponse>
     where TMessage : notnull, IMessage
 {
@@ -16,7 +16,7 @@ public sealed class ErrorLoggingBehaviour<TMessage, TResponse>(
         CancellationToken cancellationToken
     )
     {
-        logger.LogError(
+        logger.Error(
             "\n\n Server {exception} error has {@trace}  error is with message '{Message}'\n {StackTrace}\n at {DatetimeUTC} \n",
             exception.GetType().Name,
             new TraceLogging()

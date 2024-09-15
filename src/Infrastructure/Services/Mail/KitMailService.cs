@@ -3,15 +3,15 @@ using AutoMapper;
 using Contracts.Dtos.Requests;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using Serilog;
 
 namespace Infrastructure.Services.Mail;
 
 public class KitMailService(
     IOptions<EmailSettings> options,
-    ILogger<KitMailService> logger,
+    ILogger logger,
     IMapper mapper
 ) : IMailService
 {
@@ -49,7 +49,7 @@ public class KitMailService(
             await client.SendAsync(emailMessage);
             await client.DisconnectAsync(true);
 
-            logger.LogInformation(
+            logger.Information(
                 "Email has been sent successfully to {recipients}",
                 string.Join(", ", mailData.To)
             );
@@ -57,7 +57,7 @@ public class KitMailService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
+            logger.Error(
                 ex,
                 "Failed to send email to {recipients}: {error}",
                 string.Join(", ", mailData.To),

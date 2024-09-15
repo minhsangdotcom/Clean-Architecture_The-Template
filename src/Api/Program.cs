@@ -1,9 +1,9 @@
 using Api.Converters;
 using Api.Extensions;
-using Api.Middlewares;
 using Application;
 using Infrastructure;
 using Infrastructure.Data;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -22,41 +22,52 @@ builder
     });
 services.AddSwagger();
 services.AddOpenTelemetryTracing(configuration);
-
-builder.AddSerialogsToOtelp();
+builder.AddSerialogs();
 
 //-----------------------------
 
 services.AddInfrastructureServices(configuration);
 services.AddApplicationServices();
 
-var app = builder.Build();
-app.Logger.LogInformation("Application is starting....");
-
-var scope = app.Services.CreateScope();
-var serviceProvider = scope.ServiceProvider;
-
-DbInitializer.Initialize(serviceProvider).GetAwaiter();
-
-if (app.Environment.IsDevelopment())
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(x =>
+    Log.Logger.Information("Application is starting....");
+    var app = builder.Build();
+
+    var scope = app.Services.CreateScope();
+    var serviceProvider = scope.ServiceProvider;
+
+    DbInitializer.Initialize(serviceProvider).GetAwaiter();
+
+    if (app.Environment.IsDevelopment())
     {
-        x.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-        x.RoutePrefix = "docs";
-        x.ConfigObject.PersistAuthorization = true;
-    });
+        app.UseSwagger();
+        app.UseSwaggerUI(x =>
+        {
+            x.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            x.RoutePrefix = "docs";
+            x.ConfigObject.PersistAuthorization = true;
+        });
+    }
+
+    app.UseAuthentication();
+    app.CurrentUser();
+    app.UseAuthorization();
+    app.UseDetection();
+
+    app.UseSerilogRequestLogging();
+    app.LogContext();
+    app.ExceptionHandler();
+    app.MapControllers();
+
+    Log.Logger.Information("Application is launching");
+    app.Run();
 }
-
-app.UseAuthentication();
-app.CurrentUser();
-app.UseAuthorization();
-app.UseDetection();
-
-app.LogContext();
-app.ExceptionHandler();
-app.MapControllers();
-
-app.Logger.LogInformation("Application is launching");
-app.Run();
+catch (Exception ex)
+{
+    Log.Logger.Fatal("Application has launched fail with error {error}", ex.Message);
+}
+finally
+{
+    Log.CloseAndFlush();
+}

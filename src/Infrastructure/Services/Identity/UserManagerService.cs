@@ -1,5 +1,4 @@
 using System.Data;
-using System.Data.Common;
 using Application.Common.Interfaces.Services.Identity;
 using Ardalis.GuardClauses;
 using Contracts.Common;
@@ -7,14 +6,14 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace Infrastructure.Services.Identity;
 
 public class UserManagerService(
     IRoleManagerService roleManagerService,
     IDbContext context,
-    ILogger<UserManagerService> logger
+    ILogger logger
 ) : IUserManagerService
 {
     private readonly DbSet<UserRole> userRoleContext = context.Set<UserRole>();
@@ -56,7 +55,7 @@ public class UserManagerService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
+            logger.Error(
                 ex,
                 "Error in method {MethodName}. Exception Type: {ExceptionType}. Error Message: {ErrorMessage}. StackTrace: {StackTrace}",
                 nameof(CreateUserAsync),
@@ -108,7 +107,7 @@ public class UserManagerService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
+            logger.Error(
                 ex,
                 "Error in method {MethodName}. Exception Type: {ExceptionType}. Error Message: {ErrorMessage}. StackTrace: {StackTrace}",
                 nameof(UpdateUserAsync),

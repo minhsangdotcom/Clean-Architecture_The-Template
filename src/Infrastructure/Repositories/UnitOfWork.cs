@@ -7,10 +7,11 @@ using Domain.Common;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Serilog;
 
 namespace Infrastructure.Repositories;
 
-public class UnitOfWork(IMapper mapper, IDbContext dbContext) : IUnitOfWork
+public class UnitOfWork(IMapper mapper, IDbContext dbContext, ILogger logger) : IUnitOfWork
 {
     private Hashtable repositories = null!;
     private bool disposed = false;
@@ -93,7 +94,8 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext) : IUnitOfWork
     {
         if (Transaction == null)
         {
-            throw new InvalidOperationException("No transaction started.");
+            logger.Warning("Thre is no transaction started.");
+            return;
         }
 
         try

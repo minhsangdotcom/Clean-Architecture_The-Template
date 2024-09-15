@@ -2,11 +2,11 @@ using Application.Common.Interfaces.Services.Mail;
 using Contracts.Dtos.Requests;
 using FluentEmail.Core;
 using FluentEmail.Core.Models;
-using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace Infrastructure.Services.Mail;
 
-public class FluentMailService(IFluentEmail fluentEmail, ILogger<FluentMailService> logger)
+public class FluentMailService(IFluentEmail fluentEmail, ILogger logger)
     : IMailService
 {
     public async Task<bool> SendAsync(MessageMailMetaData metaData)
@@ -19,12 +19,12 @@ public class FluentMailService(IFluentEmail fluentEmail, ILogger<FluentMailServi
                 .Body(metaData.Message)
                 .SendAsync();
 
-            logger.LogInformation("email has been sent successfully.");
+            logger.Information("email has been sent successfully.");
             return res.Successful;
         }
         catch (Exception ex)
         {
-            logger.LogError("email has been sent fail with error :{error}", ex.Message);
+            logger.Error("email has been sent fail with error :{error}", ex.Message);
             return false;
         }
     }
@@ -42,12 +42,12 @@ public class FluentMailService(IFluentEmail fluentEmail, ILogger<FluentMailServi
                 )
                 .SendAsync();
 
-            logger.LogInformation("email has been sent successfully.");
+            logger.Information("email has been sent successfully.");
             return res.Successful;
         }
         catch (Exception ex)
         {
-            logger.LogError("email has been sent fail with error :{error}", ex.Message);
+            logger.Error("email has been sent fail with error :{error}", ex.Message);
             return false;
         }
     }

@@ -5,41 +5,23 @@ namespace Api.Extensions;
 
 public static class SerialogExtension
 {
-    public static void AddSerialogsToOtelp(this WebApplicationBuilder web)
+    public static void AddSerialogs(this WebApplicationBuilder builder)
     {
-        web.Host.UseSerilog(
-            (context, config) =>
-            {
-                OpenTelemetrySettings? openTelemetrySettings = web
-                    .Configuration.GetSection(nameof(OpenTelemetrySettings))
-                    .Get<OpenTelemetrySettings>();
+        LoggerConfiguration loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration);
 
-                SerilogSettings? serilogSettings = web
-                    .Configuration.GetSection(nameof(SerilogSettings))
-                    .Get<SerilogSettings>();
+        SerilogSettings? serilogSettings = builder
+            .Configuration.GetSection(nameof(SerilogSettings))
+            .Get<SerilogSettings>();
 
-                var loggerConfiguration = config.ReadFrom.Configuration(context.Configuration);
+        if (serilogSettings!.IsDistributeLog)
+        {
+            loggerConfiguration.WriteTo.Seq(serilogSettings.SeqUrl!);
+        }
 
-                if (serilogSettings!.IsDistributeLog)
-                {
-                    // loggerConfiguration.WriteTo.OpenTelemetry(options =>
-                    // {
-                    //     options.Endpoint = openTelemetrySettings!.Otelp;
-                    //     options.Protocol = Serilog.Sinks.OpenTelemetry.OtlpProtocol.Grpc;
-                    //     options.ResourceAttributes = new Dictionary<string, object>
-                    //     {
-                    //         ["service.name"] = openTelemetrySettings.ServiceName!,
-                    //         ["Environment"] = context.HostingEnvironment.EnvironmentName,
-                    //     };
+        Log.Logger = loggerConfiguration.CreateLogger();
 
-                    //     options.IncludedData =
-                    //         Serilog.Sinks.OpenTelemetry.IncludedData.TraceIdField
-                    //         | Serilog.Sinks.OpenTelemetry.IncludedData.SpanIdField;
-                    // });
+        builder.Host.UseSerilog(Log.Logger);
 
-                    loggerConfiguration.WriteTo.Seq(serilogSettings.SeqUrl!);
-                }
-            }
-        );
+        builder.Services.AddSingleton(Log.Logger);
     }
 }

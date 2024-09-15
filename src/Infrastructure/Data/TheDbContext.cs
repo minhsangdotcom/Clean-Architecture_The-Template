@@ -5,10 +5,11 @@ using Ardalis.GuardClauses;
 using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Serilog;
 
 namespace Infrastructure.Data;
 
-public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(options), IDbContext
+public class TheDbContext(DbContextOptions<TheDbContext> options, ILogger logger) : DbContext(options), IDbContext
 {
     private bool IsSharedTransaction = false;
     public DatabaseFacade DatabaseFacade => Database;
@@ -43,6 +44,7 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(op
     {
         if (IsSharedTransaction)
         {
+            logger.Warning("there is no transaction to commit!");
             return;
         }
         await Database.CommitTransactionAsync();
@@ -52,6 +54,7 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(op
     {
         if (IsSharedTransaction)
         {
+            logger.Warning("there is no transaction to rollback!");
             return;
         }
         await Database.RollbackTransactionAsync();
