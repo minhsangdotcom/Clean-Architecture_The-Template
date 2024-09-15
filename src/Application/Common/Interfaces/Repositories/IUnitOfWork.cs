@@ -1,4 +1,5 @@
 using System.Data.Common;
+using Contracts.Common;
 using Domain.Common;
 
 namespace Application.Common.Interfaces.Repositories;
@@ -13,6 +14,8 @@ public interface IUnitOfWork : IDisposable
         where TEntity : BaseEntity;
 
     Task<DbTransaction> CreateTransactionAsync();
+
+    Task UseTransactionAsync(SharedTransaction transaction);
 
     Task CommitAsync();
 

@@ -2,6 +2,7 @@ using System.Data;
 using System.Data.Common;
 using Application.Common.Interfaces.Services.Identity;
 using Ardalis.GuardClauses;
+using Contracts.Common;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Infrastructure.Data;
@@ -31,27 +32,27 @@ public class UserManagerService(
         User user,
         IEnumerable<Ulid> roleIds,
         IEnumerable<UserClaimType> claims,
-        DbTransaction? transaction = null
+        SharedTransaction? sharedTransaction = null
     )
     {
         try
         {
-            if (transaction == null)
+            if (sharedTransaction == null)
             {
                 await context.DatabaseFacade.BeginTransactionAsync();
             }
             else
             {
-                await context.UseTransactionAsync(transaction);
+                await context.UseTransactionAsync(
+                    sharedTransaction.Transaction,
+                    sharedTransaction.Connection
+                );
             }
 
             await AddRoleToUserAsync(user, [.. roleIds]);
             await AddClaimsToUserAsync(user, claims);
 
-            if (transaction == null)
-            {
-                await context.DatabaseFacade.CommitTransactionAsync();
-            }
+            await context.CommitTransactionAsync();
         }
         catch (Exception ex)
         {
@@ -63,11 +64,8 @@ public class UserManagerService(
                 ex.Message,
                 ex.StackTrace
             );
-            if (transaction == null)
-            {
-                await context.DatabaseFacade.RollbackTransactionAsync();
-            }
 
+            await context.RollbackTransactionAsync();
             throw;
         }
     }
@@ -76,18 +74,21 @@ public class UserManagerService(
         User user,
         IEnumerable<Ulid> roleIds,
         IEnumerable<UserClaimType> claims,
-        DbTransaction? transaction = null
+        SharedTransaction? sharedTransaction = null
     )
     {
         try
         {
-            if (transaction == null)
+            if (sharedTransaction == null)
             {
                 await context.DatabaseFacade.BeginTransactionAsync();
             }
             else
             {
-                await context.UseTransactionAsync(transaction);
+                await context.UseTransactionAsync(
+                    sharedTransaction.Transaction,
+                    sharedTransaction.Connection
+                );
             }
 
             // update role for user
@@ -103,10 +104,7 @@ public class UserManagerService(
             // update custom user claim
             await UpdateClaimsToUserAsync(user, claims);
 
-            if (transaction == null)
-            {
-                await context.DatabaseFacade.CommitTransactionAsync();
-            }
+            await context.CommitTransactionAsync();
         }
         catch (Exception ex)
         {
@@ -118,11 +116,8 @@ public class UserManagerService(
                 ex.Message,
                 ex.StackTrace
             );
-            if (transaction == null)
-            {
-                await context.DatabaseFacade.RollbackTransactionAsync();
-            }
 
+            await context.RollbackTransactionAsync();
             throw;
         }
     }

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Data.Common;
 using Application.Common.Interfaces.Repositories;
 using AutoMapper;
+using Contracts.Common;
 using Domain.Common;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -12,18 +13,34 @@ namespace Infrastructure.Repositories;
 public class UnitOfWork(IMapper mapper, IDbContext dbContext) : IUnitOfWork
 {
     private Hashtable repositories = null!;
-
-    private readonly IMapper mapper = mapper;
-
     private bool disposed = false;
 
     public DbConnection? Connection { get; set; } = null;
-
     public DbTransaction? Transaction { get; set; } = null;
+
+    public IRepository<TEntity> Repository<TEntity>()
+        where TEntity : BaseEntity
+    {
+        repositories ??= [];
+        var type = typeof(TEntity).Name;
+
+        if (!repositories.ContainsKey(type))
+        {
+            var repositoryType = typeof(Repository<>);
+            var repositoryInstance = Activator.CreateInstance(
+                repositoryType.MakeGenericType(typeof(TEntity)),
+                [dbContext, mapper]
+            );
+
+            repositories.Add(type, repositoryInstance);
+        }
+
+        return (IRepository<TEntity>)repositories[type]!;
+    }
 
     public async Task<DbTransaction> CreateTransactionAsync()
     {
-        if (Connection != null)
+        if (Transaction != null)
         {
             throw new InvalidOperationException("A transaction is already in progress.");
         }
@@ -32,9 +49,22 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext) : IUnitOfWork
             await dbContext.DatabaseFacade.BeginTransactionAsync();
 
         Transaction = currentTransaction.GetDbTransaction();
-        Connection = currentTransaction.GetDbTransaction().Connection;
+        Connection = Transaction.Connection;
 
-        return currentTransaction.GetDbTransaction();
+        return Transaction;
+    }
+
+    public async Task UseTransactionAsync(SharedTransaction transaction)
+    {
+        if (Transaction != null)
+        {
+            Connection = null;
+            Transaction = null;
+        }
+        await dbContext.UseTransactionAsync(transaction.Transaction, transaction.Connection);
+
+        Connection = transaction.Connection;
+        Transaction = transaction.Transaction;
     }
 
     public async Task CommitAsync()
@@ -80,53 +110,17 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext) : IUnitOfWork
         }
     }
 
-    public IRepository<TEntity> Repository<TEntity>()
-        where TEntity : BaseEntity
-    {
-        repositories ??= [];
-
-        var type = typeof(TEntity).Name;
-
-        if (!repositories.ContainsKey(type))
-        {
-            var repositoryType = typeof(Repository<>);
-
-            List<object> parameters = [dbContext, mapper];
-
-            var repositoryInstance = Activator.CreateInstance(
-                repositoryType.MakeGenericType(typeof(TEntity)),
-                [.. parameters]
-            );
-
-            repositories.Add(type, repositoryInstance);
-        }
-
-        return (IRepository<TEntity>)repositories[type]!;
-    }
-
     public int ExecuteSqlCommand(string sql, params object[] parameters) =>
         dbContext.DatabaseFacade.ExecuteSqlRaw(sql, parameters);
 
-    public async Task SaveAsync(CancellationToken cancellationToken = default)
-    {
+    public async Task SaveAsync(CancellationToken cancellationToken = default) =>
         await dbContext.SaveChangesAsync(cancellationToken);
-    }
 
     public void Dispose()
     {
         Dispose(true);
 
         GC.SuppressFinalize(this);
-    }
-
-    private async Task DisposeTransactionAsync()
-    {
-        if (Transaction != null)
-        {
-            await Transaction.DisposeAsync();
-            Transaction = null;
-            Connection = null;
-        }
     }
 
     protected virtual void Dispose(bool disposing)
@@ -138,5 +132,15 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext) : IUnitOfWork
         }
 
         disposed = true;
+    }
+
+    private async Task DisposeTransactionAsync()
+    {
+        if (Transaction != null)
+        {
+            await Transaction.DisposeAsync();
+            Transaction = null;
+            Connection = null;
+        }
     }
 }

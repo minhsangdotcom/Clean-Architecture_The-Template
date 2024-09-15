@@ -1,6 +1,7 @@
 using System.Data;
 using System.Data.Common;
 using System.Reflection;
+using Ardalis.GuardClauses;
 using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -9,6 +10,7 @@ namespace Infrastructure.Data;
 
 public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(options), IDbContext
 {
+    private bool IsSharedTransaction = false;
     public DatabaseFacade DatabaseFacade => Database;
 
     public override DbSet<TEntity> Set<TEntity>()
@@ -31,7 +33,28 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(op
             dbConnection.Open();
         }
 
+        Guard.Against.Null(transaction, nameof(transaction), "transaction is not null");
+
         await Database.UseTransactionAsync(transaction);
+        IsSharedTransaction = true;
+    }
+
+    public async Task CommitTransactionAsync()
+    {
+        if (IsSharedTransaction)
+        {
+            return;
+        }
+        await Database.CommitTransactionAsync();
+    }
+
+    public async Task RollbackTransactionAsync()
+    {
+        if (IsSharedTransaction)
+        {
+            return;
+        }
+        await Database.RollbackTransactionAsync();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

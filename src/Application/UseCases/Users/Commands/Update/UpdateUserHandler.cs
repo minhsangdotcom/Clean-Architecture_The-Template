@@ -48,6 +48,7 @@ public class UpdateUserHandler(
 
             await unitOfWork.Repository<User>().UpdateAsync(user);
             await unitOfWork.SaveAsync(cancellationToken);
+
             await userManagerService.UpdateUserAsync(
                 user,
                 command.User.RoleIds!,
@@ -55,9 +56,8 @@ public class UpdateUserHandler(
                     command.User.Claims,
                     opt => opt.Items[nameof(UserClaimType.Type)] = KindaUserClaimType.Custom
                 ),
-                unitOfWork.Transaction
+                new(unitOfWork.Transaction!, unitOfWork.Connection!)
             );
-
             await unitOfWork.CommitAsync();
 
             await avatarUpdate.DeleteAvatarAsync(oldAvatar);
@@ -69,6 +69,7 @@ public class UpdateUserHandler(
             {
                 await avatarUpdate.DeleteAvatarAsync(user.Avatar);
             }
+            await unitOfWork.RollbackAsync();
             throw;
         }
     }
