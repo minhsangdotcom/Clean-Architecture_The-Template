@@ -4,12 +4,12 @@ using Application.Common.Interfaces.Services.Aws;
 using Application.Common.Security;
 using Contracts.Dtos.Responses;
 using Mediator;
-using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace Application.Common.Behaviors;
 
 public class ProcessImagePathBehavior<TMessage, TResponse>(
-    ILogger<TResponse> logger,
+    ILogger logger,
     IAwsAmazonService awsAmazonService
 ) : MessagePostProcessor<TMessage, TResponse>
     where TMessage : notnull, IMessage
@@ -51,13 +51,13 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
                             continue;
                         }
 
-                        logger.LogInformation("image key {value}", imageKey);
+                        logger.Information("image key {value}", imageKey);
 
                         string imageKeyStr = imageKey.ToString()!;
                         if (!imageKeyStr.StartsWith(awsAmazonService.GetPublicUrl()!))
                         {
                             string? fullPath = awsAmazonService.GetFullpath(imageKeyStr);
-                            logger.LogInformation("image path {value}", fullPath);
+                            logger.Information("image path {value}", fullPath);
                             prop.SetValue(data, fullPath);
                         }
                     }
@@ -82,7 +82,7 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
 
         object? key = property.GetValue(response);
 
-        logger.LogInformation("image key {value}", key);
+        logger.Information("image key {value}", key);
 
         if (key == null)
         {
@@ -96,7 +96,7 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
 
         string? path = awsAmazonService.GetFullpath(key?.ToString());
 
-        logger.LogInformation("image path {value}", path);
+        logger.Information("image path {value}", path);
 
         property.SetValue(response, path);
 

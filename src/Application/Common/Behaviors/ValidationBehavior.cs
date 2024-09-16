@@ -4,7 +4,10 @@ using Mediator;
 using ValidationException = Application.Common.Exceptions.ValidationException;
 
 namespace Application.Common.Behaviors;
-public sealed class ValidationBehavior<TMessage, TResponse>(IEnumerable<IValidator<TMessage>> validators) : MessagePreProcessor<TMessage, TResponse>
+
+public sealed class ValidationBehavior<TMessage, TResponse>(
+    IEnumerable<IValidator<TMessage>> validators
+) : MessagePreProcessor<TMessage, TResponse>
     where TMessage : notnull, IMessage
 {
     protected override async ValueTask Handle(TMessage message, CancellationToken cancellationToken)
@@ -14,8 +17,8 @@ public sealed class ValidationBehavior<TMessage, TResponse>(IEnumerable<IValidat
             var context = new ValidationContext<TMessage>(message);
 
             IEnumerable<ValidationResult> validationResults = await Task.WhenAll(
-                validators.Select(v =>
-                    v.ValidateAsync(context, cancellationToken)));
+                validators.Select(v => v.ValidateAsync(context, cancellationToken))
+            );
 
             List<ValidationFailure> failures = validationResults
                 .Where(r => r.Errors.Count != 0)

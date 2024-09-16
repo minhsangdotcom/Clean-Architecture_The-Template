@@ -1,8 +1,11 @@
+using System.Collections;
+using System.Runtime.InteropServices;
 using Ardalis.GuardClauses;
 using Contracts.Constants;
 using Contracts.Extensions.Reflections;
 using Domain.Aggregates.Users.Enums;
 using Domain.Common;
+using Mediator;
 
 namespace Domain.Aggregates.Users;
 
@@ -50,7 +53,6 @@ public class User(
     public void AddUserClaim(IEnumerable<UserClaim> userClaims)
     {
         Guard.Against.NullOrEmpty(userClaims, nameof(userClaims));
-
         Guard.Against.InvalidInput(
             userClaims,
             nameof(userClaims),
@@ -60,12 +62,10 @@ public class User(
             $"{nameof(userClaims)} is duplicated"
         );
 
-        UserClaims!.ToList().AddRange(userClaims);
+        Enumerable.ToList(UserClaims!).AddRange(userClaims);
     }
 
-    public IEnumerable<UserClaimType> GetUserClaims()
-    {
-        return
+    public IEnumerable<UserClaimType> GetUserClaims() =>
         [
             new()
             {
@@ -92,5 +92,9 @@ public class User(
             new() { ClaimType = ClaimTypes.Gender, ClaimValue = this.GetValue(x => x.Gender!) },
             new() { ClaimType = ClaimTypes.Email, ClaimValue = this.GetValue(x => x.Email!) },
         ];
+
+    protected override bool TryApplyDomainEvent(INotification domainEvent)
+    {
+        return false;
     }
 }

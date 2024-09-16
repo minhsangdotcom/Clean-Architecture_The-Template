@@ -4,11 +4,17 @@ using Serilog;
 
 namespace Application.Common.Behaviors;
 
-public class PerformaceBehavior<TMessage, TResponse>(ILogger logger) : IPipelineBehavior<TMessage, TResponse> where TMessage : notnull, IMessage
+public class PerformaceBehavior<TMessage, TResponse>(ILogger logger)
+    : IPipelineBehavior<TMessage, TResponse>
+    where TMessage : notnull, IMessage
 {
     private readonly Stopwatch timer = new();
 
-    public async ValueTask<TResponse> Handle(TMessage message, CancellationToken cancellationToken, MessageHandlerDelegate<TMessage, TResponse> next)
+    public async ValueTask<TResponse> Handle(
+        TMessage message,
+        MessageHandlerDelegate<TMessage, TResponse> next,
+        CancellationToken cancellationToken
+    )
     {
         timer.Start();
 
@@ -20,8 +26,11 @@ public class PerformaceBehavior<TMessage, TResponse>(ILogger logger) : IPipeline
 
         string requestName = typeof(TMessage).Name;
 
-        logger.Information("\n\nApplication run {Name} request in ({ElapsedMilliseconds} milliseconds)\n\n",
-                requestName, elapsedMilliseconds);
+        logger.Information(
+            "\n\nApplication run {Name} request in ({ElapsedMilliseconds} milliseconds)\n\n",
+            requestName,
+            elapsedMilliseconds
+        );
 
         return response;
     }

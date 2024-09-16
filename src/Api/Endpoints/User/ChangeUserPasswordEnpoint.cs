@@ -13,7 +13,7 @@ public class ChangeUserPasswordEnpoint(ISender sender)
     : EndpointBaseAsync.WithRequest<ChangeUserPasswordCommand>.WithActionResult
 {
     [HttpPut(Router.UserRoute.ChangePassword)]
-    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Change User password")]
+    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "reset User password")]
     [Restrict()]
     public override async Task<ActionResult> HandleAsync(
         ChangeUserPasswordCommand request,

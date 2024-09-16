@@ -4,17 +4,17 @@ public abstract class DefaultEntity
 {
     public Ulid Id { get; set; } = Ulid.NewUlid();
 
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.Now;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 
 public abstract class DefaultEntity<T>
 {
     public T Id { get; set; } = default!;
-    
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.Now;
+
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 
-public class BaseEntity() : DefaultEntity, IAuditable
+public abstract class BaseEntity() : AggregateRoot, IAuditable
 {
     public string CreatedBy { get; set; } = string.Empty;
     public string? UpdatedBy { get; set; }

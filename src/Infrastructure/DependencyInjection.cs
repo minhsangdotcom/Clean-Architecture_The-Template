@@ -49,7 +49,6 @@ public static class DependencyInjection
             .AddTransient<IMailService, FluentMailService>(provider =>
                 provider.GetService<FluentMailService>()!
             )
-            .AddSingleton<Mailer>()
             .AddFluentMail(configuration)
             .Scan(scan =>
                 scan.FromCallingAssembly()

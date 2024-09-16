@@ -1,18 +1,21 @@
 using Application.Common.Interfaces.Services.Mail;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.Mail;
 
-public class Mailer(IServiceProvider serviceProvider)
+public class Mailer(IServiceScopeFactory serviceScopeFactory, IOptions<EmailSettings> options) : IMailer
 {
-    public IMailService GetEmailService(MailType type)
+    public IMailService GetEmailService()
     {
-        using var scope = serviceProvider.CreateScope();
-        IServiceProvider provider = scope.ServiceProvider;
+        MailType type = options.Value.MailType;
+        
+        using var scope = serviceScopeFactory.CreateScope();
+        IServiceProvider serviceProvider = scope.ServiceProvider;
         return type switch
         {
-            MailType.Kit => provider.GetRequiredService<KitMailService>(),
-            MailType.Fluent => provider.GetRequiredService<FluentMailService>(),
+            MailType.Kit => serviceProvider.GetRequiredService<KitMailService>(),
+            MailType.Fluent => serviceProvider.GetRequiredService<FluentMailService>(),
             _ => throw new ArgumentException("Invalid email provider"),
         };
     }
