@@ -1,17 +1,21 @@
 using FluentValidation;
 using FluentValidation.Results;
 using Mediator;
-using ValidationException = Application.Common.Exceptions.ValidationException;
-
+using Microsoft.Extensions.DependencyInjection;
 namespace Application.Common.Behaviors;
 
 public sealed class ValidationBehavior<TMessage, TResponse>(
-    IEnumerable<IValidator<TMessage>> validators
+    IServiceScopeFactory serviceScopeFactory
 ) : MessagePreProcessor<TMessage, TResponse>
     where TMessage : notnull, IMessage
 {
     protected override async ValueTask Handle(TMessage message, CancellationToken cancellationToken)
     {
+        using IServiceScope scope = serviceScopeFactory.CreateScope();
+        IServiceProvider serviceProvider = scope.ServiceProvider;
+        IEnumerable<IValidator<TMessage>> validators = serviceProvider.GetRequiredService<
+            IEnumerable<IValidator<TMessage>>
+        >();
         if (validators.Any())
         {
             var context = new ValidationContext<TMessage>(message);
@@ -27,7 +31,7 @@ public sealed class ValidationBehavior<TMessage, TResponse>(
 
             if (failures.Count != 0)
             {
-                throw new ValidationException(failures);
+                throw new Exceptions.ValidationException(failures);
             }
         }
 

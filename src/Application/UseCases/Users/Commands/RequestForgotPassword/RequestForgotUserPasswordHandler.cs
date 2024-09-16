@@ -30,8 +30,18 @@ public class RequestForgotUserPasswordHandler(
             );
 
         string token = StringExtension.GenerateRandomString(40);
-        string domain = configuration.GetValue<string>("ForgotPassowrdUrl")!;
 
+        UserResetPassword userResetPassword = new()
+        {
+            Token = token,
+            UserId = user.Id,
+            Expiry = DateTimeOffset.UtcNow,
+        };
+
+        await unitOfWork.Repository<UserResetPassword>().AddAsync(userResetPassword);
+        await unitOfWork.SaveAsync(cancellationToken);
+
+        string domain = configuration.GetValue<string>("ForgotPassowrdUrl")!;
         var link = new UriBuilder(domain)
         {
             Query = $"token={token}&id={user.Id}",

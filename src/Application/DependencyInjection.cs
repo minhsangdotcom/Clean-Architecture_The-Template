@@ -17,10 +17,8 @@ public static class DependencyInjection
         ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
         ValidatorOptions.Global.DefaultClassLevelCascadeMode = CascadeMode.Stop;
 
-        services
-            .AddMediator(options => options.ServiceLifetime = ServiceLifetime.Singleton);
-
-         return services
+        return services
+            .AddMediator(option => option.ServiceLifetime = ServiceLifetime.Scoped)
             .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ErrorLoggingBehaviour<,>))
             .AddSingleton(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>))
             .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>))
