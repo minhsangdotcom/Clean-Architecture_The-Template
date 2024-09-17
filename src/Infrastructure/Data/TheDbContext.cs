@@ -5,13 +5,13 @@ using Ardalis.GuardClauses;
 using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Serilog;
 
 namespace Infrastructure.Data;
 
-public class TheDbContext(DbContextOptions<TheDbContext> options, ILogger logger) : DbContext(options), IDbContext
+public class TheDbContext(DbContextOptions<TheDbContext> options)
+    : DbContext(options),
+        IDbContext
 {
-    private bool IsSharedTransaction = false;
     public DatabaseFacade DatabaseFacade => Database;
 
     public override DbSet<TEntity> Set<TEntity>()
@@ -37,27 +37,6 @@ public class TheDbContext(DbContextOptions<TheDbContext> options, ILogger logger
         Guard.Against.Null(transaction, nameof(transaction), "transaction is not null");
 
         await Database.UseTransactionAsync(transaction);
-        IsSharedTransaction = true;
-    }
-
-    public async Task CommitTransactionAsync()
-    {
-        if (IsSharedTransaction)
-        {
-            logger.Warning("there is no need to commit transaction!");
-            return;
-        }
-        await Database.CommitTransactionAsync();
-    }
-
-    public async Task RollbackTransactionAsync()
-    {
-        if (IsSharedTransaction)
-        {
-            logger.Warning("there is no need to rollback transaction!");
-            return;
-        }
-        await Database.RollbackTransactionAsync();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

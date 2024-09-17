@@ -1,7 +1,6 @@
 using System.Data;
 using Application.Common.Interfaces.Services.Identity;
 using Ardalis.GuardClauses;
-using Contracts.Common;
 using Contracts.Dtos.Models;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -52,7 +51,10 @@ public class UserManagerService(
             await AddRoleToUserAsync(user, [.. roleIds]);
             await AddClaimsToUserAsync(user, claims);
 
-            await context.CommitTransactionAsync();
+            if (sharedTransaction != null)
+            {
+                await context.DatabaseFacade.CommitTransactionAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -65,7 +67,10 @@ public class UserManagerService(
                 ex.StackTrace
             );
 
-            await context.RollbackTransactionAsync();
+            if (sharedTransaction != null)
+            {
+                await context.DatabaseFacade.RollbackTransactionAsync();
+            }
             throw;
         }
     }
@@ -104,7 +109,10 @@ public class UserManagerService(
             // update custom user claim
             await UpdateClaimsToUserAsync(user, claims);
 
-            await context.CommitTransactionAsync();
+            if (sharedTransaction != null)
+            {
+                await context.DatabaseFacade.CommitTransactionAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -117,7 +125,10 @@ public class UserManagerService(
                 ex.StackTrace
             );
 
-            await context.RollbackTransactionAsync();
+            if (sharedTransaction != null)
+            {
+                await context.DatabaseFacade.RollbackTransactionAsync();
+            }
             throw;
         }
     }

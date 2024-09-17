@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using Serilog;
 
 namespace Infrastructure.Data;
 
@@ -16,6 +15,6 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<TheDbConte
         var builder = new DbContextOptionsBuilder<TheDbContext>();
         var connectionString = configuration.GetConnectionString("default");
         builder.UseNpgsql(connectionString);
-        return new TheDbContext(builder.Options, Log.Logger);
+        return new TheDbContext(builder.Options);
     }
 }
