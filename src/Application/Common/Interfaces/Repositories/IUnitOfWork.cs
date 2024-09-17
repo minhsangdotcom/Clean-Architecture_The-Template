@@ -1,6 +1,6 @@
 using System.Data.Common;
 using Contracts.Common;
-using Domain.Common;
+using Contracts.Dtos.Models;
 
 namespace Application.Common.Interfaces.Repositories;
 
@@ -11,7 +11,7 @@ public interface IUnitOfWork : IDisposable
     public DbTransaction? Transaction { get; protected set; }
 
     IRepository<TEntity> Repository<TEntity>()
-        where TEntity : BaseEntity;
+        where TEntity : class;
 
     Task<DbTransaction> CreateTransactionAsync();
 

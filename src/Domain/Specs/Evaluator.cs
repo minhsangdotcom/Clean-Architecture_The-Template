@@ -1,9 +1,8 @@
-using Domain.Common;
 using Domain.Specs.Interfaces;
 using Microsoft.EntityFrameworkCore;
 namespace Domain.Specs;
 
-public class SpecificationEvaluator<T> where T : BaseEntity
+public class SpecificationEvaluator<T> where T : class
 {
     public static IQueryable<T> GetQuery(IQueryable<T> inputQuery, ISpecification<T> specification)
     {

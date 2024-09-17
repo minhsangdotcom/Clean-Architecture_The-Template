@@ -10,10 +10,10 @@ public interface IRepository<T>
     : IRepositoryAsync<T>,
         IRepositorySync<T>,
         IRepositorySpecification<T>
-    where T : BaseEntity { }
+    where T : class;
 
 public interface IRepositoryAsync<T>
-    where T : BaseEntity
+    where T : class
 {
     Task<IEnumerable<T>> ListAsync();
 
@@ -43,7 +43,7 @@ public interface IRepositoryAsync<T>
 }
 
 public interface IRepositorySync<T>
-    where T : BaseEntity
+    where T : class
 {
     IEnumerable<T> List();
 
@@ -69,7 +69,7 @@ public interface IRepositorySync<T>
 }
 
 public interface IRepositorySpecification<T>
-    where T : BaseEntity
+    where T : class
 {
     IQueryable<T> ApplyQuery(ISpecification<T> spec);
 

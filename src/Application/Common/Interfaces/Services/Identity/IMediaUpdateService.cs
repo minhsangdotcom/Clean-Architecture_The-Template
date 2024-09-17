@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 namespace Application.Common.Interfaces.Services.Identity;
 
 public interface IMediaUpdateService<T> : ISingleton
-    where T : BaseEntity
+    where T : class
 {
     string? GetKey(IFormFile? avatar);
 

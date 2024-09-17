@@ -8,7 +8,6 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.AspNetCore.Http;
-using web.Specification.Specs;
 
 namespace Application.UseCases.Users.Commands.Profiles;
 

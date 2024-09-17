@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 public partial class Repository<T> : IRepository<T>
-    where T : BaseEntity
+    where T : class
 {
     public IQueryable<T> ApplyQuery(ISpecification<T> spec)
     {

@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 using Application.Common.Interfaces.Repositories;
 using AutoMapper;
-using Domain.Common;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +8,7 @@ namespace Infrastructure.Repositories;
 
 public partial class Repository<T>(IDbContext dbContext, IMapper mapper) :
     IRepository<T>
-    where T : BaseEntity
+    where T : class
 {
     private readonly IConfigurationProvider _configurationProvider = mapper.ConfigurationProvider;
 

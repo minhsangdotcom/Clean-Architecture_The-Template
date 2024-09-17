@@ -2,10 +2,11 @@ using Domain.Common;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Data.Interceptors;
 
-public class DispatchDomainEventInterceptor(IPublisher mediator) : SaveChangesInterceptor
+public class DispatchDomainEventInterceptor(IServiceScopeFactory serviceScopeFactory) : SaveChangesInterceptor
 {
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
@@ -22,16 +23,17 @@ public class DispatchDomainEventInterceptor(IPublisher mediator) : SaveChangesIn
         if (context == null)
             return;
 
-        IEnumerable<BaseEntity> entities = context
-            .ChangeTracker.Entries<BaseEntity>()
+        IEnumerable<AggregateRoot> entities = context
+            .ChangeTracker.Entries<AggregateRoot>()
             .Where(e => e.Entity.UncommittedEvents.Count != 0)
             .Select(e => e.Entity);
 
         List<INotification> domainEvents = entities.SelectMany(e => e.UncommittedEvents).ToList();
-
         entities.ToList().ForEach(e => e.DequeueUncommittedEvents());
 
-        foreach (var domainEvent in domainEvents)
+        using IServiceScope scope = serviceScopeFactory.CreateScope();
+        IPublisher mediator = scope.ServiceProvider.GetRequiredService<IPublisher>();
+        foreach (INotification domainEvent in domainEvents)
             await mediator.Publish(domainEvent);
     }
 }

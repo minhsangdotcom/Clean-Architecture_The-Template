@@ -2,6 +2,7 @@ using System.Data;
 using Application.Common.Interfaces.Services.Identity;
 using Ardalis.GuardClauses;
 using Contracts.Common;
+using Contracts.Dtos.Models;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Infrastructure.Data;

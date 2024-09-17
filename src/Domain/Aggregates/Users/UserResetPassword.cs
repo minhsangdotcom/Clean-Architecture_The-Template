@@ -1,6 +1,4 @@
 using Domain.Common;
-using Mediator;
-
 namespace Domain.Aggregates.Users;
 
 public class UserResetPassword : BaseEntity
@@ -12,9 +10,4 @@ public class UserResetPassword : BaseEntity
     public Ulid UserId { get; set; }
 
     public User? User { get; set; }
-
-    protected override bool TryApplyDomainEvent(INotification domainEvent)
-    {
-        return false;
-    }
 }

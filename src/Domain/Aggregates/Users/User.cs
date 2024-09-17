@@ -16,7 +16,7 @@ public class User(
     string password,
     string email,
     string phoneNumber
-) : BaseEntity
+) : AggregateRoot
 {
     public string FirstName { get; private set; } =
         Guard.Against.NullOrEmpty(firstName, nameof(FirstName));

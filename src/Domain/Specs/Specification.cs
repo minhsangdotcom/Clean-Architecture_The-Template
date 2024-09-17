@@ -7,10 +7,12 @@ using Domain.Specs.Models;
 
 namespace Domain.Specs;
 
-public abstract class Specification<T> : ISpecification<T> where T : BaseEntity
+public abstract class Specification<T> : ISpecification<T>
+    where T : class
 {
     public Specification()
     {
+        typeof(T).IsValidBaseType();
         Query = new SpecificationBuilder<T>(this);
     }
 
@@ -34,13 +36,22 @@ public abstract class Specification<T> : ISpecification<T> where T : BaseEntity
 
         ParameterExpression parameter = Expression.Parameter(typeof(T), "x");
 
-        Expression leftExpression = ParameterReplacerVisitor.Replace(Criteria.Body, Criteria.Parameters[0], parameter);
+        Expression leftExpression = ParameterReplacerVisitor.Replace(
+            Criteria.Body,
+            Criteria.Parameters[0],
+            parameter
+        );
 
-        Expression rightExpression = ParameterReplacerVisitor.Replace(criteria.Body, criteria.Parameters[0], parameter);
+        Expression rightExpression = ParameterReplacerVisitor.Replace(
+            criteria.Body,
+            criteria.Parameters[0],
+            parameter
+        );
 
-        BinaryExpression body = type == BinaryExpressionType.And ?
-            Expression.And(leftExpression, rightExpression) :
-            Expression.Or(leftExpression, rightExpression);
+        BinaryExpression body =
+            type == BinaryExpressionType.And
+                ? Expression.And(leftExpression, rightExpression)
+                : Expression.Or(leftExpression, rightExpression);
 
         Criteria = Expression.Lambda<Func<T, bool>>(body, parameter);
     }

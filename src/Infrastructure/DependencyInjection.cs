@@ -31,12 +31,16 @@ public static class DependencyInjection
         return services
             .AddScoped<IDbContext, TheDbContext>()
             .AddTransient<IUnitOfWork, UnitOfWork>()
-            .AddSingleton<UpdateBaseEntityInterceptor>()
+            .AddSingleton<UpdateAuditableEntityInterceptor>()
+            .AddSingleton<DispatchDomainEventInterceptor>()
             .AddDbContext<TheDbContext>(
                 (sp, options) =>
                     options
                         .UseNpgsql(configuration.GetConnectionString("default"))
-                        .AddInterceptors(sp.GetRequiredService<UpdateBaseEntityInterceptor>())
+                        .AddInterceptors(
+                            sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
+                            sp.GetRequiredService<DispatchDomainEventInterceptor>()
+                        )
             )
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentUser, CurrentUserService>()

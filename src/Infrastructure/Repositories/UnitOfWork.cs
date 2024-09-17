@@ -1,8 +1,7 @@
-using System.Collections;
 using System.Data.Common;
 using Application.Common.Interfaces.Repositories;
 using AutoMapper;
-using Contracts.Common;
+using Contracts.Dtos.Models;
 using Domain.Common;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -13,30 +12,30 @@ namespace Infrastructure.Repositories;
 
 public class UnitOfWork(IMapper mapper, IDbContext dbContext, ILogger logger) : IUnitOfWork
 {
-    private Hashtable repositories = null!;
+    private readonly Dictionary<string, object?> repositories = [];
     private bool disposed = false;
 
     public DbConnection? Connection { get; set; } = null;
     public DbTransaction? Transaction { get; set; } = null;
 
     public IRepository<TEntity> Repository<TEntity>()
-        where TEntity : BaseEntity
+        where TEntity : class
     {
-        repositories ??= [];
-        var type = typeof(TEntity).Name;
+        typeof(TEntity).IsValidBaseType();
+        string type = typeof(TEntity).Name;
 
-        if (!repositories.ContainsKey(type))
+        if (!repositories.TryGetValue(type, out object? value))
         {
-            var repositoryType = typeof(Repository<>);
-            var repositoryInstance = Activator.CreateInstance(
+            Type repositoryType = typeof(Repository<>);
+            object? repositoryInstance = Activator.CreateInstance(
                 repositoryType.MakeGenericType(typeof(TEntity)),
                 [dbContext, mapper]
             );
-
-            repositories.Add(type, repositoryInstance);
+            value = repositoryInstance;
+            repositories.Add(type, value);
         }
 
-        return (IRepository<TEntity>)repositories[type]!;
+        return (IRepository<TEntity>)value!;
     }
 
     public async Task<DbTransaction> CreateTransactionAsync()

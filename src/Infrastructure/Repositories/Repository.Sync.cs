@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Repositories;
 
 public partial class Repository<T> : IRepository<T>
-    where T : BaseEntity
+    where T : class
 {
     public void Modify(T entity)
     {

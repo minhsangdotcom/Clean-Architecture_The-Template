@@ -9,7 +9,7 @@ namespace Infrastructure.Services.Identity;
 
 public class MediaUpdateService<T>(IAwsAmazonService awsAmazonService, ILogger logger)
     : IMediaUpdateService<T>
-    where T : BaseEntity
+    where T : class
 {
     private readonly string Directory = $"{typeof(T).Name}s";
 

@@ -1,4 +1,3 @@
-using Domain.Aggregates.Users;
 using Domain.Specs;
 using Microsoft.EntityFrameworkCore;
 

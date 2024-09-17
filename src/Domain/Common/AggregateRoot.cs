@@ -4,11 +4,12 @@ using Mediator;
 
 namespace Domain.Common;
 
-public abstract class AggregateRoot
+public abstract class AggregateRoot : DefaultEntity, IAuditable
 {
-    public Ulid Id { get; set; } = Ulid.NewUlid();
     public long Version { get; set; }
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public string CreatedBy { get; set; } = string.Empty;
+    public string? UpdatedBy { get; set; }
+    public DateTimeOffset? UpdatedAt { get; set; }
 
     [JsonIgnore]
     [NotMapped]

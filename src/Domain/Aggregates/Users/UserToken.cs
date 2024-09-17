@@ -1,6 +1,4 @@
 using Domain.Common;
-using Mediator;
-
 namespace Domain.Aggregates.Users;
 
 public class UserToken : BaseEntity
@@ -20,9 +18,4 @@ public class UserToken : BaseEntity
     public User? User { get; set; }
 
     public DateTimeOffset ExpiredTime { get; set; }
-
-    protected override bool TryApplyDomainEvent(INotification domainEvent)
-    {
-        return false;
-    }
 }

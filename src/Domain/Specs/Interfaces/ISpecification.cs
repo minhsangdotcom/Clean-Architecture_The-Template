@@ -1,12 +1,12 @@
 using System.Linq.Expressions;
-using Domain.Common;
 using Domain.Specs.Models;
 
 namespace Domain.Specs.Interfaces;
 
-public interface ISpecification<T> where T : BaseEntity
+public interface ISpecification<T>
+    where T : class
 {
-    SpecificationBuilder<T> Query { get;}
+    SpecificationBuilder<T> Query { get; }
 
     Expression<Func<T, bool>> Criteria { get; }
 
