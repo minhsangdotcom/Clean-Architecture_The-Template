@@ -259,10 +259,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("character varying(26)")
                         .HasColumnName("user_id");
 
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
-
                     b.HasKey("Id")
                         .HasName("pk_user_reset_password");
 
@@ -342,10 +338,6 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("character varying(26)")
                         .HasColumnName("user_id");
-
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
 
                     b.HasKey("Id")
                         .HasName("pk_user_token");

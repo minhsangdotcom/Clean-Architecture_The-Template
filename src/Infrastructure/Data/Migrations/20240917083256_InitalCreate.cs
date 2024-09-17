@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitalCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -46,6 +46,7 @@ namespace Infrastructure.Data.Migrations
                     avatar = table.Column<string>(type: "text", nullable: true),
                     status = table.Column<int>(type: "integer", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    version = table.Column<long>(type: "bigint", nullable: false),
                     created_by = table.Column<string>(type: "text", nullable: false),
                     updated_by = table.Column<string>(type: "text", nullable: true),
                     updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
@@ -72,6 +73,30 @@ namespace Infrastructure.Data.Migrations
                         name: "fk_role_claim_role_role_id",
                         column: x => x.role_id,
                         principalTable: "role",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "user_reset_password",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    token = table.Column<string>(type: "text", nullable: false),
+                    expiry = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    user_id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_by = table.Column<string>(type: "text", nullable: false),
+                    updated_by = table.Column<string>(type: "text", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_user_reset_password", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_user_reset_password_user_user_id",
+                        column: x => x.user_id,
+                        principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -184,6 +209,11 @@ namespace Infrastructure.Data.Migrations
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_user_reset_password_user_id",
+                table: "user_reset_password",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_user_role_user_id",
                 table: "user_role",
                 column: "user_id");
@@ -199,6 +229,9 @@ namespace Infrastructure.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "user_claim");
+
+            migrationBuilder.DropTable(
+                name: "user_reset_password");
 
             migrationBuilder.DropTable(
                 name: "user_role");

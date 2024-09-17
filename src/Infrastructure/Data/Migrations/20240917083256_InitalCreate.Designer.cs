@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    [Migration("20240908173306_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240917083256_InitalCreate")]
+    partial class InitalCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -166,6 +166,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("citext")
                         .HasColumnName("user_name");
 
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
                     b.HasKey("Id")
                         .HasName("pk_user");
 
@@ -219,6 +223,52 @@ namespace Infrastructure.Data.Migrations
                         .HasDatabaseName("ix_user_claim_user_id");
 
                     b.ToTable("user_claim", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Users.UserResetPassword", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset>("Expiry")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expiry");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("token");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_reset_password");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_user_reset_password_user_id");
+
+                    b.ToTable("user_reset_password", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Users.UserRole", b =>
@@ -328,6 +378,18 @@ namespace Infrastructure.Data.Migrations
                         .HasConstraintName("fk_user_claim_user_user_id");
 
                     b.Navigation("RoleClaim");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Users.UserResetPassword", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_reset_password_user_user_id");
 
                     b.Navigation("User");
                 });
