@@ -51,7 +51,7 @@ public class UserManagerService(
             await AddRoleToUserAsync(user, [.. roleIds]);
             await AddClaimsToUserAsync(user, claims);
 
-            if (sharedTransaction != null)
+            if (sharedTransaction == null)
             {
                 await context.DatabaseFacade.CommitTransactionAsync();
             }
@@ -67,7 +67,7 @@ public class UserManagerService(
                 ex.StackTrace
             );
 
-            if (sharedTransaction != null)
+            if (sharedTransaction == null)
             {
                 await context.DatabaseFacade.RollbackTransactionAsync();
             }
@@ -109,7 +109,7 @@ public class UserManagerService(
             // update custom user claim
             await UpdateClaimsToUserAsync(user, claims);
 
-            if (sharedTransaction != null)
+            if (sharedTransaction == null)
             {
                 await context.DatabaseFacade.CommitTransactionAsync();
             }
@@ -125,7 +125,7 @@ public class UserManagerService(
                 ex.StackTrace
             );
 
-            if (sharedTransaction != null)
+            if (sharedTransaction == null)
             {
                 await context.DatabaseFacade.RollbackTransactionAsync();
             }
