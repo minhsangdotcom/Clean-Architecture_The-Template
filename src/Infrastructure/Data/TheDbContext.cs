@@ -44,7 +44,7 @@ public class TheDbContext(DbContextOptions<TheDbContext> options, ILogger logger
     {
         if (IsSharedTransaction)
         {
-            logger.Warning("there is no transaction to commit!");
+            logger.Warning("there is no need to commit transaction!");
             return;
         }
         await Database.CommitTransactionAsync();
@@ -54,7 +54,7 @@ public class TheDbContext(DbContextOptions<TheDbContext> options, ILogger logger
     {
         if (IsSharedTransaction)
         {
-            logger.Warning("there is no transaction to rollback!");
+            logger.Warning("there is no need to rollback transaction!");
             return;
         }
         await Database.RollbackTransactionAsync();

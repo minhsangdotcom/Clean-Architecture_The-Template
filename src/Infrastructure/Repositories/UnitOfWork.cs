@@ -14,6 +14,7 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, ILogger logger) : 
 {
     private readonly Dictionary<string, object?> repositories = [];
     private bool disposed = false;
+    private bool isSharedTransaction = false;
 
     public DbConnection? Connection { get; set; } = null;
     public DbTransaction? Transaction { get; set; } = null;
@@ -42,6 +43,7 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, ILogger logger) : 
     {
         if (Transaction != null)
         {
+            isSharedTransaction = true;
             throw new InvalidOperationException("A transaction is already in progress.");
         }
 
@@ -65,6 +67,7 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, ILogger logger) : 
 
         Connection = transaction.Connection;
         Transaction = transaction.Transaction;
+        isSharedTransaction = true;
     }
 
     public async Task CommitAsync()
@@ -72,6 +75,11 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, ILogger logger) : 
         if (Transaction == null)
         {
             throw new InvalidOperationException("No transaction started.");
+        }
+
+        if(isSharedTransaction)
+        {
+            throw new InvalidOperationException("there is no need to commit transaction.");
         }
 
         try
@@ -95,6 +103,11 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, ILogger logger) : 
         {
             logger.Warning("Thre is no transaction started.");
             return;
+        }
+
+        if(isSharedTransaction)
+        {
+            throw new InvalidOperationException("there is no need to commit transaction.");
         }
 
         try
