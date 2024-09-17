@@ -11,12 +11,13 @@ public class UpdateRoleCommandValidator : AbstractValidator<UpdateRoleCommand>
     public UpdateRoleCommandValidator(IRoleManagerService roleManagerService, IActionAccessorService actionAccessorService)
     {
         RuleFor(x => x.Role)
-            .NotEmpty().WithMessage(
+            .NotEmpty()
+            .WithState(x =>
                 Messager.Create<UpdateRoleCommand>()
                     .Property(x => x.Role!)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage().Message
+                    .Build()
             )
             .SetValidator(new RoleValidator(roleManagerService, actionAccessorService));
     }

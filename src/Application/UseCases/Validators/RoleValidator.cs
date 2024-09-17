@@ -25,7 +25,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     .Property(x => x.Name!)
                     .Negative()
                     .Message(MessageType.Null)
-                    .BuildMessage()
+                    .Build()
             )
             .MaximumLength(256)
             .WithState(x =>
@@ -33,7 +33,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     .Create<RoleModel>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.MaximumLength)
-                    .BuildMessage()
+                    .Build()
             )
             .MustAsync(
                 (name, CancellationToken) =>
@@ -48,7 +48,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     .Create<RoleModel>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.Existence)
-                    .BuildMessage()
+                    .Build()
             )
             .MustAsync(
                 (name, CancellationToken) =>
@@ -63,7 +63,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     .Create<RoleModel>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.Existence)
-                    .BuildMessage()
+                    .Build()
             );
 
         RuleFor(x => x.Description)
@@ -74,7 +74,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     .Create<RoleModel>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.MaximumLength)
-                    .BuildMessage()
+                    .Build()
             );
 
         When(
@@ -96,7 +96,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                             .Property(x => x.Claims!)
                             .Message(MessageType.Unique)
                             .Negative()
-                            .BuildMessage()
+                            .Build()
                     );
 
                 RuleFor(x => x.Claims)
@@ -122,7 +122,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                             .Create<RoleModel>(nameof(Role))
                             .Property(x => x.Claims!)
                             .Message(MessageType.Existence)
-                            .BuildMessage()
+                            .Build()
                     );
             }
         );
@@ -137,9 +137,8 @@ public class RoleValidator : AbstractValidator<RoleModel>
     {
         return !await roleManagerService.Roles.AnyAsync(
             x =>
-                // (!id.HasValue && EF.Functions.ILike(x.Name, name))
-                // || (x.Id != id && EF.Functions.ILike(x.Name, name)),
-                (!id.HasValue || x.Id != id) && EF.Functions.ILike(x.Name, name),
+                (!id.HasValue && EF.Functions.ILike(x.Name, name))
+                || (x.Id != id && EF.Functions.ILike(x.Name, name)),
             cancellationToken
         );
     }

@@ -1,15 +1,20 @@
 using System.Text.RegularExpressions;
+using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Services;
 using Application.UseCases.Projections.Users;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Users;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.UseCases.Validators;
 
 public partial class UserValidator : AbstractValidator<UserModel>
 {
-    public UserValidator()
+    public UserValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
     {
+        _ = Ulid.TryParse(accessorService.Id, out Ulid id);
+
         RuleFor(x => x.LastName)
             .NotEmpty()
             .WithState(x =>
@@ -18,7 +23,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Property(x => x.LastName)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage()
+                    .Build()
             )
             .MaximumLength(256)
             .WithState(x =>
@@ -26,7 +31,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Create<User>()
                     .Property(x => x.LastName)
                     .Message(MessageType.MaximumLength)
-                    .BuildMessage()
+                    .Build()
             );
 
         RuleFor(x => x.FirstName)
@@ -37,7 +42,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Property(x => x.FirstName)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage()
+                    .Build()
             )
             .MaximumLength(256)
             .WithState(x =>
@@ -45,7 +50,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Create<User>()
                     .Property(x => x.FirstName)
                     .Message(MessageType.MaximumLength)
-                    .BuildMessage()
+                    .Build()
             );
 
         RuleFor(x => x.Email)
@@ -56,7 +61,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Property(x => x.Email)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage()
+                    .Build()
             )
             .Must(x =>
             {
@@ -69,7 +74,25 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Property(x => x.Email)
                     .Message(MessageType.ValidFormat)
                     .Negative()
-                    .BuildMessage()
+                    .Build()
+            )
+            .MustAsync((email, _) => IsExistedEmail(unitOfWork, email!, id))
+            .When(_ => accessorService.GetHttpMethod() == HttpMethod.Put.ToString())
+            .WithState(x =>
+                 Messager
+                    .Create<User>()
+                    .Property(x => x.Email)
+                    .Message(MessageType.Existence)
+                    .Build()
+            )
+            .MustAsync((email, _) => IsExistedEmail(unitOfWork, email!))
+            .When(_ => accessorService.GetHttpMethod() == HttpMethod.Post.ToString())
+            .WithState(x =>
+                 Messager
+                    .Create<User>()
+                    .Property(x => x.Email)
+                    .Message(MessageType.Existence)
+                    .Build()
             );
 
         RuleFor(x => x.PhoneNumber)
@@ -80,7 +103,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Property(x => x.PhoneNumber)
                     .Message(MessageType.Null)
                     .Negative()
-                    .BuildMessage()
+                    .Build()
             )
             .Must(x =>
             {
@@ -93,7 +116,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Property(x => x.PhoneNumber)
                     .Message(MessageType.ValidFormat)
                     .Negative()
-                    .BuildMessage()
+                    .Build()
             );
 
         RuleFor(x => x.Address)
@@ -104,7 +127,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Create<User>()
                     .Property(x => x.Address!)
                     .Message(MessageType.MaximumLength)
-                    .BuildMessage()
+                    .Build()
                     .Message
             );
     }
@@ -114,4 +137,14 @@ public partial class UserValidator : AbstractValidator<UserModel>
 
     [GeneratedRegex(@"^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$")]
     private static partial Regex VietnamesePhoneValidationRegex();
+
+    private static async Task<bool> IsExistedEmail(IUnitOfWork unitOfWork, string email, Ulid? id = null)
+    {
+        return !await unitOfWork
+            .Repository<User>()
+            .AnyAsync(x =>
+                (!id.HasValue && EF.Functions.ILike(x.Email, email))
+                || (x.Id != id && EF.Functions.ILike(x.Email, email))
+            );
+    }
 }
