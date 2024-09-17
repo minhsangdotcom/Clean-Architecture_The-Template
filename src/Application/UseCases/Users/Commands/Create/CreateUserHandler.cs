@@ -45,7 +45,7 @@ public class CreateUserHandler(
                 user,
                 [.. command.RoleIds!],
                 claims,
-                new(unitOfWork.Transaction!, unitOfWork.Connection!)
+                unitOfWork.Transaction
             );
 
             await unitOfWork.CommitAsync();

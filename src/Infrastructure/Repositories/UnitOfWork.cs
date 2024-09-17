@@ -1,7 +1,6 @@
 using System.Data.Common;
 using Application.Common.Interfaces.Repositories;
 using AutoMapper;
-using Contracts.Dtos.Models;
 using Domain.Common;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +11,10 @@ namespace Infrastructure.Repositories;
 
 public class UnitOfWork(IMapper mapper, IDbContext dbContext, ILogger logger) : IUnitOfWork
 {
+    public DbTransaction? Transaction { get; set; } =
+        dbContext.DatabaseFacade.CurrentTransaction?.GetDbTransaction();
     private readonly Dictionary<string, object?> repositories = [];
     private bool disposed = false;
-    private bool isSharedTransaction = false;
-
-    public DbConnection? Connection { get; set; } = null;
-    public DbTransaction? Transaction { get; set; } = null;
 
     public IRepository<TEntity> Repository<TEntity>()
         where TEntity : class
@@ -43,7 +40,6 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, ILogger logger) : 
     {
         if (Transaction != null)
         {
-            isSharedTransaction = true;
             throw new InvalidOperationException("A transaction is already in progress.");
         }
 
@@ -51,23 +47,16 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, ILogger logger) : 
             await dbContext.DatabaseFacade.BeginTransactionAsync();
 
         Transaction = currentTransaction.GetDbTransaction();
-        Connection = Transaction.Connection;
-
         return Transaction;
     }
 
-    public async Task UseTransactionAsync(SharedTransaction transaction)
+    public async Task UseTransactionAsync(DbTransaction transaction)
     {
-        if (Transaction != null)
+        await dbContext.UseTransactionAsync(transaction);
+        if (Transaction == null || Transaction != transaction)
         {
-            Connection = null;
-            Transaction = null;
+            Transaction = transaction;
         }
-        await dbContext.UseTransactionAsync(transaction.Transaction, transaction.Connection);
-
-        Connection = transaction.Connection;
-        Transaction = transaction.Transaction;
-        isSharedTransaction = true;
     }
 
     public async Task CommitAsync()
@@ -75,11 +64,6 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, ILogger logger) : 
         if (Transaction == null)
         {
             throw new InvalidOperationException("No transaction started.");
-        }
-
-        if(isSharedTransaction)
-        {
-            throw new InvalidOperationException("there is no need to commit transaction.");
         }
 
         try
@@ -103,11 +87,6 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, ILogger logger) : 
         {
             logger.Warning("Thre is no transaction started.");
             return;
-        }
-
-        if(isSharedTransaction)
-        {
-            throw new InvalidOperationException("there is no need to commit transaction.");
         }
 
         try
@@ -154,7 +133,6 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, ILogger logger) : 
         {
             await Transaction.DisposeAsync();
             Transaction = null;
-            Connection = null;
         }
     }
 }

@@ -30,7 +30,7 @@ public static class DependencyInjection
 
         return services
             .AddScoped<IDbContext, TheDbContext>()
-            .AddTransient<IUnitOfWork, UnitOfWork>()
+            .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddSingleton<UpdateAuditableEntityInterceptor>()
             .AddSingleton<DispatchDomainEventInterceptor>()
             .AddDbContext<TheDbContext>(

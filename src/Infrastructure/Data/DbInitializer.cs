@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Services.Identity;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Infrastructure.Constants;
+using Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Data;
@@ -61,7 +62,7 @@ public class DbInitializer
                 user,
                 [role.Id],
                 user.GetUserClaims(),
-                new(unitOfWork.Transaction!, unitOfWork.Connection!)
+                unitOfWork.Transaction
             );
 
             await unitOfWork.CommitAsync();

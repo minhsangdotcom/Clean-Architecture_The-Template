@@ -56,7 +56,7 @@ public class UpdateUserHandler(
                     command.User.Claims,
                     opt => opt.Items[nameof(UserClaimType.Type)] = KindaUserClaimType.Custom
                 ),
-                new(unitOfWork.Transaction!, unitOfWork.Connection!)
+                unitOfWork.Transaction
             );
             await unitOfWork.CommitAsync();
 

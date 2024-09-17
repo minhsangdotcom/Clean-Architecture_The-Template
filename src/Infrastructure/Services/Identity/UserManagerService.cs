@@ -1,4 +1,5 @@
 using System.Data;
+using System.Data.Common;
 using Application.Common.Interfaces.Services.Identity;
 using Ardalis.GuardClauses;
 using Contracts.Dtos.Models;
@@ -31,27 +32,24 @@ public class UserManagerService(
         User user,
         IEnumerable<Ulid> roleIds,
         IEnumerable<UserClaimType> claims,
-        SharedTransaction? sharedTransaction = null
+        DbTransaction? transaction = null
     )
     {
         try
         {
-            if (sharedTransaction == null)
+            if (transaction == null)
             {
                 await context.DatabaseFacade.BeginTransactionAsync();
             }
             else
             {
-                await context.UseTransactionAsync(
-                    sharedTransaction.Transaction,
-                    sharedTransaction.Connection
-                );
+                await context.UseTransactionAsync(transaction);
             }
 
             await AddRoleToUserAsync(user, [.. roleIds]);
             await AddClaimsToUserAsync(user, claims);
 
-            if (sharedTransaction == null)
+            if (transaction == null)
             {
                 await context.DatabaseFacade.CommitTransactionAsync();
             }
@@ -67,7 +65,7 @@ public class UserManagerService(
                 ex.StackTrace
             );
 
-            if (sharedTransaction == null)
+            if (transaction == null)
             {
                 await context.DatabaseFacade.RollbackTransactionAsync();
             }
@@ -79,21 +77,18 @@ public class UserManagerService(
         User user,
         IEnumerable<Ulid> roleIds,
         IEnumerable<UserClaimType> claims,
-        SharedTransaction? sharedTransaction = null
+        DbTransaction? transaction = null
     )
     {
         try
         {
-            if (sharedTransaction == null)
+            if (transaction == null)
             {
                 await context.DatabaseFacade.BeginTransactionAsync();
             }
             else
             {
-                await context.UseTransactionAsync(
-                    sharedTransaction.Transaction,
-                    sharedTransaction.Connection
-                );
+                await context.UseTransactionAsync(transaction);
             }
 
             // update role for user
@@ -109,7 +104,7 @@ public class UserManagerService(
             // update custom user claim
             await UpdateClaimsToUserAsync(user, claims);
 
-            if (sharedTransaction == null)
+            if (transaction == null)
             {
                 await context.DatabaseFacade.CommitTransactionAsync();
             }
@@ -125,7 +120,7 @@ public class UserManagerService(
                 ex.StackTrace
             );
 
-            if (sharedTransaction == null)
+            if (transaction == null)
             {
                 await context.DatabaseFacade.RollbackTransactionAsync();
             }

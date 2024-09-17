@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Application.Common.Interfaces.Registers;
 using Contracts.Dtos.Models;
 using Domain.Aggregates.Users;
@@ -17,14 +18,14 @@ public interface IUserManagerService : IScope
         User user,
         IEnumerable<Ulid> roleIds,
         IEnumerable<UserClaimType> claims,
-        SharedTransaction? sharedTransaction = null
+        DbTransaction? transaction = null
     );
 
     Task UpdateUserAsync(
         User user,
         IEnumerable<Ulid> roleIds,
         IEnumerable<UserClaimType> claims,
-        SharedTransaction? sharedTransaction = null
+        DbTransaction? transaction = null
     );
 
     Task AddRoleToUserAsync(User user, List<Ulid> roleIds);

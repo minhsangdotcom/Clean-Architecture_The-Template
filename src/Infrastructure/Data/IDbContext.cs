@@ -15,5 +15,5 @@ public interface IDbContext : IDisposable
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
-    public Task UseTransactionAsync(DbTransaction transaction, DbConnection? connection = null);
+    public Task UseTransactionAsync(DbTransaction transaction);
 }

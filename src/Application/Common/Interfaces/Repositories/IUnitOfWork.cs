@@ -1,13 +1,10 @@
 using System.Data.Common;
-using Contracts.Common;
 using Contracts.Dtos.Models;
 
 namespace Application.Common.Interfaces.Repositories;
 
 public interface IUnitOfWork : IDisposable
 {
-    public DbConnection? Connection { get; protected set; }
-
     public DbTransaction? Transaction { get; protected set; }
 
     IRepository<TEntity> Repository<TEntity>()
@@ -15,7 +12,7 @@ public interface IUnitOfWork : IDisposable
 
     Task<DbTransaction> CreateTransactionAsync();
 
-    Task UseTransactionAsync(SharedTransaction transaction);
+    Task UseTransactionAsync(DbTransaction transaction);
 
     Task CommitAsync();
 
