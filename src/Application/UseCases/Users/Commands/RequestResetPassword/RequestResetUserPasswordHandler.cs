@@ -8,16 +8,16 @@ using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.Extensions.Configuration;
 
-namespace Application.UseCases.Users.Commands.RequestForgotPassword;
+namespace Application.UseCases.Users.Commands.RequestResetPassword;
 
-public class RequestForgotUserPasswordHandler(
+public class RequestResetUserPasswordHandler(
     IUnitOfWork unitOfWork,
     IPublisher mediator,
     IConfiguration configuration
-) : IRequestHandler<RequestForgotUserPasswordCommand>
+) : IRequestHandler<RequestResetUserPasswordCommand>
 {
     public async ValueTask<Unit> Handle(
-        RequestForgotUserPasswordCommand command,
+        RequestResetUserPasswordCommand command,
         CancellationToken cancellationToken
     )
     {
@@ -43,6 +43,7 @@ public class RequestForgotUserPasswordHandler(
                 Expiry = expiredTime,
             };
 
+        await unitOfWork.Repository<UserResetPassword>().DeleteRangeAsync(user.UserResetPasswords!);
         await unitOfWork.Repository<UserResetPassword>().AddAsync(userResetPassword);
         await unitOfWork.SaveAsync(cancellationToken);
 

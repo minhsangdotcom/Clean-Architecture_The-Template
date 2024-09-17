@@ -47,6 +47,8 @@ public class User(
 
     public ICollection<UserToken>? UserTokens { get; set; } = [];
 
+    public ICollection<UserResetPassword>? UserResetPasswords { get; set; } = [];
+
     public void SetPassword(string password) =>
         Password = Guard.Against.NullOrWhiteSpace(password, nameof(password));
 

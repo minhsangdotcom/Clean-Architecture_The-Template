@@ -38,7 +38,7 @@ namespace Infrastructure.Data.Migrations
                     last_name = table.Column<string>(type: "text", nullable: false),
                     user_name = table.Column<string>(type: "citext", nullable: false),
                     password = table.Column<string>(type: "text", nullable: false),
-                    email = table.Column<string>(type: "text", nullable: false),
+                    email = table.Column<string>(type: "citext", nullable: false),
                     phone_number = table.Column<string>(type: "text", nullable: false),
                     day_of_birth = table.Column<DateTime>(type: "date", nullable: true),
                     gender = table.Column<int>(type: "integer", nullable: true),
@@ -191,6 +191,12 @@ namespace Infrastructure.Data.Migrations
                 name: "ix_role_claim_role_id",
                 table: "role_claim",
                 column: "role_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_user_email",
+                table: "user",
+                column: "email",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_user_user_name",

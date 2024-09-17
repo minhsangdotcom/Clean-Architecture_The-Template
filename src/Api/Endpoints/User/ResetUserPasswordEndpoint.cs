@@ -1,4 +1,4 @@
-using Application.UseCases.Users.Commands.RequestForgotPassword;
+using Application.UseCases.Users.Commands.ResetPassword;
 using Ardalis.ApiEndpoints;
 using Contracts.RouteResults;
 using Contracts.Routers;
@@ -8,13 +8,12 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.User;
 
-public class RequestForgotUserPasswordEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<RequestForgotUserPasswordCommand>.WithActionResult
+public class ResetUserPasswordEndpoint(ISender sender ): EndpointBaseAsync.WithRequest<ResetUserPasswordCommand>.WithActionResult
 {
-    [HttpPut(Router.UserRoute.RequestResetPassowrd)]
-    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Change User password")]
+    [HttpPut(Router.UserRoute.ResetPassowrd)]
+    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "reset User password")]
     public override async Task<ActionResult> HandleAsync(
-        RequestForgotUserPasswordCommand request,
+        ResetUserPasswordCommand request,
         CancellationToken cancellationToken = default
     )
     {

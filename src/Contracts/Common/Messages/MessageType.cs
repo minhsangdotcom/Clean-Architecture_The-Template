@@ -18,4 +18,6 @@ public enum MessageType
     Null = 14,
     Unique = 15,
     Strong = 16,
+
+    Expired = 17
 }

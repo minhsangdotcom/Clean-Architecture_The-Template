@@ -209,4 +209,12 @@
     <value>Định danh</value>
     <comment> </comment>
   </data>
+  <data name="UserResetPassword" xml:space="preserve">
+    <value>đặt lại mật khẩu người dùng</value>
+    <comment> </comment>
+  </data>
+  <data name="Token" xml:space="preserve">
+    <value>Mã xác thực</value>
+    <comment> </comment>
+  </data>
 </root>

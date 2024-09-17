@@ -119,7 +119,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("email");
 
                     b.Property<string>("FirstName")
@@ -169,6 +169,10 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_user");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_email");
 
                     b.HasIndex("UserName")
                         .IsUnique()
@@ -382,7 +386,7 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Users.UserResetPassword", b =>
                 {
                     b.HasOne("Domain.Aggregates.Users.User", "User")
-                        .WithMany()
+                        .WithMany("UserResetPasswords")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -439,6 +443,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
                 {
                     b.Navigation("UserClaims");
+
+                    b.Navigation("UserResetPasswords");
 
                     b.Navigation("UserRoles");
 

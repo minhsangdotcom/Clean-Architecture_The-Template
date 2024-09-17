@@ -11,7 +11,7 @@ public class UserResetPassowrdConfiguration : IEntityTypeConfiguration<UserReset
         builder.HasKey(x => x.Id);
 
         builder.HasOne(x => x.User)
-            .WithMany()
+            .WithMany(x => x.UserResetPasswords)
             .HasForeignKey(x => x.UserId);
     }
 }

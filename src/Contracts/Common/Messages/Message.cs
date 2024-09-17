@@ -364,5 +364,17 @@ public class Message<T>(string? entityName = null)
                     "weak"
                 )
             },
+            {
+                MessageType.Expired,
+                new(
+                    MessageType.Expired.ToString().ToKebabCase(),
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "Expired" },
+                        { LanguageType.Vi.ToString(), "Quá hạn" },
+                    },
+                    MessageType.Expired
+                )
+            },
         };
 }

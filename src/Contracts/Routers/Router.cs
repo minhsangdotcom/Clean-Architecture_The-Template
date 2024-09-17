@@ -31,6 +31,7 @@ public static class Router
 
         public const string ChangePassword = $"{prefix}{nameof(Users)}/{nameof(ChangePassword)}";
         public const string RequestResetPassowrd = $"{prefix}{nameof(Users)}/{nameof(RequestResetPassowrd)}";
+        public const string ResetPassowrd = $"{prefix}{nameof(Users)}/{nameof(ResetPassowrd)}";
         public const string Tags = $"{nameof(Users)} endpoint";
     }
 

@@ -209,4 +209,12 @@
     <value>Id</value>
     <comment> </comment>
   </data>
+  <data name="UserResetPassword" xml:space="preserve">
+    <value>password resetting</value>
+    <comment> </comment>
+  </data>
+  <data name="Token" xml:space="preserve">
+    <value>Token</value>
+    <comment> </comment>
+  </data>
 </root>
