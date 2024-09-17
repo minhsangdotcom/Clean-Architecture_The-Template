@@ -30,25 +30,28 @@ public class RequestForgotUserPasswordHandler(
             );
 
         string token = StringExtension.GenerateRandomString(40);
-
-        UserResetPassword userResetPassword = new()
-        {
-            Token = token,
-            UserId = user.Id,
-            Expiry = DateTimeOffset.UtcNow,
-        };
+        Console.WriteLine(token +" - " + user.Id);
+        
+        DateTimeOffset expiredTime = DateTimeOffset.UtcNow.AddHours(
+            configuration.GetValue<int>("ForgotPasswordExpiredTimeInHour")
+        );
+        UserResetPassword userResetPassword =
+            new()
+            {
+                Token = token,
+                UserId = user.Id,
+                Expiry = expiredTime,
+            };
 
         await unitOfWork.Repository<UserResetPassword>().AddAsync(userResetPassword);
         await unitOfWork.SaveAsync(cancellationToken);
 
-        string domain = configuration.GetValue<string>("ForgotPassowrdUrl")!;
-        var link = new UriBuilder(domain)
-        {
-            Query = $"token={token}&id={user.Id}",
-        };
+        string domain = configuration.GetValue<string>("ForgotPassowordUrl")!;
+        var link = new UriBuilder(domain) { Query = $"token={token}&id={user.Id}" };
+        string expiry = expiredTime.ToLocalTime().ToString("dd/MM/yyyy hh:mm:ss");
 
         await mediator.Publish(
-            new EmailSenderEvent(user.Email, link.ToString(), "ForgotPassword"),
+            new EmailSenderEvent(user.Email, link.ToString(), expiry, "ForgotPassword"),
             cancellationToken
         );
         return Unit.Value;

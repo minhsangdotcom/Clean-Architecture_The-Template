@@ -7,7 +7,10 @@ namespace Application.Common.Events;
 
 public class EmailSenderEventHandler(IMailer mailer) : INotificationHandler<EmailSenderEvent>
 {
-    public async ValueTask Handle(EmailSenderEvent notification, CancellationToken cancellationToken)
+    public async ValueTask Handle(
+        EmailSenderEvent notification,
+        CancellationToken cancellationToken
+    )
     {
         await mailer
             .GetEmailService()
@@ -19,7 +22,11 @@ public class EmailSenderEventHandler(IMailer mailer) : INotificationHandler<Emai
                     To = [notification.Email],
                     Template = new(
                         notification.Template!,
-                        new ResetPasswordModel() { ResetLink = notification.ResetLink }
+                        new ResetPasswordModel()
+                        {
+                            ResetLink = notification.ResetLink,
+                            Expiry = notification.Expiry,
+                        }
                     ),
                 }
             );
