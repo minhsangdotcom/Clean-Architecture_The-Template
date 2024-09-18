@@ -8,6 +8,7 @@ using Infrastructure.Data.Interceptors;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Infrastructure.Services.Aws;
+using Infrastructure.Services.Elastics;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Mail;
 using Infrastructure.Services.Token;
@@ -67,6 +68,7 @@ public static class DependencyInjection
                     .WithTransientLifetime()
             )
             .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
-            .AddJwtAuth(configuration);
+            .AddJwtAuth(configuration)
+            .AddElasticSearch(configuration);
     }
 }

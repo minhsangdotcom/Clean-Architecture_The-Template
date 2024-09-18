@@ -1,5 +1,4 @@
 using System.Reflection;
-using Domain.Common;
 using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
@@ -33,7 +32,7 @@ public static class ElasticSearchExtension
             settings.Authentication(new BasicAuthentication(userName, password));
         }
 
-        var currentAssemply = Assembly.GetAssembly(typeof(BaseEntity));
+        var currentAssemply = Assembly.GetExecutingAssembly();
         IEnumerable<ElsConfig> elkConfigbuilder = GetElasticsearchConfigBuilder(currentAssemply!);
         ConfigureConnectionSettings(ref settings, elkConfigbuilder);
 
@@ -133,82 +132,6 @@ public static class ElasticSearchExtension
                 evaluateMethodInfo.Invoke(elasticsearchClientEvaluator, [elsConfig.Configs])!;
         }
     }
-
-    // private static void DataSeeding(this ElasticClient elasticClient)
-    // {
-    //     string indexName = ElsIndexExtension.GetName<ElkMedia>();
-    //     var res = elasticClient.Search<ElkMedia>(s => s.Query(q => q.MatchAll()).Size(1).Index(indexName));
-
-    //     if (res.Documents.Count > 0)
-    //     {
-    //         return;
-    //     }
-
-    //     List<ElkMedia> medias = new();
-
-    //     long size = 1234455;
-
-    //     var types = new[]
-    //     {
-    //         new { ContentType = "video/mp4", Extension = ".mp4" },
-    //         new { ContentType = "audio/mp3", Extension = ".mp3" },
-    //         new { ContentType = "image/jpg", Extension = ".jpg" },
-    //     };
-
-    //     Random random = new();
-
-    //     for (int i = 1; i <= 1000; i++)
-    //     {
-    //         int randomNumber = random.Next(0, 3);
-
-    //         var type = types[randomNumber];
-
-    //         string extension = type.Extension;
-
-    //         string fileName = $"{type.ContentType[..type.ContentType.IndexOf('/')]}{i}{extension}";
-
-    //         size += 1;
-
-    //         var media = new ElkMedia()
-    //         {
-    //             Name = $"media{i}",
-    //             ContentType = type.ContentType,
-    //             ResourcePath = $"https://www.abc.com.vn/files/{fileName}",
-    //             Extension = extension,
-    //             Size = size,
-    //             FileName = fileName,
-    //             Post = new ElkPost
-    //             {
-    //                 Title = $"Title{i}",
-    //                 Content = $"asd",
-    //                 User = new ElkUser
-    //                 {
-    //                     FirstName = "User",
-    //                     LastName = $"{i}",
-    //                     DayOfBirth = DateTimeOffset.UtcNow,
-    //                     Status = UserStatus.Active,
-    //                     Address = $"NewYork{i}"
-    //                 },
-    //             },
-    //         };
-
-    //         medias.Add(media);
-    //     }
-
-    //     BulkResponse response = elasticClient.Bulk(b => b
-    //         .Index(indexName)
-    //         .CreateMany(medias)
-    //         .Refresh(Refresh.WaitFor));
-
-    //     if (response.IsValid)
-    //     {
-    //         Console.WriteLine("Elasticsearch has seeded.");
-    //     }
-    //     else
-    //     {
-    //         Console.WriteLine($"Elasticsearch has been failed in seeding with {response.DebugInformation}");
-    //     }
-    // }
 }
 
 internal record ElsConfig(object Configs, Type Type);
