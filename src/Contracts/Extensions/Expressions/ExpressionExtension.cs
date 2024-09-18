@@ -2,14 +2,23 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Ardalis.GuardClauses;
 using Contracts.Guards;
+
 namespace Contracts.Extensions.Expressions;
 
 public static class ExpressionExtension
 {
-    public static Expression GetExpressionMember<T>(string property, Expression expression, bool isNullCheck) =>
-        GetExpressionMember(property, expression, isNullCheck, typeof(T));
+    public static Expression GetExpressionMember<T>(
+        string property,
+        Expression expression,
+        bool isNullCheck
+    ) => GetExpressionMember(property, expression, isNullCheck, typeof(T));
 
-    public static Expression GetExpressionMember(string property, Expression expression, bool isNullCheck, Type entityType)
+    public static Expression GetExpressionMember(
+        string property,
+        Expression expression,
+        bool isNullCheck,
+        Type entityType
+    )
     {
         Type type = entityType;
 
@@ -25,9 +34,12 @@ public static class ExpressionExtension
 
             PropertyInfo propertyInfo = Guard.Against.NotFound(
                 Guid.NewGuid(),
-                type.GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance),
+                type.GetProperty(
+                    name,
+                    BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
+                ),
                 nameof(name)
-                );
+            );
 
             try
             {
@@ -46,7 +58,25 @@ public static class ExpressionExtension
             type = propertyInfo.PropertyType;
         }
 
-        return isNullCheck ? Expression.Condition(nullCheck, Expression.Default(propertyValue.Type), propertyValue) : propertyValue;
+        return isNullCheck
+            ? Expression.Condition(nullCheck, Expression.Default(propertyValue.Type), propertyValue)
+            : propertyValue;
+    }
+
+    public static PropertyInfo ToPropertyInfo(Expression expression)
+    {
+        LambdaExpression lambda = Guard.Against.ConvertLamda(expression);
+
+        ExpressionType expressionType = lambda.Body.NodeType;
+
+        MemberExpression? memberExpr = expressionType switch
+        {
+            ExpressionType.Convert => ((UnaryExpression)lambda.Body).Operand as MemberExpression,
+            ExpressionType.MemberAccess => lambda.Body as MemberExpression,
+            _ => throw new Exception("Expression Type is not support"),
+        };
+
+        return (PropertyInfo)memberExpr!.Member;
     }
 
     public static string ToStringProperty(this Expression expression)
@@ -59,9 +89,13 @@ public static class ExpressionExtension
 
         MemberExpression? memberExpression = true switch
         {
-            bool when expressionType == ExpressionType.Convert || expressionType == ExpressionType.ConvertChecked =>
-                (lambda.Body as UnaryExpression)?.Operand as MemberExpression,
-            bool when expressionType == ExpressionType.MemberAccess => lambda.Body as MemberExpression,
+            bool
+                when expressionType == ExpressionType.Convert
+                    || expressionType == ExpressionType.ConvertChecked => (
+                lambda.Body as UnaryExpression
+            )?.Operand as MemberExpression,
+            bool when expressionType == ExpressionType.MemberAccess => lambda.Body
+                as MemberExpression,
             _ => throw new Exception("Expression Type is not support"),
         };
 
@@ -74,10 +108,16 @@ public static class ExpressionExtension
         return string.Join(".", [.. stack]);
     }
 
-    private static BinaryExpression GenerateOrderNullCheckExpression(Expression propertyValue, Expression nullCheckExpression)
+    private static BinaryExpression GenerateOrderNullCheckExpression(
+        Expression propertyValue,
+        Expression nullCheckExpression
+    )
     {
         return nullCheckExpression == null
             ? Expression.Equal(propertyValue, Expression.Default(propertyValue.Type))
-            : Expression.OrElse(nullCheckExpression, Expression.Equal(propertyValue, Expression.Default(propertyValue.Type)));
+            : Expression.OrElse(
+                nullCheckExpression,
+                Expression.Equal(propertyValue, Expression.Default(propertyValue.Type))
+            );
     }
 }
