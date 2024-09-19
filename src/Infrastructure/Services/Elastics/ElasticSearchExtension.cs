@@ -19,9 +19,7 @@ public static class ElasticSearchExtension
             .Get<ElasticsearchSettings>();
 
         IEnumerable<Uri> nodes = elasticsearch!.Nodes.Select(x => new Uri(x));
-
         var pool = new StaticNodePool(nodes);
-
         string? userName = elasticsearch.Username;
         string? password = elasticsearch.Password;
 
