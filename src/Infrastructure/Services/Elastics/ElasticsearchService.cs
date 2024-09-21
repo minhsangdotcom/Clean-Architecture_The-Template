@@ -1,13 +1,17 @@
 using Application.Common.Interfaces.Services.Elastics;
 using AutoMapper;
+using Contracts.Dtos.Requests;
+using Contracts.Dtos.Responses;
 using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.Fluent;
 using Elastic.Clients.Elasticsearch.QueryDsl;
+using Org.BouncyCastle.Math.EC.Rfc7748;
 
 namespace Infrastructure.Services.Elastics;
 
-public class ElasticsearchService<T>(ElasticsearchClient elasticClient) : IElasticsearchService<T>
+public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper mapper)
+    : IElasticsearchService<T>
     where T : class
 {
     private readonly string indexName = ElsIndexExtension.GetName<T>();
@@ -84,27 +88,27 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient) : IElast
         return searchResponse.Documents;
     }
 
-    public async Task ModifyAsync(T entity)
+    public async Task<PaginationResponse<TResult>> PaginatedListAsync<TResult>(
+        Action<QueryDescriptor<T>> filter,
+        QueryRequest request
+    )
     {
-        await UpdateAsync(entity);
+        SearchResponse<T> searchResponse = await elasticClient.SearchAsync<T>(search =>
+            search
+                .Query(q => q.Bool(b => b.Must(filter, search => search.Search(request.Keyword!))))
+                .Index(indexName)
+                .From((request.CurrentPage - 1) * request.Size)
+                .Size(request.Size)
+                .OrderBy(request)
+        );
+
+        return new PaginationResponse<TResult>(
+            mapper.Map<IEnumerable<TResult>>(searchResponse.Documents.AsEnumerable()),
+            (int)searchResponse.Total,
+            request.CurrentPage,
+            request.Size
+        );
     }
-
-    // public async Task<PaginationResponse<TResult>> PaginatedListAsync<TResult>(SearchDescriptor<T> query, QueryRequest request)
-    // {
-    //     SearchDescriptor<T> search = query
-    //         .Sort(request)
-    //         .Skip((request.CurrentPage - 1) * request.Size)
-    //         .Take(request.Size)
-    //         .Index(indexName);
-
-    //     ISearchResponse<T> searchResponse = await elasticClient.SearchAsync<T>(search);
-
-    //     return new PaginationResponse<TResult>(
-    //         mapper.Map<IEnumerable<TResult>>(searchResponse.Documents.AsEnumerable()),
-    //         (int)searchResponse.Total,
-    //         request.CurrentPage,
-    //         request.Size);
-    // }
 
     public async Task UpdateAsync(T entity)
     {

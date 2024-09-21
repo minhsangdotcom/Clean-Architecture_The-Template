@@ -57,10 +57,10 @@ public static partial class StringExtension
             );
     }
 
-    public static string GenerateRandomString(int codeLength = 16)
+    public static string GenerateRandomString(int codeLength = 16, string? allowedSources = null)
     {
-        const string allowedChars =
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-";
+        string allowedChars =
+            allowedSources ?? "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-";
 
         if (codeLength < 0)
         {

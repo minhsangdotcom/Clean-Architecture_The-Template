@@ -29,7 +29,7 @@ public static class DependencyInjection
         services.AddDetection();
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-        return services
+         services
             .AddScoped<IDbContext, TheDbContext>()
             .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddSingleton<UpdateAuditableEntityInterceptor>()
@@ -68,7 +68,9 @@ public static class DependencyInjection
                     .WithTransientLifetime()
             )
             .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
-            .AddJwtAuth(configuration)
-            .AddElasticSearch(configuration);
+            .AddJwtAuth(configuration);
+
+            services.AddElasticSearchAsync(configuration).GetAwaiter();
+        return services;
     }
 }

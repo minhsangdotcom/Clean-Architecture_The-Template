@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Ardalis.GuardClauses;
 using Contracts.Guards;
+
 namespace Contracts.Extensions.Reflections;
 
 public static class PropertyInfoExtensions
@@ -15,7 +16,10 @@ public static class PropertyInfoExtensions
         {
             propertyInfo = Guard.Against.NotFound(
                 $"{type.FullName}.{propertyName}",
-                type.GetProperty(part.Trim(), BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance),
+                type.GetProperty(
+                    part.Trim(),
+                    BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
+                ),
                 nameof(propertyName)
             );
 
@@ -32,7 +36,18 @@ public static class PropertyInfoExtensions
             return false;
         }
 
-        return propertyInfo.PropertyType.IsClass && propertyInfo.PropertyType.FullName?.StartsWith("System.") == false;
+        return propertyInfo.PropertyType.IsClass
+            && propertyInfo.PropertyType.FullName?.StartsWith("System.") == false;
+    }
+
+    public static bool IsUserDefineType(this Type? type)
+    {
+        if (type == null)
+        {
+            return false;
+        }
+
+        return type?.IsClass == true && type?.FullName?.StartsWith("System.") == false;
     }
 
     public static string GetValue<T>(this T obj, Expression<Func<T, object>> expression)
@@ -41,7 +56,7 @@ public static class PropertyInfoExtensions
 
         return propertyInfo.GetValue(obj, null)?.ToString() ?? string.Empty;
     }
-    
+
     public static PropertyInfo ToPropertyInfo(this Expression expression)
     {
         LambdaExpression lambda = Guard.Against.ConvertLamda(expression);

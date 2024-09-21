@@ -32,26 +32,27 @@ public class ElasticsearchClientEvaluator(ElasticsearchClient elasticsearchClien
         where TEntity : class
     {
         var existsResponse = await elasticsearchClient.Indices.ExistsAsync(indexName);
-        ElasticsearchResponse elasticsearchResponse = !existsResponse.Exists
-            ? await elasticsearchClient.Indices.CreateAsync(
-                indexName,
-                config => config.Mappings(typeMap => typeMap.Properties(properties))
-            )
-            : await elasticsearchClient.Indices.PutMappingAsync(
-                indexName,
-                config => config.Properties(properties)
-            );
-        string action = existsResponse.Exists ? "Update" : "Create";
 
-        if (elasticsearchResponse.IsSuccess())
+        if (!existsResponse.Exists)
         {
-            Console.WriteLine($@"{action} elasticsearch {indexName} index sucessfully!");
-        }
-        else
-        {
-            Console.WriteLine(
-                $"{action} elasticsearch {indexName} index mapping has failed with {elasticsearchResponse.DebugInformation}"
-            );
+            ElasticsearchResponse elasticsearchResponse =
+                await elasticsearchClient.Indices.CreateAsync(
+                    indexName,
+                    config => config.Mappings(typeMap => typeMap.Properties(properties))
+                );
+
+            string action = "Create";
+
+            if (elasticsearchResponse.IsSuccess())
+            {
+                Console.WriteLine($@"{action} elasticsearch {indexName} index sucessfully!");
+            }
+            else
+            {
+                Console.WriteLine(
+                    $"{action} elasticsearch {indexName} index mapping has failed with {elasticsearchResponse.DebugInformation}"
+                );
+            }
         }
     }
 }

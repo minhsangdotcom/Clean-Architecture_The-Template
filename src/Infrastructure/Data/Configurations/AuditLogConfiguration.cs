@@ -21,7 +21,13 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                             )
                         )
                 )
-                .Text(txt => txt.Entity)
+                .Text(
+                    txt => txt.Entity,
+                    config =>
+                        config.Fields(f =>
+                            f.Keyword(ElsIndexExtension.GetKeywordName<AuditLog>(n => n.Entity!))
+                        )
+                )
                 .ByteNumber(b => b.Type)
                 .Object(o => o.OldValue!)
                 .Object(o => o.NewValue!)
@@ -36,17 +42,49 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                             )
                         )
                 )
+                .Date(d => d.CreatedAt)
                 .Nested(
                     n => n.Agent!,
                     nest =>
                         nest.Properties(nestProp =>
                             nestProp
-                                .Keyword(t => t.Id)
-                                .Text(t => t.Agent!.FirstName!)
-                                .Text(t => t.Agent!.LastName!)
+                                .Text(
+                                    t => t.Id,
+                                    config =>
+                                        config.Fields(f =>
+                                            f.Keyword(
+                                                ElsIndexExtension.GetKeywordName<Agent>(name =>
+                                                    name.Id
+                                                )
+                                            )
+                                        )
+                                )
+                                .Text(
+                                    t => t.Agent!.FirstName!,
+                                    config =>
+                                        config.Fields(f =>
+                                            f.Keyword(
+                                                ElsIndexExtension.GetKeywordName<Agent>(n =>
+                                                    n.FirstName!
+                                                )
+                                            )
+                                        )
+                                )
+                                .Text(
+                                    t => t.Agent!.LastName!,
+                                    config =>
+                                        config.Fields(f =>
+                                            f.Keyword(
+                                                ElsIndexExtension.GetKeywordName<Agent>(n =>
+                                                    n.LastName!
+                                                )
+                                            )
+                                        )
+                                )
                                 .Text(t => t.Agent!.Email!)
                                 .Date(d => d.Agent!.DayOfBirth!)
                                 .ByteNumber(b => b.Agent!.Gender!)
+                                .Date(x => x.Agent!.CreatedAt)
                         )
                 )
         );

@@ -18,26 +18,9 @@ public class ConnectionSettingEvaluator(ElasticsearchClientSettings settings) : 
                         ? descriptor.IdProperty(builder.Configuration.DocumentId)
                         : result.IdProperty(builder.Configuration.DocumentId);
             }
-            // if (builder.Configuration.IgnoreProperties.Count > 0)
-            // {
-            //     var ignoreProperties = builder.Configuration.IgnoreProperties;
-
-            //     for (int i = 0; i < ignoreProperties.Count; i++)
-            //     {
-            //         var property = ignoreProperties[i];
-
-            //         result = result == null && i == 0 ?
-            //             x.Ignore(property) :
-            //                 result!.Ignore(property);
-            //     }
-            // }
-
-            //return result ??= x;
         }
-        //settings.DefaultMappingFor((Func<ClrTypeMappingDescriptor<TEntity>, IClrTypeMapping<TEntity>>)selector);
 
         settings.DefaultMappingFor((Action<ClrTypeMappingDescriptor<TEntity>>)Selector);
-
         await Task.CompletedTask;
     }
 }

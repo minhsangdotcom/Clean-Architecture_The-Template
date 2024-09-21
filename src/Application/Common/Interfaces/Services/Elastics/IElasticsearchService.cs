@@ -1,3 +1,4 @@
+using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
@@ -15,8 +16,6 @@ public interface IElasticsearchService<T>
 
     Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities);
 
-    Task ModifyAsync(T entity);
-
     Task UpdateAsync(T entity);
 
     Task UpdateRangeAsync(IEnumerable<T> entities);
@@ -33,5 +32,8 @@ public interface IElasticsearchService<T>
 
     Task<long> CountAsync(CountRequestDescriptor<T> selector);
 
-    // Task<PaginationResponse<TResult>> PaginatedListAsync<TResult>(SearchDescriptor<T> query, QueryRequest request);
+    Task<PaginationResponse<TResult>> PaginatedListAsync<TResult>(
+        Action<QueryDescriptor<T>> filter,
+        QueryRequest request
+    );
 }
