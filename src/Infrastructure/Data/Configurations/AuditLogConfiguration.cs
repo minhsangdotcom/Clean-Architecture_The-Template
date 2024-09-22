@@ -81,7 +81,14 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                             )
                                         )
                                 )
-                                .Text(t => t.Agent!.Email!)
+                                .Text(t => t.Agent!.Email!, config =>
+                                        config.Fields(f =>
+                                            f.Keyword(
+                                                ElsIndexExtension.GetKeywordName<Agent>(n =>
+                                                    n.Email!
+                                                )
+                                            )
+                                        ))
                                 .Date(d => d.Agent!.DayOfBirth!)
                                 .ByteNumber(b => b.Agent!.Gender!)
                                 .Date(x => x.Agent!.CreatedAt)

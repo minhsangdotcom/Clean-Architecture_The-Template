@@ -1,12 +1,10 @@
 using System.Reflection;
-using Contracts.Dtos.Models;
 using Contracts.Extensions;
 using Domain.Aggregates.AuditLogs;
 using Domain.Aggregates.AuditLogs.Enums;
 using Domain.Aggregates.Users.Enums;
 using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch;
-using Org.BouncyCastle.Math.EC.Rfc7748;
 using Serilog;
 
 namespace Infrastructure.Services.Elastics;
@@ -20,10 +18,10 @@ public class ElasticsearchRegisterHelper
     /// <param name="elsConfigs"></param>
     public static void ConfigureConnectionSettings(
         ref ElasticsearchClientSettings connectionSettings,
-        IEnumerable<ElasticConfigureResult> elsConfigs
+        IEnumerable<ElasticConfigureResult> configures
     )
     {
-        foreach (var elsConfig in elsConfigs)
+        foreach (var configure in configures)
         {
             object? connectionSettingEvaluator = Activator.CreateInstance(
                 typeof(ConnectionSettingEvaluator),
@@ -31,10 +29,10 @@ public class ElasticsearchRegisterHelper
             );
 
             var evaluateMethodInfo = typeof(ConnectionSettingEvaluator)
-                .GetMethod(nameof(IEvaluator.Evaluate))!
-                .MakeGenericMethod(elsConfig.Type);
+                .GetMethod(nameof(IEvaluatorSync.Evaluate))!
+                .MakeGenericMethod(configure.Type);
 
-            evaluateMethodInfo.Invoke(connectionSettingEvaluator, [elsConfig.Configs]);
+            evaluateMethodInfo.Invoke(connectionSettingEvaluator, [configure.Configs]);
         }
     }
 
@@ -46,10 +44,10 @@ public class ElasticsearchRegisterHelper
     /// <returns></returns>
     public static async Task ElasticFluentConfigAsync(
         ElasticsearchClient elasticClient,
-        IEnumerable<ElasticConfigureResult> elsConfigs
+        IEnumerable<ElasticConfigureResult> configures
     )
     {
-        foreach (var elsConfig in elsConfigs)
+        foreach (var configure in configures)
         {
             object? elasticsearchClientEvaluator = Activator.CreateInstance(
                 typeof(ElasticsearchClientEvaluator),
@@ -58,9 +56,10 @@ public class ElasticsearchRegisterHelper
 
             var evaluateMethodInfo = typeof(ElasticsearchClientEvaluator)
                 .GetMethod(nameof(IEvaluator.Evaluate))!
-                .MakeGenericMethod(elsConfig.Type);
+                .MakeGenericMethod(configure.Type);
 
-            await (Task)evaluateMethodInfo.Invoke(elasticsearchClientEvaluator, [elsConfig.Configs])!;
+            await (Task)
+                evaluateMethodInfo.Invoke(elasticsearchClientEvaluator, [configure.Configs])!;
         }
     }
 
@@ -73,7 +72,7 @@ public class ElasticsearchRegisterHelper
         }
         string allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         List<AuditLog> auditLogs = [];
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 100; i++)
         {
             string entity =
                 $"{StringExtension.GenerateRandomString(4, allowedChars)} {StringExtension.GenerateRandomString(4, allowedChars)} {i}";
@@ -97,7 +96,7 @@ public class ElasticsearchRegisterHelper
                         FirstName = $"{StringExtension.GenerateRandomString(4, allowedChars)} {i}",
                         LastName = $"{StringExtension.GenerateRandomString(4, allowedChars)} {i}",
                         Email = $"anna.kim{i}@gmail.com",
-                        DayOfBirth = new DateTime(1990, 1, 1 + i),
+                        DayOfBirth = new DateTime(1990, 7, new Random().Next(1, 31)),
                     },
                 }
             );
