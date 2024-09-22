@@ -6,7 +6,6 @@ using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.Fluent;
 using Elastic.Clients.Elasticsearch.QueryDsl;
-using Org.BouncyCastle.Math.EC.Rfc7748;
 
 namespace Infrastructure.Services.Elastics;
 
@@ -26,7 +25,7 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
     public async Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities)
     {
         await elasticClient.BulkAsync(x =>
-            x.Index(indexName).CreateMany(entities).Refresh(Refresh.WaitFor)
+            x.Index(indexName).IndexMany(entities).Refresh(Refresh.WaitFor)
         );
 
         return entities;
@@ -89,13 +88,21 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
     }
 
     public async Task<PaginationResponse<TResult>> PaginatedListAsync<TResult>(
-        Action<QueryDescriptor<T>> filter,
-        QueryRequest request
+        QueryRequest request,
+        Action<QueryDescriptor<T>>? filter = null
     )
     {
+        List<Action<QueryDescriptor<T>>> queries = [];
+        if (filter != null)
+        {
+            queries.Add(filter);
+        }
+
+        queries.Add(search => search.Search(request.Keyword!));
+
         SearchResponse<T> searchResponse = await elasticClient.SearchAsync<T>(search =>
             search
-                .Query(q => q.Bool(b => b.Must(filter, search => search.Search(request.Keyword!))))
+                .Query(q => q.Bool(b => b.Must(queries.ToArray())))
                 .Index(indexName)
                 .From((request.CurrentPage - 1) * request.Size)
                 .Size(request.Size)

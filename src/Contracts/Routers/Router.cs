@@ -2,24 +2,7 @@ namespace Contracts.Routers;
 public static class Router
 {
     public const string Id = "id";
-
     public const string prefix = "api/";
-
-    public static class PostRoute
-    {
-        public const string Posts = nameof(Posts);
-        public const string GetPostById = $"{nameof(Posts)}/" + "{" + Id + "}";
-        public const string Tags = $"{nameof(Posts)} endpoint";
-    }
-
-    public static class MediaRoute
-    {
-        public const string Medias = nameof(Medias);
-
-        public const string GetMediaById = $"{nameof(Medias)}/" + "{" + Id + "}";
-
-        public const string Tags = $"{nameof(Medias)} endpoint";
-    }
 
     public static class UserRoute
     {
@@ -57,5 +40,11 @@ public static class Router
 
 
         public const string Tags = $"{nameof(Roles)} endpoint";
+    }
+
+    public static class AuditLogRoute
+    {
+         public const string AuditLog = $"{prefix}{nameof(AuditLog)}";
+         public const string Tags = $"{nameof(AuditLog)} endpoint";
     }
 }

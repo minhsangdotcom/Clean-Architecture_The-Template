@@ -1,9 +1,10 @@
 using Application.Common.Interfaces.Services.Elastics;
+using AutoMapper;
 using Elastic.Clients.Elasticsearch;
 
 namespace Infrastructure.Services.Elastics;
 
-public class ElasticsearchServiceFactory(ElasticsearchClient elasticClient)
+public class ElasticsearchServiceFactory(ElasticsearchClient elasticClient, IMapper mapper)
     : IElasticsearchServiceFactory
 {
     private readonly Dictionary<string, object?> repositories = [];
@@ -18,7 +19,7 @@ public class ElasticsearchServiceFactory(ElasticsearchClient elasticClient)
             Type repositoryType = typeof(ElasticsearchService<>);
             object? repositoryInstance = Activator.CreateInstance(
                 repositoryType.MakeGenericType(typeof(TEntity)),
-                [elasticClient]
+                [elasticClient, mapper]
             );
             value = repositoryInstance;
             repositories.Add(type, value);
