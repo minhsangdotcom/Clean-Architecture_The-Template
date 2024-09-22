@@ -2,10 +2,9 @@ using Elastic.Clients.Elasticsearch;
 
 namespace Domain.Common.ElasticConfigurations;
 
-public class ConnectionSettingEvaluator(ElasticsearchClientSettings settings) : IEvaluator
+public class ConnectionSettingEvaluator(ElasticsearchClientSettings settings) : IEvaluatorSync
 {
-    public async Task Evaluate<TEntity>(ElasticsearchConfigBuilder<TEntity> builder)
-        where TEntity : class
+    public void Evaluate<TEntity>(ElasticsearchConfigBuilder<TEntity> builder) where TEntity : class
     {
         void Selector(ClrTypeMappingDescriptor<TEntity> descriptor)
         {
@@ -21,6 +20,5 @@ public class ConnectionSettingEvaluator(ElasticsearchClientSettings settings) : 
         }
 
         settings.DefaultMappingFor((Action<ClrTypeMappingDescriptor<TEntity>>)Selector);
-        await Task.CompletedTask;
     }
 }

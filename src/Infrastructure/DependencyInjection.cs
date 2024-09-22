@@ -68,9 +68,10 @@ public static class DependencyInjection
                     .WithTransientLifetime()
             )
             .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
-            .AddJwtAuth(configuration);
-
-            services.AddElasticSearchAsync(configuration).GetAwaiter();
+            .AddJwtAuth(configuration)
+            .AddElasticSearch(configuration)
+            .AddHostedService<ElasticsearchIndexBackgoundService>();
+            
         return services;
     }
 }
