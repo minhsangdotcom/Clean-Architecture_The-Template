@@ -63,6 +63,11 @@ public class ElasticsearchRegisterHelper
         }
     }
 
+    /// <summary>
+    /// fake data for test
+    /// </summary>
+    /// <param name="elasticsearchClient"></param>
+    /// <returns></returns>
     public static async Task SeedingAsync(ElasticsearchClient elasticsearchClient)
     {
         var auditLog = await elasticsearchClient.SearchAsync<AuditLog>();
@@ -72,6 +77,8 @@ public class ElasticsearchRegisterHelper
         }
         string allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         List<AuditLog> auditLogs = [];
+        List<string> roles = ["ADMIN", "MANAGER", "USER"];
+        List<string> permissions = ["create", "update", "delete", "list"];
         for (int i = 0; i < 100; i++)
         {
             string entity =
@@ -97,6 +104,16 @@ public class ElasticsearchRegisterHelper
                         LastName = $"{StringExtension.GenerateRandomString(4, allowedChars)} {i}",
                         Email = $"anna.kim{i}@gmail.com",
                         DayOfBirth = new DateTime(1990, 7, new Random().Next(1, 31)),
+                        Role = new RoleTest()
+                        {
+                            Name = roles[new Random().Next(0, roles.Count - 1)],
+                            Guard = $"{StringExtension.GenerateRandomString(4, allowedChars)} {StringExtension.GenerateRandomString(4, allowedChars)}",
+                            Permissions = Generate(
+                                    new Random().Next(1, permissions.Count),
+                                    permissions
+                                )
+                                .ToArray(),
+                        },
                     },
                 }
             );
@@ -177,5 +194,17 @@ public class ElasticsearchRegisterHelper
     {
         var builderType = typeof(ElasticsearchConfigBuilder<>).MakeGenericType(documentType);
         return Activator.CreateInstance(builderType)!;
+    }
+
+    private static IEnumerable<PermissionTest> Generate(int quantity, List<string> permissions)
+    {
+        var ran = new Random();
+        for (int i = 0; i < quantity; i++)
+        {
+            yield return new PermissionTest()
+            {
+                Name = permissions[ran.Next(0, permissions.Count - 1)],
+            };
+        }
     }
 }

@@ -97,7 +97,7 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
         {
             queries.Add(filter);
         }
-        queries.Add(search => search.Search(request.Keyword!));
+        queries.Add(search => search.Search(request.Keyword, 3));
 
         SearchResponse<T> searchResponse = await elasticClient.SearchAsync<T>(search =>
             search

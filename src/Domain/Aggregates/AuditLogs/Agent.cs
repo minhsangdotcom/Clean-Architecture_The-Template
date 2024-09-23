@@ -14,4 +14,20 @@ public class Agent : DefaultEntity<string>
     public DateTime? DayOfBirth { get; set; }
 
     public Gender? Gender { get; set; }
+
+    public RoleTest? Role { get; set; }
+}
+
+public class RoleTest
+{
+    public string? Name { get; set; }
+
+    public string? Guard { get; set; }
+
+    public ICollection<PermissionTest>? Permissions { get; set; }
+}
+
+public class PermissionTest
+{
+    public string? Name { get; set; }
 }

@@ -1,5 +1,6 @@
 using Ardalis.GuardClauses;
 using Elastic.Clients.Elasticsearch;
+using Elastic.Clients.Elasticsearch.IndexManagement;
 using Elastic.Clients.Elasticsearch.Mapping;
 using Elastic.Transport.Products.Elasticsearch;
 
@@ -22,25 +23,33 @@ public class ElasticsearchClientEvaluator(ElasticsearchClient elasticsearchClien
             "Missing mapping properties."
         );
 
-        await CreateIndexOrPutMappingAsync(indexName, maps);
+        await CreateIndexOrPutMappingAsync(indexName, maps, builder.Configuration.Settings);
     }
 
     private async Task CreateIndexOrPutMappingAsync<TEntity>(
         string indexName,
-        Action<PropertiesDescriptor<TEntity>> properties
+        Action<PropertiesDescriptor<TEntity>> properties,
+        Action<IndexSettingsDescriptor>? settings = null
     )
         where TEntity : class
     {
-        var existsResponse = await elasticsearchClient.Indices.ExistsAsync(indexName);
+        void CreateIndexDescriptor(CreateIndexRequestDescriptor config)
+        {
+            CreateIndexRequestDescriptor requestDescriptor = config;
 
+            if (settings != null)
+            {
+                requestDescriptor = config.Settings(settings);
+            }
+            requestDescriptor = config.Mappings(typeMap => typeMap.Properties(properties));
+        }
+
+        var existsResponse = await elasticsearchClient.Indices.ExistsAsync(indexName);
         ElasticsearchResponse elasticsearchResponse = !existsResponse.Exists
-            ? await elasticsearchClient.Indices.CreateAsync(
-                indexName,
-                config => config.Mappings(typeMap => typeMap.Properties(properties))
-            )
+            ? await elasticsearchClient.Indices.CreateAsync(indexName, CreateIndexDescriptor)
             : await elasticsearchClient.Indices.PutMappingAsync(
                 indexName,
-                config => config.Properties<TEntity>(properties)
+                config => config.Properties(properties)
             );
 
         string action = !existsResponse.Exists ? "Create" : "Update";
