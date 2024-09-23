@@ -36,4 +36,8 @@ public interface IElasticsearchService<T>
         QueryRequest request,
         Action<QueryDescriptor<T>>? filter = null
     );
+    Task<PaginationResponse<T>> PaginatedListAsync(
+        QueryRequest request,
+        Action<QueryDescriptor<T>>? filter = null
+    );
 }

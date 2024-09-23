@@ -2,6 +2,7 @@ using System.Collections;
 using System.Reflection;
 using Contracts.Dtos.Models;
 using Contracts.Dtos.Requests;
+using Contracts.Extensions;
 using Contracts.Extensions.Reflections;
 using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch;
@@ -67,17 +68,18 @@ public static class ElasticFunctionalityHelper
         int deep = 1
     )
     {
-        QueryDescriptor<T> query = new();
         List<Query> queries = [];
+        if (!string.IsNullOrWhiteSpace(keyword))
+        {
+            List<KeyValuePair<PropertyType, string>> stringProperties = StringProperties(
+                typeof(T),
+                deep
+            );
+            queries.AddRange(MultiMatchQuery(stringProperties, keyword));
+            queries.AddRange(PrefixQuery(stringProperties, keyword));
+        }
 
-        List<KeyValuePair<PropertyType, string>> stringProperties = StringProperties(
-            typeof(T),
-            deep
-        );
-        queries.AddRange(MultiMatchQuery(stringProperties, keyword));
-        queries.AddRange(PrefixQuery(stringProperties, keyword));
-
-        return query.Bool(b => b.Should(queries));
+        return search.Bool(b => b.Should(queries));
     }
 
     private static List<Query> PrefixQuery(
@@ -185,7 +187,7 @@ public static class ElasticFunctionalityHelper
             {
                 string value = x.Value;
                 int lastDot = value.LastIndexOf('.');
-                return new KeyValuePair<string, string>(value[..lastDot], value[(lastDot + 1)..]);
+                return new KeyValuePair<string, string>(value[..lastDot], value);
             })
             .ToList();
 
@@ -237,6 +239,7 @@ public static class ElasticFunctionalityHelper
         PropertyType? propertyType = null
     )
     {
+        parrentName = parrentName?.Trim().ToCamelCase();
         if (deep < 0)
         {
             return [];
@@ -246,10 +249,14 @@ public static class ElasticFunctionalityHelper
 
         List<KeyValuePair<PropertyType, string>> stringProperties = properties
             .Where(x => x.PropertyType == typeof(string))
-            .Select(x => new KeyValuePair<PropertyType, string>(
-                propertyType ?? PropertyType.Property,
-                parrentName != null ? $"{parrentName}.{x.Name}" : x.Name
-            ))
+            .Select(x =>
+            {
+                string propertyName = x.Name.ToCamelCase();
+                return new KeyValuePair<PropertyType, string>(
+                    propertyType ?? PropertyType.Property,
+                    parrentName != null ? $"{parrentName}.{propertyName}" : propertyName
+                );
+            })
             .ToList();
 
         List<PropertyInfo> collectionObjectProperties = properties
@@ -260,8 +267,9 @@ public static class ElasticFunctionalityHelper
 
         foreach (var propertyInfo in collectionObjectProperties)
         {
+            string propertyName = propertyInfo.Name.ToCamelCase();
             string currentName =
-                parrentName != null ? $"{parrentName}.{propertyInfo.Name}" : propertyInfo.Name;
+                parrentName != null ? $"{parrentName}.{propertyName}" : propertyName;
 
             if (IsArrayGenericType(propertyInfo))
             {

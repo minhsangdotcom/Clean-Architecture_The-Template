@@ -97,7 +97,6 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
         {
             queries.Add(filter);
         }
-
         queries.Add(search => search.Search(request.Keyword!));
 
         SearchResponse<T> searchResponse = await elasticClient.SearchAsync<T>(search =>
@@ -110,7 +109,36 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
         );
 
         return new PaginationResponse<TResult>(
-            mapper.Map<IEnumerable<TResult>>(searchResponse.Documents.AsEnumerable()),
+            mapper.Map<IEnumerable<TResult>>(searchResponse.Documents?.AsEnumerable() ?? []),
+            (int)searchResponse.Total,
+            request.CurrentPage,
+            request.Size
+        );
+    }
+
+    public async Task<PaginationResponse<T>> PaginatedListAsync(
+        QueryRequest request,
+        Action<QueryDescriptor<T>>? filter = null
+    )
+    {
+        List<Action<QueryDescriptor<T>>> queries = [];
+        if (filter != null)
+        {
+            queries.Add(filter);
+        }
+        queries.Add(search => search.Search(request.Keyword!));
+
+        SearchResponse<T> searchResponse = await elasticClient.SearchAsync<T>( //search =>
+        // search
+        //     .Query(q => q.Bool(b => b.Must(queries.ToArray())))
+        //     .Index(indexName)
+        //     .From((request.CurrentPage - 1) * request.Size)
+        //     .Size(request.Size)
+        //.OrderBy(request)
+        );
+
+        return new PaginationResponse<T>(
+            searchResponse.Documents?.AsEnumerable() ?? [],
             (int)searchResponse.Total,
             request.CurrentPage,
             request.Size

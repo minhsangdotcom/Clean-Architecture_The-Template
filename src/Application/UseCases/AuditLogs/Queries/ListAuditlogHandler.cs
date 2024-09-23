@@ -11,9 +11,5 @@ public class ListAuditlogHandler(IElasticsearchServiceFactory elasticsearch)
     public async ValueTask<PaginationResponse<ListAuditlogResponse>> Handle(
         ListAuditlogQuery request,
         CancellationToken cancellationToken
-    )
-    {
-        var a = await elasticsearch.Get<AuditLog>().PaginatedListAsync<ListAuditlogResponse>(request);
-        return a;
-    }
+    ) => await elasticsearch.Get<AuditLog>().PaginatedListAsync<ListAuditlogResponse>(request);
 }

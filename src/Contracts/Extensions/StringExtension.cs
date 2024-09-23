@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -135,6 +136,42 @@ public static partial class StringExtension
         return result.ToLower();
     }
 
+    public static string ToCamelCase(this string input)
+    {
+        if (string.IsNullOrEmpty(input)) 
+            return input;
+
+        // Handle PascalCase
+        if (MyRegex4().IsMatch(input))
+        {
+            // Lowercase first letter
+            return char.ToLower(input[0]) + input[1..];
+        }
+
+        // Split by underscores, hyphens, or spaces
+        string[] words = MyRegex3().Split(input);
+
+        // Process the words for camelCase conversion
+        for (int i = 0; i < words.Length; i++)
+        {
+            if (i == 0)
+            {
+                // Lowercase the first word
+                words[i] = words[i].ToLower();
+            }
+            else
+            {
+                // Capitalize the first letter of the rest of the words
+                words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
+            }
+        }
+
+        // Join words together into a camelCase string
+        return string.Concat(words);
+    }
+
+    private static readonly char[] separator = [' ', '_'];
+
     [GeneratedRegex("[^A-Za-z0-9_.]+")]
     private static partial Regex RemoveSpecialCharacterRegex();
 
@@ -149,4 +186,8 @@ public static partial class StringExtension
 
     [GeneratedRegex(@"[\s_]+")]
     private static partial Regex MyRegex2();
+    [GeneratedRegex(@"[_\- ]+")]
+    private static partial Regex MyRegex3();
+    [GeneratedRegex(@"^[A-Z][a-z]+([A-Z][a-z]+)+$")]
+    private static partial Regex MyRegex4();
 }
