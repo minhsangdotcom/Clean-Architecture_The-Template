@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Reflection;
-using Ardalis.GuardClauses;
 using Contracts.Dtos.Models;
 using Contracts.Dtos.Requests;
 using Contracts.Extensions;
@@ -8,7 +6,6 @@ using Contracts.Extensions.Reflections;
 using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
-using Org.BouncyCastle.Asn1.IsisMtt.X509;
 
 namespace Infrastructure.Services.Elastics;
 
@@ -70,14 +67,15 @@ public static class ElasticFunctionalityHelper
     public static QueryDescriptor<T> Search<T>(
         this QueryDescriptor<T> search,
         string keyword,
-        int deep = 1
+        int deep = 1,
+        IEnumerable<string>? searchProperties = null
     )
     {
         List<Query> queries = [];
-        List<KeyValuePair<PropertyType, string>> stringProperties = StringProperties(
-            typeof(T),
-            deep
-        );
+        List<KeyValuePair<PropertyType, string>> stringProperties =
+            searchProperties?.Any() == true
+                ? GivenStringProperties(typeof(T), searchProperties)
+                : StringProperties(typeof(T), deep);
         queries.AddRange(MultiMatchQuery(stringProperties, keyword));
 
         return search.Bool(b => b.Should(queries));
@@ -182,7 +180,7 @@ public static class ElasticFunctionalityHelper
             {
                 Query = $"{keyword}",
                 Fields = Fields.FromFields(properties.Select(x => new Field(x.Value)).ToArray()),
-                Fuzziness = new Fuzziness(2),
+                //Fuzziness = new Fuzziness(2),
             };
         List<Query> queries = [multiMatchQuery];
 
@@ -232,7 +230,7 @@ public static class ElasticFunctionalityHelper
             {
                 Query = $"{keyword}",
                 Fields = nested.primaryProperty.Select(x => new Field(x)).ToArray(),
-                Fuzziness = new Fuzziness(2),
+                //Fuzziness = new Fuzziness(2),
             };
             queries.Add(nestedQuery);
         }
@@ -318,7 +316,7 @@ public static class ElasticFunctionalityHelper
             {
                 var propertyName = parts[i];
                 var propertyInfo =
-                    currentType.GetProperty(propertyName)
+                    currentType.GetNestedPropertyInfo(propertyName)
                     ?? throw new ArgumentException(
                         $"Property '{propertyName}' not found on type '{currentType.Name}'."
                     );
