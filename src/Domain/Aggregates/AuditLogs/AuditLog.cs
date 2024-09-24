@@ -7,7 +7,7 @@ public class AuditLog : DefaultEntity<string>
 {
     public string Entity { get; set; } = string.Empty;
 
-    public AuditLogType Type { get; set; }
+    public byte Type { get; set; }
 
     public object? OldValue { get; set; }
 

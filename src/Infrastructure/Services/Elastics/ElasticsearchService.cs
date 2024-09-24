@@ -92,22 +92,7 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
         Action<QueryDescriptor<T>>? filter = null
     )
     {
-        List<Action<QueryDescriptor<T>>> queries = [];
-        if (filter != null)
-        {
-            queries.Add(filter);
-        }
-        queries.Add(search => search.Search(request.Keyword, 3));
-
-        SearchResponse<T> searchResponse = await elasticClient.SearchAsync<T>(search =>
-            search
-                .Query(q => q.Bool(b => b.Must(queries.ToArray())))
-                .Index(indexName)
-                .From((request.CurrentPage - 1) * request.Size)
-                .Size(request.Size)
-                .OrderBy(request)
-        );
-
+        SearchResponse<T> searchResponse = await SearchAsync(request, filter);
         return new PaginationResponse<TResult>(
             mapper.Map<IEnumerable<TResult>>(searchResponse.Documents?.AsEnumerable() ?? []),
             (int)searchResponse.Total,
@@ -121,22 +106,7 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
         Action<QueryDescriptor<T>>? filter = null
     )
     {
-        List<Action<QueryDescriptor<T>>> queries = [];
-        if (filter != null)
-        {
-            queries.Add(filter);
-        }
-        queries.Add(search => search.Search(request.Keyword!));
-
-        SearchResponse<T> searchResponse = await elasticClient.SearchAsync<T>( //search =>
-        // search
-        //     .Query(q => q.Bool(b => b.Must(queries.ToArray())))
-        //     .Index(indexName)
-        //     .From((request.CurrentPage - 1) * request.Size)
-        //     .Size(request.Size)
-        //.OrderBy(request)
-        );
-
+        SearchResponse<T> searchResponse = await SearchAsync(request, filter);
         return new PaginationResponse<T>(
             searchResponse.Documents?.AsEnumerable() ?? [],
             (int)searchResponse.Total,
@@ -176,5 +146,38 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
         await elasticClient.BulkAsync(x =>
             x.Index(indexName).UpdateMany(entities, (x, i) => x.Doc(i)).Refresh(Refresh.WaitFor)
         );
+    }
+
+    private async Task<SearchResponse<T>> SearchAsync(
+        QueryRequest request,
+        Action<QueryDescriptor<T>>? filter = null
+    )
+    {
+        List<Action<QueryDescriptor<T>>> queries = [];
+        if (filter != null)
+        {
+            queries.Add(filter);
+        }
+        if (!string.IsNullOrWhiteSpace(request.Keyword))
+        {
+            queries.Add(search => search.Search(request.Keyword, 0));
+        }
+
+        void Search(SearchRequestDescriptor<T> search)
+        {
+            SearchRequestDescriptor<T> results = new();
+            if (queries.Count > 0)
+            {
+                search.Query(q => q.Bool(b => b.Must(queries.ToArray())));
+            }
+
+            search
+                .Index(indexName)
+                .OrderBy(request)
+                .From((request.CurrentPage - 1) * request.Size)
+                .Size(request.Size);
+        }
+
+        return await elasticClient.SearchAsync<T>(Search);
     }
 }

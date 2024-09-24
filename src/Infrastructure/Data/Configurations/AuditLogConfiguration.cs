@@ -15,17 +15,21 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
             setting.Analysis(x =>
                 x.Analyzers(an =>
                         an.Custom(
-                            "myTokenizer",
-                            ca => ca.Filter(["lowercase"]).Tokenizer("myTokenizer")
-                        )
+                                "myTokenizer",
+                                ca => ca.Filter(["lowercase"]).Tokenizer("myTokenizer")
+                            )
+                            .Custom(
+                                "standardAnalyzer",
+                                ca => ca.Filter(["lowercase"]).Tokenizer("standard")
+                            )
                     )
                     .Tokenizers(tz =>
                         tz.NGram(
                             "myTokenizer",
                             config =>
                                 config
-                                    .MinGram(2)
-                                    .MaxGram(3)
+                                    .MinGram(3)
+                                    .MaxGram(4)
                                     .TokenChars([TokenChar.Digit, TokenChar.Letter])
                         )
                     )
@@ -46,6 +50,7 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                 )
                             )
                             .Analyzer("myTokenizer")
+                            .SearchAnalyzer("standardAnalyzer")
                 )
                 .Text(
                     txt => txt.Entity,
@@ -57,6 +62,7 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                 )
                             )
                             .Analyzer("myTokenizer")
+                            .SearchAnalyzer("standardAnalyzer")
                 )
                 .ByteNumber(b => b.Type)
                 .Object(o => o.OldValue!)
@@ -73,6 +79,7 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                 )
                             )
                             .Analyzer("myTokenizer")
+                            .SearchAnalyzer("standardAnalyzer")
                 )
                 .Date(d => d.CreatedAt)
                 .Nested(
@@ -92,6 +99,7 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                                 )
                                             )
                                             .Analyzer("myTokenizer")
+                                            .SearchAnalyzer("standardAnalyzer")
                                 )
                                 .Text(
                                     t => t.Agent!.FirstName!,
@@ -105,6 +113,7 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                                 )
                                             )
                                             .Analyzer("myTokenizer")
+                                            .SearchAnalyzer("standardAnalyzer")
                                 )
                                 .Text(
                                     t => t.Agent!.LastName!,
@@ -118,6 +127,7 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                                 )
                                             )
                                             .Analyzer("myTokenizer")
+                                            .SearchAnalyzer("standardAnalyzer")
                                 )
                                 .Text(
                                     t => t.Agent!.Email!,
@@ -131,6 +141,7 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                                 )
                                             )
                                             .Analyzer("myTokenizer")
+                                            .SearchAnalyzer("standardAnalyzer")
                                 )
                                 .Date(d => d.Agent!.DayOfBirth!)
                                 .ByteNumber(b => b.Agent!.Gender!)
@@ -151,6 +162,7 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                                                 )
                                                             )
                                                             .Analyzer("myTokenizer")
+                                                            .SearchAnalyzer("standardAnalyzer")
                                                 )
                                                 .Text(
                                                     t => t.Agent!.Role!.Guard!,
@@ -164,6 +176,7 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                                                 )
                                                             )
                                                             .Analyzer("myTokenizer")
+                                                            .SearchAnalyzer("standardAnalyzer")
                                                 )
                                                 .Nested(
                                                     n => n.Agent!.Role!.Permissions!,
@@ -182,6 +195,9 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                                                             )
                                                                         )
                                                                         .Analyzer("myTokenizer")
+                                                                        .SearchAnalyzer(
+                                                                            "standardAnalyzer"
+                                                                        )
                                                             )
                                                         )
                                                 )

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Reflection;
+using Ardalis.GuardClauses;
 using Contracts.Dtos.Models;
 using Contracts.Dtos.Requests;
 using Contracts.Extensions;
@@ -7,6 +8,7 @@ using Contracts.Extensions.Reflections;
 using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
+using Org.BouncyCastle.Asn1.IsisMtt.X509;
 
 namespace Infrastructure.Services.Elastics;
 
@@ -19,18 +21,22 @@ public static class ElasticFunctionalityHelper
         where T : class
     {
         var results = new List<SortOptions>();
-
         string[] sorts = request.Order?.Trim().Split(',') ?? [];
-        var sortItems = GetSortItems(sorts);
+        List<SortItemResult> sortItems = GetSortItems<T>(sorts);
 
-        for (int i = 0; i < sortItems.Count; i++)
+        foreach (var sortItem in sortItems)
         {
-            string property = sortItems.ElementAt(0).Key;
-            string order = sortItems.ElementAt(0).Value;
-            SortOrder sortOrder = order == OrderTerm.DESC ? SortOrder.Desc : SortOrder.Asc;
+            string property = sortItem.PropertyName;
+            string order = sortItem.Order;
 
+            SortOrder sortOrder = order == OrderTerm.DESC ? SortOrder.Desc : SortOrder.Asc;
             bool isNestedSort = property.Contains('.');
-            property += $".{ElsIndexExtension.GetKeywordName<T>(property)}";
+            Type propertyType = sortItem.PropertyInfo.PropertyType;
+
+            if (propertyType == typeof(string) && !propertyType.IsUserDefineType())
+            {
+                property += $".{ElsIndexExtension.GetKeywordName<T>(property)}";
+            }
 
             if (!isNestedSort)
             {
@@ -43,14 +49,13 @@ public static class ElasticFunctionalityHelper
                 //PATH: A
                 //PATH: A.B
                 List<string> nestedArray = [.. property.Trim().Split('.')];
-                var nestedSort = new NestedSortValue() { Path = nestedArray[0]! };
+                var nestedSort = new NestedSortValue();
                 string name = string.Empty;
-                for (int j = 0; j < nestedArray.Count - 2; j++)
+                for (int j = 0; j < nestedArray.Count - (nestedArray.Count > 2 ? 2 : 1); j++)
                 {
-                    name += j == 0 ? nestedArray[i] : $".{nestedArray[i]}";
+                    name += j == 0 ? nestedArray[j] : $".{nestedArray[j]}";
                     nestedSort = nestedSort.Nested = new NestedSortValue() { Path = name! };
                 }
-
                 var sortOptions = SortOptions.Field(
                     property!,
                     new FieldSort() { Order = sortOrder, Nested = nestedSort }
@@ -64,105 +69,21 @@ public static class ElasticFunctionalityHelper
 
     public static QueryDescriptor<T> Search<T>(
         this QueryDescriptor<T> search,
-        string? keyword,
+        string keyword,
         int deep = 1
     )
     {
         List<Query> queries = [];
-        if (!string.IsNullOrWhiteSpace(keyword))
-        {
-            List<KeyValuePair<PropertyType, string>> stringProperties = StringProperties(
-                typeof(T),
-                deep
-            );
-            queries.AddRange(MultiMatchQuery(stringProperties, keyword));
-            queries.AddRange(PrefixQuery(stringProperties, keyword));
-        }
+        List<KeyValuePair<PropertyType, string>> stringProperties = StringProperties(
+            typeof(T),
+            deep
+        );
+        queries.AddRange(MultiMatchQuery(stringProperties, keyword));
 
         return search.Bool(b => b.Should(queries));
     }
 
-    private static List<Query> WildCardQuery(
-        List<KeyValuePair<PropertyType, string>> stringProperties,
-        string keyword)
-    {
-        List<Query> queries = [];
-        string keywordPattern = $"*{keyword}*";
-
-        //*search for the same level property
-        List<KeyValuePair<PropertyType, string>> properties = stringProperties.FindAll(x =>
-            x.Key == PropertyType.Property
-        );
-
-        var prefixQueries = properties.Select(x =>
-        {
-            return new WildcardQuery(new Field(x.Value)) { Value = keywordPattern };
-        });
-
-        queries.AddRange([.. prefixQueries]);
-
-        //* search nested properties
-        //todo: [{"A" ,["A.A1","A.A2"]}, {"A.B", ["A.B.B1","A.B.B2"]}]
-        List<KeyValuePair<string, string>> nestedProperties = stringProperties
-            .Except(properties)
-            .Select(x =>
-            {
-                string value = x.Value;
-                int lastDot = value.LastIndexOf('.');
-                return new KeyValuePair<string, string>(value[..lastDot], value);
-            })
-            .ToList();
-
-        // * group and sort with the deeper and deeper of nesting
-        var nestedsearch = nestedProperties
-            .GroupBy(x => x.Key)
-            .Select(x => new { key = x.Key, primaryProperty = x.Select(p => p.Value).ToList() })
-            .OrderBy(x => x.key)
-            .ToList();
-
-        //* create nested multi_match search
-        foreach (var nested in nestedsearch)
-        {
-            var key = nested.key;
-            var parts = key.Trim().Split(".");
-            NestedQuery nestedQuery = new();
-
-            string path = string.Empty;
-            for (int i = 0; i < parts.Length; i++)
-            {
-                if (i == 0)
-                {
-                    path += $"{parts[i]}";
-                    nestedQuery.Path = path!;
-                }
-                else
-                {
-                    path += $".{parts[i]}";
-                    NestedQuery nest = new() { Path = path! };
-                    nestedQuery.Query = nest;
-                    nestedQuery = nest;
-                }
-            }
-            nestedQuery.Query = new BoolQuery()
-            {
-                Should =
-                [
-                    .. nested
-                        .primaryProperty.Select(x =>
-                        {
-                            return new WildcardQuery(new Field(x)) { Value = keywordPattern };
-                        })
-                        .ToList(),
-                ],
-            };
-
-            queries.Add(nestedQuery);
-        }
-
-        return queries;
-    }
-
-    private static List<Query> PrefixQuery(
+    private static List<Query> MatchPhraseQuery(
         List<KeyValuePair<PropertyType, string>> stringProperties,
         string keyword
     )
@@ -174,12 +95,13 @@ public static class ElasticFunctionalityHelper
             x.Key == PropertyType.Property
         );
 
-        var prefixQueries = properties.Select(x =>
+        var matchPhraseQueries = properties.Select(x => new MatchPhraseQuery(new Field(x.Value))
         {
-            return new PrefixQuery(new Field(x.Value)) { Value = $"{keyword}" };
+            Query = $"{keyword}",
+            Boost = 2,
         });
 
-        queries.AddRange([.. prefixQueries]);
+        queries.AddRange([.. matchPhraseQueries]);
 
         //* search nested properties
         //todo: [{"A" ,["A.A1","A.A2"]}, {"A.B", ["A.B.B1","A.B.B2"]}]
@@ -230,7 +152,11 @@ public static class ElasticFunctionalityHelper
                     .. nested
                         .primaryProperty.Select(x =>
                         {
-                            return new PrefixQuery(new Field(x)) { Value = $"{keyword}" };
+                            return new MatchPhraseQuery(new Field(x))
+                            {
+                                Query = $"{keyword}",
+                                Boost = 2,
+                            };
                         })
                         .ToList(),
                 ],
@@ -256,6 +182,7 @@ public static class ElasticFunctionalityHelper
             {
                 Query = $"{keyword}",
                 Fields = Fields.FromFields(properties.Select(x => new Field(x.Value)).ToArray()),
+                Fuzziness = new Fuzziness(2),
             };
         List<Query> queries = [multiMatchQuery];
 
@@ -305,6 +232,7 @@ public static class ElasticFunctionalityHelper
             {
                 Query = $"{keyword}",
                 Fields = nested.primaryProperty.Select(x => new Field(x)).ToArray(),
+                Fuzziness = new Fuzziness(2),
             };
             queries.Add(nestedQuery);
         }
@@ -341,7 +269,7 @@ public static class ElasticFunctionalityHelper
 
         List<PropertyInfo> collectionObjectProperties = properties
             .Where(x =>
-                (x.IsUserDefineType() || IsArrayGenericType(x)) && x.PropertyType != typeof(string)
+                (x.IsUserDefineType() || x.IsArrayGenericType()) && x.PropertyType != typeof(string)
             )
             .ToList();
 
@@ -351,7 +279,7 @@ public static class ElasticFunctionalityHelper
             string currentName =
                 parrentName != null ? $"{parrentName}.{propertyName}" : propertyName;
 
-            if (IsArrayGenericType(propertyInfo))
+            if (propertyInfo.IsArrayGenericType())
             {
                 Type genericType = propertyInfo.PropertyType.GetGenericArguments()[0];
                 stringProperties.AddRange(
@@ -397,7 +325,7 @@ public static class ElasticFunctionalityHelper
 
                 var propertyTypeInfo = propertyInfo.PropertyType;
 
-                if (IsArrayGenericType(propertyInfo))
+                if (propertyInfo.IsArrayGenericType())
                 {
                     propertyType = PropertyType.Array;
                     currentType = propertyTypeInfo.GetGenericArguments()[0];
@@ -424,37 +352,25 @@ public static class ElasticFunctionalityHelper
         return result;
     }
 
-    static bool IsArrayGenericType(PropertyInfo propertyInfo)
-    {
-        Type type = propertyInfo.PropertyType;
-
-        if (
-            type.IsGenericType
-            && typeof(IEnumerable).IsAssignableFrom(type)
-            && type.GetGenericArguments()[0].IsUserDefineType()
-        )
-        {
-            return true;
-        }
-        return false;
-    }
-
-    private static Dictionary<string, string> GetSortItems(string[] sortItems)
-    {
-        return sortItems
+    private static List<SortItemResult> GetSortItems<T>(string[] sortItems)
+        where T : class =>
+        sortItems
             .Select(sortItem =>
             {
                 string[] items = sortItem.Trim().Split(' ');
+                string propertyName = items[0].Trim();
+                PropertyInfo propertyInfo = typeof(T).GetNestedPropertyInfo(propertyName);
 
                 if (items.Length == 1)
                 {
-                    return new KeyValuePair<string, string>(items[0].Trim(), OrderTerm.ASC);
+                    return new SortItemResult(propertyName, propertyInfo, OrderTerm.ASC);
                 }
 
-                return new KeyValuePair<string, string>(items[0].Trim(), items[1].Trim());
+                return new SortItemResult(propertyName, propertyInfo, items[1].Trim());
             })
-            .ToDictionary(x => x.Key, x => x.Value);
-    }
+            .ToList();
+
+    internal record SortItemResult(string PropertyName, PropertyInfo PropertyInfo, string Order);
 
     internal enum PropertyType
     {

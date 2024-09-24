@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
 using Ardalis.GuardClauses;
@@ -7,13 +8,37 @@ namespace Contracts.Extensions.Reflections;
 
 public static class PropertyInfoExtensions
 {
+
+    public static bool IsArrayGenericType(this PropertyInfo propertyInfo)
+    {
+        Type type = propertyInfo.PropertyType;
+        return IsArrayGenericType(type);
+    }
+
+    public static bool IsArrayGenericType(this Type type)
+    {
+        if (
+            type.IsGenericType
+            && typeof(IEnumerable).IsAssignableFrom(type)
+            && type.GetGenericArguments()[0].IsUserDefineType()
+        )
+        {
+            return true;
+        }
+        return false;
+    }
+
     public static PropertyInfo GetNestedPropertyInfo(this Type type, string propertyName)
     {
-        var parts = propertyName.Trim().Split('.');
+        // Split the propertyName by '.' to handle nested properties
+        var propertyParts = propertyName.Trim().Split('.');
+
         PropertyInfo? propertyInfo = null;
 
-        foreach (var part in parts)
+        // Iterate through each part of the property chain
+        foreach (var part in propertyParts)
         {
+            // Attempt to find the property information for the current part
             propertyInfo = Guard.Against.NotFound(
                 $"{type.FullName}.{propertyName}",
                 type.GetProperty(
@@ -23,10 +48,34 @@ public static class PropertyInfoExtensions
                 nameof(propertyName)
             );
 
+            // Move to the next type in the chain (the type of the current property)
             type = propertyInfo.PropertyType;
         }
 
+        // Return the last found PropertyInfo (non-null due to Guard.Against)
         return propertyInfo!;
+    }
+
+    public static bool IsNestedPropertyValid(this Type type, string propertyName)
+    {
+        var propertyParts = propertyName.Trim().Split('.');
+
+        foreach (var part in propertyParts)
+        {
+            PropertyInfo? propertyInfo = type.GetProperty(
+                part.Trim(),
+                BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
+            );
+
+            if (propertyInfo == null)
+            {
+                return false;
+            }
+
+            type = propertyInfo.PropertyType;
+        }
+
+        return true;
     }
 
     public static bool IsUserDefineType(this PropertyInfo? propertyInfo)

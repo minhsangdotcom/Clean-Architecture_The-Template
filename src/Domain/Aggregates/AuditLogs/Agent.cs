@@ -13,7 +13,7 @@ public class Agent : DefaultEntity<string>
     
     public DateTime? DayOfBirth { get; set; }
 
-    public Gender? Gender { get; set; }
+    public byte? Gender { get; set; }
 
     public RoleTest? Role { get; set; }
 }
