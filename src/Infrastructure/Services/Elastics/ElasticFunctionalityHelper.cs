@@ -30,7 +30,12 @@ public static class ElasticFunctionalityHelper
             bool isNestedSort = property.Contains('.');
             Type propertyType = sortItem.PropertyInfo.PropertyType;
 
-            if (propertyType == typeof(string) && !propertyType.IsUserDefineType())
+            bool isStringPropertyType =
+                propertyType == typeof(string)
+                && !propertyType.IsUserDefineType()
+                && !propertyType.IsArrayGenericType();
+
+            if (isStringPropertyType)
             {
                 property += $".{ElsIndexExtension.GetKeywordName<T>(property)}";
             }
@@ -48,7 +53,7 @@ public static class ElasticFunctionalityHelper
                 List<string> nestedArray = [.. property.Trim().Split('.')];
                 var nestedSort = new NestedSortValue();
                 string name = string.Empty;
-                for (int j = 0; j < nestedArray.Count - (nestedArray.Count > 2 ? 2 : 1); j++)
+                for (int j = 0; j < nestedArray.Count - (isStringPropertyType ? 2 : 1); j++)
                 {
                     name += j == 0 ? nestedArray[j] : $".{nestedArray[j]}";
                     nestedSort = nestedSort.Nested = new NestedSortValue() { Path = name! };
