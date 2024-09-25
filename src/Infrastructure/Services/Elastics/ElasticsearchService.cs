@@ -160,7 +160,9 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
         }
         if (!string.IsNullOrWhiteSpace(request.Keyword))
         {
-            queries.Add(search => search.Search(request.Keyword, 0, request.SearchTarget));
+            queries.Add(search =>
+                search.Search(request.Keyword, searchProperties: request.SearchTarget)
+            );
         }
 
         void Search(SearchRequestDescriptor<T> search)

@@ -14,6 +14,11 @@ public class ElasticsearchIndexBackgoundService(
     {
         try
         {
+            if (!(await elasticsearchClient.PingAsync(cancellationToken)).IsSuccess())
+            {
+                return;
+            }
+
             var configures = ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
                 Assembly.GetExecutingAssembly()
             );
@@ -32,31 +37,26 @@ public class ElasticsearchIndexBackgoundService(
 
     public async Task StartedAsync(CancellationToken cancellationToken)
     {
-        logger.Information("StartedAsync");
         await Task.CompletedTask;
     }
 
     public async Task StartingAsync(CancellationToken cancellationToken)
     {
-        logger.Information("StartingAsync");
         await Task.CompletedTask;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        logger.Information("StopAsync");
         await Task.CompletedTask;
     }
 
     public async Task StoppedAsync(CancellationToken cancellationToken)
     {
-        logger.Information("StoppedAsync");
         await Task.CompletedTask;
     }
 
     public async Task StoppingAsync(CancellationToken cancellationToken)
     {
-        logger.Information("StoppedAsync");
         await Task.CompletedTask;
     }
 }

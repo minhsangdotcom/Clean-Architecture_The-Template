@@ -310,45 +310,33 @@ public static class ElasticFunctionalityHelper
         IEnumerable<string> properties
     )
     {
-        var result = new List<KeyValuePair<PropertyType, string>>();
-        foreach (var propertyPath in properties)
+        List<KeyValuePair<PropertyType, string>> result = [];
+        foreach (string propertyPath in properties)
         {
-            var currentType = type;
-            var parts = propertyPath.Split('.');
-            PropertyType propertyType = PropertyType.Property;
-
-            for (int i = 0; i < parts.Length; i++)
+            string propertyName = propertyPath.Trim('.');
+            if (type.GetNestedPropertyInfo(propertyName).PropertyType != typeof(string))
             {
-                var propertyName = parts[i];
-                var propertyInfo =
-                    currentType.GetNestedPropertyInfo(propertyName)
-                    ?? throw new ArgumentException(
-                        $"Property '{propertyName}' not found on type '{currentType.Name}'."
-                    );
+                continue;
+            }
 
-                var propertyTypeInfo = propertyInfo.PropertyType;
+            if (!propertyPath.Contains('.'))
+            {
+                result.Add(new(PropertyType.Property, propertyName));
+                continue;
+            }
 
-                if (propertyInfo.IsArrayGenericType())
-                {
-                    propertyType = PropertyType.Array;
-                    currentType = propertyTypeInfo.GetGenericArguments()[0];
-                }
-                else if (
-                    propertyTypeInfo.IsClass && !propertyTypeInfo.Namespace!.StartsWith("System")
-                )
-                {
-                    propertyType = PropertyType.Object;
-                    currentType = propertyTypeInfo;
-                }
-                else
-                {
-                    propertyType = PropertyType.Property;
-                }
+            string parentPropertyName = propertyName[..propertyName.LastIndexOf('.')];
+            PropertyInfo propertyInfo = type.GetNestedPropertyInfo(parentPropertyName);
 
-                if (i == parts.Length - 1 && propertyTypeInfo == typeof(string))
-                {
-                    result.Add(new KeyValuePair<PropertyType, string>(propertyType, propertyPath));
-                }
+            if(propertyInfo.IsArrayGenericType())
+            {
+                result.Add(new(PropertyType.Array, propertyName));
+                continue;
+            }
+
+            if(propertyInfo.IsUserDefineType())
+            {
+                result.Add(new(PropertyType.Object, propertyName));
             }
         }
 

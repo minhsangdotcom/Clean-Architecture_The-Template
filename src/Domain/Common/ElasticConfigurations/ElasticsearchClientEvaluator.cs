@@ -23,6 +23,12 @@ public class ElasticsearchClientEvaluator(ElasticsearchClient elasticsearchClien
             "Missing mapping properties."
         );
 
+        if (!(await elasticsearchClient.PingAsync()).IsSuccess())
+        {
+            Console.WriteLine($"cannot connect with elasticsearch server");
+            return;
+        }
+
         await CreateIndexOrPutMappingAsync(indexName, maps, builder.Configuration.Settings);
     }
 
