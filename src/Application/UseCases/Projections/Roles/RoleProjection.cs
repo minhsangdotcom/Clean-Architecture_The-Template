@@ -2,7 +2,7 @@ using Contracts.Dtos.Models;
 
 namespace Application.UseCases.Projections.Roles;
 
-public class RoleProjection : BaseResponse
+public class RoleProjection : DefaultBaseResponse
 {
     public string? Guard { get; set; }
 

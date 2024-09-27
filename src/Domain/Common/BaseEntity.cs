@@ -1,3 +1,5 @@
+using Contracts.Dtos.Models;
+
 namespace Domain.Common;
 
 public abstract class DefaultEntity
@@ -28,11 +30,4 @@ public abstract class BaseEntity<T> : DefaultEntity<T>, IAuditable
     public DateTimeOffset? UpdatedAt { get; set; }
 }
 
-public interface IAuditable
-{
-    public string CreatedBy { get; set; }
-
-    public string? UpdatedBy { get; set; }
-
-    public DateTimeOffset? UpdatedAt { get; set; }
-}
+public interface IAuditable : IBaseAuditable;

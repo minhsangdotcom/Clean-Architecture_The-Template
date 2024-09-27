@@ -21,15 +21,15 @@ public static class SearchExtensions
         this IQueryable<T> query,
         string? keyword,
         List<string>? fields = null,
-        int deep = 0
+        int deep = 1
     )
     {
-        SearchResult searchResult = Search<T>(fields, keyword, deep);
-
-        if (searchResult.Expression == null)
+        if (string.IsNullOrWhiteSpace(keyword))
         {
             return query;
         }
+
+        SearchResult searchResult = Search<T>(fields, keyword, deep, false);
 
         return query.Where(
             Expression.Lambda<Func<T, bool>>(searchResult.Expression, searchResult.Parameter)
@@ -52,12 +52,12 @@ public static class SearchExtensions
         int deep = 0
     )
     {
-        SearchResult searchResult = Search<T>(fields, keyword, deep, true);
-
-        if (searchResult.Expression == null)
+        if (string.IsNullOrWhiteSpace(keyword))
         {
             return query;
         }
+
+        SearchResult searchResult = Search<T>(fields, keyword, deep, true);
 
         return query.Where(
             Expression
@@ -66,76 +66,9 @@ public static class SearchExtensions
         );
     }
 
-    /// <summary>
-    /// Create main search expression
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="parameter"></param>
-    /// <param name="keyword"></param>
-    /// <param name="fields"></param>
-    /// <param name="deep"></param>
-    /// <param name="isNullCheck"> check null if it's IEnumable</param>
-    /// <returns></returns>
-    private static Expression SearchBodyExpression<T>(
-        ParameterExpression parameter,
-        string? keyword,
-        IEnumerable<string>? fields = null,
-        int deep = 0,
-        bool isNullCheck = false
-    )
-    {
-        Type type = typeof(T);
-        ParameterExpression rootParameter = parameter;
-
-        MethodCallExpression constant = Expression.Call(
-            Expression.Constant(string.IsNullOrWhiteSpace(keyword) ? string.Empty : keyword),
-            nameof(string.Contains),
-            Type.EmptyTypes
-        );
-
-        Expression? body = null!;
-        List<KeyValuePair<PropertyType, string>> searchFields =
-            fields?.Any() == true
-                ? FilterSearchFields(type, fields)
-                : DetectStringProperties(type, deep);
-
-        if (searchFields.Count == 0)
-        {
-            return body;
-        }
-
-        foreach (KeyValuePair<PropertyType, string> field in searchFields)
-        {
-            Expression expression = null!;
-            if (field.Key == PropertyType.Array)
-            {
-                expression = BuildAnyQuery<T>(
-                    type,
-                    field.Value,
-                    keyword ?? string.Empty,
-                    rootParameter,
-                    'a'
-                );
-            }
-            else
-            {
-                expression = BuildContainsQuery(
-                    type,
-                    field.Value,
-                    rootParameter,
-                    constant,
-                    isNullCheck
-                );
-            }
-            body = body == null ? expression : Expression.OrElse(body, expression);
-        }
-
-        return body;
-    }
-
     private static SearchResult Search<T>(
         IEnumerable<string>? fields,
-        string? keyword,
+        string keyword,
         int deep,
         bool isNullCheck = false
     )
@@ -154,7 +87,58 @@ public static class SearchExtensions
     }
 
     /// <summary>
-    /// Build deep search by nested any 
+    /// Create main search expression
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="parameter"></param>
+    /// <param name="keyword"></param>
+    /// <param name="fields"></param>
+    /// <param name="deep"></param>
+    /// <param name="isNullCheck"> check null if it's IEnumable</param>
+    /// <returns></returns>
+    private static Expression SearchBodyExpression<T>(
+        ParameterExpression parameter,
+        string keyword,
+        IEnumerable<string>? fields = null,
+        int deep = 0,
+        bool isNullCheck = false
+    )
+    {
+        Type type = typeof(T);
+        ParameterExpression rootParameter = parameter;
+
+        MethodCallExpression constant = Expression.Call(
+            Expression.Constant(keyword),
+            nameof(string.ToLower),
+            Type.EmptyTypes
+        );
+
+        Expression? body = null!;
+        List<KeyValuePair<PropertyType, string>> searchFields =
+            fields?.Any() == true
+                ? FilterSearchFields(type, fields)
+                : DetectStringProperties(type, deep);
+
+        if (searchFields.Count == 0)
+        {
+            return body;
+        }
+
+        foreach (KeyValuePair<PropertyType, string> field in searchFields)
+        {
+            Expression expression =
+                field.Key == PropertyType.Array
+                    ? BuildAnyQuery(type, field.Value, keyword ?? string.Empty, rootParameter, 'a')
+                    : BuildContainsQuery(type, field.Value, rootParameter, constant, isNullCheck);
+
+            body = body == null ? expression : Expression.OrElse(body, expression);
+        }
+
+        return body;
+    }
+
+    /// <summary>
+    /// Build deep search by nested any
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="type"></param>
@@ -165,7 +149,7 @@ public static class SearchExtensions
     /// <param name="body"></param>
     /// <param name="isNullCheck"></param>
     /// <returns></returns>
-    static Expression BuildAnyQuery<T>(
+    static Expression BuildAnyQuery(
         Type type,
         string property,
         string keyword,
@@ -179,18 +163,9 @@ public static class SearchExtensions
         {
             var constant = Expression.Call(
                 Expression.Constant(string.IsNullOrWhiteSpace(keyword) ? string.Empty : keyword),
-                "ToLower",
+                nameof(string.ToLower),
                 Type.EmptyTypes
             );
-
-            // Expression member = ExpressionExtension.GetExpressionMember(
-            //     property,
-            //     parameter!,
-            //     isNullCheck,
-            //     type
-            // );
-            // Expression lower = Expression.Call(member, "ToLower", Type.EmptyTypes);
-            // return Expression.Call(lower, nameof(string.Contains), Type.EmptyTypes, constant);
 
             return BuildContainsQuery(type, property, parameter, constant, isNullCheck);
         }
@@ -214,7 +189,7 @@ public static class SearchExtensions
         {
             propertyType = propertyInfo.PropertyType.GetGenericArguments()[0];
             var anyParameter = Expression.Parameter(propertyType, (++parameterName).ToString());
-            var contains = BuildAnyQuery<T>(
+            var contains = BuildAnyQuery(
                 propertyType,
                 string.Join(".", properties.Skip(1)),
                 keyword,
@@ -232,7 +207,7 @@ public static class SearchExtensions
             return anyCall;
         }
 
-        return BuildAnyQuery<T>(
+        return BuildAnyQuery(
             propertyType,
             string.Join(".", properties.Skip(1)),
             keyword,

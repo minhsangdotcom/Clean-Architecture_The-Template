@@ -52,7 +52,7 @@ public static class ExpressionExtension
 
             if (isNullCheck)
             {
-                nullCheck = GenerateOrderNullCheckExpression(propertyValue, nullCheck);
+                nullCheck = GenerateNullCheckExpression(propertyValue, nullCheck);
             }
 
             type = propertyInfo.PropertyType;
@@ -108,7 +108,7 @@ public static class ExpressionExtension
         return string.Join(".", [.. stack]);
     }
 
-    private static BinaryExpression GenerateOrderNullCheckExpression(
+    private static BinaryExpression GenerateNullCheckExpression(
         Expression propertyValue,
         Expression nullCheckExpression
     )

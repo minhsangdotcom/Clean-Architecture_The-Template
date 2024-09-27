@@ -2,7 +2,7 @@ using Contracts.Dtos.Models;
 
 namespace Application.UseCases.Projections.Roles;
 
-public class RoleClaimDetailProjection : BaseResponse
+public class RoleClaimDetailProjection : DefaultBaseResponse
 {
     public string? ClaimType { get; set; }
 
