@@ -45,7 +45,9 @@ public static class PropertyInfoExtensions
             );
 
             // Move to the next type in the chain (the type of the current property)
-            type = propertyInfo.PropertyType;
+            type = propertyInfo.IsArrayGenericType()
+                ? propertyInfo.PropertyType.GetGenericArguments()[0]
+                : propertyInfo.PropertyType;
         }
 
         // Return the last found PropertyInfo (non-null due to Guard.Against)
@@ -68,7 +70,9 @@ public static class PropertyInfoExtensions
                 return false;
             }
 
-            type = propertyInfo.PropertyType;
+            type = propertyInfo.IsArrayGenericType()
+                ? propertyInfo.PropertyType.GetGenericArguments()[0]
+                : propertyInfo.PropertyType;
         }
 
         return true;
