@@ -33,23 +33,20 @@ public class UpdateAuditableEntityInterceptor(ICurrentUser currentUser) : SaveCh
 
         foreach (EntityEntry entry in entities)
         {
-            if (entry is IAuditable auditableEntity)
+            switch (entry.State)
             {
-                switch (entry.State)
-                {
-                    case EntityState.Added:
-                        entry.Property(nameof(IAuditable.CreatedBy)).CurrentValue =
-                            currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
-                        break;
-                    case EntityState.Modified:
-                        entry.Property(nameof(IAuditable.UpdatedBy)).CurrentValue =
-                            currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
+                case EntityState.Added:
+                    entry.Property(nameof(IAuditable.CreatedBy)).CurrentValue =
+                        currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
+                    break;
+                case EntityState.Modified:
+                    entry.Property(nameof(IAuditable.UpdatedBy)).CurrentValue =
+                        currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
 
-                        entry.Property(nameof(IAuditable.UpdatedAt)).CurrentValue = currentTime;
-                        break;
-                    default:
-                        break;
-                }
+                    entry.Property(nameof(IAuditable.UpdatedAt)).CurrentValue = currentTime;
+                    break;
+                default:
+                    break;
             }
         }
     }
