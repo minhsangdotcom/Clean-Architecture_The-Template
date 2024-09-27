@@ -8,12 +8,8 @@ namespace Contracts.Extensions.Reflections;
 
 public static class PropertyInfoExtensions
 {
-
-    public static bool IsArrayGenericType(this PropertyInfo propertyInfo)
-    {
-        Type type = propertyInfo.PropertyType;
-        return IsArrayGenericType(type);
-    }
+    public static bool IsArrayGenericType(this PropertyInfo propertyInfo) =>
+        IsArrayGenericType(propertyInfo.PropertyType);
 
     public static bool IsArrayGenericType(this Type type)
     {
@@ -78,16 +74,8 @@ public static class PropertyInfoExtensions
         return true;
     }
 
-    public static bool IsUserDefineType(this PropertyInfo? propertyInfo)
-    {
-        if (propertyInfo == null)
-        {
-            return false;
-        }
-
-        return propertyInfo.PropertyType.IsClass
-            && propertyInfo.PropertyType.FullName?.StartsWith("System.") == false;
-    }
+    public static bool IsUserDefineType(this PropertyInfo? propertyInfo) =>
+        IsUserDefineType(propertyInfo?.PropertyType);
 
     public static bool IsUserDefineType(this Type? type)
     {

@@ -6,7 +6,11 @@ namespace Contracts.Extensions.QueryExtensions;
 
 public static class SortExtension
 {
-    public static IQueryable<T> Sort<T>(this IQueryable<T> entities, string orderByStringValues, bool thenby = false)
+    public static IQueryable<T> Sort<T>(
+        this IQueryable<T> entities,
+        string orderByStringValues,
+        bool thenby = false
+    )
     {
         if (string.IsNullOrWhiteSpace(orderByStringValues))
         {
@@ -21,9 +25,9 @@ public static class SortExtension
 
         string[] orderBy = orderValue.Trim().Split(" ");
 
-        string command = orderValue.ToLower().EndsWith(RequestType.DescOrderType) ?
-        (thenby ? OrderType.ThenByDescending : OrderType.Descending) :
-        (thenby ? SortType.ThenBy : SortType.OrderBy);
+        string command = orderValue.ToLower().EndsWith(RequestType.DescOrderType)
+            ? (thenby ? OrderType.ThenByDescending : OrderType.Descending)
+            : (thenby ? SortType.ThenBy : SortType.OrderBy);
 
         var member = ExpressionExtension.GetExpressionMember<T>(orderBy[0], parameter, false);
 
@@ -36,15 +40,18 @@ public static class SortExtension
             command,
             [typeof(T), lamda.ReturnType],
             entities.Expression,
-            Expression.Quote(lamda));
+            Expression.Quote(lamda)
+        );
 
-        return Sort(entities.Provider.CreateQuery<T>(queryExpression),
-                        orderValues.Length == 1
-                            ? string.Empty
-                                : orderValues.Skip(1).Aggregate((current, next) => current + "," + next),
-                    true);
+        return Sort(
+            entities.Provider.CreateQuery<T>(queryExpression),
+            orderValues.Length == 1 ? string.Empty : string.Join(".", orderValues.Skip(1)),
+            true
+        );
     }
 
-    public static IEnumerable<T> Sort<T>(this IEnumerable<T> entities, string orderByStringValues) =>
-        entities.AsQueryable().Sort<T>(orderByStringValues);
+    public static IEnumerable<T> Sort<T>(
+        this IEnumerable<T> entities,
+        string orderByStringValues
+    ) => entities.AsQueryable().Sort<T>(orderByStringValues);
 }

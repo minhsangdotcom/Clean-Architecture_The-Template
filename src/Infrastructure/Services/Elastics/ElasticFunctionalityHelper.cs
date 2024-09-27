@@ -362,11 +362,4 @@ public static class ElasticFunctionalityHelper
             .ToList();
 
     internal record SortItemResult(string PropertyName, PropertyInfo PropertyInfo, string Order);
-
-    internal enum PropertyType
-    {
-        Property = 1,
-        Object = 2,
-        Array = 3,
-    }
 }
