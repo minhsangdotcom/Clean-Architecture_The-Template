@@ -23,7 +23,7 @@ public static class SortExtension
         string sortProperty = sortProperties[0];
         string[] orderBy = sortProperty.Split(OrderTerm.DELIMITER);
 
-        string command = sortProperty.ToLower().EndsWith(OrderTerm.DESC)
+        string command = sortProperty.EndsWith(OrderTerm.DESC, StringComparison.OrdinalIgnoreCase)
             ? (thenby ? OrderType.ThenByDescending : OrderType.Descending)
             : (thenby ? SortType.ThenBy : SortType.OrderBy);
 
