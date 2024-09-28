@@ -4,4 +4,4 @@ using Mediator;
 
 namespace Application.UseCases.AuditLogs.Queries;
 
-public class ListAuditlogQuery() : QueryRequest, IRequest<PaginationResponse<ListAuditlogResponse>>;
+public class ListAuditlogQuery() : QueryParamRequest, IRequest<PaginationResponse<ListAuditlogResponse>>;

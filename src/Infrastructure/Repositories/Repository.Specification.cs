@@ -15,10 +15,7 @@ namespace Infrastructure.Repositories;
 public partial class Repository<T> : IRepository<T>
     where T : class
 {
-    public IQueryable<T> ApplyQuery(ISpecification<T> spec)
-    {
-        return ApplySpecification(spec);
-    }
+    public IQueryable<T> ApplyQuery(ISpecification<T> spec) => ApplySpecification(spec);
 
     public async Task<TResult?> GetByConditionSpecificationAsync<TResult>(ISpecification<T> spec) =>
         await ApplySpecification(spec)
@@ -30,20 +27,20 @@ public partial class Repository<T> : IRepository<T>
 
     public async Task<PaginationResponse<TResult>> PaginatedListSpecificationAsync<TResult>(
         ISpecification<T> spec,
-        QueryRequest request
+        QueryParamRequest request
     )
     {
-        string sortRequest = string.IsNullOrWhiteSpace(request.Order!)
-            ? $"{nameof(BaseEntity.CreatedAt)} {OrderTerm.DESC}"
-            : request.Order;
-
-        string orderQuery = $"{sortRequest},{nameof(BaseEntity.Id)}";
+        string defaultSort = string.IsNullOrWhiteSpace(request.Sort)
+            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
+            : request.Sort.Trim();
+        string uniqueSort = $"{defaultSort},{nameof(BaseEntity.Id)}";
+        Search? search = request.Search;
 
         return await ApplySpecification(spec)
             .ProjectTo<TResult>(_configurationProvider)
-            .Search(request.Keyword, request.SearchTarget)
-            .Sort(orderQuery)
-            .PaginateAsync(request.CurrentPage, request.Size);
+            .Search(search?.Keyword, search?.Targets)
+            .Sort(uniqueSort)
+            .PaginateAsync(request.Page, request.PageSize);
     }
 
     public async Task<PaginationResponse<TResult>> PaginatedListSpecificationWithGroupByAsync<
@@ -51,83 +48,81 @@ public partial class Repository<T> : IRepository<T>
         TResult
     >(
         ISpecification<T> spec,
-        QueryRequest request,
+        QueryParamRequest request,
         Expression<Func<T, TGroupProperty>> groupByExpression
     )
     {
-        string sortRequest = string.IsNullOrWhiteSpace(request.Order)
-            ? $"{nameof(BaseEntity.CreatedAt)} desc"
-            : request.Order;
+        string defaultSort = string.IsNullOrWhiteSpace(request.Sort)
+            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
+            : request.Sort.Trim();
+        string uniqueSort = $"{defaultSort},{nameof(BaseEntity.Id)}";
 
-        string orderQuery = $"{sortRequest},{nameof(BaseEntity.Id)}";
+        Search? search = request.Search;
 
         return await ApplySpecification(spec)
             .GroupBy(groupByExpression)
             .ProjectTo<TResult>(_configurationProvider)
-            .Search(request.Keyword, request.SearchTarget)
-            .Sort(orderQuery)
-            .PaginateAsync(request.CurrentPage, request.Size);
+            .Search(search?.Keyword, search?.Targets)
+            .Sort(uniqueSort)
+            .PaginateAsync(request.Page, request.PageSize);
     }
 
     public async Task<PaginationResponse<TResult>> CursorPaginatedListSpecificationAsync<TResult>(
         ISpecification<T> spec,
-        QueryRequest request,
+        QueryParamRequest request,
         string? uniqueSort = null!
-    )
-    {
-        return await ApplySpecification(spec)
+    ) =>
+        await ApplySpecification(spec)
             .ProjectTo<TResult>(_configurationProvider)
-            .Search(request.Keyword, request.SearchTarget)
+            .Search(request.Search?.Keyword, request.Search?.Targets)
             .PointerPaginateAsync(
                 new CursorPaginationRequest(
-                    request.Before,
-                    request.After,
-                    request.Size,
-                    request.Order,
+                    request.Cursor?.Before,
+                    request.Cursor?.After,
+                    request.PageSize,
+                    request.Sort,
                     uniqueSort ?? nameof(BaseEntity.Id)
                 )
             );
-    }
 
     public async Task<PaginationResponse<TResult>> CursorPaginatedListSpecificationWithGroupByAsync<
         TGroupProperty,
         TResult
     >(
         ISpecification<T> spec,
-        QueryRequest request,
+        QueryParamRequest request,
         Expression<Func<T, TGroupProperty>> groupByExpression,
         string? uniqueSort = null
-    )
-    {
-        return await ApplySpecification(spec)
+    ) =>
+        await ApplySpecification(spec)
             .GroupBy(groupByExpression)
             .ProjectTo<TResult>(_configurationProvider)
-            .Search(request.Keyword, request.SearchTarget)
+            .Search(request.Search?.Keyword, request.Search?.Targets)
             .PointerPaginateAsync(
                 new CursorPaginationRequest(
-                    request.Before,
-                    request.After,
-                    request.Size,
-                    request.Order,
+                    request.Cursor?.Before,
+                    request.Cursor?.After,
+                    request.PageSize,
+                    request.Sort,
                     uniqueSort ?? nameof(BaseEntity.Id)
                 )
             );
-    }
 
     public async Task<IEnumerable<T>> ListWithSpecificationAsync(
         ISpecification<T> spec,
-        QueryRequest request
+        QueryParamRequest request
     )
     {
-        string sortRequest = string.IsNullOrWhiteSpace(request.Order!)
-            ? $"{nameof(BaseEntity.CreatedAt)} desc"
-            : request.Order;
+        string defaultSort = string.IsNullOrWhiteSpace(request.Sort)
+            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
+            : request.Sort.Trim();
+        string uniqueSort = $"{defaultSort},{nameof(BaseEntity.Id)}";
 
-        string orderQuery = $"{sortRequest},{nameof(BaseEntity.Id)}";
+        Search? search = request.Search;
 
         return await ApplySpecification(spec)
-            .Search(request.Keyword, request.SearchTarget)
-            .Sort(orderQuery)
+            .Search(search?.Keyword, search?.Targets)
+            .Sort(uniqueSort)
             .ToListAsync();
     }
 
@@ -136,26 +131,25 @@ public partial class Repository<T> : IRepository<T>
         TResult
     >(
         ISpecification<T> spec,
-        QueryRequest request,
+        QueryParamRequest request,
         Expression<Func<T, TGroupProperty>> groupByExpression
     )
     {
-        string sortRequest = string.IsNullOrWhiteSpace(request.Order!)
-            ? $"{nameof(BaseEntity.CreatedAt)} desc"
-            : request.Order;
+        string defaultSort = string.IsNullOrWhiteSpace(request.Sort)
+            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
+            : request.Sort.Trim();
+        string uniqueSort = $"{defaultSort},{nameof(BaseEntity.Id)}";
 
-        string orderQuery = $"{sortRequest},{nameof(BaseEntity.Id)}";
+        Search? search = request.Search;
 
         return await ApplySpecification(spec)
             .GroupBy(groupByExpression)
             .ProjectTo<TResult>(_configurationProvider)
-            .Search(request.Keyword, request.SearchTarget)
-            .Sort(orderQuery)
+            .Search(search?.Keyword, search?.Targets)
+            .Sort(uniqueSort)
             .ToListAsync();
     }
 
-    private IQueryable<T> ApplySpecification(ISpecification<T> spec)
-    {
-        return SpecificationEvaluator<T>.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
-    }
+    private IQueryable<T> ApplySpecification(ISpecification<T> spec) =>
+        SpecificationEvaluator<T>.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
 }

@@ -208,7 +208,7 @@ public static class PaginationExtension
         Expression operation = true switch
         {
             bool when operationInfo.PropertyType == typeof(string) => orderInfo.OrderType
-            == RequestType.DescOrderType
+            == OrderTerm.DESC
                 ? Expression.LessThan(
                     StringCompareExpression(
                         operationInfo.MemberExpression,
@@ -224,7 +224,7 @@ public static class PaginationExtension
                     Expression.Constant(0)
                 ),
 
-            _ => orderInfo.OrderType == RequestType.DescOrderType
+            _ => orderInfo.OrderType == OrderTerm.DESC
                 ? Expression.LessThan(
                     operationInfo.MemberExpression,
                     operationInfo.ConstantExpression
@@ -319,7 +319,7 @@ public static class PaginationExtension
 
             if (sortItem.Length == 1)
             {
-                stringBuilder.Append($" {RequestType.DescOrderType}");
+                stringBuilder.Append($" {OrderTerm.DESC}");
             }
 
             stringBuilder.Append(',');

@@ -1,7 +1,9 @@
 using Application.Common.Interfaces.Services.Elastics;
 using AutoMapper;
+using Contracts.Dtos.Models;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
+using Domain.Common;
 using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.Fluent;
@@ -88,7 +90,7 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
     }
 
     public async Task<PaginationResponse<TResult>> PaginatedListAsync<TResult>(
-        QueryRequest request,
+        QueryParamRequest request,
         Action<QueryDescriptor<T>>? filter = null
     )
     {
@@ -96,13 +98,13 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
         return new PaginationResponse<TResult>(
             mapper.Map<IEnumerable<TResult>>(searchResponse.Documents?.AsEnumerable() ?? []),
             (int)searchResponse.Total,
-            request.CurrentPage,
-            request.Size
+            request.Page,
+            request.PageSize
         );
     }
 
     public async Task<PaginationResponse<T>> PaginatedListAsync(
-        QueryRequest request,
+        QueryParamRequest request,
         Action<QueryDescriptor<T>>? filter = null
     )
     {
@@ -110,8 +112,8 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
         return new PaginationResponse<T>(
             searchResponse.Documents?.AsEnumerable() ?? [],
             (int)searchResponse.Total,
-            request.CurrentPage,
-            request.Size
+            request.Page,
+            request.PageSize
         );
     }
 
@@ -149,7 +151,7 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
     }
 
     private async Task<SearchResponse<T>> SearchAsync(
-        QueryRequest request,
+        QueryParamRequest request,
         Action<QueryDescriptor<T>>? filter = null
     )
     {
@@ -158,12 +160,16 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
         {
             queries.Add(filter);
         }
-        if (!string.IsNullOrWhiteSpace(request.Keyword))
+        if (!string.IsNullOrWhiteSpace(request.Search?.Keyword))
         {
             queries.Add(search =>
-                search.Search(request.Keyword, searchProperties: request.SearchTarget)
+                search.Search(request.Search.Keyword, searchProperties: request.Search?.Targets)
             );
         }
+
+        string sort = string.IsNullOrWhiteSpace(request.Sort)
+            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
+            : request.Sort.Trim();
 
         void Search(SearchRequestDescriptor<T> search)
         {
@@ -175,9 +181,9 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
 
             search
                 .Index(indexName)
-                .OrderBy(request)
-                .From((request.CurrentPage - 1) * request.Size)
-                .Size(request.Size);
+                .OrderBy(sort)
+                .From((request.Page - 1) * request.PageSize)
+                .Size(request.PageSize);
         }
 
         return await elasticClient.SearchAsync<T>(Search);

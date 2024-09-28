@@ -1,6 +1,12 @@
 namespace Contracts.Dtos.Requests;
 
-public class CursorPaginationRequest(string? beforeCursor, string? afterCursor, int size, string? order, string uniqueOrdering)
+public class CursorPaginationRequest(
+    string? beforeCursor,
+    string? afterCursor,
+    int size,
+    string? order,
+    string uniqueOrdering
+)
 {
     public string? BeforeCursor { get; private set; } = beforeCursor;
 

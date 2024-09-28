@@ -4,4 +4,4 @@ using Mediator;
 
 namespace Application.UseCases.Users.Queries.List;
 
-public class ListUserQuery : QueryRequest, IRequest<PaginationResponse<ListUserResponse>>;
+public class ListUserQuery : QueryParamRequest, IRequest<PaginationResponse<ListUserResponse>>;

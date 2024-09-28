@@ -33,11 +33,11 @@ public interface IElasticsearchService<T>
     Task<long> CountAsync(CountRequestDescriptor<T> selector);
 
     Task<PaginationResponse<TResult>> PaginatedListAsync<TResult>(
-        QueryRequest request,
+        QueryParamRequest request,
         Action<QueryDescriptor<T>>? filter = null
     );
     Task<PaginationResponse<T>> PaginatedListAsync(
-        QueryRequest request,
+        QueryParamRequest request,
         Action<QueryDescriptor<T>>? filter = null
     );
 }

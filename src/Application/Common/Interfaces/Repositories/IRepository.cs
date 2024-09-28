@@ -77,17 +77,17 @@ public interface IRepositorySpecification<T>
 
     Task<T?> GetByConditionSpecificationAsync(ISpecification<T> spec);
 
-    Task<IEnumerable<T>> ListWithSpecificationAsync(ISpecification<T> spec, QueryRequest request);
+    Task<IEnumerable<T>> ListWithSpecificationAsync(ISpecification<T> spec, QueryParamRequest request);
 
     Task<IEnumerable<TResult>> ListSpecificationWithGroupbyAsync<TGroupProperty, TResult>(
         ISpecification<T> spec,
-        QueryRequest request,
+        QueryParamRequest request,
         Expression<Func<T, TGroupProperty>> groupByExpression
     );
 
     Task<PaginationResponse<TResult>> PaginatedListSpecificationAsync<TResult>(
         ISpecification<T> spec,
-        QueryRequest request
+        QueryParamRequest request
     );
 
     Task<PaginationResponse<TResult>> PaginatedListSpecificationWithGroupByAsync<
@@ -95,13 +95,13 @@ public interface IRepositorySpecification<T>
         TResult
     >(
         ISpecification<T> spec,
-        QueryRequest request,
+        QueryParamRequest request,
         Expression<Func<T, TGroupProperty>> groupByExpression
     );
 
     Task<PaginationResponse<TResult>> CursorPaginatedListSpecificationAsync<TResult>(
         ISpecification<T> spec,
-        QueryRequest request,
+        QueryParamRequest request,
         string? uniqueSort = null!
     );
 
@@ -110,7 +110,7 @@ public interface IRepositorySpecification<T>
         TResult
     >(
         ISpecification<T> spec,
-        QueryRequest request,
+        QueryParamRequest request,
         Expression<Func<T, TGroupProperty>> groupByExpression,
         string? uniqueSort = null!
     );

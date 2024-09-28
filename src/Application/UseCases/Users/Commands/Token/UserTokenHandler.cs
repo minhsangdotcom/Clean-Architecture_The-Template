@@ -5,6 +5,7 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
 using Contracts.Common.Messages;
 using Contracts.Constants;
+using Contracts.Dtos.Models;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -44,7 +45,7 @@ public class UserTokenHandler(
                     decodeToken.FamilyId!,
                     Ulid.Parse(decodeToken.Sub!)
                 ),
-                new() { Order = $"{nameof(UserToken.CreatedAt)} desc" }
+                new() { Sort = $"{nameof(UserToken.CreatedAt)} {OrderTerm.DESC}" }
             );
 
         if (refresh == null)

@@ -13,15 +13,15 @@ public static class ElasticFunctionalityHelper
 {
     public static SearchRequestDescriptor<T> OrderBy<T>(
         this SearchRequestDescriptor<T> sortQuery,
-        QueryRequest request
+        string Sort
     )
         where T : class
     {
         var results = new List<SortOptions>();
-        string[] sorts = request.Order?.Trim().Split(',') ?? [];
+        string[] sorts = Sort.Split(',', StringSplitOptions.TrimEntries) ?? [];
         List<SortItemResult> sortItems = GetSortItems<T>(sorts);
 
-        foreach (var sortItem in sortItems)
+        foreach (SortItemResult sortItem in sortItems)
         {
             string property = sortItem.PropertyName;
             string order = sortItem.Order;
@@ -50,7 +50,7 @@ public static class ElasticFunctionalityHelper
                 //A.B.C.CRAW
                 //PATH: A
                 //PATH: A.B
-                List<string> nestedArray = [.. property.Trim().Split('.')];
+                List<string> nestedArray = [.. property.Split('.')];
                 var nestedSort = new NestedSortValue();
                 string name = string.Empty;
                 for (int j = 0; j < nestedArray.Count - (isStringPropertyType ? 2 : 1); j++)
@@ -328,13 +328,13 @@ public static class ElasticFunctionalityHelper
             string parentPropertyName = propertyName[..propertyName.LastIndexOf('.')];
             PropertyInfo propertyInfo = type.GetNestedPropertyInfo(parentPropertyName);
 
-            if(propertyInfo.IsArrayGenericType())
+            if (propertyInfo.IsArrayGenericType())
             {
                 result.Add(new(PropertyType.Array, propertyName));
                 continue;
             }
 
-            if(propertyInfo.IsUserDefineType())
+            if (propertyInfo.IsUserDefineType())
             {
                 result.Add(new(PropertyType.Object, propertyName));
             }
@@ -348,8 +348,8 @@ public static class ElasticFunctionalityHelper
         sortItems
             .Select(sortItem =>
             {
-                string[] items = sortItem.Trim().Split(' ');
-                string propertyName = items[0].Trim();
+                string[] items = sortItem.Split(OrderTerm.DELIMITER);
+                string propertyName = items[0];
                 PropertyInfo propertyInfo = typeof(T).GetNestedPropertyInfo(propertyName);
 
                 if (items.Length == 1)
