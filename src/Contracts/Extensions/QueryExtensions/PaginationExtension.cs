@@ -38,10 +38,9 @@ public static class PaginationExtension
         CursorPaginationRequest request
     )
     {
-        string sortRequests =
-            request.Order != null
-                ? $"{request.Order},{request.UniqueOrdering}"
-                : $"{request.UniqueOrdering}";
+        string sortRequests = string.IsNullOrWhiteSpace(request.Order)
+            ? $"{request.UniqueOrdering}"
+            : $"{request.Order},{request.UniqueOrdering}";
 
         IQueryable<T> sortData = entities.Sort(sortRequests);
 
