@@ -92,8 +92,6 @@ public static class PaginationExtension
             result.Data,
             totalPage,
             request.Size,
-            first,
-            last,
             result.Pre,
             result.Next
         );

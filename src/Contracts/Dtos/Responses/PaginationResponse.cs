@@ -1,6 +1,4 @@
-using System.Text;
-using System.Text.Json.Serialization;
-using Contracts.Extensions;
+using Contracts.Dtos.Requests;
 
 namespace Contracts.Dtos.Responses;
 
@@ -20,20 +18,16 @@ public class PaginationResponse<T>
         IEnumerable<T> data,
         int totalPage,
         int pageSize,
-        T? FirstPage = default,
-        T? LastPage = default,
-        string? PreviousCursor = null,
-        string? NextCursor = null
+        string? previousCursor = null,
+        string? nextCursor = null
     )
     {
         Data = data;
         Paging = new Paging<T>(
             totalPage,
             pageSize,
-            FirstPage,
-            LastPage,
-            PreviousCursor,
-            NextCursor
+            previousCursor,
+            nextCursor
         );
     }
 }
@@ -50,9 +44,7 @@ public class Paging<T>
 
     public bool? HasPreviousPage { get; set; }
 
-    public string? Previous { get; set; }
-
-    public string? Next { get; set; }
+    public Cursor Cursor { get; set; } = new();
 
     public Paging(int totalPage, int currentPage = 1, int pageSize = 10)
     {
@@ -67,37 +59,15 @@ public class Paging<T>
     public Paging(
         int totalPage,
         int pageSize = 10,
-        T? first = default,
-        T? last = default,
-        string? PreviousCursor = null,
-        string? NextCursor = null
+        string? previousCursor = null,
+        string? nextCursor = null
     )
     {
         PageSize = pageSize;
         TotalPage = totalPage;
-
-        bool isNext =
-            Convert.ToBase64String(
-                Encoding.UTF8.GetBytes(SerializerExtension.Serialize(last!).StringJson)
-            ) == NextCursor;
-
-        if (!isNext)
-        {
-            Next = NextCursor;
-        }
-
-        HasNextPage = !isNext;
-
-        bool isPrevious =
-            Convert.ToBase64String(
-                Encoding.UTF8.GetBytes(SerializerExtension.Serialize(first!).StringJson)
-            ) == PreviousCursor;
-
-        if (!isPrevious)
-        {
-            Previous = PreviousCursor;
-        }
-
-        HasPreviousPage = !isPrevious;
+        Cursor.After = nextCursor;
+        HasNextPage = nextCursor != null;
+        Cursor.Before = previousCursor;
+        HasPreviousPage = previousCursor != null;
     }
 }
