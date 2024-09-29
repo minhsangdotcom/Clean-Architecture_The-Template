@@ -116,7 +116,6 @@ public static class PaginationExtension
             T? theLast = await list.LastAsync();
 
             string? cursor = GenerateCursor(theLast, payload.Sort);
-
             return new PaginationResult<T>(list, cursor);
         }
 
@@ -125,7 +124,7 @@ public static class PaginationExtension
         if (!string.IsNullOrWhiteSpace(payload.Next))
         {
             Dictionary<string, object?>? cursorObject = DecodeCursor(payload.Next);
-            results = GetForwardAndBackwardAsync(payload.Query, cursorObject!, payload.Sort)
+            results = MoveForwardOrBackwardAsync(payload.Query, cursorObject!, payload.Sort)
                 .Take(payload.Size)
                 .Sort(payload.Sort);
         }
@@ -134,7 +133,7 @@ public static class PaginationExtension
         {
             Dictionary<string, object?>? cursorObject = DecodeCursor(payload.Prev);
             string sort = ReverseSortOrder(payload.Sort);
-            IQueryable<T> list = GetForwardAndBackwardAsync(payload.Query, cursorObject!, sort)
+            IQueryable<T> list = MoveForwardOrBackwardAsync(payload.Query, cursorObject!, sort)
                 .Take(payload.Size)
                 .Sort(sort);
             results = list.Sort(payload.Sort);
@@ -153,6 +152,11 @@ public static class PaginationExtension
         return new PaginationResult<T>(results, nextCursor, preCursor);
     }
 
+    /// <summary>
+    /// reverse sort to move backward
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
     private static string ReverseSortOrder(string input)
     {
         // Split the input by comma to separate each field
@@ -226,14 +230,14 @@ public static class PaginationExtension
     }
 
     /// <summary>
-    /// move forward and backward
+    /// move forward or backward <- | ->
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="query"></param>
     /// <param name="cursors">consist of property name and it's value in cursor</param>
     /// <param name="sort"></param>
     /// <returns></returns>
-    private static IQueryable<T> GetForwardAndBackwardAsync<T>(
+    private static IQueryable<T> MoveForwardOrBackwardAsync<T>(
         IQueryable<T> query,
         Dictionary<string, object?>? cursors,
         string sort
@@ -243,88 +247,114 @@ public static class PaginationExtension
 
         ParameterExpression parameter = Expression.Parameter(typeof(T), "x");
         Expression? body = null;
+
+        List<KeyValuePair<Expression, object?>> CompararisonValues = [];
         for (int i = 0; i < sorts.Count; i++)
         {
             KeyValuePair<string, string> sortField = sorts[i];
+            string order = sortField.Value;
+            string propertyName = sortField.Key;
 
             //* x."property"
             Expression expressionMember = ExpressionExtension.GetExpressionMember(
-                sortField.Key,
+                propertyName,
                 parameter,
                 false,
                 typeof(T)
             );
+            object? value = cursors?.GetValueOrDefault(propertyName);
+            CompararisonValues.Add(new(expressionMember, value));
 
-            PropertyInfo propertyInfo = typeof(T).GetNestedPropertyInfo(sortField.Key);
-            object? value = cursors?.GetValueOrDefault(sortField.Key);
-
-            BinaryExpression binaryExpression = BuildInnerExpression<T>(
-                propertyInfo.PropertyType,
-                (MemberExpression)expressionMember,
-                value!,
+            BinaryExpression andClause = BuildAndClause<T>(
                 i,
-                sortField.Value
+                CompararisonValues,
+                propertyName,
+                order
             );
 
-            //* outer query
-            body = body == null ? body : Expression.OrElse(body, binaryExpression);
+            body = body == null ? andClause : Expression.OrElse(body, andClause);
         }
 
         //* x => x.Age < AgeValue ||
         //*     (x.Age == AgeValue && x.Aname > NameValue) ||
-        //*     (x.Id > IdValue)
+        //*     (x.Age == AgeValue && x.Aname == NameValue && x.Id > IdValue)
         var lamda = Expression.Lambda<Func<T, bool>>(body!, parameter);
         return query.Where(lamda);
     }
 
     /// <summary>
-    /// Build inner query like (x.Age == AgeValue && x.Aname > NameValue)
+    /// build and clause (x.Age == AgeValue && x.Aname > NameValue)
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="propertyType"></param>
-    /// <param name="member"></param>
-    /// <param name="value"></param>
     /// <param name="index"></param>
+    /// <param name="CompararisonValues"></param>
+    /// <param name="propertyName"></param>
     /// <param name="order"></param>
     /// <returns></returns>
-    private static BinaryExpression BuildInnerExpression<T>(
-        Type propertyType,
-        MemberExpression member,
-        object value,
+    private static BinaryExpression BuildAndClause<T>(
         int index,
+        List<KeyValuePair<Expression, object?>> CompararisonValues,
+        string propertyName,
         string order
     )
     {
-        BinaryExpression? body = null!;
-        for (int i = 0; i <= index; i++)
-        {
-            BinaryExpression operation = true switch
-            {
-                bool when propertyType == typeof(string) => order == OrderTerm.DESC
-                    ? Expression.LessThan(
-                        StringCompareExpression(member, Expression.Constant(value)),
-                        Expression.Constant(0)
-                    )
-                    : Expression.GreaterThan(
-                        StringCompareExpression(member, Expression.Constant(value)),
-                        Expression.Constant(0)
-                    ),
+        BinaryExpression? innerExpression = BuildEqualOperationClause(index, CompararisonValues);
 
-                _ => order == OrderTerm.DESC
-                    ? Expression.LessThan(member, Expression.Constant(value))
-                    : Expression.GreaterThan(member, Expression.Constant(value)),
-            };
+        PropertyInfo propertyInfo = typeof(T).GetNestedPropertyInfo(propertyName);
+        Expression expressionMember = CompararisonValues[index].Key;
+        object? value = CompararisonValues[index].Value;
+
+        BinaryExpression binaryExpression = true switch
+        {
+            bool when propertyInfo.PropertyType == typeof(string) => order == OrderTerm.DESC
+                ? Expression.LessThan(
+                    StringCompareExpression(expressionMember, Expression.Constant(value)),
+                    Expression.Constant(0)
+                )
+                : Expression.GreaterThan(
+                    StringCompareExpression(expressionMember, Expression.Constant(value)),
+                    Expression.Constant(0)
+                ),
+
+            _ => order == OrderTerm.DESC
+                ? Expression.LessThan(expressionMember, Expression.Constant(value))
+                : Expression.GreaterThan(expressionMember, Expression.Constant(value)),
+        };
+
+        return innerExpression == null
+            ? binaryExpression
+            : Expression.AndAlso(innerExpression, binaryExpression);
+    }
+
+    /// <summary>
+    /// Build equal query like (x.Age == AgeValue && .....)
+    /// </summary>
+    /// <param name="index"></param>
+    /// <param name="CompararisonValues"></param>
+    /// <returns></returns>
+    private static BinaryExpression? BuildEqualOperationClause(
+        int index,
+        List<KeyValuePair<Expression, object?>> CompararisonValues
+    )
+    {
+        BinaryExpression? body = null;
+        for (int i = 0; i < index; i++)
+        {
+            var innerExpression = CompararisonValues[i];
+            BinaryExpression operation = Expression.Equal(
+                innerExpression.Key,
+                Expression.Constant(innerExpression.Value)
+            );
 
             body = body == null ? body : Expression.AndAlso(body, operation);
         }
-
-        return body!;
+        return body;
     }
 
-    private static MethodCallExpression StringCompareExpression(Expression left, Expression right)
-    {
-        return Expression.Call(typeof(string), nameof(string.Compare), null, [left, right]);
-    }
+    private static MethodCallExpression StringCompareExpression(
+        Expression left,
+        Expression right
+    ) => Expression.Call(typeof(string), nameof(string.Compare), null, [left, right]);
 
     /// <summary>
     /// Get all of properties that we need to put them into cursor
