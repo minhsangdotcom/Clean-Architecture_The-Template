@@ -40,7 +40,7 @@ public partial class Repository<T> : IRepository<T>
             .ProjectTo<TResult>(_configurationProvider)
             .Search(search?.Keyword, search?.Targets)
             .Sort(uniqueSort)
-            .PaginateAsync(request.Page, request.PageSize);
+            .ToPagedListAsync(request.Page, request.PageSize);
     }
 
     public async Task<PaginationResponse<TResult>> PaginatedListSpecificationWithGroupByAsync<
@@ -64,7 +64,7 @@ public partial class Repository<T> : IRepository<T>
             .ProjectTo<TResult>(_configurationProvider)
             .Search(search?.Keyword, search?.Targets)
             .Sort(uniqueSort)
-            .PaginateAsync(request.Page, request.PageSize);
+            .ToPagedListAsync(request.Page, request.PageSize);
     }
 
     public async Task<PaginationResponse<TResult>> CursorPaginatedListSpecificationAsync<TResult>(
@@ -75,7 +75,7 @@ public partial class Repository<T> : IRepository<T>
         await ApplySpecification(spec)
             .ProjectTo<TResult>(_configurationProvider)
             .Search(request.Search?.Keyword, request.Search?.Targets)
-            .PointerPaginateAsync(
+            .ToCursorPagedListAsync(
                 new CursorPaginationRequest(
                     request.Cursor?.Before,
                     request.Cursor?.After,
@@ -98,7 +98,7 @@ public partial class Repository<T> : IRepository<T>
             .GroupBy(groupByExpression)
             .ProjectTo<TResult>(_configurationProvider)
             .Search(request.Search?.Keyword, request.Search?.Targets)
-            .PointerPaginateAsync(
+            .ToCursorPagedListAsync(
                 new CursorPaginationRequest(
                     request.Cursor?.Before,
                     request.Cursor?.After,

@@ -4,17 +4,17 @@ public class CursorPaginationRequest(
     string? beforeCursor,
     string? afterCursor,
     int size,
-    string? order,
-    string uniqueOrdering
+    string? sort,
+    string uniqueSort
 )
 {
-    public string? BeforeCursor { get; private set; } = beforeCursor;
+    public string? Before { get; private set; } = beforeCursor;
 
-    public string? AfterCursor { get; private set; } = afterCursor;
+    public string? After { get; private set; } = afterCursor;
 
     public int Size { get; private set; } = size;
 
-    public string? Order { get; private set; } = order;
+    public string? Sort { get; private set; } = sort;
 
-    public string UniqueOrdering { get; private set; } = uniqueOrdering;
+    public string UniqueSort { get; private set; } = uniqueSort;
 }

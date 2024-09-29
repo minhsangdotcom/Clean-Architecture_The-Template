@@ -50,12 +50,6 @@ public class Paging<T>
 
     public bool? HasPreviousPage { get; set; }
 
-    [JsonIgnore]
-    public T? FirstPage { get; set; }
-
-    [JsonIgnore]
-    public T? LastPage { get; set; }
-
     public string? Previous { get; set; }
 
     public string? Next { get; set; }
@@ -73,8 +67,8 @@ public class Paging<T>
     public Paging(
         int totalPage,
         int pageSize = 10,
-        T? FirstPage = default,
-        T? LastPage = default,
+        T? first = default,
+        T? last = default,
         string? PreviousCursor = null,
         string? NextCursor = null
     )
@@ -82,12 +76,9 @@ public class Paging<T>
         PageSize = pageSize;
         TotalPage = totalPage;
 
-        this.FirstPage = FirstPage;
-        this.LastPage = LastPage;
-
         bool isNext =
             Convert.ToBase64String(
-                Encoding.UTF8.GetBytes(SerializerExtension.Serialize(LastPage!).StringJson)
+                Encoding.UTF8.GetBytes(SerializerExtension.Serialize(last!).StringJson)
             ) == NextCursor;
 
         if (!isNext)
@@ -99,7 +90,7 @@ public class Paging<T>
 
         bool isPrevious =
             Convert.ToBase64String(
-                Encoding.UTF8.GetBytes(SerializerExtension.Serialize(FirstPage!).StringJson)
+                Encoding.UTF8.GetBytes(SerializerExtension.Serialize(first!).StringJson)
             ) == PreviousCursor;
 
         if (!isPrevious)

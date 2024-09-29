@@ -1,11 +1,22 @@
 using System.Linq.Expressions;
+using Ardalis.GuardClauses;
 using Contracts.Dtos.Models;
 using Contracts.Extensions.Expressions;
+using Contracts.Extensions.Reflections;
 
 namespace Contracts.Extensions.QueryExtensions;
 
 public static class SortExtension
 {
+    /// <summary>
+    /// Dynamic sort but do not do nested sort for array of poprety
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="entities"></param>
+    /// <param name="sortBy"></param>
+    /// <param name="thenby"></param>
+    /// <returns></returns>
+    /// <exception cref="NotFoundException"></exception>
     public static IQueryable<T> Sort<T>(
         this IQueryable<T> entities,
         string sortBy,
@@ -21,6 +32,12 @@ public static class SortExtension
 
         string[] sortProperties = sortBy.Trim().Split(",", StringSplitOptions.TrimEntries);
         string sortProperty = sortProperties[0];
+
+        if (typeof(T).IsNestedPropertyValid(sortProperty))
+        {
+            throw new NotFoundException(nameof(sortProperty), sortProperty);
+        }
+
         string[] orderBy = sortProperty.Split(OrderTerm.DELIMITER);
 
         string command = sortProperty.EndsWith(OrderTerm.DESC, StringComparison.OrdinalIgnoreCase)
@@ -46,8 +63,6 @@ public static class SortExtension
         );
     }
 
-    public static IEnumerable<T> Sort<T>(
-        this IEnumerable<T> entities,
-        string sortBy
-    ) => entities.AsQueryable().Sort(sortBy);
+    public static IEnumerable<T> Sort<T>(this IEnumerable<T> entities, string sortBy) =>
+        entities.AsQueryable().Sort(sortBy);
 }

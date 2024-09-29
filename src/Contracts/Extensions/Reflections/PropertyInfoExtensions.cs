@@ -54,6 +54,39 @@ public static class PropertyInfoExtensions
         return propertyInfo!;
     }
 
+    public static object? GetNestedPropertyValue(this Type type, string propertyName, object target)
+    {
+        var propertyParts = propertyName.Trim().Split('.');
+
+        PropertyInfo? propertyInfo = null;
+        object? objTarget = target;
+
+        foreach (var part in propertyParts)
+        {
+            if (objTarget == null)
+            {
+                break;
+            }
+
+            propertyInfo = Guard.Against.NotFound(
+                $"{type.FullName}.{propertyName}",
+                type.GetProperty(
+                    part.Trim(),
+                    BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
+                ),
+                nameof(propertyName)
+            );
+
+            type = propertyInfo.IsArrayGenericType()
+                ? propertyInfo.PropertyType.GetGenericArguments()[0]
+                : propertyInfo.PropertyType;
+
+            objTarget = propertyInfo.GetValue(objTarget, null);
+        }
+
+        return objTarget;
+    }
+
     public static bool IsNestedPropertyValid(this Type type, string propertyName)
     {
         var propertyParts = propertyName.Trim().Split('.');
