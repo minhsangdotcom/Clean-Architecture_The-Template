@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using Ardalis.GuardClauses;
+using Contracts.Extensions.Reflections;
 using Contracts.Guards;
 
 namespace Contracts.Extensions.Expressions;
@@ -14,35 +15,25 @@ public static class ExpressionExtension
     ) => GetExpressionMember(property, expression, isNullCheck, typeof(T));
 
     public static Expression GetExpressionMember(
-        string property,
+        string propertyPath,
         Expression expression,
         bool isNullCheck,
         Type entityType
     )
     {
         Type type = entityType;
-
-        string[] propertyNames = property.Trim().Split('.');
+        string[] properties = propertyPath.Trim().Split('.', StringSplitOptions.TrimEntries);
 
         Expression propertyValue = expression;
         Expression nullCheck = null!;
 
-        foreach (string propertyName in propertyNames)
+        foreach (string property in properties)
         {
-            string name = propertyName.Trim();
-
-            PropertyInfo propertyInfo = Guard.Against.NotFound(
-                Guid.NewGuid(),
-                type.GetProperty(
-                    name,
-                    BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
-                ),
-                nameof(name)
-            );
+            PropertyInfo propertyInfo = type.GetNestedPropertyInfo(property);
 
             try
             {
-                propertyValue = Expression.Property(propertyValue, name);
+                propertyValue = Expression.PropertyOrField(propertyValue, property);
             }
             catch (ArgumentException)
             {
@@ -57,9 +48,13 @@ public static class ExpressionExtension
             type = propertyInfo.PropertyType;
         }
 
-        return isNullCheck
-            ? Expression.Condition(nullCheck, Expression.Default(propertyValue.Type), propertyValue)
-            : propertyValue;
+        return nullCheck == null
+            ? propertyValue
+            : Expression.Condition(
+                nullCheck,
+                Expression.Default(propertyValue.Type),
+                propertyValue
+            );
     }
 
     public static PropertyInfo ToPropertyInfo(Expression expression)
@@ -110,13 +105,11 @@ public static class ExpressionExtension
     private static BinaryExpression GenerateNullCheckExpression(
         Expression propertyValue,
         Expression nullCheckExpression
-    )
-    {
-        return nullCheckExpression == null
+    ) =>
+        nullCheckExpression == null
             ? Expression.Equal(propertyValue, Expression.Default(propertyValue.Type))
             : Expression.OrElse(
                 nullCheckExpression,
                 Expression.Equal(propertyValue, Expression.Default(propertyValue.Type))
             );
-    }
 }
