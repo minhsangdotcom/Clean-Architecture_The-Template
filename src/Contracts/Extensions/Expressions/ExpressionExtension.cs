@@ -25,7 +25,6 @@ public static class ExpressionExtension
         string[] propertyNames = property.Trim().Split('.');
 
         Expression propertyValue = expression;
-
         Expression nullCheck = null!;
 
         foreach (string propertyName in propertyNames)

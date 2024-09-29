@@ -20,7 +20,8 @@ public static class SortExtension
     public static IQueryable<T> Sort<T>(
         this IQueryable<T> entities,
         string sortBy,
-        bool thenby = false
+        bool thenby = false,
+        bool isNullCheck = false
     )
     {
         if (string.IsNullOrWhiteSpace(sortBy))
@@ -29,40 +30,44 @@ public static class SortExtension
         }
 
         ParameterExpression parameter = Expression.Parameter(typeof(T), "x");
+        string[] sorts = sortBy.Trim().Split(",", StringSplitOptions.TrimEntries);
 
-        string[] sortProperties = sortBy.Trim().Split(",", StringSplitOptions.TrimEntries);
-        string sortProperty = sortProperties[0];
-
-        if (typeof(T).IsNestedPropertyValid(sortProperty))
+        Expression expression = entities.Expression;
+        foreach (string sort in sorts)
         {
-            throw new NotFoundException(nameof(sortProperty), sortProperty);
+            if (typeof(T).IsNestedPropertyValid(sort))
+            {
+                throw new NotFoundException(nameof(sort), sort);
+            }
+
+            string[] orderField = sort.Split(OrderTerm.DELIMITER);
+            string field = orderField[0];
+            string order = orderField[1];
+
+            string command =
+                order == OrderTerm.DESC
+                    ? (thenby ? OrderType.ThenByDescending : OrderType.Descending)
+                    : (thenby ? SortType.ThenBy : SortType.OrderBy);
+
+            var member = ExpressionExtension.GetExpressionMember<T>(field, parameter, isNullCheck);
+            UnaryExpression converted = Expression.Convert(member, typeof(object));
+            Expression<Func<T, object>> lamda = Expression.Lambda<Func<T, object>>(
+                converted,
+                parameter
+            );
+
+            expression = Expression.Call(
+                typeof(Queryable),
+                command,
+                [typeof(T), lamda.ReturnType],
+                expression,
+                Expression.Quote(lamda)
+            );
         }
 
-        string[] orderBy = sortProperty.Split(OrderTerm.DELIMITER);
-
-        string command = sortProperty.EndsWith(OrderTerm.DESC, StringComparison.OrdinalIgnoreCase)
-            ? (thenby ? OrderType.ThenByDescending : OrderType.Descending)
-            : (thenby ? SortType.ThenBy : SortType.OrderBy);
-
-        var member = ExpressionExtension.GetExpressionMember<T>(orderBy[0], parameter, false);
-        var converted = Expression.Convert(member, typeof(object));
-        var lamda = Expression.Lambda<Func<T, object>>(converted, parameter);
-
-        var queryExpression = Expression.Call(
-            typeof(Queryable),
-            command,
-            [typeof(T), lamda.ReturnType],
-            entities.Expression,
-            Expression.Quote(lamda)
-        );
-
-        return Sort(
-            entities.Provider.CreateQuery<T>(queryExpression),
-            sortProperties.Length == 1 ? string.Empty : string.Join(".", sortProperties.Skip(1)),
-            true
-        );
+        return entities.Provider.CreateQuery<T>(expression);
     }
 
     public static IEnumerable<T> Sort<T>(this IEnumerable<T> entities, string sortBy) =>
-        entities.AsQueryable().Sort(sortBy);
+        entities.AsQueryable().Sort(sortBy, isNullCheck: true);
 }
