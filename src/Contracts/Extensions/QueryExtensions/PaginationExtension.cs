@@ -7,7 +7,9 @@ using Contracts.Dtos.Responses;
 using Contracts.Extensions.Encryption;
 using Contracts.Extensions.Expressions;
 using Contracts.Extensions.Reflections;
+using Cysharp.Serialization.Json;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace Contracts.Extensions.QueryExtensions;
 
@@ -73,10 +75,12 @@ public static class PaginationExtension
             return new PaginationResponse<T>(query, totalPage, request.Size);
         }
 
-        T? first = await query.FirstOrDefaultAsync();
-        T? last = await query.LastOrDefaultAsync();
+        IQueryable<T> sortedQuery = query.Sort(sort);
 
-        var result = await CusorPaginateAsync(
+        T? first = await sortedQuery.FirstOrDefaultAsync();
+        T? last = await sortedQuery.LastOrDefaultAsync();
+
+        PaginationResult<T> result = await CusorPaginateAsync(
             new PaginationPayload<T>(
                 query,
                 request.Before,
@@ -112,21 +116,21 @@ public static class PaginationExtension
 
         if (isFirstMove)
         {
-            IQueryable<T> list = payload.Query.Take(payload.Size).Sort(payload.Sort);
-            T? theLast = await list.LastAsync();
+            IEnumerable<T> list = await payload.Query.Take(payload.Size).ToListAsync();
+            T? theLast = list.Last();
 
             string? cursor = GenerateCursor(theLast, payload.Sort);
             return new PaginationResult<T>(list, cursor);
         }
 
-        IQueryable<T> results = null!;
+        IEnumerable<T> results = [];
 
         if (!string.IsNullOrWhiteSpace(payload.Next))
         {
             Dictionary<string, object?>? cursorObject = DecodeCursor(payload.Next);
-            results = MoveForwardOrBackwardAsync(payload.Query, cursorObject!, payload.Sort)
+            results = await MoveForwardOrBackwardAsync(payload.Query, cursorObject!, payload.Sort)
                 .Take(payload.Size)
-                .Sort(payload.Sort);
+                .ToListAsync();
         }
 
         if (!string.IsNullOrWhiteSpace(payload.Prev))
@@ -136,11 +140,11 @@ public static class PaginationExtension
             IQueryable<T> list = MoveForwardOrBackwardAsync(payload.Query, cursorObject!, sort)
                 .Take(payload.Size)
                 .Sort(sort);
-            results = list.Sort(payload.Sort);
+            results = await list.Sort(payload.Sort).ToListAsync();
         }
 
-        T? last = await results.LastOrDefaultAsync();
-        T? first = await results.FirstOrDefaultAsync();
+        T? last = results.LastOrDefault();
+        T? first = results.FirstOrDefault();
 
         string? nextCursor = CompareToTheflag(last, payload.Last)
             ? null
@@ -211,10 +215,10 @@ public static class PaginationExtension
     private static Dictionary<string, object?>? DecodeCursor(string cursor)
     {
         string stringCursor = AesEncryptionUtility.Decrypt(cursor, EncryptKey());
-        var serializeResult = SerializerExtension.Deserialize<Dictionary<string, object?>>(
+        var serializeResult = JsonConvert.DeserializeObject<Dictionary<string, object?>>(
             stringCursor
         );
-        return serializeResult.Object;
+        return serializeResult;
     }
 
     private static string? GenerateCursor<T>(T? entity, string sort)
@@ -225,8 +229,8 @@ public static class PaginationExtension
         }
 
         Dictionary<string, object?> properties = GetEncryptionProperties(entity, sort);
-        SerializeResult serialize = SerializerExtension.Serialize(properties);
-        return AesEncryptionUtility.Encrypt(serialize.StringJson, EncryptKey());
+        string serialize = JsonConvert.SerializeObject(properties, Formatting.Indented);
+        return AesEncryptionUtility.Encrypt(serialize, EncryptKey());
     }
 
     /// <summary>
@@ -248,7 +252,7 @@ public static class PaginationExtension
         ParameterExpression parameter = Expression.Parameter(typeof(T), "x");
         Expression? body = null;
 
-        List<KeyValuePair<Expression, object?>> CompararisonValues = [];
+        List<KeyValuePair<MemberExpression, object?>> CompararisonValues = [];
         for (int i = 0; i < sorts.Count; i++)
         {
             KeyValuePair<string, string> sortField = sorts[i];
@@ -263,7 +267,7 @@ public static class PaginationExtension
                 typeof(T)
             );
             object? value = cursors?.GetValueOrDefault(propertyName);
-            CompararisonValues.Add(new(expressionMember, value));
+            CompararisonValues.Add(new((MemberExpression)expressionMember, value));
 
             BinaryExpression andClause = BuildAndClause<T>(
                 i,
@@ -293,7 +297,7 @@ public static class PaginationExtension
     /// <returns></returns>
     private static BinaryExpression BuildAndClause<T>(
         int index,
-        List<KeyValuePair<Expression, object?>> CompararisonValues,
+        List<KeyValuePair<MemberExpression, object?>> CompararisonValues,
         string propertyName,
         string order
     )
@@ -304,26 +308,51 @@ public static class PaginationExtension
         Expression expressionMember = CompararisonValues[index].Key;
         object? value = CompararisonValues[index].Value;
 
-        BinaryExpression binaryExpression = true switch
-        {
-            bool when propertyInfo.PropertyType == typeof(string) => order == OrderTerm.DESC
-                ? Expression.LessThan(
-                    StringCompareExpression(expressionMember, Expression.Constant(value)),
-                    Expression.Constant(0)
-                )
-                : Expression.GreaterThan(
-                    StringCompareExpression(expressionMember, Expression.Constant(value)),
-                    Expression.Constant(0)
-                ),
-
-            _ => order == OrderTerm.DESC
-                ? Expression.LessThan(expressionMember, Expression.Constant(value))
-                : Expression.GreaterThan(expressionMember, Expression.Constant(value)),
-        };
+        BinaryExpression binaryExpression = BuildCompareOperation(
+            propertyInfo.PropertyType,
+            (MemberExpression)expressionMember,
+            value,
+            order
+        );
 
         return innerExpression == null
             ? binaryExpression
             : Expression.AndAlso(innerExpression, binaryExpression);
+    }
+
+    private static BinaryExpression BuildCompareOperation(
+        Type type,
+        MemberExpression member,
+        object? value,
+        string order
+    )
+    {
+        if (type == typeof(Ulid))
+        {
+            MethodCallExpression compareExpression = UlidCompareExpression(member, value);
+
+            return order == OrderTerm.DESC
+                ? Expression.LessThan(compareExpression, Expression.Constant(0))
+                : Expression.GreaterThan(compareExpression, Expression.Constant(0));
+        }
+
+        if (type == typeof(string))
+        {
+            ConstantExpression comparisonValue = Expression.Constant(0);
+            ConstantExpression constantValue = Expression.Constant(value);
+            MethodCallExpression comparisonExpression = StringCompareExpression(
+                member,
+                constantValue
+            );
+
+            return order == OrderTerm.DESC
+                ? Expression.LessThan(comparisonExpression, comparisonValue)
+                : Expression.GreaterThan(comparisonExpression, comparisonValue);
+        }
+
+        return order == OrderTerm.DESC
+            ? Expression.LessThan(member, Expression.Constant(value))
+            : Expression.GreaterThan(member, Expression.Constant(value));
     }
 
     /// <summary>
@@ -334,21 +363,46 @@ public static class PaginationExtension
     /// <returns></returns>
     private static BinaryExpression? BuildEqualOperationClause(
         int index,
-        List<KeyValuePair<Expression, object?>> CompararisonValues
+        List<KeyValuePair<MemberExpression, object?>> CompararisonValues
     )
     {
         BinaryExpression? body = null;
         for (int i = 0; i < index; i++)
         {
-            var innerExpression = CompararisonValues[i];
-            BinaryExpression operation = Expression.Equal(
-                innerExpression.Key,
-                Expression.Constant(innerExpression.Value)
-            );
+            var compararisonValue = CompararisonValues[i];
+            BinaryExpression operation;
 
-            body = body == null ? body : Expression.AndAlso(body, operation);
+            //! check tomorrow
+            if (compararisonValue.Key.GetExpressionType() == typeof(Ulid))
+            {
+                MethodCallExpression compararison = UlidCompareExpression(
+                    compararisonValue.Key,
+                    compararisonValue.Value
+                );
+                operation = Expression.Equal(compararison, Expression.Constant(0));
+            }
+            else
+            {
+                operation = Expression.Equal(
+                    compararisonValue.Key,
+                    Expression.Constant(compararisonValue.Value)
+                );
+            }
+
+            body = body == null ? operation : Expression.AndAlso(body, operation);
         }
         return body;
+    }
+
+    private static MethodCallExpression UlidCompareExpression(Expression left, object? value)
+    {
+        Ulid compararisonValue = value == null ? Ulid.Empty : Ulid.Parse(value!.ToString());
+        MethodInfo? compareToMethod = typeof(Ulid).GetMethod(
+            nameof(Ulid.CompareTo),
+            [typeof(Ulid)]
+        );
+
+        return Expression.Call(left, compareToMethod!, Expression.Constant(compararisonValue));
     }
 
     private static MethodCallExpression StringCompareExpression(
@@ -369,7 +423,7 @@ public static class PaginationExtension
         List<string> sortFields = SortFields(sort);
         foreach (string field in sortFields)
         {
-            if (typeof(T).IsNestedPropertyValid(field))
+            if (!typeof(T).IsNestedPropertyValid(field))
             {
                 throw new NotFoundException(nameof(field), field);
             }

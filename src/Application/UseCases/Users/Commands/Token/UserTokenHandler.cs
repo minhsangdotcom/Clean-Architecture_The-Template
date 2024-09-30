@@ -64,7 +64,7 @@ public class UserTokenHandler(
             );
         }
 
-        if (refresh.User!.Status == UserStatus.DeActive)
+        if (refresh.User!.Status == UserStatus.Inactive)
         {
             throw new BadRequestException(
                 [Messager.Create<User>().Message(MessageType.Active).Negative().BuildMessage()]

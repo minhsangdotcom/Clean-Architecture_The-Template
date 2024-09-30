@@ -102,6 +102,18 @@ public static class ExpressionExtension
         return string.Join(".", [.. stack]);
     }
 
+    public static Type? GetExpressionType(this MemberExpression expression)
+    {
+        var propertyInfo = expression.Member as PropertyInfo;
+
+        if (propertyInfo != null)
+        {
+            return propertyInfo.PropertyType;
+        }
+
+        return null;
+    }
+
     private static BinaryExpression GenerateNullCheckExpression(
         Expression propertyValue,
         Expression nullCheckExpression

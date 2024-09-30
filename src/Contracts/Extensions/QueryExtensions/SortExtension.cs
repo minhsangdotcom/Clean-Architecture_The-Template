@@ -20,7 +20,6 @@ public static class SortExtension
     public static IQueryable<T> Sort<T>(
         this IQueryable<T> entities,
         string sortBy,
-        bool thenby = false,
         bool isNullCheck = false
     )
     {
@@ -33,21 +32,22 @@ public static class SortExtension
         string[] sorts = sortBy.Trim().Split(",", StringSplitOptions.TrimEntries);
 
         Expression expression = entities.Expression;
+        bool hasThenBy = false;
         foreach (string sort in sorts)
         {
-            if (typeof(T).IsNestedPropertyValid(sort))
+            if (!typeof(T).IsNestedPropertyValid(sort))
             {
                 throw new NotFoundException(nameof(sort), sort);
             }
 
             string[] orderField = sort.Split(OrderTerm.DELIMITER);
             string field = orderField[0];
-            string order = orderField[1];
+            string order = orderField.Length == 1 ? OrderTerm.DESC : orderField[1];
 
             string command =
                 order == OrderTerm.DESC
-                    ? (thenby ? OrderType.ThenByDescending : OrderType.Descending)
-                    : (thenby ? SortType.ThenBy : SortType.OrderBy);
+                    ? (hasThenBy ? OrderType.ThenByDescending : OrderType.Descending)
+                    : (hasThenBy ? SortType.ThenBy : SortType.OrderBy);
 
             var member = ExpressionExtension.GetExpressionMember<T>(field, parameter, isNullCheck);
             UnaryExpression converted = Expression.Convert(member, typeof(object));
@@ -63,6 +63,8 @@ public static class SortExtension
                 expression,
                 Expression.Quote(lamda)
             );
+
+            hasThenBy = true;
         }
 
         return entities.Provider.CreateQuery<T>(expression);

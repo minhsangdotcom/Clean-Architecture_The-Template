@@ -16,7 +16,6 @@
     <PackageReference Include="Mediator.Abstractions" Version="3.0.0-preview.27" />
     <PackageReference Include="NEST" Version="7.17.5" />
     <PackageReference Include="NewId" Version="4.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
     <PackageReference Include="Ulid" Version="1.3.4" />
   </ItemGroup>

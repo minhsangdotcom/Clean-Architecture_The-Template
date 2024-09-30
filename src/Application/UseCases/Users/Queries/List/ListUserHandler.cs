@@ -18,5 +18,5 @@ public class ListUserHandler(IUnitOfWork unitOfWork)
     ) =>
         await unitOfWork
             .Repository<User>()
-            .PaginatedListSpecificationAsync<ListUserResponse>(new ListUserSpecification(), query);
+            .CursorPaginatedListSpecificationAsync<ListUserResponse>(new ListUserSpecification(), query);
 }
