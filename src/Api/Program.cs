@@ -36,8 +36,7 @@ try
 
     var scope = app.Services.CreateScope();
     var serviceProvider = scope.ServiceProvider;
-
-    DbInitializer.Initialize(serviceProvider).GetAwaiter();
+    await DbInitializer.InitializeAsync(serviceProvider);
 
     if (app.Environment.IsDevelopment())
     {
