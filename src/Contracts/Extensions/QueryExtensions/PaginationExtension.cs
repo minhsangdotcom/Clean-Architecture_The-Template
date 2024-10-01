@@ -7,9 +7,9 @@ using Contracts.Dtos.Responses;
 using Contracts.Extensions.Encryption;
 using Contracts.Extensions.Expressions;
 using Contracts.Extensions.Reflections;
-using Cysharp.Serialization.Json;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Contracts.Extensions.QueryExtensions;
 
@@ -125,7 +125,7 @@ public static class PaginationExtension
             IEnumerable<T> list = await payload.Query.Take(payload.Size).ToListAsync();
             T? theLast = list.Last();
 
-            string? cursor = GenerateCursor(theLast, payload.Sort);
+            string? cursor = EncodeCursor(theLast, payload.Sort);
             return new PaginationResult<T>(list, list.Count(), cursor);
         }
 
@@ -147,21 +147,21 @@ public static class PaginationExtension
         T? first = await results.FirstOrDefaultAsync();
         int count = await results.CountAsync();
 
-        // whether or not we're currently in first or last page
+        // whether or not we're currently at first or last page
         string? nextCursor =
             (
-                CompareToTheflag(last, payload.IsPrevious ? payload.First : payload.Last)
-                || count < payload.Size
+                count < payload.Size
+                || CompareToTheflag(last, payload.IsPrevious ? payload.First : payload.Last)
             ) && !payload.IsPrevious
                 ? null
-                : GenerateCursor(last, payload.Sort);
+                : EncodeCursor(last, payload.Sort);
         string? preCursor =
             (
-                CompareToTheflag(first, payload.IsPrevious ? payload.Last : payload.First)
-                || count < payload.Size
+                count < payload.Size
+                || CompareToTheflag(first, payload.IsPrevious ? payload.Last : payload.First)
             ) && payload.IsPrevious
                 ? null
-                : GenerateCursor(first, payload.Sort);
+                : EncodeCursor(first, payload.Sort);
 
         return new PaginationResult<T>(results, count, nextCursor, preCursor);
     }
@@ -199,7 +199,7 @@ public static class PaginationExtension
                 false,
                 typeof(T)
             );
-            object? value = cursors?.GetValueOrDefault(field);
+            object? value = cursors?[field];
             CompararisonValues.Add(new((MemberExpression)expressionMember, value));
 
             BinaryExpression andClause = BuildAndClause<T>(i, CompararisonValues, order);
@@ -254,7 +254,7 @@ public static class PaginationExtension
     {
         if (type == typeof(Ulid))
         {
-            MethodCallExpression compareExpression = UlidCompareExpression(member, value);
+            MethodCallExpression compareExpression = CompareUlidByExpression(member, value);
             ConstantExpression comparisonValue = Expression.Constant(0);
 
             return order == OrderTerm.DESC
@@ -265,7 +265,7 @@ public static class PaginationExtension
         if (type == typeof(string))
         {
             ConstantExpression comparisonValue = Expression.Constant(0);
-            MethodCallExpression comparisonExpression = StringCompareExpression(
+            MethodCallExpression comparisonExpression = CompareStringByExpression(
                 member,
                 Expression.Constant(value)
             );
@@ -275,9 +275,10 @@ public static class PaginationExtension
                 : Expression.GreaterThan(comparisonExpression, comparisonValue);
         }
 
+        ConvertExpressionTypeResult typeResult = ConvertType(member, value);
         return order == OrderTerm.DESC
-            ? Expression.LessThan(member, Expression.Constant(value))
-            : Expression.GreaterThan(member, Expression.Constant(value));
+            ? Expression.LessThan(typeResult.Member, typeResult.Value)
+            : Expression.GreaterThan(typeResult.Member, typeResult.Value);
     }
 
     /// <summary>
@@ -301,12 +302,16 @@ public static class PaginationExtension
             BinaryExpression operation;
             if (compararisonValue.Key.GetMemberExpressionType() == typeof(Ulid))
             {
-                MethodCallExpression compararison = UlidCompareExpression(memberExpression, value);
+                MethodCallExpression compararison = CompareUlidByExpression(
+                    memberExpression,
+                    value
+                );
                 operation = Expression.Equal(compararison, Expression.Constant(0));
             }
             else
             {
-                operation = Expression.Equal(memberExpression, Expression.Constant(value));
+                ConvertExpressionTypeResult typeResult = ConvertType(memberExpression, value);
+                operation = Expression.Equal(typeResult.Member, typeResult.Value!);
             }
 
             body = body == null ? operation : Expression.AndAlso(body, operation);
@@ -314,7 +319,52 @@ public static class PaginationExtension
         return body;
     }
 
-    private static MethodCallExpression UlidCompareExpression(Expression left, object? value)
+    private static ConvertExpressionTypeResult ConvertType(
+        MemberExpression memberExpression,
+        object? value
+    )
+    {
+        Expression member = memberExpression;
+
+        if (memberExpression.GetMemberExpressionType().IsEnum)
+        {
+            return ConvertEnumToLong(member, value);
+        }
+
+        Type memberType = memberExpression.GetMemberExpressionType();
+
+        if (memberType.IsNullable())
+        {
+            if (memberType.GenericTypeArguments[0].IsEnum)
+            {
+                return ConvertEnumToLong(member, value);
+            }
+
+            return new(member, Expression.Constant(value, memberType));
+        }
+
+        if (value == null)
+        {
+            return new(member, Expression.Constant(value, memberType)); // Handle null as the default constant
+        }
+
+        Type valueType = value.GetType();
+        if (valueType != memberType)
+        {
+            // Convert non-matching types (e.g., string to DateTime, etc.)
+            value = Convert.ChangeType(value, memberType);
+        }
+
+        return new(member, Expression.Constant(value, memberType));
+    }
+
+    private static ConvertExpressionTypeResult ConvertEnumToLong(Expression member, object? value)
+    {
+        Type type = value?.GetType() ?? typeof(long);
+        return new(Expression.Convert(member, type), Expression.Constant(value, type));
+    }
+
+    private static MethodCallExpression CompareUlidByExpression(Expression left, object? value)
     {
         Ulid compararisonValue = value == null ? Ulid.Empty : Ulid.Parse(value!.ToString());
         MethodInfo? compareToMethod = typeof(Ulid).GetMethod(
@@ -325,35 +375,10 @@ public static class PaginationExtension
         return Expression.Call(left, compareToMethod!, Expression.Constant(compararisonValue));
     }
 
-    private static MethodCallExpression StringCompareExpression(
+    private static MethodCallExpression CompareStringByExpression(
         Expression left,
         Expression right
     ) => Expression.Call(typeof(string), nameof(string.Compare), null, [left, right]);
-
-    /// <summary>
-    /// Get all of properties that we need to put them into cursor
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="entity"></param>
-    /// <param name="sort"></param>
-    /// <returns></returns>
-    private static Dictionary<string, object?> GetEncryptionProperties<T>(T entity, string sort)
-    {
-        Dictionary<string, object?> properties = [];
-        List<string> sortFields = SortFields(sort);
-        foreach (string field in sortFields)
-        {
-            if (!typeof(T).IsNestedPropertyValid(field))
-            {
-                throw new NotFoundException(nameof(field), field);
-            }
-
-            object? value = typeof(T).GetNestedPropertyValue(field, entity!);
-            properties.Add(field, value);
-        }
-
-        return properties;
-    }
 
     /// <summary>
     /// reverse sort to move backward
@@ -430,6 +455,31 @@ public static class PaginationExtension
             : cursorProperty == desProperty;
     }
 
+    /// <summary>
+    /// Get all of properties that we need to put them into cursor
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="entity"></param>
+    /// <param name="sort"></param>
+    /// <returns></returns>
+    private static Dictionary<string, object?> GetEncryptionProperties<T>(T entity, string sort)
+    {
+        Dictionary<string, object?> properties = [];
+        List<string> sortFields = SortFields(sort);
+        foreach (string field in sortFields)
+        {
+            if (!typeof(T).IsNestedPropertyValid(field))
+            {
+                throw new NotFoundException(nameof(field), field);
+            }
+
+            object? value = typeof(T).GetNestedPropertyValue(field, entity!);
+            properties.Add(field, value);
+        }
+
+        return properties;
+    }
+
     private static Dictionary<string, object?>? DecodeCursor(string cursor)
     {
         string stringCursor = AesEncryptionUtility.Decrypt(cursor, EncryptKey());
@@ -439,7 +489,7 @@ public static class PaginationExtension
         return serializeResult;
     }
 
-    private static string? GenerateCursor<T>(T? entity, string sort)
+    private static string? EncodeCursor<T>(T? entity, string sort)
     {
         if (entity == null)
         {
@@ -508,3 +558,5 @@ internal record PaginationResult<T>(
     string? Next = null,
     string? Pre = null
 );
+
+internal record ConvertExpressionTypeResult(Expression Member, ConstantExpression Value);

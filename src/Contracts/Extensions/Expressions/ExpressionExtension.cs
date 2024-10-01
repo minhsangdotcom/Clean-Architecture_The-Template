@@ -57,7 +57,7 @@ public static class ExpressionExtension
             );
     }
 
-    public static PropertyInfo ToPropertyInfo(Expression expression)
+    public static PropertyInfo ToPropertyInfo(this Expression expression)
     {
         LambdaExpression lambda = Guard.Against.ConvertLamda(expression);
 

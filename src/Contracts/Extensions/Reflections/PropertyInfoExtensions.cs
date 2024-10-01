@@ -146,4 +146,13 @@ public static class PropertyInfoExtensions
 
         return (PropertyInfo)memberExpr!.Member;
     }
+
+    public static bool IsNullable(this Type type)
+    {
+        if (!type.IsValueType)
+            return true; // ref-type
+        if (Nullable.GetUnderlyingType(type) != null)
+            return true; // Nullable<T>
+        return false; // value-type
+    }
 }

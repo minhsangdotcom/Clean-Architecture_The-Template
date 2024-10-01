@@ -146,8 +146,8 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("phone_number");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
+                    b.Property<byte>("Status")
+                        .HasColumnType("smallint")
                         .HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
