@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    [Migration("20240917160403_InitalCreate")]
+    [Migration("20241001084513_InitalCreate")]
     partial class InitalCreate
     {
         /// <inheritdoc />
@@ -149,8 +149,8 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("phone_number");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
+                    b.Property<byte>("Status")
+                        .HasColumnType("smallint")
                         .HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
@@ -176,6 +176,9 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasDatabaseName("ix_user_email");
+
+                    b.HasIndex("Id")
+                        .HasDatabaseName("ix_user_id");
 
                     b.HasIndex("UserName")
                         .IsUnique()
