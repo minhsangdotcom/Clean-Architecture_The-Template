@@ -75,6 +75,13 @@ public static class PaginationExtension
             return new PaginationResponse<T>(query, totalPage, request.Size);
         }
 
+        bool IsPreviousMove = !string.IsNullOrWhiteSpace(request.Before);
+        string originalSort = sort;
+        if (IsPreviousMove)
+        {
+            sort = ReverseSortOrder(sort);
+        }
+
         IQueryable<T> sortedQuery = query.Sort(sort);
 
         T? first = await sortedQuery.FirstOrDefaultAsync();
@@ -82,11 +89,12 @@ public static class PaginationExtension
 
         PaginationResult<T> result = await CusorPaginateAsync(
             new PaginationPayload<T>(
-                query,
-                request.Before,
-                request.After,
+                sortedQuery,
+                request.After ?? request.Before,
+                IsPreviousMove,
                 first!,
                 last!,
+                originalSort,
                 sort,
                 request.Size
             )
@@ -95,7 +103,7 @@ public static class PaginationExtension
         return new PaginationResponse<T>(
             result.Data,
             totalPage,
-            request.Size,
+            result.PageSize,
             result.Pre,
             result.Next
         );
@@ -111,126 +119,51 @@ public static class PaginationExtension
         PaginationPayload<T> payload
     )
     {
-        bool isFirstMove =
-            string.IsNullOrWhiteSpace(payload.Prev) && string.IsNullOrWhiteSpace(payload.Next);
-
+        bool isFirstMove = string.IsNullOrWhiteSpace(payload.Cursor);
         if (isFirstMove)
         {
             IEnumerable<T> list = await payload.Query.Take(payload.Size).ToListAsync();
             T? theLast = list.Last();
 
             string? cursor = GenerateCursor(theLast, payload.Sort);
-            return new PaginationResult<T>(list, cursor);
+            return new PaginationResult<T>(list, list.Count(), cursor);
         }
 
-        IEnumerable<T> results = [];
-
-        if (!string.IsNullOrWhiteSpace(payload.Next))
+        IQueryable<T> results = Enumerable.Empty<T>().AsQueryable();
+        if (!string.IsNullOrWhiteSpace(payload.Cursor))
         {
-            Dictionary<string, object?>? cursorObject = DecodeCursor(payload.Next);
-            results = await MoveForwardOrBackwardAsync(payload.Query, cursorObject!, payload.Sort)
-                .Take(payload.Size)
-                .ToListAsync();
+            Dictionary<string, object?>? cursorObject = DecodeCursor(payload.Cursor);
+            IQueryable<T> list = MoveForwardOrBackwardAsync(
+                    payload.Query,
+                    cursorObject!,
+                    payload.Sort
+                )
+                .Take(payload.Size);
+
+            results = payload.IsPrevious ? list.Sort(payload.OriginalSort) : list;
         }
 
-        if (!string.IsNullOrWhiteSpace(payload.Prev))
-        {
-            Dictionary<string, object?>? cursorObject = DecodeCursor(payload.Prev);
-            string sort = ReverseSortOrder(payload.Sort);
-            IQueryable<T> list = MoveForwardOrBackwardAsync(payload.Query, cursorObject!, sort)
-                .Take(payload.Size)
-                .Sort(sort);
-            results = await list.Sort(payload.Sort).ToListAsync();
-        }
+        T? last = await results.LastOrDefaultAsync();
+        T? first = await results.FirstOrDefaultAsync();
+        int count = await results.CountAsync();
 
-        T? last = results.LastOrDefault();
-        T? first = results.FirstOrDefault();
+        // whether or not we're currently in first or last page
+        string? nextCursor =
+            (
+                CompareToTheflag(last, payload.IsPrevious ? payload.First : payload.Last)
+                || count < payload.Size
+            ) && !payload.IsPrevious
+                ? null
+                : GenerateCursor(last, payload.Sort);
+        string? preCursor =
+            (
+                CompareToTheflag(first, payload.IsPrevious ? payload.Last : payload.First)
+                || count < payload.Size
+            ) && payload.IsPrevious
+                ? null
+                : GenerateCursor(first, payload.Sort);
 
-        string? nextCursor = CompareToTheflag(last, payload.Last)
-            ? null
-            : GenerateCursor(last, payload.Sort);
-        string? preCursor = CompareToTheflag(first, payload.Fist)
-            ? null
-            : GenerateCursor(first, payload.Sort);
-
-        return new PaginationResult<T>(results, nextCursor, preCursor);
-    }
-
-    /// <summary>
-    /// reverse sort to move backward
-    /// </summary>
-    /// <param name="input"></param>
-    /// <returns></returns>
-    private static string ReverseSortOrder(string input)
-    {
-        // Split the input by comma to separate each field
-        var fields = input.Split(',');
-
-        // Process each field
-        for (int i = 0; i < fields.Length; i++)
-        {
-            var parts = fields[i].Split(OrderTerm.DELIMITER);
-            string fieldName = parts[0]; // The actual field name
-            string sortOrder = parts.Length > 1 ? parts[1] : OrderTerm.ASC; // Default to asc if no order specified
-
-            // Reverse the sort order
-            if (sortOrder == OrderTerm.ASC)
-            {
-                sortOrder = OrderTerm.DESC;
-            }
-            else
-            {
-                sortOrder = OrderTerm.ASC;
-            }
-
-            // Rebuild the field with the new sort order
-            fields[i] = $"{fieldName}:{sortOrder}";
-        }
-
-        // Join the fields back into a single string and return
-        return string.Join(",", fields);
-    }
-
-    /// <summary>
-    /// make sure that whether we have next or previous move
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="cursor"></param>
-    /// <param name="destination"></param>
-    /// <returns>true we're not gonna move</returns>
-    private static bool CompareToTheflag<T>(T cursor, T destination)
-    {
-        var cursorProperty = typeof(T).GetNestedPropertyValue(
-            nameof(DefaultBaseResponse.Id),
-            cursor!
-        );
-        var desProperty = typeof(T).GetNestedPropertyValue(
-            nameof(DefaultBaseResponse.Id),
-            destination!
-        );
-
-        return cursorProperty == desProperty;
-    }
-
-    private static Dictionary<string, object?>? DecodeCursor(string cursor)
-    {
-        string stringCursor = AesEncryptionUtility.Decrypt(cursor, EncryptKey());
-        var serializeResult = JsonConvert.DeserializeObject<Dictionary<string, object?>>(
-            stringCursor
-        );
-        return serializeResult;
-    }
-
-    private static string? GenerateCursor<T>(T? entity, string sort)
-    {
-        if (entity == null)
-        {
-            return null;
-        }
-
-        Dictionary<string, object?> properties = GetEncryptionProperties(entity, sort);
-        string serialize = JsonConvert.SerializeObject(properties, Formatting.Indented);
-        return AesEncryptionUtility.Encrypt(serialize, EncryptKey());
+        return new PaginationResult<T>(results, count, nextCursor, preCursor);
     }
 
     /// <summary>
@@ -255,33 +188,27 @@ public static class PaginationExtension
         List<KeyValuePair<MemberExpression, object?>> CompararisonValues = [];
         for (int i = 0; i < sorts.Count; i++)
         {
-            KeyValuePair<string, string> sortField = sorts[i];
-            string order = sortField.Value;
-            string propertyName = sortField.Key;
+            KeyValuePair<string, string> orderField = sorts[i];
+            string order = orderField.Value;
+            string field = orderField.Key;
 
             //* x."property"
             Expression expressionMember = ExpressionExtension.GetExpressionMember(
-                propertyName,
+                field,
                 parameter,
                 false,
                 typeof(T)
             );
-            object? value = cursors?.GetValueOrDefault(propertyName);
+            object? value = cursors?.GetValueOrDefault(field);
             CompararisonValues.Add(new((MemberExpression)expressionMember, value));
 
-            BinaryExpression andClause = BuildAndClause<T>(
-                i,
-                CompararisonValues,
-                propertyName,
-                order
-            );
-
+            BinaryExpression andClause = BuildAndClause<T>(i, CompararisonValues, order);
             body = body == null ? andClause : Expression.OrElse(body, andClause);
         }
 
         //* x => x.Age < AgeValue ||
-        //*     (x.Age == AgeValue && x.Aname > NameValue) ||
-        //*     (x.Age == AgeValue && x.Aname == NameValue && x.Id > IdValue)
+        //*     (x.Age == AgeValue && x.Name > NameValue) ||
+        //*     (x.Age == AgeValue && x.Name == NameValue && x.Id > IdValue)
         var lamda = Expression.Lambda<Func<T, bool>>(body!, parameter);
         return query.Where(lamda);
     }
@@ -298,19 +225,17 @@ public static class PaginationExtension
     private static BinaryExpression BuildAndClause<T>(
         int index,
         List<KeyValuePair<MemberExpression, object?>> CompararisonValues,
-        string propertyName,
         string order
     )
     {
         BinaryExpression? innerExpression = BuildEqualOperationClause(index, CompararisonValues);
 
-        PropertyInfo propertyInfo = typeof(T).GetNestedPropertyInfo(propertyName);
-        Expression expressionMember = CompararisonValues[index].Key;
+        MemberExpression expressionMember = CompararisonValues[index].Key;
         object? value = CompararisonValues[index].Value;
 
         BinaryExpression binaryExpression = BuildCompareOperation(
-            propertyInfo.PropertyType,
-            (MemberExpression)expressionMember,
+            expressionMember.GetMemberExpressionType(),
+            expressionMember,
             value,
             order
         );
@@ -330,19 +255,19 @@ public static class PaginationExtension
         if (type == typeof(Ulid))
         {
             MethodCallExpression compareExpression = UlidCompareExpression(member, value);
+            ConstantExpression comparisonValue = Expression.Constant(0);
 
             return order == OrderTerm.DESC
-                ? Expression.LessThan(compareExpression, Expression.Constant(0))
-                : Expression.GreaterThan(compareExpression, Expression.Constant(0));
+                ? Expression.LessThan(compareExpression, comparisonValue)
+                : Expression.GreaterThan(compareExpression, comparisonValue);
         }
 
         if (type == typeof(string))
         {
             ConstantExpression comparisonValue = Expression.Constant(0);
-            ConstantExpression constantValue = Expression.Constant(value);
             MethodCallExpression comparisonExpression = StringCompareExpression(
                 member,
-                constantValue
+                Expression.Constant(value)
             );
 
             return order == OrderTerm.DESC
@@ -370,23 +295,18 @@ public static class PaginationExtension
         for (int i = 0; i < index; i++)
         {
             var compararisonValue = CompararisonValues[i];
-            BinaryExpression operation;
+            MemberExpression memberExpression = compararisonValue.Key;
+            object? value = compararisonValue.Value;
 
-            //! check tomorrow
-            if (compararisonValue.Key.GetExpressionType() == typeof(Ulid))
+            BinaryExpression operation;
+            if (compararisonValue.Key.GetMemberExpressionType() == typeof(Ulid))
             {
-                MethodCallExpression compararison = UlidCompareExpression(
-                    compararisonValue.Key,
-                    compararisonValue.Value
-                );
+                MethodCallExpression compararison = UlidCompareExpression(memberExpression, value);
                 operation = Expression.Equal(compararison, Expression.Constant(0));
             }
             else
             {
-                operation = Expression.Equal(
-                    compararisonValue.Key,
-                    Expression.Constant(compararisonValue.Value)
-                );
+                operation = Expression.Equal(memberExpression, Expression.Constant(value));
             }
 
             body = body == null ? operation : Expression.AndAlso(body, operation);
@@ -436,6 +356,102 @@ public static class PaginationExtension
     }
 
     /// <summary>
+    /// reverse sort to move backward
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    private static string ReverseSortOrder(string input)
+    {
+        // Split the input by comma to separate each field
+        var fields = input.Split(',');
+
+        // Process each field
+        for (int i = 0; i < fields.Length; i++)
+        {
+            var parts = fields[i].Split(OrderTerm.DELIMITER);
+            string fieldName = parts[0]; // The actual field name
+            string sortOrder = parts.Length > 1 ? parts[1] : OrderTerm.ASC; // Default to asc if no order specified
+
+            // Reverse the sort order
+            if (sortOrder == OrderTerm.ASC)
+            {
+                sortOrder = OrderTerm.DESC;
+            }
+            else
+            {
+                sortOrder = OrderTerm.ASC;
+            }
+
+            // Rebuild the field with the new sort order
+            fields[i] = $"{fieldName}:{sortOrder}";
+        }
+
+        // Join the fields back into a single string and return
+        return string.Join(",", fields);
+    }
+
+    /// <summary>
+    /// make sure that whether we have next or previous move
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="cursor"></param>
+    /// <param name="destination"></param>
+    /// <returns>true we're not gonna move</returns>
+    private static bool CompareToTheflag<T>(T cursor, T destination)
+    {
+        PropertyInfo cursorPropertyInfo = typeof(T).GetNestedPropertyInfo(
+            nameof(DefaultBaseResponse.Id)
+        );
+        object? cursorProperty = typeof(T).GetNestedPropertyValue(
+            nameof(DefaultBaseResponse.Id),
+            cursor!
+        );
+
+        PropertyInfo destinationPropertyInfo = typeof(T).GetNestedPropertyInfo(
+            nameof(DefaultBaseResponse.Id)
+        );
+        object? desProperty = typeof(T).GetNestedPropertyValue(
+            nameof(DefaultBaseResponse.Id),
+            destination!
+        );
+
+        if (cursorPropertyInfo.PropertyType != destinationPropertyInfo.PropertyType)
+        {
+            throw new Exception($"{cursor} and {destination} key is difference");
+        }
+
+        if (cursorProperty == null || desProperty == null)
+        {
+            throw new Exception($"{cursor} or {destination} key is null");
+        }
+
+        return cursorPropertyInfo.PropertyType == typeof(Ulid)
+            ? ((Ulid)cursorProperty).CompareTo((Ulid)desProperty) == 0
+            : cursorProperty == desProperty;
+    }
+
+    private static Dictionary<string, object?>? DecodeCursor(string cursor)
+    {
+        string stringCursor = AesEncryptionUtility.Decrypt(cursor, EncryptKey());
+        var serializeResult = JsonConvert.DeserializeObject<Dictionary<string, object?>>(
+            stringCursor
+        );
+        return serializeResult;
+    }
+
+    private static string? GenerateCursor<T>(T? entity, string sort)
+    {
+        if (entity == null)
+        {
+            return null;
+        }
+
+        Dictionary<string, object?> properties = GetEncryptionProperties(entity, sort);
+        string serialize = JsonConvert.SerializeObject(properties, Formatting.Indented);
+        return AesEncryptionUtility.Encrypt(serialize, EncryptKey());
+    }
+
+    /// <summary>
     /// turn string sort to easy form
     /// </summary>
     /// <param name="sort"></param>
@@ -477,12 +493,18 @@ public static class PaginationExtension
 
 internal record PaginationPayload<T>(
     IQueryable<T> Query,
-    string? Prev,
-    string? Next,
-    T Fist,
+    string? Cursor,
+    bool IsPrevious,
+    T First,
     T Last,
+    string OriginalSort,
     string Sort,
     int Size
 );
 
-internal record PaginationResult<T>(IEnumerable<T> Data, string? Next = null, string? Pre = null);
+internal record PaginationResult<T>(
+    IEnumerable<T> Data,
+    int PageSize,
+    string? Next = null,
+    string? Pre = null
+);

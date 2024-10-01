@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Contracts.Dtos.Requests;
 
 namespace Contracts.Dtos.Responses;
@@ -23,17 +24,13 @@ public class PaginationResponse<T>
     )
     {
         Data = data;
-        Paging = new Paging<T>(
-            totalPage,
-            pageSize,
-            previousCursor,
-            nextCursor
-        );
+        Paging = new Paging<T>(totalPage, pageSize, previousCursor, nextCursor);
     }
 }
 
 public class Paging<T>
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? CurrentPage { get; set; }
 
     public int PageSize { get; set; }

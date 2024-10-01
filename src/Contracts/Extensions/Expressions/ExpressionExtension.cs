@@ -102,16 +102,18 @@ public static class ExpressionExtension
         return string.Join(".", [.. stack]);
     }
 
-    public static Type? GetExpressionType(this MemberExpression expression)
+    public static Type GetMemberExpressionType(this MemberExpression expression)
     {
-        var propertyInfo = expression.Member as PropertyInfo;
+        MemberExpression memberExpression = Guard.Against.ConvertMember(expression);
 
-        if (propertyInfo != null)
+        return memberExpression.Member switch
         {
-            return propertyInfo.PropertyType;
-        }
-
-        return null;
+            PropertyInfo property => property.PropertyType,
+            FieldInfo field => field.FieldType,
+            _ => throw new ArgumentException(
+                $"{memberExpression.Member} neither a property nor a field "
+            ),
+        };
     }
 
     private static BinaryExpression GenerateNullCheckExpression(
