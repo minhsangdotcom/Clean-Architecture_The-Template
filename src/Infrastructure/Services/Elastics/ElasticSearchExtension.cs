@@ -1,6 +1,5 @@
 using System.Reflection;
 using Application.Common.Interfaces.Services.Elastics;
-using Contracts.Dtos.Models;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
 using Microsoft.Extensions.Configuration;
@@ -34,13 +33,13 @@ public static class ElasticSearchExtension
             }
 
             IEnumerable<ElasticConfigureResult> elkConfigbuilder =
-                ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(Assembly.GetExecutingAssembly());
+                ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
+                    Assembly.GetExecutingAssembly()
+                );
             ElasticsearchRegisterHelper.ConfigureConnectionSettings(ref settings, elkConfigbuilder);
 
             var client = new ElasticsearchClient(settings);
-            services
-                .AddSingleton(client)
-                .AddSingleton<IElasticsearchServiceFactory, ElasticsearchServiceFactory>();
+            services.AddSingleton(client);
         }
 
         return services;
