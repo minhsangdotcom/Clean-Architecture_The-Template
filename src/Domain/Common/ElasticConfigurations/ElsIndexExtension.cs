@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
+using CaseConverter;
 using Contracts.Extensions;
 using Contracts.Extensions.Expressions;
 using Contracts.Extensions.Reflections;
@@ -24,7 +25,7 @@ public static class ElsIndexExtension
     public static string GetKeywordName<T>(Expression<Func<T, object>> expression)
     {
         PropertyInfo propertyInfo = ExpressionExtension.ToPropertyInfo(expression);
-        return $"{propertyInfo.Name.LowerCaseFirst()}{ElsPrefix.KeywordPrefixName}";
+        return $"{propertyInfo.Name.FirstCharToLowerCase()}{ElsPrefix.KeywordPrefixName}";
     }
 
     public static string GetKeywordName<T>(string propertyName)
@@ -36,6 +37,6 @@ public static class ElsIndexExtension
                 BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
             ) ?? throw new ArgumentException($"{propertyName} is not found.");
 
-        return $"{propertyInfo.Name.LowerCaseFirst()}{ElsPrefix.KeywordPrefixName}";
+        return $"{propertyInfo.Name.FirstCharToLowerCase()}{ElsPrefix.KeywordPrefixName}";
     }
 }

@@ -1,5 +1,5 @@
 using Ardalis.GuardClauses;
-using Contracts.Extensions;
+using CaseConverter;
 
 namespace Contracts.Common.Messages;
 
