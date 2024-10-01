@@ -35,14 +35,15 @@ public static class SortExtension
         bool hasThenBy = false;
         foreach (string sort in sorts)
         {
-            if (!typeof(T).IsNestedPropertyValid(sort))
-            {
-                throw new NotFoundException(nameof(sort), sort);
-            }
-
             string[] orderField = sort.Split(OrderTerm.DELIMITER);
             string field = orderField[0];
-            string order = orderField.Length == 1 ? OrderTerm.DESC : orderField[1];
+
+            if (!typeof(T).IsNestedPropertyValid(field))
+            {
+                throw new NotFoundException(nameof(field), field);
+            }
+
+            string order = orderField.Length == 1 ? OrderTerm.ASC : orderField[1];
 
             string command =
                 order == OrderTerm.DESC
