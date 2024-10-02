@@ -339,14 +339,8 @@ public static class PaginationExtension
         {
             return new(member, Expression.Constant(value, memberType));
         }
-        
-        return new(member, Expression.Constant(value));
-    }
 
-    private static ConvertExpressionTypeResult ConvertEnumToLong(Expression member, object? value)
-    {
-        Type type = value?.GetType() ?? typeof(long);
-        return new(Expression.Convert(member, type), Expression.Constant(value, type));
+        return new(member, Expression.Constant(value));
     }
 
     private static MethodCallExpression CompareUlidByExpression(Expression left, object? value)
