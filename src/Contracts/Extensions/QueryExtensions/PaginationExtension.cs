@@ -461,7 +461,8 @@ public static class PaginationExtension
 
     private static Dictionary<string, object?>? DecodeCursor(string cursor)
     {
-        string stringCursor = AesEncryptionUtility.Decrypt(cursor, EncryptKey());
+        string key = AesGcmEncryption.GenKey(EncryptKey());
+        string stringCursor = AesGcmEncryption.Decrypt(cursor, key);
         var serializeResult = JsonConvert.DeserializeObject<Dictionary<string, object?>>(
             stringCursor
         );
@@ -476,8 +477,9 @@ public static class PaginationExtension
         }
 
         Dictionary<string, object?> properties = GetEncryptionProperties(entity, sort);
-        string serialize = JsonConvert.SerializeObject(properties, Formatting.Indented);
-        return AesEncryptionUtility.Encrypt(serialize, EncryptKey());
+        string json = JsonConvert.SerializeObject(properties, Formatting.Indented);
+        string key = AesGcmEncryption.GenKey(EncryptKey());
+        return AesGcmEncryption.Encrypt(json, key);
     }
 
     /// <summary>
