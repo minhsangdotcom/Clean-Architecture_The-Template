@@ -327,8 +327,11 @@ public static class PaginationExtension
         Type memberType = memberExpression.GetMemberExpressionType();
 
         if (
-            (memberType.IsNullable() && memberType.GenericTypeArguments[0].IsEnum)
-            || memberType.IsEnum
+            (
+                memberType.IsNullable()
+                && memberType.GenericTypeArguments.Length > 0
+                && memberType.GenericTypeArguments[0].IsEnum
+            ) || memberType.IsEnum
         )
         {
             Type type = value?.GetType() ?? typeof(long);
