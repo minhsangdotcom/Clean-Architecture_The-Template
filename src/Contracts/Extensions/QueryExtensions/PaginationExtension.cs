@@ -9,7 +9,6 @@ using Contracts.Extensions.Expressions;
 using Contracts.Extensions.Reflections;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Contracts.Extensions.QueryExtensions;
 
@@ -325,37 +324,23 @@ public static class PaginationExtension
     )
     {
         Expression member = memberExpression;
-
-        if (memberExpression.GetMemberExpressionType().IsEnum)
-        {
-            return ConvertEnumToLong(member, value);
-        }
-
         Type memberType = memberExpression.GetMemberExpressionType();
 
-        if (memberType.IsNullable())
+        if (
+            (memberType.IsNullable() && memberType.GenericTypeArguments[0].IsEnum)
+            || memberType.IsEnum
+        )
         {
-            if (memberType.GenericTypeArguments[0].IsEnum)
-            {
-                return ConvertEnumToLong(member, value);
-            }
+            Type type = value?.GetType() ?? typeof(long);
+            return new(Expression.Convert(member, type), Expression.Constant(value, type));
+        }
 
+        if (memberType != value?.GetType())
+        {
             return new(member, Expression.Constant(value, memberType));
         }
-
-        if (value == null)
-        {
-            return new(member, Expression.Constant(value, memberType)); // Handle null as the default constant
-        }
-
-        Type valueType = value.GetType();
-        if (valueType != memberType)
-        {
-            // Convert non-matching types (e.g., string to DateTime, etc.)
-            value = Convert.ChangeType(value, memberType);
-        }
-
-        return new(member, Expression.Constant(value, memberType));
+        
+        return new(member, Expression.Constant(value));
     }
 
     private static ConvertExpressionTypeResult ConvertEnumToLong(Expression member, object? value)
