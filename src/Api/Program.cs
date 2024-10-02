@@ -20,7 +20,7 @@ builder
             new Cysharp.Serialization.Json.UlidJsonConverter()
         );
     });
-services.AddSwagger();
+services.AddSwagger(configuration);
 services.AddOpenTelemetryTracing(configuration);
 builder.AddSerialogs();
 

@@ -1,4 +1,5 @@
 using System.Reflection;
+using Api.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 
@@ -6,8 +7,15 @@ namespace Api.Extensions;
 
 public static class SwaggerExtension
 {
-    public static IServiceCollection AddSwagger(this IServiceCollection services)
+    public static IServiceCollection AddSwagger(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
+        OpenApiSettings? openApiSettings = configuration
+            .GetSection(nameof(OpenApiSettings))
+            .Get<OpenApiSettings>();
+
         return services.AddSwaggerGen(option =>
         {
             option.EnableAnnotations();
@@ -20,7 +28,7 @@ public static class SwaggerExtension
                     Name = "Authorization",
                     Type = SecuritySchemeType.Http,
                     BearerFormat = "JWT",
-                    Scheme = "bearer",
+                    Scheme = JwtBearerDefaults.AuthenticationScheme,
                 }
             );
 
@@ -33,7 +41,7 @@ public static class SwaggerExtension
                             Reference = new OpenApiReference
                             {
                                 Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer",
+                                Id = JwtBearerDefaults.AuthenticationScheme,
                             },
                         },
                         Array.Empty<string>()
@@ -41,7 +49,23 @@ public static class SwaggerExtension
                 }
             );
 
-            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            option.SwaggerDoc(
+                openApiSettings?.Version,
+                new OpenApiInfo()
+                {
+                    Title = $"{openApiSettings?.ApplicationName} Documentation",
+                    Version = openApiSettings?.Version,
+                    Description = $"Well come to the {openApiSettings?.ApplicationName} API",
+                    Contact = new OpenApiContact()
+                    {
+                        Name = openApiSettings?.Name,
+                        Email = openApiSettings?.Email,
+                    },
+                }
+            );
+
+            string? path = Assembly.GetExecutingAssembly().GetName().Name;
+            var xmlFile = $"{path}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             option.IncludeXmlComments(xmlPath);
         });
