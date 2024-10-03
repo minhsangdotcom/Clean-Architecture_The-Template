@@ -376,5 +376,17 @@ public class Message<T>(string? entityName = null)
                     MessageType.Expired
                 )
             },
+            {
+                MessageType.Redundant,
+                new(
+                    MessageType.Redundant.ToString().ToKebabCase(),
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "Redundant" },
+                        { LanguageType.Vi.ToString(), "Dư thừa" },
+                    },
+                    MessageType.Redundant
+                )
+            },
         };
 }
