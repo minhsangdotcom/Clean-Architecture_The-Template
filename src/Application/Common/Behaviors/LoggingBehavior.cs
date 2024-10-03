@@ -4,10 +4,8 @@ using Serilog;
 
 namespace Application.Common.Behaviors;
 
-public class LoggingBehavior<TMessage, TResponse>(
-    ILogger logger,
-    ICurrentUser currentUser
-) : MessagePreProcessor<TMessage, TResponse>
+public class LoggingBehavior<TMessage, TResponse>(ILogger logger, ICurrentUser currentUser)
+    : MessagePreProcessor<TMessage, TResponse>
     where TMessage : notnull, IMessage
 {
     protected override ValueTask Handle(TMessage message, CancellationToken cancellationToken)
@@ -15,13 +13,25 @@ public class LoggingBehavior<TMessage, TResponse>(
         string requestName = typeof(TMessage).Name;
         Ulid? id = currentUser.Id;
 
-        logger.Information(
-            "\n\n Application logging incomming request: {Name} has userId {userId} with payload \n {@Request} \n",
-            requestName,
-            id,
-            message
-        );
+        const string replacePhrase = "is userId {userId}";
+        string loggingMessage =
+            "\n\n Application logs incomming request: {Name} "
+            + replacePhrase
+            + " with payload \n {@Request} \n";
 
+        List<object> parameters = [requestName, id, message];
+
+        if (id == null)
+        {
+            loggingMessage = loggingMessage.Replace(
+                $"{replacePhrase}",
+                "is anonymous",
+                StringComparison.Ordinal
+            );
+            parameters.RemoveAt(1);
+        }
+
+        logger.Information(loggingMessage, [.. parameters]);
         return default!;
     }
 }
