@@ -20,10 +20,12 @@ public class QueryParamRequest
     public Search? Search { get; set; }
 
     /// <summary>
-    /// example : Sort=Age:desc,Name:asc 
+    /// example : Sort=Age:desc,Name:asc
     /// default is asc
     /// </summary>
     public string? Sort { get; set; }
+
+    public Dictionary<string, string>? Filter { get; set; }
 }
 
 public class Cursor
