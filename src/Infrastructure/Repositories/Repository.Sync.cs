@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using Application.Common.Interfaces.Repositories;
-using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
@@ -35,7 +34,7 @@ public partial class Repository<T> : IRepository<T>
 
     public IEnumerable<T> List()
     {
-       return dbContext.Set<T>().ToList();
+       return [.. dbContext.Set<T>()];
     }
 
     public T? Get(object id)
