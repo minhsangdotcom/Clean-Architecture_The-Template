@@ -34,23 +34,21 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
     }
 
     // Checks if TResponse is of PaginationResponse<> type
-    private static bool IsPaginationResponse()
-    {
-        return typeof(TResponse).IsGenericType
-            && typeof(TResponse).GetGenericTypeDefinition() == typeof(PaginationResponse<>);
-    }
+    private static bool IsPaginationResponse() =>
+        typeof(TResponse).IsGenericType
+        && typeof(TResponse).GetGenericTypeDefinition() == typeof(PaginationResponse<>);
 
     // Processes responses of type PaginationResponse<>
     private void ProcessPaginationResponse(TResponse response)
     {
-        var dataProperty = ProcessImagePathBehavior<TMessage, TResponse>.GetProperty(nameof(PaginationResponse<object>.Data));
+        PropertyInfo? dataProperty = GetProperty(nameof(PaginationResponse<object>.Data));
         if (dataProperty == null)
             return;
 
-        var dataPropertyValue = dataProperty.GetValue(response);
+        object? dataPropertyValue = dataProperty.GetValue(response);
         if (dataPropertyValue is IEnumerable dataEnumerable)
         {
-            foreach (var data in dataEnumerable)
+            foreach (object data in dataEnumerable)
             {
                 ProcessDataPropertiesWithFileAttribute(data);
             }
@@ -60,11 +58,11 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
     // Processes individual response properties with the [File] attribute
     private void ProcessSingleResponse(TResponse response)
     {
-        var property = ProcessImagePathBehavior<TMessage, TResponse>.GetFileAttributeProperty(typeof(TResponse));
+        PropertyInfo? property = GetFileAttributeProperty(typeof(TResponse));
         if (property == null)
             return;
 
-        var key = property.GetValue(response);
+        object? key = property.GetValue(response);
         if (key == null)
             return;
 
@@ -74,11 +72,13 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
     // Processes the properties of a data object within a pagination response
     private void ProcessDataPropertiesWithFileAttribute(object data)
     {
-        var propertiesWithFileAttribute = ProcessImagePathBehavior<TMessage, TResponse>.GetFileAttributeProperties(data.GetType());
+        IEnumerable<PropertyInfo> propertiesWithFileAttribute = GetFileAttributeProperties(
+            data.GetType()
+        );
 
-        foreach (var prop in propertiesWithFileAttribute)
+        foreach (PropertyInfo prop in propertiesWithFileAttribute)
         {
-            var imageKey = prop.GetValue(data);
+            object? imageKey = prop.GetValue(data);
             if (imageKey == null)
                 continue;
 
@@ -94,37 +94,31 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
         string imageKeyStr = key.ToString()!;
         if (!imageKeyStr.StartsWith(awsAmazonService.GetPublicUrl()!))
         {
-            var fullPath = awsAmazonService.GetFullpath(imageKeyStr);
+            string? fullPath = awsAmazonService.GetFullpath(imageKeyStr);
             logger.Information("image path {value}", fullPath);
             property.SetValue(target, fullPath);
         }
     }
 
     // Retrieves a property by name from the TResponse type
-    private static PropertyInfo? GetProperty(string propertyName)
-    {
-        return typeof(TResponse).GetProperty(propertyName);
-    }
+    private static PropertyInfo? GetProperty(string propertyName) =>
+        typeof(TResponse).GetProperty(propertyName);
 
     // Retrieves the first property with a [File] attribute from the given type
-    private static PropertyInfo? GetFileAttributeProperty(Type type)
-    {
-        return type.GetProperties()
+    private static PropertyInfo? GetFileAttributeProperty(Type type) =>
+        type.GetProperties()
             .FirstOrDefault(prop =>
                 prop.CustomAttributes.Any(attr =>
                     attr.AttributeType.FullName == typeof(FileAttribute).FullName
                 )
             );
-    }
 
     // Retrieves all properties with the [File] attribute from the given type
-    private static IEnumerable<PropertyInfo> GetFileAttributeProperties(Type type)
-    {
-        return type.GetProperties()
+    private static IEnumerable<PropertyInfo> GetFileAttributeProperties(Type type) =>
+        type.GetProperties()
             .Where(prop =>
                 prop.CustomAttributes.Any(attr => attr.AttributeType == typeof(FileAttribute))
             );
-    }
 
     // protected override ValueTask Handle(
     //     TMessage message,
