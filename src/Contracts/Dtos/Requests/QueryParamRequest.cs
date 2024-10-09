@@ -1,3 +1,7 @@
+using System.Text.Json.Serialization;
+using Contracts.Binds;
+using Microsoft.AspNetCore.Mvc;
+
 namespace Contracts.Dtos.Requests;
 
 public class QueryParamRequest
@@ -26,6 +30,10 @@ public class QueryParamRequest
     public string? Sort { get; set; }
 
     public Dictionary<string, string>? Filter { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
+    [ModelBinder(BinderType = typeof(FilterModelBinder))]
+    public dynamic? DynamicFilter { get; set; }
 }
 
 public class Cursor
