@@ -44,7 +44,7 @@ namespace Infrastructure.Data.Migrations
                     gender = table.Column<int>(type: "integer", nullable: true),
                     address = table.Column<string>(type: "text", nullable: true),
                     avatar = table.Column<string>(type: "text", nullable: true),
-                    status = table.Column<int>(type: "integer", nullable: false),
+                    status = table.Column<byte>(type: "smallint", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     version = table.Column<long>(type: "bigint", nullable: false),
                     created_by = table.Column<string>(type: "text", nullable: false),
@@ -197,6 +197,11 @@ namespace Infrastructure.Data.Migrations
                 table: "user",
                 column: "email",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_user_id",
+                table: "user",
+                column: "id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_user_user_name",

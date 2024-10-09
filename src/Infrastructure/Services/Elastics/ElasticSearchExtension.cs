@@ -1,6 +1,5 @@
 using System.Reflection;
 using Application.Common.Interfaces.Services.Elastics;
-using Contracts.Dtos.Models;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
 using Microsoft.Extensions.Configuration;
@@ -19,29 +18,26 @@ public static class ElasticSearchExtension
             .GetSection(nameof(ElasticsearchSettings))
             .Get<ElasticsearchSettings>();
 
-        if (elasticsearch?.IsEnable == true)
+        IEnumerable<Uri> nodes = elasticsearch!.Nodes.Select(x => new Uri(x));
+        var pool = new StaticNodePool(nodes);
+        string? userName = elasticsearch.Username;
+        string? password = elasticsearch.Password;
+
+        var settings = new ElasticsearchClientSettings(pool).DefaultIndex("default_index");
+
+        if (!string.IsNullOrWhiteSpace(userName) && !string.IsNullOrWhiteSpace(password))
         {
-            IEnumerable<Uri> nodes = elasticsearch!.Nodes.Select(x => new Uri(x));
-            var pool = new StaticNodePool(nodes);
-            string? userName = elasticsearch.Username;
-            string? password = elasticsearch.Password;
-
-            var settings = new ElasticsearchClientSettings(pool).DefaultIndex("default_index");
-
-            if (!string.IsNullOrWhiteSpace(userName) && !string.IsNullOrWhiteSpace(password))
-            {
-                settings.Authentication(new BasicAuthentication(userName, password));
-            }
-
-            IEnumerable<ElasticConfigureResult> elkConfigbuilder =
-                ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(Assembly.GetExecutingAssembly());
-            ElasticsearchRegisterHelper.ConfigureConnectionSettings(ref settings, elkConfigbuilder);
-
-            var client = new ElasticsearchClient(settings);
-            services
-                .AddSingleton(client)
-                .AddSingleton<IElasticsearchServiceFactory, ElasticsearchServiceFactory>();
+            settings.Authentication(new BasicAuthentication(userName, password));
         }
+
+        IEnumerable<ElasticConfigureResult> elkConfigbuilder =
+            ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
+                Assembly.GetExecutingAssembly()
+            );
+        ElasticsearchRegisterHelper.ConfigureConnectionSettings(ref settings, elkConfigbuilder);
+
+        var client = new ElasticsearchClient(settings);
+        services.AddSingleton(client);
 
         return services;
     }

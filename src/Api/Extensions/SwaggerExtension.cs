@@ -1,3 +1,5 @@
+using System.Reflection;
+using Api.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 
@@ -5,35 +7,67 @@ namespace Api.Extensions;
 
 public static class SwaggerExtension
 {
-    public static IServiceCollection AddSwagger(this IServiceCollection services)
+    public static IServiceCollection AddSwagger(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
-        return services.AddSwaggerGen(option =>
-         {
-             option.EnableAnnotations();
-             option.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
-             {
-                 In = ParameterLocation.Header,
-                 Description = "Please enter token",
-                 Name = "Authorization",
-                 Type = SecuritySchemeType.Http,
-                 BearerFormat = "JWT",
-                 Scheme = "bearer"
-             });
+        OpenApiSettings? openApiSettings = configuration
+            .GetSection(nameof(OpenApiSettings))
+            .Get<OpenApiSettings>();
 
-             option.AddSecurityRequirement(new OpenApiSecurityRequirement
-             {
+        return services.AddSwaggerGen(option =>
+        {
+            option.EnableAnnotations();
+            option.AddSecurityDefinition(
+                JwtBearerDefaults.AuthenticationScheme,
+                new OpenApiSecurityScheme
                 {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type=ReferenceType.SecurityScheme,
-                            Id="Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
+                    In = ParameterLocation.Header,
+                    Description = "Please enter token",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    Scheme = JwtBearerDefaults.AuthenticationScheme,
                 }
-             });
-         });
+            );
+
+            option.AddSecurityRequirement(
+                new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = JwtBearerDefaults.AuthenticationScheme,
+                            },
+                        },
+                        Array.Empty<string>()
+                    },
+                }
+            );
+
+            option.SwaggerDoc(
+                openApiSettings?.Version,
+                new OpenApiInfo()
+                {
+                    Title = $"{openApiSettings?.ApplicationName} Documentation",
+                    Version = openApiSettings?.Version,
+                    Description = $"Well come to the {openApiSettings?.ApplicationName} API",
+                    Contact = new OpenApiContact()
+                    {
+                        Name = openApiSettings?.Name,
+                        Email = openApiSettings?.Email,
+                    },
+                }
+            );
+
+            string? path = Assembly.GetExecutingAssembly().GetName().Name;
+            var xmlFile = $"{path}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            option.IncludeXmlComments(xmlPath);
+        });
     }
 }

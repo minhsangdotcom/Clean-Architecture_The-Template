@@ -1,6 +1,5 @@
-using System.Text;
 using System.Text.Json.Serialization;
-using Contracts.Extensions;
+using Contracts.Dtos.Requests;
 
 namespace Contracts.Dtos.Responses;
 
@@ -20,26 +19,18 @@ public class PaginationResponse<T>
         IEnumerable<T> data,
         int totalPage,
         int pageSize,
-        T? FirstPage = default,
-        T? LastPage = default,
-        string? PreviousCursor = null,
-        string? NextCursor = null
+        string? previousCursor = null,
+        string? nextCursor = null
     )
     {
         Data = data;
-        Paging = new Paging<T>(
-            totalPage,
-            pageSize,
-            FirstPage,
-            LastPage,
-            PreviousCursor,
-            NextCursor
-        );
+        Paging = new Paging<T>(totalPage, pageSize, previousCursor, nextCursor);
     }
 }
 
 public class Paging<T>
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? CurrentPage { get; set; }
 
     public int PageSize { get; set; }
@@ -50,15 +41,7 @@ public class Paging<T>
 
     public bool? HasPreviousPage { get; set; }
 
-    [JsonIgnore]
-    public T? FirstPage { get; set; }
-
-    [JsonIgnore]
-    public T? LastPage { get; set; }
-
-    public string? Previous { get; set; }
-
-    public string? Next { get; set; }
+    public Cursor Cursor { get; set; } = new();
 
     public Paging(int totalPage, int currentPage = 1, int pageSize = 10)
     {
@@ -73,40 +56,15 @@ public class Paging<T>
     public Paging(
         int totalPage,
         int pageSize = 10,
-        T? FirstPage = default,
-        T? LastPage = default,
-        string? PreviousCursor = null,
-        string? NextCursor = null
+        string? previousCursor = null,
+        string? nextCursor = null
     )
     {
         PageSize = pageSize;
         TotalPage = totalPage;
-
-        this.FirstPage = FirstPage;
-        this.LastPage = LastPage;
-
-        bool isNext =
-            Convert.ToBase64String(
-                Encoding.UTF8.GetBytes(SerializerExtension.Serialize(LastPage!).StringJson)
-            ) == NextCursor;
-
-        if (!isNext)
-        {
-            Next = NextCursor;
-        }
-
-        HasNextPage = !isNext;
-
-        bool isPrevious =
-            Convert.ToBase64String(
-                Encoding.UTF8.GetBytes(SerializerExtension.Serialize(FirstPage!).StringJson)
-            ) == PreviousCursor;
-
-        if (!isPrevious)
-        {
-            Previous = PreviousCursor;
-        }
-
-        HasPreviousPage = !isPrevious;
+        Cursor.After = nextCursor;
+        HasNextPage = nextCursor != null;
+        Cursor.Before = previousCursor;
+        HasPreviousPage = previousCursor != null;
     }
 }

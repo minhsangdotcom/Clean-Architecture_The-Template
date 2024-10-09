@@ -1,8 +1,6 @@
 using Application.Common.Interfaces.Repositories;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
+using Application.Common.QueryStringProcessing;
 using Contracts.Dtos.Responses;
-using Contracts.Extensions.QueryExtensions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
@@ -18,5 +16,8 @@ public class ListUserHandler(IUnitOfWork unitOfWork)
     ) =>
         await unitOfWork
             .Repository<User>()
-            .PaginatedListSpecificationAsync<ListUserResponse>(new ListUserSpecification(), query);
+            .CursorPaginatedListSpecificationAsync<ListUserResponse>(
+                new ListUserSpecification(),
+                query.ValidateQuery()
+            );
 }

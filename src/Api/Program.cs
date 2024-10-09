@@ -20,7 +20,7 @@ builder
             new Cysharp.Serialization.Json.UlidJsonConverter()
         );
     });
-services.AddSwagger();
+services.AddSwagger(configuration);
 services.AddOpenTelemetryTracing(configuration);
 builder.AddSerialogs();
 
@@ -36,8 +36,7 @@ try
 
     var scope = app.Services.CreateScope();
     var serviceProvider = scope.ServiceProvider;
-
-    DbInitializer.Initialize(serviceProvider).GetAwaiter();
+    await DbInitializer.InitializeAsync(serviceProvider);
 
     if (app.Environment.IsDevelopment())
     {

@@ -1,344 +1,546 @@
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
+using Ardalis.GuardClauses;
 using Contracts.Dtos.Models;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
+using Contracts.Extensions.Encryption;
 using Contracts.Extensions.Expressions;
+using Contracts.Extensions.Reflections;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace Contracts.Extensions.QueryExtensions;
 
 public static class PaginationExtension
 {
-    public static async Task<PaginationResponse<T>> PaginateAsync<T>(
-        this IQueryable<T> entities,
+    /// <summary>
+    /// offset pagination for IQueryable
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="entities"></param>
+    /// <param name="current"></param>
+    /// <param name="size"></param>
+    /// <returns></returns>
+    public static async Task<PaginationResponse<T>> ToPagedListAsync<T>(
+        this IQueryable<T> query,
         int current,
         int size
     )
     {
-        int totalPage = entities.Count();
+        int totalPage = query.Count();
 
         return new PaginationResponse<T>(
-            await entities.Skip((current - 1) * size).Take(size).ToListAsync(),
+            await query.Skip((current - 1) * size).Take(size).ToListAsync(),
             totalPage,
             current,
             size
         );
     }
 
-    public static PaginationResponse<T> Paginate<T>(
-        this IEnumerable<T> entities,
+    /// <summary>
+    /// offset pagination for IEnumerable
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="entities"></param>
+    /// <param name="current"></param>
+    /// <param name="size"></param>
+    /// <returns></returns>
+    public static PaginationResponse<T> ToPagedList<T>(
+        this IEnumerable<T> query,
         int current,
         int size
-    ) => new(entities.Skip((current - 1) * size).Take(size), entities.Count(), current, size);
+    ) => new(query.Skip((current - 1) * size).Take(size), query.Count(), current, size);
 
-    public static async Task<PaginationResponse<T>> PointerPaginateAsync<T>(
-        this IQueryable<T> entities,
+    /// <summary>
+    /// Cursor pagination
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="query"></param>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    public static async Task<PaginationResponse<T>> ToCursorPagedListAsync<T>(
+        this IQueryable<T> query,
         CursorPaginationRequest request
     )
     {
-        string sortRequests = string.IsNullOrWhiteSpace(request.Order)
-            ? $"{request.UniqueOrdering}"
-            : $"{request.Order},{request.UniqueOrdering}";
+        string sort = string.IsNullOrWhiteSpace(request.Sort)
+            ? $"{request.UniqueSort}"
+            : $"{request.Sort},{request.UniqueSort}";
 
-        IQueryable<T> sortData = entities.Sort(sortRequests);
-
-        int totalPage = sortData.Count();
-
-        T? firstPage = sortData.FirstOrDefault();
-
-        T? lastPage = sortData.LastOrDefault();
-
-        bool isBefore = request.BeforeCursor != null && request.AfterCursor == null;
-
-        string cursorQuery = request.AfterCursor!;
-        string sort = sortRequests;
-
-        if (isBefore)
+        int totalPage = await query.CountAsync();
+        if (totalPage == 0)
         {
-            sort = GetReverseSort(sortRequests);
-            sortData = sortData.Sort(sort);
-            cursorQuery = request.BeforeCursor!;
+            return new PaginationResponse<T>(query, totalPage, request.Size);
         }
 
-        PaginationMetadata<T> metadata = await GetMetadata(
-            sortData,
-            request.Size,
-            sort,
-            cursorQuery,
-            isBefore
+        bool IsPreviousMove = !string.IsNullOrWhiteSpace(request.Before);
+        string originalSort = sort;
+        if (IsPreviousMove)
+        {
+            sort = ReverseSortOrder(sort);
+        }
+
+        IQueryable<T> sortedQuery = query.Sort(sort);
+
+        T? first = await sortedQuery.FirstOrDefaultAsync();
+        T? last = await sortedQuery.LastOrDefaultAsync();
+
+        PaginationResult<T> result = await CusorPaginateAsync(
+            new PaginationPayload<T>(
+                sortedQuery,
+                request.After ?? request.Before,
+                IsPreviousMove,
+                first!,
+                last!,
+                originalSort,
+                sort,
+                request.Size
+            )
         );
 
         return new PaginationResponse<T>(
-            metadata.Entities,
+            result.Data,
             totalPage,
-            request.Size,
-            firstPage,
-            lastPage,
-            metadata.PreviousCursor,
-            metadata.NextCursor
+            result.PageSize,
+            result.Pre,
+            result.Next
         );
     }
 
-    private static async Task<PaginationMetadata<T>> GetMetadata<T>(
-        IQueryable<T> entities,
-        int size,
-        string sortRequest,
-        string? cursor = null,
-        bool isBefore = false
+    /// <summary>
+    /// do cursor paging
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="payload"></param>
+    /// <returns></returns>
+    private static async Task<PaginationResult<T>> CusorPaginateAsync<T>(
+        PaginationPayload<T> payload
     )
     {
+        bool isFirstMove = string.IsNullOrWhiteSpace(payload.Cursor);
+        if (isFirstMove)
+        {
+            IEnumerable<T> list = await payload.Query.Take(payload.Size).ToListAsync();
+            T? theLast = list.Last();
+
+            string? cursor = EncodeCursor(theLast, payload.Sort);
+            return new PaginationResult<T>(list, list.Count(), cursor);
+        }
+
+        IQueryable<T> results = Enumerable.Empty<T>().AsQueryable();
+        if (!string.IsNullOrWhiteSpace(payload.Cursor))
+        {
+            Dictionary<string, object?>? cursorObject = DecodeCursor(payload.Cursor);
+            IQueryable<T> list = MoveForwardOrBackwardAsync(
+                    payload.Query,
+                    cursorObject!,
+                    payload.Sort
+                )
+                .Take(payload.Size);
+
+            results = payload.IsPrevious ? list.Sort(payload.OriginalSort) : list;
+        }
+
+        T? last = await results.LastOrDefaultAsync();
+        T? first = await results.FirstOrDefaultAsync();
+        int count = await results.CountAsync();
+
+        // whether or not we're currently at first or last page
+        string? nextCursor =
+            (
+                count < payload.Size
+                || CompareToTheflag(last, payload.IsPrevious ? payload.First : payload.Last)
+            ) && !payload.IsPrevious
+                ? null
+                : EncodeCursor(last, payload.Sort);
+        string? preCursor =
+            (
+                count < payload.Size
+                || CompareToTheflag(first, payload.IsPrevious ? payload.Last : payload.First)
+            ) && payload.IsPrevious
+                ? null
+                : EncodeCursor(first, payload.Sort);
+
+        return new PaginationResult<T>(results, count, nextCursor, preCursor);
+    }
+
+    /// <summary>
+    /// move forward or backward <- | ->
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="query"></param>
+    /// <param name="cursors">consist of property name and it's value in cursor</param>
+    /// <param name="sort"></param>
+    /// <returns></returns>
+    private static IQueryable<T> MoveForwardOrBackwardAsync<T>(
+        IQueryable<T> query,
+        Dictionary<string, object?>? cursors,
+        string sort
+    )
+    {
+        List<KeyValuePair<string, string>> sorts = TransformSort(sort);
+
         ParameterExpression parameter = Expression.Parameter(typeof(T), "x");
+        Expression? body = null;
 
-        Expression<Func<T, bool>> lamda = GetlamdaExpression<T>(
-            parameter,
-            cursor == null,
-            cursor!,
-            sortRequest
+        List<KeyValuePair<MemberExpression, object?>> CompararisonValues = [];
+        for (int i = 0; i < sorts.Count; i++)
+        {
+            KeyValuePair<string, string> orderField = sorts[i];
+            string order = orderField.Value;
+            string field = orderField.Key;
+
+            //* x."property"
+            Expression expressionMember = ExpressionExtension.GetExpressionMember(
+                field,
+                parameter,
+                false,
+                typeof(T)
+            );
+            object? value = cursors?[field];
+            CompararisonValues.Add(new((MemberExpression)expressionMember, value));
+
+            BinaryExpression andClause = BuildAndClause<T>(i, CompararisonValues, order);
+            body = body == null ? andClause : Expression.OrElse(body, andClause);
+        }
+
+        //* x => x.Age < AgeValue ||
+        //*     (x.Age == AgeValue && x.Name > NameValue) ||
+        //*     (x.Age == AgeValue && x.Name == NameValue && x.Id > IdValue)
+        var lamda = Expression.Lambda<Func<T, bool>>(body!, parameter);
+        return query.Where(lamda);
+    }
+
+    /// <summary>
+    /// build and clause (x.Age == AgeValue && x.Aname > NameValue)
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="index"></param>
+    /// <param name="CompararisonValues"></param>
+    /// <param name="propertyName"></param>
+    /// <param name="order"></param>
+    /// <returns></returns>
+    private static BinaryExpression BuildAndClause<T>(
+        int index,
+        List<KeyValuePair<MemberExpression, object?>> CompararisonValues,
+        string order
+    )
+    {
+        BinaryExpression? innerExpression = BuildEqualOperationClause(index, CompararisonValues);
+
+        MemberExpression expressionMember = CompararisonValues[index].Key;
+        object? value = CompararisonValues[index].Value;
+
+        BinaryExpression binaryExpression = BuildCompareOperation(
+            expressionMember.GetMemberExpressionType(),
+            expressionMember,
+            value,
+            order
         );
 
-        IQueryable<T> query = entities.Where(lamda).Take(size);
-
-        if (isBefore)
-        {
-            query = query.Sort(GetReverseSort(sortRequest));
-        }
-
-        List<T> dataEntities = await query.ToListAsync();
-
-        string nextCursor = null!;
-        string previousCursor = null!;
-
-        if (dataEntities.Count != 0)
-        {
-            previousCursor = Convert.ToBase64String(
-                Encoding.UTF8.GetBytes(
-                    SerializerExtension.Serialize(dataEntities.FirstOrDefault()!).StringJson
-                )
-            );
-            nextCursor = Convert.ToBase64String(
-                Encoding.UTF8.GetBytes(
-                    SerializerExtension.Serialize(dataEntities.LastOrDefault()!).StringJson
-                )
-            );
-        }
-
-        return new PaginationMetadata<T>(dataEntities, nextCursor, previousCursor);
+        return innerExpression == null
+            ? binaryExpression
+            : Expression.AndAlso(innerExpression, binaryExpression);
     }
 
-    private static Expression<Func<T, bool>> GetlamdaExpression<T>(
-        ParameterExpression parameter,
-        bool isFirstPage,
-        string cursor,
-        string sortRequest
+    private static BinaryExpression BuildCompareOperation(
+        Type type,
+        MemberExpression member,
+        object? value,
+        string order
     )
     {
-        if (isFirstPage)
+        if (type == typeof(Ulid))
         {
-            return Expression.Lambda<Func<T, bool>>(Expression.Constant(true), parameter);
+            MethodCallExpression compareExpression = CompareUlidByExpression(member, value);
+            ConstantExpression comparisonValue = Expression.Constant(0);
+
+            return order == OrderTerm.DESC
+                ? Expression.LessThan(compareExpression, comparisonValue)
+                : Expression.GreaterThan(compareExpression, comparisonValue);
         }
 
-        Expression body = null!;
-
-        IEnumerable<OrderInfo> orders = GetOrderInfo(sortRequest);
-
-        for (int i = 0; i < orders.Count(); i++)
+        if (type == typeof(string))
         {
-            OrderInfo orderInfo = orders.ElementAt(i);
-
-            Expression currentOperation = GetBodyExpression<T>(orderInfo, cursor, parameter);
-
-            Expression previousOperation = GetPreviousExpression<T>(
-                orders,
-                parameter,
-                cursor,
-                orderInfo.Propertyname
+            ConstantExpression comparisonValue = Expression.Constant(0);
+            MethodCallExpression comparisonExpression = CompareStringByExpression(
+                member,
+                Expression.Constant(value)
             );
 
-            Expression operation =
-                previousOperation != null
-                    ? Expression.And(previousOperation, currentOperation)
-                    : currentOperation;
-
-            body = body == null ? operation : Expression.OrElse(body, operation);
+            return order == OrderTerm.DESC
+                ? Expression.LessThan(comparisonExpression, comparisonValue)
+                : Expression.GreaterThan(comparisonExpression, comparisonValue);
         }
 
-        return Expression.Lambda<Func<T, bool>>(body, parameter);
+        ConvertExpressionTypeResult typeResult = ConvertType(member, value);
+        return order == OrderTerm.DESC
+            ? Expression.LessThan(typeResult.Member, typeResult.Value)
+            : Expression.GreaterThan(typeResult.Member, typeResult.Value);
     }
 
-    private static Expression GetPreviousExpression<T>(
-        IEnumerable<OrderInfo> orders,
-        ParameterExpression parameter,
-        string cursor,
-        string breakProperty
+    /// <summary>
+    /// Build equal query like (x.Age == AgeValue && .....)
+    /// </summary>
+    /// <param name="index"></param>
+    /// <param name="CompararisonValues"></param>
+    /// <returns></returns>
+    private static BinaryExpression? BuildEqualOperationClause(
+        int index,
+        List<KeyValuePair<MemberExpression, object?>> CompararisonValues
     )
     {
-        Expression body = null!;
-
-        foreach (var order in orders)
+        BinaryExpression? body = null;
+        for (int i = 0; i < index; i++)
         {
-            if (breakProperty == order.Propertyname)
+            var compararisonValue = CompararisonValues[i];
+            MemberExpression memberExpression = compararisonValue.Key;
+            object? value = compararisonValue.Value;
+
+            BinaryExpression operation;
+            if (compararisonValue.Key.GetMemberExpressionType() == typeof(Ulid))
             {
-                break;
+                MethodCallExpression compararison = CompareUlidByExpression(
+                    memberExpression,
+                    value
+                );
+                operation = Expression.Equal(compararison, Expression.Constant(0));
             }
-
-            OperationInfo operationInfo = GetOperationInfo<T>(parameter, cursor, order);
-
-            Expression operation = Expression.Equal(
-                operationInfo.MemberExpression,
-                operationInfo.ConstantExpression
-            );
+            else
+            {
+                ConvertExpressionTypeResult typeResult = ConvertType(memberExpression, value);
+                operation = Expression.Equal(typeResult.Member, typeResult.Value!);
+            }
 
             body = body == null ? operation : Expression.AndAlso(body, operation);
         }
-
         return body;
     }
 
-    private static Expression GetBodyExpression<T>(
-        OrderInfo orderInfo,
-        string cursor,
-        ParameterExpression parameter
+    private static ConvertExpressionTypeResult ConvertType(
+        MemberExpression memberExpression,
+        object? value
     )
     {
-        OperationInfo operationInfo = GetOperationInfo<T>(parameter, cursor, orderInfo);
+        Expression member = memberExpression;
+        Type memberType = memberExpression.GetMemberExpressionType();
 
-        Expression operation = true switch
+        if (
+            (
+                memberType.IsNullable()
+                && memberType.GenericTypeArguments.Length > 0
+                && memberType.GenericTypeArguments[0].IsEnum
+            ) || memberType.IsEnum
+        )
         {
-            bool when operationInfo.PropertyType == typeof(string) => orderInfo.OrderType
-            == OrderTerm.DESC
-                ? Expression.LessThan(
-                    StringCompareExpression(
-                        operationInfo.MemberExpression,
-                        operationInfo.ConstantExpression
-                    ),
-                    Expression.Constant(0)
-                )
-                : Expression.GreaterThan(
-                    StringCompareExpression(
-                        operationInfo.MemberExpression,
-                        operationInfo.ConstantExpression
-                    ),
-                    Expression.Constant(0)
-                ),
+            Type type = value?.GetType() ?? typeof(long);
+            return new(Expression.Convert(member, type), Expression.Constant(value, type));
+        }
 
-            _ => orderInfo.OrderType == OrderTerm.DESC
-                ? Expression.LessThan(
-                    operationInfo.MemberExpression,
-                    operationInfo.ConstantExpression
-                )
-                : Expression.GreaterThan(
-                    operationInfo.MemberExpression,
-                    operationInfo.ConstantExpression
-                ),
-        };
+        if (memberType != value?.GetType())
+        {
+            return new(member, Expression.Constant(value, memberType));
+        }
 
-        return operation;
+        return new(member, Expression.Constant(value));
     }
 
-    private static OperationInfo GetOperationInfo<T>(
-        ParameterExpression parameter,
-        string cursor,
-        OrderInfo orderInfo
-    )
+    private static MethodCallExpression CompareUlidByExpression(Expression left, object? value)
     {
-        var memberExpression = ExpressionExtension.GetExpressionMember<T>(
-            orderInfo.Propertyname,
-            parameter,
-            false
+        Ulid compararisonValue = value == null ? Ulid.Empty : Ulid.Parse(value!.ToString());
+        MethodInfo? compareToMethod = typeof(Ulid).GetMethod(
+            nameof(Ulid.CompareTo),
+            [typeof(Ulid)]
         );
 
-        T? cursorObject = GetCursor<T>(cursor);
+        return Expression.Call(left, compareToMethod!, Expression.Constant(compararisonValue));
+    }
 
-        PropertyInfo propertyInfo =
-            cursorObject?.GetType()?.GetProperty(orderInfo.Propertyname)
-            ?? throw new Exception($"{orderInfo.Propertyname} is not found.");
+    private static MethodCallExpression CompareStringByExpression(
+        Expression left,
+        Expression right
+    ) => Expression.Call(typeof(string), nameof(string.Compare), null, [left, right]);
 
-        ConstantExpression expressionValue = GetExpresionValue(propertyInfo, cursorObject!);
+    /// <summary>
+    /// reverse sort to move backward
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    private static string ReverseSortOrder(string input)
+    {
+        // Split the input by comma to separate each field
+        var fields = input.Split(',');
 
-        return new OperationInfo
+        // Process each field
+        for (int i = 0; i < fields.Length; i++)
         {
-            MemberExpression = memberExpression,
-            ConstantExpression = expressionValue,
-            PropertyType = propertyInfo.PropertyType,
-        };
-    }
+            var parts = fields[i].Split(OrderTerm.DELIMITER);
+            string fieldName = parts[0]; // The actual field name
+            string sortOrder = parts.Length > 1 ? parts[1] : OrderTerm.ASC; // Default to asc if no order specified
 
-    private static T? GetCursor<T>(string cursor)
-    {
-        byte[] byteArray = Convert.FromBase64String(cursor!);
-
-        string jsonBack = Encoding.UTF8.GetString(byteArray);
-
-        return SerializerExtension.Deserialize<T>(jsonBack).Object;
-    }
-
-    private static ConstantExpression GetExpresionValue(
-        PropertyInfo propertyInfo,
-        object cursorObject
-    )
-    {
-        var value = propertyInfo?.GetValue(cursorObject, null);
-
-        return Expression.Constant(value);
-    }
-
-    private static IEnumerable<OrderInfo> GetOrderInfo(string sortRequest)
-    {
-        foreach (var orederValue in sortRequest.Trim().Split(","))
-        {
-            var order = orederValue.Trim().Split(" ");
-
-            OrderInfo orderInfo = new() { Propertyname = order.FirstOrDefault()! };
-
-            if (order.Length > 1)
+            // Reverse the sort order
+            if (sortOrder == OrderTerm.ASC)
             {
-                orderInfo.OrderType = order.LastOrDefault()!;
+                sortOrder = OrderTerm.DESC;
+            }
+            else
+            {
+                sortOrder = OrderTerm.ASC;
             }
 
-            yield return orderInfo;
+            // Rebuild the field with the new sort order
+            fields[i] = $"{fieldName}:{sortOrder}";
         }
+
+        // Join the fields back into a single string and return
+        return string.Join(",", fields);
     }
 
-    private static MethodCallExpression StringCompareExpression(Expression left, Expression right)
+    /// <summary>
+    /// make sure that whether we have next or previous move
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="cursor"></param>
+    /// <param name="destination"></param>
+    /// <returns>true we're not gonna move</returns>
+    private static bool CompareToTheflag<T>(T cursor, T destination)
     {
-        return Expression.Call(typeof(string), nameof(string.Compare), null, [left, right]);
-    }
+        PropertyInfo cursorPropertyInfo = typeof(T).GetNestedPropertyInfo(
+            nameof(DefaultBaseResponse.Id)
+        );
+        object? cursorProperty = typeof(T).GetNestedPropertyValue(
+            nameof(DefaultBaseResponse.Id),
+            cursor!
+        );
 
-    private static string GetReverseSort(string sortQuery)
-    {
-        StringBuilder stringBuilder = new();
+        PropertyInfo destinationPropertyInfo = typeof(T).GetNestedPropertyInfo(
+            nameof(DefaultBaseResponse.Id)
+        );
+        object? desProperty = typeof(T).GetNestedPropertyValue(
+            nameof(DefaultBaseResponse.Id),
+            destination!
+        );
 
-        foreach (var query in sortQuery.Trim().Split(","))
+        if (cursorPropertyInfo.PropertyType != destinationPropertyInfo.PropertyType)
         {
-            var sortItem = query.Trim().Split(" ");
+            throw new Exception($"{cursor} and {destination} key is difference");
+        }
 
-            stringBuilder.Append($"{sortItem.FirstOrDefault()}");
+        if (cursorProperty == null || desProperty == null)
+        {
+            throw new Exception($"{cursor} or {destination} key is null");
+        }
 
-            if (sortItem.Length == 1)
+        return cursorPropertyInfo.PropertyType == typeof(Ulid)
+            ? ((Ulid)cursorProperty).CompareTo((Ulid)desProperty) == 0
+            : cursorProperty == desProperty;
+    }
+
+    /// <summary>
+    /// Get all of properties that we need to put them into cursor
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="entity"></param>
+    /// <param name="sort"></param>
+    /// <returns></returns>
+    private static Dictionary<string, object?> GetEncryptionProperties<T>(T entity, string sort)
+    {
+        Dictionary<string, object?> properties = [];
+        List<string> sortFields = SortFields(sort);
+        foreach (string field in sortFields)
+        {
+            if (!typeof(T).IsNestedPropertyValid(field))
             {
-                stringBuilder.Append($" {OrderTerm.DESC}");
+                throw new NotFoundException(nameof(field), field);
             }
 
-            stringBuilder.Append(',');
+            object? value = typeof(T).GetNestedPropertyValue(field, entity!);
+            properties.Add(field, value);
         }
 
-        return stringBuilder.Remove(stringBuilder.Length - 1, 1).ToString();
+        return properties;
     }
+
+    private static Dictionary<string, object?>? DecodeCursor(string cursor)
+    {
+        string key = AesGcmEncryption.GenKey(EncryptKey());
+        string stringCursor = AesGcmEncryption.Decrypt(cursor, key);
+        var serializeResult = JsonConvert.DeserializeObject<Dictionary<string, object?>>(
+            stringCursor
+        );
+        return serializeResult;
+    }
+
+    private static string? EncodeCursor<T>(T? entity, string sort)
+    {
+        if (entity == null)
+        {
+            return null;
+        }
+
+        Dictionary<string, object?> properties = GetEncryptionProperties(entity, sort);
+        string json = JsonConvert.SerializeObject(properties, Formatting.Indented);
+        string key = AesGcmEncryption.GenKey(EncryptKey());
+        return AesGcmEncryption.Encrypt(json, key);
+    }
+
+    /// <summary>
+    /// turn string sort to easy form
+    /// </summary>
+    /// <param name="sort"></param>
+    /// <returns></returns>
+    private static List<KeyValuePair<string, string>> TransformSort(string sort)
+    {
+        string[] fields = sort.Trim().Split(",", StringSplitOptions.TrimEntries);
+
+        return fields
+            .Select(field =>
+            {
+                string[] orderFields = field.Split(OrderTerm.DELIMITER);
+
+                if (orderFields.Length == 1)
+                {
+                    return new KeyValuePair<string, string>(orderFields[0], OrderTerm.ASC);
+                }
+                return new KeyValuePair<string, string>(orderFields[0], orderFields[1]);
+            })
+            .ToList();
+    }
+
+    /// <summary>
+    /// get all of fiels of string sort
+    /// </summary>
+    /// <param name="sort">string sort</param>
+    /// <returns></returns>
+    private static List<string> SortFields(string sort)
+    {
+        return TransformSort(sort).Select(field => field.Key).ToList();
+    }
+
+    /// <summary>
+    /// Encrypt aes key
+    /// </summary>
+    /// <returns></returns>
+    private static string EncryptKey() => "+%9d$t}L76?Zh2TtNcNR,DNy&a6/W9";
 }
 
-public class OrderInfo
-{
-    public string Propertyname { get; set; } = string.Empty;
-    public string OrderType { get; set; } = string.Empty;
-}
+internal record PaginationPayload<T>(
+    IQueryable<T> Query,
+    string? Cursor,
+    bool IsPrevious,
+    T First,
+    T Last,
+    string OriginalSort,
+    string Sort,
+    int Size
+);
 
-public class OperationInfo
-{
-    public Expression MemberExpression { get; set; } = default!;
+internal record PaginationResult<T>(
+    IEnumerable<T> Data,
+    int PageSize,
+    string? Next = null,
+    string? Pre = null
+);
 
-    public ConstantExpression ConstantExpression { get; set; } = default!;
-
-    public Type? PropertyType { get; set; }
-}
+internal record ConvertExpressionTypeResult(Expression Member, ConstantExpression Value);

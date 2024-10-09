@@ -217,4 +217,12 @@
     <value>Mã xác thực</value>
     <comment> </comment>
   </data>
+  <data name="QueryParam" xml:space="preserve">
+    <value>Tham số truy vấn</value>
+    <comment> </comment>
+  </data>
+  <data name="Cursor" xml:space="preserve">
+    <value>Con trỏ</value>
+    <comment> </comment>
+  </data>
 </root>

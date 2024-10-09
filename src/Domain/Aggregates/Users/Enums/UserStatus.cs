@@ -1,7 +1,7 @@
 namespace Domain.Aggregates.Users.Enums;
 
-public enum UserStatus
+public enum UserStatus : byte
 {
     Active = 1,
-    DeActive = 2,
+    Inactive = 2,
 }

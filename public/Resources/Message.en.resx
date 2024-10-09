@@ -217,4 +217,12 @@
     <value>Token</value>
     <comment> </comment>
   </data>
+  <data name="QueryParam" xml:space="preserve">
+    <value>Query Parameter</value>
+    <comment> </comment>
+  </data>
+  <data name="Cursor" xml:space="preserve">
+    <value>Cursor</value>
+    <comment> </comment>
+  </data>
 </root>

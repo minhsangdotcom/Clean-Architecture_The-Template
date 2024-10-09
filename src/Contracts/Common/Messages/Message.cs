@@ -1,5 +1,5 @@
-using System.Resources;
 using System.Text;
+using CaseConverter;
 using Contracts.Extensions;
 
 namespace Contracts.Common.Messages;
@@ -374,6 +374,18 @@ public class Message<T>(string? entityName = null)
                         { LanguageType.Vi.ToString(), "Quá hạn" },
                     },
                     MessageType.Expired
+                )
+            },
+            {
+                MessageType.Redundant,
+                new(
+                    MessageType.Redundant.ToString().ToKebabCase(),
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "Redundant" },
+                        { LanguageType.Vi.ToString(), "Dư thừa" },
+                    },
+                    MessageType.Redundant
                 )
             },
         };

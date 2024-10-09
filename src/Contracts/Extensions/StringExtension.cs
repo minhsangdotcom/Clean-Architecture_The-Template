@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -24,38 +23,11 @@ public static partial class StringExtension
         return builder.ToString();
     }
 
-    public static string LowerCaseFirst(this string s)
-    {
-        // Check for empty string.
-        if (string.IsNullOrEmpty(s))
-        {
-            return string.Empty;
-        }
-        // Return char and concat substring.
-        return char.ToLower(s[0]) + s[1..];
-    }
-
     public static string SpecialCharacterRemoving(this string s)
     {
         Regex regex = RemoveSpecialCharacterRegex();
 
         return regex.Replace(s, string.Empty);
-    }
-
-    private static bool ShouldUnderscore(int i, string s)
-    {
-        if (i == 0 || i >= s.Length || s[i] == '_')
-            return false;
-
-        var curr = s[i];
-        var prev = s[i - 1];
-        var next = i < s.Length - 2 ? s[i + 1] : '_';
-
-        return prev != '_'
-            && (
-                (char.IsUpper(curr) && (char.IsLower(prev) || char.IsLower(next)))
-                || (char.IsNumber(curr) && (!char.IsNumber(prev)))
-            );
     }
 
     public static string GenerateRandomString(int codeLength = 16, string? allowedSources = null)
@@ -112,7 +84,7 @@ public static partial class StringExtension
         string result = PascalAndCamelRegex().Replace(input, "$1_$2");
 
         // Handle consecutive uppercase letters (e.g., "HTTPServer" -> "HTTP_SERVER")
-        result = MyRegex().Replace(result, "$1_$2");
+        result = UpperLetter().Replace(result, "$1_$2");
 
         // Replace dashes (for kebab-case and Train-Case) with underscores
         result = result.Replace("-", "_");
@@ -121,56 +93,21 @@ public static partial class StringExtension
         return result.ToUpper();
     }
 
-    public static string ToKebabCase(this string? input)
+    private static bool ShouldUnderscore(int i, string s)
     {
-        if (string.IsNullOrEmpty(input))
-            return string.Empty;
+        if (i == 0 || i >= s.Length || s[i] == '_')
+            return false;
 
-        // Convert camelCase or PascalCase to words separated by spaces
-        string result = MyRegex1().Replace(input, "$1 $2");
+        var curr = s[i];
+        var prev = s[i - 1];
+        var next = i < s.Length - 2 ? s[i + 1] : '_';
 
-        // Replace underscores (_) or spaces with hyphens
-        result = MyRegex2().Replace(result, "-");
-
-        // Convert the whole string to lowercase
-        return result.ToLower();
+        return prev != '_'
+            && (
+                (char.IsUpper(curr) && (char.IsLower(prev) || char.IsLower(next)))
+                || (char.IsNumber(curr) && (!char.IsNumber(prev)))
+            );
     }
-
-    public static string ToCamelCase(this string input)
-    {
-        if (string.IsNullOrEmpty(input)) 
-            return input;
-
-        // Handle PascalCase
-        if (MyRegex4().IsMatch(input))
-        {
-            // Lowercase first letter
-            return char.ToLower(input[0]) + input[1..];
-        }
-
-        // Split by underscores, hyphens, or spaces
-        string[] words = MyRegex3().Split(input);
-
-        // Process the words for camelCase conversion
-        for (int i = 0; i < words.Length; i++)
-        {
-            if (i == 0)
-            {
-                // Lowercase the first word
-                words[i] = words[i].ToLower();
-            }
-            else
-            {
-                // Capitalize the first letter of the rest of the words
-                words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
-            }
-        }
-
-        // Join words together into a camelCase string
-        return string.Concat(words);
-    }
-
-    private static readonly char[] separator = [' ', '_'];
 
     [GeneratedRegex("[^A-Za-z0-9_.]+")]
     private static partial Regex RemoveSpecialCharacterRegex();
@@ -179,15 +116,5 @@ public static partial class StringExtension
     private static partial Regex PascalAndCamelRegex();
 
     [GeneratedRegex(@"([A-Z]+)([A-Z][a-z])")]
-    private static partial Regex MyRegex();
-
-    [GeneratedRegex("([a-z])([A-Z])")]
-    private static partial Regex MyRegex1();
-
-    [GeneratedRegex(@"[\s_]+")]
-    private static partial Regex MyRegex2();
-    [GeneratedRegex(@"[_\- ]+")]
-    private static partial Regex MyRegex3();
-    [GeneratedRegex(@"^[A-Z][a-z]+([A-Z][a-z]+)+$")]
-    private static partial Regex MyRegex4();
+    private static partial Regex UpperLetter();
 }

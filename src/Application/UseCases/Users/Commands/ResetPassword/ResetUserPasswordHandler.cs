@@ -53,7 +53,7 @@ public class ResetUserPasswordHandler(IUnitOfWork unitOfWork)
             );
         }
 
-        if (user.Status == UserStatus.DeActive)
+        if (user.Status == UserStatus.Inactive)
         {
             throw new BadRequestException(
                 [Messager.Create<User>().Message(MessageType.Active).Negative().Build()]
