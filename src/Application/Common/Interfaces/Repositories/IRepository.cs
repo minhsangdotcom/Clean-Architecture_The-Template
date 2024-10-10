@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
-using Domain.Common;
 using Domain.Specs.Interfaces;
 
 namespace Application.Common.Interfaces.Repositories;
@@ -10,20 +9,22 @@ public interface IRepository<T>
     : IRepositoryAsync<T>,
         IRepositorySync<T>,
         IRepositorySpecification<T>
-    where T : class;
+    where T : class { }
 
 public interface IRepositoryAsync<T>
     where T : class
 {
     Task<IEnumerable<T>> ListAsync();
 
-    Task<T?> GetAsync(object id);
+    Task<T?> FindByIdAsync(object id);
+
+    Task<T?> FindByConditionAsync(Expression<Func<T, bool>> criteria);
 
     Task<T> AddAsync(T entity);
 
     Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities);
 
-    Task ModifyAsync(T entity);
+    Task EditAsync(T entity);
 
     Task UpdateAsync(T entity);
 
@@ -33,12 +34,12 @@ public interface IRepositoryAsync<T>
 
     Task DeleteRangeAsync(IEnumerable<T> entities);
 
-    IQueryable<T> ApplyQuery(Expression<Func<T, bool>> criteria = null!);
+    Task<bool> AnyAsync(Expression<Func<T, bool>> criteria);
 
-    Task<bool> AnyAsync(Expression<Func<T, bool>> expression);
+    Task<int> CountAsync(Expression<Func<T, bool>> criteria);
 
-    Task<int> CountAsync(Expression<Func<T, bool>> expression);
-
+    IQueryable<T> ApplyQuery(Expression<Func<T, bool>>? criteria = null);
+    
     IQueryable<T> Fromsql(string sqlQuery, params object[] parameters);
 }
 
@@ -47,13 +48,15 @@ public interface IRepositorySync<T>
 {
     IEnumerable<T> List();
 
-    T? Get(object id);
+    T? FindById(object id);
+
+    T? FindByCondition(Expression<Func<T, bool>> criteria);
 
     T Add(T entity);
 
     IEnumerable<T> AddRange(IEnumerable<T> entities);
 
-    void Modify(T entity);
+    void Edit(T entity);
 
     void Update(T entity);
 
@@ -63,9 +66,11 @@ public interface IRepositorySync<T>
 
     void DeleteRange(IEnumerable<T> entities);
 
-    bool Any(Expression<Func<T, bool>> expression);
+    bool Any(Expression<Func<T, bool>> criteria);
 
-    int Count(Expression<Func<T, bool>> expression);
+    int Count(Expression<Func<T, bool>> criteria);
+
+    IEnumerable<T> ApplyQuerySync(Expression<Func<T, bool>>? criteria = null);
 }
 
 public interface IRepositorySpecification<T>
@@ -77,7 +82,10 @@ public interface IRepositorySpecification<T>
 
     Task<T?> GetByConditionSpecificationAsync(ISpecification<T> spec);
 
-    Task<IEnumerable<T>> ListWithSpecificationAsync(ISpecification<T> spec, QueryParamRequest request);
+    Task<IEnumerable<T>> ListWithSpecificationAsync(
+        ISpecification<T> spec,
+        QueryParamRequest request
+    );
 
     Task<IEnumerable<TResult>> ListSpecificationWithGroupbyAsync<TGroupProperty, TResult>(
         ISpecification<T> spec,
