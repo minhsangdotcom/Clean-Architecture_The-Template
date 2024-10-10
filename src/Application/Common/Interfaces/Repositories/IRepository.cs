@@ -39,7 +39,7 @@ public interface IRepositoryAsync<T>
     Task<int> CountAsync(Expression<Func<T, bool>> criteria);
 
     IQueryable<T> ApplyQuery(Expression<Func<T, bool>>? criteria = null);
-    
+
     IQueryable<T> Fromsql(string sqlQuery, params object[] parameters);
 }
 
@@ -76,50 +76,41 @@ public interface IRepositorySync<T>
 public interface IRepositorySpecification<T>
     where T : class
 {
-    IQueryable<T> ApplyQuery(ISpecification<T> spec);
+    Task<TResult?> FindByConditionAsync<TResult>(ISpecification<T> spec);
 
-    Task<TResult?> GetByConditionSpecificationAsync<TResult>(ISpecification<T> spec);
+    Task<T?> FindByConditionAsync(ISpecification<T> spec);
 
-    Task<T?> GetByConditionSpecificationAsync(ISpecification<T> spec);
+    Task<IEnumerable<T>> ListAsync(ISpecification<T> spec, QueryParamRequest queryParam);
 
-    Task<IEnumerable<T>> ListWithSpecificationAsync(
+    Task<IEnumerable<TResult>> ListWithGroupbyAsync<TGroupProperty, TResult>(
         ISpecification<T> spec,
-        QueryParamRequest request
-    );
-
-    Task<IEnumerable<TResult>> ListSpecificationWithGroupbyAsync<TGroupProperty, TResult>(
-        ISpecification<T> spec,
-        QueryParamRequest request,
+        QueryParamRequest queryParam,
         Expression<Func<T, TGroupProperty>> groupByExpression
     );
 
-    Task<PaginationResponse<TResult>> PaginatedListSpecificationAsync<TResult>(
+    Task<PaginationResponse<TResult>> PagedListAsync<TResult>(
         ISpecification<T> spec,
-        QueryParamRequest request
+        QueryParamRequest queryParam
     );
 
-    Task<PaginationResponse<TResult>> PaginatedListSpecificationWithGroupByAsync<
-        TGroupProperty,
-        TResult
-    >(
+    Task<PaginationResponse<TResult>> PagedListWithGroupByAsync<TGroupProperty, TResult>(
         ISpecification<T> spec,
-        QueryParamRequest request,
+        QueryParamRequest queryParam,
         Expression<Func<T, TGroupProperty>> groupByExpression
     );
 
-    Task<PaginationResponse<TResult>> CursorPaginatedListSpecificationAsync<TResult>(
+    Task<PaginationResponse<TResult>> CursorPagedListAsync<TResult>(
         ISpecification<T> spec,
-        QueryParamRequest request,
-        string? uniqueSort = null!
+        QueryParamRequest queryParam,
+        string? uniqueSort = null
     );
 
-    Task<PaginationResponse<TResult>> CursorPaginatedListSpecificationWithGroupByAsync<
-        TGroupProperty,
-        TResult
-    >(
+    Task<PaginationResponse<TResult>> CursorPagedListWithGroupByAsync<TGroupProperty, TResult>(
         ISpecification<T> spec,
-        QueryParamRequest request,
+        QueryParamRequest queryParam,
         Expression<Func<T, TGroupProperty>> groupByExpression,
-        string? uniqueSort = null!
+        string? uniqueSort = null
     );
+
+    IQueryable<T> ApplyQuery(ISpecification<T> spec);
 }

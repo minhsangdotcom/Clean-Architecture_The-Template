@@ -24,7 +24,7 @@ public class RequestResetUserPasswordHandler(
         User user =
             await unitOfWork
                 .Repository<User>()
-                .GetByConditionSpecificationAsync(new GetUserByEmailSpecification(command.Email))
+                .FindByConditionAsync(new GetUserByEmailSpecification(command.Email))
             ?? throw new NotFoundException(
                 [Messager.Create<User>().Message(MessageType.Found).Negative().Build()]
             );

@@ -19,7 +19,7 @@ public class ResetUserPasswordHandler(IUnitOfWork unitOfWork)
         User user =
             await unitOfWork
                 .Repository<User>()
-                .GetByConditionSpecificationAsync(
+                .FindByConditionAsync(
                     new GetUserByIdIncludeResetPassword(command.UserId)
                 )
             ?? throw new NotFoundException(

@@ -13,7 +13,7 @@ public class DeleteUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User>
     public async ValueTask<Unit> Handle(DeleteUserCommand command, CancellationToken cancellationToken)
     {
         User user = await unitOfWork.Repository<User>()
-            .GetByConditionSpecificationAsync(new GetUserByIdWithoutIncludeSpecification(command.UserId)) ??
+            .FindByConditionAsync(new GetUserByIdWithoutIncludeSpecification(command.UserId)) ??
                 throw new NotFoundException(
                      [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
                 );

@@ -32,7 +32,7 @@ public class UserLoginHandler(
         User user =
             await unitOfWork
                 .Repository<User>()
-                .GetByConditionSpecificationAsync(
+                .FindByConditionAsync(
                     new GetUserByUsernameSpecification(request.Username!)
                 )
             ?? throw new NotFoundException(
