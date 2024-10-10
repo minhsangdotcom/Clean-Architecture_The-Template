@@ -53,9 +53,7 @@ public class CreateUserHandler(
             return (
                 await unitOfWork
                     .Repository<User>()
-                    .FindByConditionAsync<CreateUserResponse>(
-                        new GetUserByIdSpecification(user.Id)
-                    )
+                    .FindByConditionAsync<CreateUserResponse>(new GetUserByIdSpecification(user.Id))
             )!;
         }
         catch (Exception)
