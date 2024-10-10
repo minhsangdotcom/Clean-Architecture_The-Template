@@ -22,7 +22,7 @@ public class ResetUserPasswordHandler(IUnitOfWork unitOfWork)
                 .GetByConditionSpecificationAsync(
                     new GetUserByIdIncludeResetPassword(command.UserId)
                 )
-            ?? throw new BadRequestException(
+            ?? throw new NotFoundException(
                 [Messager.Create<User>().Message(MessageType.Found).Negative().Build()]
             );
 

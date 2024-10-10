@@ -1,9 +1,9 @@
-using Domain.Exceptions;
+using Contracts.Common.Messages;
 using Microsoft.AspNetCore.Http;
 
 namespace Application.Common.Exceptions;
 
-public class NotFoundException(string message) : CustomException(message)
+public class NotFoundException(IEnumerable<MessageResult> errors) : BadRequestException(errors)
 {
-    public int HttpStatusCode { get; private set; } = StatusCodes.Status404NotFound;
+    public override int HttpStatusCode { get; protected set; } = StatusCodes.Status404NotFound;
 }

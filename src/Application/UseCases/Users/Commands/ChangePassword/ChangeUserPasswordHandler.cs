@@ -24,7 +24,7 @@ public class ChangeUserPasswordHandler(IUnitOfWork unitOfWork, ICurrentUser curr
                 .GetByConditionSpecificationAsync(
                     new GetUserByIdWithoutIncludeSpecification(userId ?? Ulid.Empty)
                 )
-            ?? throw new BadRequestException(
+            ?? throw new NotFoundException(
                 [Messager.Create<User>().Message(MessageType.Found).Negative().Build()]
             );
 

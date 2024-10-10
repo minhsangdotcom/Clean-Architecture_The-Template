@@ -29,7 +29,7 @@ public class UpdateUserProfileHandler(
                 .GetByConditionSpecificationAsync(
                     new GetUserByIdWithoutIncludeSpecification(currentUser.Id ?? Ulid.Empty)
                 )
-            ?? throw new BadRequestException(
+            ?? throw new NotFoundException(
                 [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
             );
 

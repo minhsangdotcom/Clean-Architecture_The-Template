@@ -1,6 +1,5 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Repositories;
-using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using AutoMapper;
 using Contracts.Common.Messages;
@@ -30,7 +29,7 @@ public class UpdateUserHandler(
                 .GetByConditionSpecificationAsync(
                     new GetUserByIdSpecification(Ulid.Parse(command.UserId))
                 )
-            ?? throw new BadRequestException(
+            ?? throw new NotFoundException(
                 [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
             );
 

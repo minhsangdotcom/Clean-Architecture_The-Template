@@ -16,7 +16,7 @@ public class DeleteRoleHandler(IRoleManagerService roleManagerService)
     {
         Role role =
             await roleManagerService.FindByIdAsync(command.UserId)
-            ?? throw new BadRequestException(
+            ?? throw new NotFoundException(
                 [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
             );
 

@@ -16,7 +16,7 @@ public class GetRoleDetailHandler(IRoleManagerService roleManagerService, IMappe
     ) =>
         mapper.Map<RoleDetailResponse>(
             await roleManagerService.FindByIdAsync(query.Id)
-                ?? throw new BadRequestException(
+                ?? throw new NotFoundException(
                     [Messager.Create<Role>().Message(MessageType.Found).Negative().Build()]
                 )
         );

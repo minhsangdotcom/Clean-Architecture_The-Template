@@ -14,7 +14,7 @@ public class DeleteUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User>
     {
         User user = await unitOfWork.Repository<User>()
             .GetByConditionSpecificationAsync(new GetUserByIdWithoutIncludeSpecification(command.UserId)) ??
-                throw new BadRequestException(
+                throw new NotFoundException(
                      [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
                 );
         string? avatar = user.Avatar;

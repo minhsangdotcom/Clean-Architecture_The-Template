@@ -17,7 +17,7 @@ public class UpdateRoleHandler(IRoleManagerService roleManagerService, IMapper m
     {
         Role role =
             await roleManagerService.FindByIdAsync(Ulid.Parse(command.RoleId))
-            ?? throw new BadRequestException(
+            ?? throw new NotFoundException(
                 [Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage()]
             );
 

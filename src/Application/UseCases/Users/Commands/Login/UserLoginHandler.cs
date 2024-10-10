@@ -35,7 +35,7 @@ public class UserLoginHandler(
                 .GetByConditionSpecificationAsync(
                     new GetUserByUsernameSpecification(request.Username!)
                 )
-            ?? throw new BadRequestException(
+            ?? throw new NotFoundException(
                 [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
             );
 
