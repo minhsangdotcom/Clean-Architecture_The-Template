@@ -33,7 +33,7 @@ public class QueryParamRequest
 
     [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
     [ModelBinder(BinderType = typeof(FilterModelBinder))]
-    public dynamic? DynamicFilter { get; set; }
+    public object? DynamicFilter { get; set; }
 }
 
 public class Cursor

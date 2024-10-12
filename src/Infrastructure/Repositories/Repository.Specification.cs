@@ -25,6 +25,47 @@ public partial class Repository<T> : IRepository<T>
     public async Task<T?> FindByConditionAsync(ISpecification<T> spec) =>
         await ApplySpecification(spec).FirstOrDefaultAsync();
 
+    public async Task<IEnumerable<T>> ListAsync(
+        ISpecification<T> spec,
+        QueryParamRequest queryParam
+    )
+    {
+        string defaultSort = string.IsNullOrWhiteSpace(queryParam.Sort)
+            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
+            : queryParam.Sort.Trim();
+        string uniqueSort = $"{defaultSort},{nameof(BaseEntity.Id)}";
+
+        Search? search = queryParam.Search;
+
+        return await ApplySpecification(spec)
+            .Filter(queryParam.DynamicFilter)
+            .Search(search?.Keyword, search?.Targets)
+            .Sort(uniqueSort)
+            .ToListAsync();
+    }
+
+    //? i will come up with the best idea for groupby
+    public async Task<IEnumerable<TResult>> ListWithGroupbyAsync<TGroupProperty, TResult>(
+        ISpecification<T> spec,
+        QueryParamRequest queryParam,
+        Expression<Func<T, TGroupProperty>> groupByExpression
+    )
+    {
+        string defaultSort = string.IsNullOrWhiteSpace(queryParam.Sort)
+            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
+            : queryParam.Sort.Trim();
+        string uniqueSort = $"{defaultSort},{nameof(BaseEntity.Id)}";
+
+        Search? search = queryParam.Search;
+
+        return await ApplySpecification(spec)
+            .GroupBy(groupByExpression)
+            .ProjectTo<TResult>(_configurationProvider)
+            .Search(search?.Keyword, search?.Targets)
+            .Sort(uniqueSort)
+            .ToListAsync();
+    }
+
     public async Task<PaginationResponse<TResult>> PagedListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam
@@ -38,11 +79,13 @@ public partial class Repository<T> : IRepository<T>
 
         return await ApplySpecification(spec)
             .ProjectTo<TResult>(_configurationProvider)
+            .Filter(queryParam.DynamicFilter)
             .Search(search?.Keyword, search?.Targets)
             .Sort(uniqueSort)
             .ToPagedListAsync(queryParam.Page, queryParam.PageSize);
     }
 
+    //? i will come up with the best idea for groupby
     public async Task<PaginationResponse<TResult>> PagedListWithGroupByAsync<
         TGroupProperty,
         TResult
@@ -74,6 +117,7 @@ public partial class Repository<T> : IRepository<T>
     ) =>
         await ApplySpecification(spec)
             .ProjectTo<TResult>(_configurationProvider)
+            .Filter(queryParam.DynamicFilter)
             .Search(queryParam.Search?.Keyword, queryParam.Search?.Targets)
             .ToCursorPagedListAsync(
                 new CursorPaginationRequest(
@@ -85,6 +129,7 @@ public partial class Repository<T> : IRepository<T>
                 )
             );
 
+    //? i will come up with the best idea for groupby
     public async Task<PaginationResponse<TResult>> CursorPagedListWithGroupByAsync<
         TGroupProperty,
         TResult
@@ -107,45 +152,6 @@ public partial class Repository<T> : IRepository<T>
                     uniqueSort ?? nameof(BaseEntity.Id)
                 )
             );
-
-    public async Task<IEnumerable<T>> ListAsync(
-        ISpecification<T> spec,
-        QueryParamRequest queryParam
-    )
-    {
-        string defaultSort = string.IsNullOrWhiteSpace(queryParam.Sort)
-            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
-            : queryParam.Sort.Trim();
-        string uniqueSort = $"{defaultSort},{nameof(BaseEntity.Id)}";
-
-        Search? search = queryParam.Search;
-
-        return await ApplySpecification(spec)
-            .Search(search?.Keyword, search?.Targets)
-            .Sort(uniqueSort)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<TResult>> ListWithGroupbyAsync<TGroupProperty, TResult>(
-        ISpecification<T> spec,
-        QueryParamRequest queryParam,
-        Expression<Func<T, TGroupProperty>> groupByExpression
-    )
-    {
-        string defaultSort = string.IsNullOrWhiteSpace(queryParam.Sort)
-            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
-            : queryParam.Sort.Trim();
-        string uniqueSort = $"{defaultSort},{nameof(BaseEntity.Id)}";
-
-        Search? search = queryParam.Search;
-
-        return await ApplySpecification(spec)
-            .GroupBy(groupByExpression)
-            .ProjectTo<TResult>(_configurationProvider)
-            .Search(search?.Keyword, search?.Targets)
-            .Sort(uniqueSort)
-            .ToListAsync();
-    }
 
     private IQueryable<T> ApplySpecification(ISpecification<T> spec) =>
         SpecificationEvaluator<T>.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
