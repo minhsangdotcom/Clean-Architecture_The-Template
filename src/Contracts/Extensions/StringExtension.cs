@@ -93,6 +93,42 @@ public static partial class StringExtension
         return result.ToUpper();
     }
 
+    /// <summary>
+    /// For generate parameter name for nested any
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    public static string NextUniformSequence(this string input)
+    {
+        // Convert the input string to a char array for manipulation
+        char[] arr = input.ToCharArray();
+
+        // Start by checking if all characters are 'z'
+        bool allZ = true;
+        foreach (char c in arr)
+        {
+            if (c != 'z')
+            {
+                allZ = false;
+                break;
+            }
+        }
+
+        // If all characters are 'z', return the next sequence with an additional 'a'
+        if (allZ)
+        {
+            return new string('a', arr.Length + 1);
+        }
+
+        // Uniformly increment all characters in the string
+        for (int i = 0; i < arr.Length; i++)
+        {
+            arr[i] = (char)(arr[i] + 1);
+        }
+
+        return new string(arr); // Return the modified array as a new string
+    }
+
     private static bool ShouldUnderscore(int i, string s)
     {
         if (i == 0 || i >= s.Length || s[i] == '_')

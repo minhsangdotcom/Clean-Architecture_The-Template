@@ -15,8 +15,8 @@ public static class FilterExtension
         }
 
         Type type = typeof(T);
-        ParameterExpression parameter = Expression.Parameter(type, "x");
-        Expression expression = FilterExpression(filterObject, parameter, type, 'a');
+        ParameterExpression parameter = Expression.Parameter(type, "a");
+        Expression expression = FilterExpression(filterObject, parameter, type, "b");
 
         var lamda = Expression.Lambda<Func<T, bool>>(expression, parameter);
 
@@ -27,7 +27,7 @@ public static class FilterExtension
         dynamic filterObject,
         Expression paramOrMember,
         Type type,
-        char parameterName
+        string parameterName
     )
     {
         var dynamicFilters = (IDictionary<string, object>)filterObject;
@@ -64,19 +64,19 @@ public static class FilterExtension
                 if (propertyType.IsArrayGenericType())
                 {
                     propertyType = propertyInfo.PropertyType.GetGenericArguments()[0];
-                    var anyParameter = Expression.Parameter(
+                    ParameterExpression anyParameter = Expression.Parameter(
                         propertyType,
-                        (++parameterName).ToString()
+                        parameterName.NextUniformSequence()
                     );
 
-                    var operationBody = FilterExpression(
+                    Expression operationBody = FilterExpression(
                         value,
                         anyParameter,
                         propertyType,
-                        ++parameterName
+                        parameterName.NextUniformSequence()
                     );
 
-                    var anyLamda = Expression.Lambda(operationBody, anyParameter);
+                    LambdaExpression anyLamda = Expression.Lambda(operationBody, anyParameter);
 
                     expression = Expression.Call(
                         typeof(Enumerable),
@@ -92,7 +92,7 @@ public static class FilterExtension
                         value,
                         memeberExpression,
                         propertyType,
-                        ++parameterName
+                        parameterName.NextUniformSequence()
                     );
                 }
             }
@@ -165,6 +165,12 @@ public static class FilterExtension
         return result;
     }
 
+    /// <summary>
+    /// Change both types to the same type
+    /// </summary>
+    /// <param name="memberExpression"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
     private static ConvertExpressionTypeResult ParseObject(
         MemberExpression memberExpression,
         object value
@@ -200,6 +206,12 @@ public static class FilterExtension
         return new(member, Expression.Constant(value));
     }
 
+    /// <summary>
+    /// Convert string operation to enum
+    /// </summary>
+    /// <param name="operationString"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
     private static OperationType GetOperationType(string operationString)
     {
         // Extract the operation substring (remove the first character, e.g., '$')
@@ -233,6 +245,7 @@ public static class FilterExtension
             { OperationType.Gt, Expression.GreaterThan },
             { OperationType.Gte, Expression.GreaterThanOrEqual },
         };
+
     /// <summary>
     /// Eq = 1,
     // EqI = 2,
