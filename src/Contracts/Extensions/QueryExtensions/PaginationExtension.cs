@@ -543,4 +543,8 @@ internal record PaginationResult<T>(
     string? Pre = null
 );
 
-internal record ConvertExpressionTypeResult(Expression Member, ConstantExpression Value);
+internal record ConvertExpressionTypeResult(
+    Expression Member,
+    ConstantExpression Value,
+    Type? Type = null
+);
