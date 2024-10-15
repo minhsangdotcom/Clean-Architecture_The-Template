@@ -4,6 +4,7 @@ using System.Reflection;
 using Ardalis.GuardClauses;
 using Contracts.Extensions.Expressions;
 using Contracts.Extensions.Reflections;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Contracts.Extensions.QueryExtensions;
 
@@ -249,12 +250,9 @@ public static class FilterExtension
     /// <param name="memberExpression"></param>
     /// <param name="value"></param>
     /// <returns></returns>
-    private static ConvertExpressionTypeResult ParseObject(
-        MemberExpression memberExpression,
-        object value
-    )
+    private static ConvertExpressionTypeResult ParseObject(MemberExpression left, object right)
     {
-        ConvertObjectTypeResult parse = Parse(memberExpression, value);
+        ConvertObjectTypeResult parse = Parse(left, right);
         return new(parse.Member, parse.Constant);
     }
 
@@ -264,27 +262,41 @@ public static class FilterExtension
     /// <param name="memberExpression"></param>
     /// <param name="values"></param>
     /// <returns></returns>
-    private static ConvertObjectTypeResult ParseArray(
-        MemberExpression memberExpression,
-        object values
-    )
+    private static ConvertObjectTypeResult ParseArray(MemberExpression left, object right)
     {
-        List<object?> list = [];
-        Expression member = null!;
-        Type type = null!;
-        foreach (object value in (IList)values)
+        List<(Expression member, Type type, object? value)> results = [];
+        IList rightValues = (IList)right;
+        int count = rightValues.Count;
+
+        for (int i = 0; i < count; i++)
         {
-            var result = Parse(memberExpression, value);
-            member = result.Member;
-            type = result.Type;
-            list.Add(result.Value);
+            object? rightValue = rightValues[i];
+            var result = Parse(left, rightValue!);
+
+            results.Add(new(result.Member, result.Type, result.Value));
         }
 
-        (IList list, Type type) convertListResult = ConvertListToType(list!, type);
+        var groupedResults = results
+            .GroupBy(x => new { x.member, x.type })
+            .Select(x => new
+            {
+                Member = x.Key.member,
+                Type = x.Key.type,
+                values = x.Select(x => x.value).ToList(),
+            })
+            .ToList();
+
+        var groupedResult = groupedResults[0];
+        Type type = groupedResult.Type;
+        Expression member = groupedResult.Member;
+        List<object?> values = groupedResult.values;
+
+        (IList list, Type type) convertedListResult = ConvertListToType(values!, type);
+        IList convertedList = convertedListResult.list;
         return new(
             member,
-            convertListResult.list,
-            Expression.Constant(convertListResult.list, convertListResult.type),
+            convertedList,
+            Expression.Constant(convertedList, convertedListResult.type),
             type
         );
     }
@@ -317,46 +329,47 @@ public static class FilterExtension
         return new(typedList, listType);
     }
 
-    private static ConvertObjectTypeResult Parse(MemberExpression memberExpression, object value)
+    private static ConvertObjectTypeResult Parse(MemberExpression left, object? right)
     {
-        Expression member = memberExpression;
-        Type memberType = memberExpression.GetMemberExpressionType();
+        Expression member = left;
+        Type leftType = left.GetMemberExpressionType();
+        Type? rightType = right?.GetType();
 
         if (
             (
-                memberType.IsNullable()
-                && memberType.GenericTypeArguments.Length > 0
-                && memberType.GenericTypeArguments[0].IsEnum
-            ) || memberType.IsEnum
+                leftType.IsNullable()
+                && leftType.GenericTypeArguments.Length > 0
+                && leftType.GenericTypeArguments[0].IsEnum
+            ) || leftType.IsEnum
         )
         {
-            Type type = value?.GetType() ?? typeof(long);
+            Type type = rightType ?? typeof(long);
             return new(
                 Expression.Convert(member, type),
-                value,
-                Expression.Constant(value, type),
+                right,
+                Expression.Constant(right, type),
                 type
             );
         }
 
-        if (memberType != value?.GetType())
+        if (leftType != rightType)
         {
-            Type targetType = memberType;
+            Type targetType = leftType;
 
             if (targetType.IsNullable() && targetType.GenericTypeArguments.Length > 0)
             {
                 targetType = targetType.GenericTypeArguments[0];
             }
-            object? changedTypeValue = Convert.ChangeType(value, targetType);
+            object? changedTypeValue = Convert.ChangeType(right, targetType);
             return new(
                 member,
                 changedTypeValue,
-                Expression.Constant(changedTypeValue, memberType),
-                memberType
+                Expression.Constant(changedTypeValue, leftType),
+                leftType
             );
         }
 
-        return new(member, value, Expression.Constant(value), memberType);
+        return new(member, right, Expression.Constant(right), leftType);
     }
 
     /// <summary>
