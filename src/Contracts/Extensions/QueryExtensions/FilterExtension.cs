@@ -43,10 +43,7 @@ public static class FilterExtension
             if (propertyName.Contains('$'))
             {
                 Expression left = paramOrMember;
-
-                var a = Compare(propertyName, left, value);
-
-                return a;
+                return Compare(propertyName, left, value);
             }
 
             PropertyInfo propertyInfo = type.GetNestedPropertyInfo(propertyName);
@@ -116,11 +113,14 @@ public static class FilterExtension
     {
         OperationType operationType = GetOperationType(operationString);
 
-        bool isFound = BinaryCompararisions.TryGetValue(operationType, out var comparisonFunc);
+        if (operationType == OperationType.Between)
+        {
+            return CompareBetweenOperations(left, right);
+        }
 
+        bool isFound = BinaryCompararisions.TryGetValue(operationType, out var comparisonFunc);
         if (!isFound)
         {
-            // find in another dictionary
             if (!MethodCallCompararisions.TryGetValue(operationType, out var callMethodType))
             {
                 throw new NotFoundException(nameof(operationType), nameof(operationType));
@@ -130,6 +130,34 @@ public static class FilterExtension
         }
 
         return CompareBinaryOperations(left, right, comparisonFunc!, operationType);
+    }
+
+    private static BinaryExpression CompareBetweenOperations(Expression left, object right)
+    {
+        ConvertObjectTypeResult convertObjectTypeResult = ParseArray((MemberExpression)left, right);
+
+        List<Func<Expression, Expression, BinaryExpression>> operations =
+        [
+            BinaryCompararisions[OperationType.Gte],
+            BinaryCompararisions[OperationType.Lte],
+        ];
+
+        BinaryExpression body = null!;
+        IList rightValues = (IList)convertObjectTypeResult.Value!;
+        for (int i = 0; i < operations.Count; i++)
+        {
+            var operation = operations[i];
+            var rightValue = rightValues[i];
+
+            BinaryExpression expression = operation(
+                convertObjectTypeResult.Member,
+                Expression.Constant(rightValue, convertObjectTypeResult.Type)
+            );
+
+            body = body == null ? expression : Expression.AndAlso(body, expression);
+        }
+
+        return body;
     }
 
     private static BinaryExpression CompareBinaryOperations(
@@ -155,12 +183,10 @@ public static class FilterExtension
                 Type.EmptyTypes
             );
 
-            BinaryExpression a = comparisonFunc(member, value);
-            return a;
+            return comparisonFunc(member, value);
         }
         ConvertExpressionTypeResult convert = ParseObject((MemberExpression)left, right);
-        BinaryExpression result = comparisonFunc(convert.Member, convert.Value);
-        return result;
+        return comparisonFunc(convert.Member, convert.Value);
     }
 
     private static BinaryExpression CompareMethodCallOpertations(
@@ -172,7 +198,7 @@ public static class FilterExtension
     {
         if (operationType == OperationType.In || operationType == OperationType.NotIn)
         {
-            ConvertExpressionTypeResult convertExpressionType = ParseArray(
+            ConvertObjectTypeResult convertObjectTypeResult = ParseArray(
                 (MemberExpression)left,
                 right
             );
@@ -180,12 +206,12 @@ public static class FilterExtension
             MethodInfo methodInfo = callMethodType
                 .Key.GetMethods(BindingFlags.Static | BindingFlags.Public)
                 .First(m => m.Name == callMethodType.Value && m.GetParameters().Length == 2)
-                .MakeGenericMethod(convertExpressionType.Type!);
+                .MakeGenericMethod(convertObjectTypeResult.Type);
 
             Expression expression = Expression.Call(
                 methodInfo,
-                convertExpressionType.Value,
-                convertExpressionType.Member
+                convertObjectTypeResult.Constant,
+                convertObjectTypeResult.Member
             );
 
             return NotOr(operationType, expression);
@@ -229,7 +255,7 @@ public static class FilterExtension
     )
     {
         ConvertObjectTypeResult parse = Parse(memberExpression, value);
-        return new(parse.Member, (ConstantExpression)parse.Value!);
+        return new(parse.Member, parse.Constant);
     }
 
     /// <summary>
@@ -238,7 +264,7 @@ public static class FilterExtension
     /// <param name="memberExpression"></param>
     /// <param name="values"></param>
     /// <returns></returns>
-    private static ConvertExpressionTypeResult ParseArray(
+    private static ConvertObjectTypeResult ParseArray(
         MemberExpression memberExpression,
         object values
     )
@@ -248,7 +274,7 @@ public static class FilterExtension
         Type type = null!;
         foreach (object value in (IList)values)
         {
-            var result = Parse(memberExpression, value, true);
+            var result = Parse(memberExpression, value);
             member = result.Member;
             type = result.Type;
             list.Add(result.Value);
@@ -257,6 +283,7 @@ public static class FilterExtension
         (IList list, Type type) convertListResult = ConvertListToType(list!, type);
         return new(
             member,
+            convertListResult.list,
             Expression.Constant(convertListResult.list, convertListResult.type),
             type
         );
@@ -278,17 +305,19 @@ public static class FilterExtension
         foreach (var item in sourceList)
         {
             // Step 3: Add each item to the typed list (casting to the target type)
-            typedList.Add(Convert.ChangeType(item, targetType));
+            Type type = targetType;
+
+            if (targetType.IsNullable() && targetType.GenericTypeArguments.Length > 0)
+            {
+                type = targetType.GenericTypeArguments[0];
+            }
+            typedList.Add(Convert.ChangeType(item, type));
         }
 
         return new(typedList, listType);
     }
 
-    private static ConvertObjectTypeResult Parse(
-        MemberExpression memberExpression,
-        object value,
-        bool isRawValue = false
-    )
+    private static ConvertObjectTypeResult Parse(MemberExpression memberExpression, object value)
     {
         Expression member = memberExpression;
         Type memberType = memberExpression.GetMemberExpressionType();
@@ -304,7 +333,8 @@ public static class FilterExtension
             Type type = value?.GetType() ?? typeof(long);
             return new(
                 Expression.Convert(member, type),
-                isRawValue ? value : Expression.Constant(value, type),
+                value,
+                Expression.Constant(value, type),
                 type
             );
         }
@@ -320,12 +350,13 @@ public static class FilterExtension
             object? changedTypeValue = Convert.ChangeType(value, targetType);
             return new(
                 member,
-                isRawValue ? changedTypeValue : Expression.Constant(changedTypeValue, memberType),
+                changedTypeValue,
+                Expression.Constant(changedTypeValue, memberType),
                 memberType
             );
         }
 
-        return new(member, isRawValue ? value : Expression.Constant(value), memberType);
+        return new(member, value, Expression.Constant(value), memberType);
     }
 
     /// <summary>
@@ -385,7 +416,12 @@ public static class FilterExtension
         };
 }
 
-internal record ConvertObjectTypeResult(Expression Member, object? Value, Type Type);
+internal record ConvertObjectTypeResult(
+    Expression Member,
+    object? Value,
+    ConstantExpression Constant,
+    Type Type
+);
 
 internal enum OperationType
 {
