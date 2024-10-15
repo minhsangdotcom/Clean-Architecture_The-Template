@@ -83,6 +83,7 @@ public class DbInitializer
                     Address = "Los Angeles",
                     DayOfBirth = new DateTime(1985, 4, 23),
                     Status = UserStatus.Active,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Alice",
@@ -96,6 +97,7 @@ public class DbInitializer
                     Address = "Chicago",
                     DayOfBirth = new DateTime(1992, 7, 19),
                     Status = UserStatus.Inactive,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Bob",
@@ -109,6 +111,7 @@ public class DbInitializer
                     Address = "San Francisco",
                     DayOfBirth = new DateTime(1980, 3, 15),
                     Status = UserStatus.Active,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Emily",
@@ -122,6 +125,7 @@ public class DbInitializer
                     Address = "Seattle",
                     DayOfBirth = new DateTime(1995, 5, 5),
                     Status = UserStatus.Active,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "James",
@@ -135,6 +139,7 @@ public class DbInitializer
                     Address = "Houston",
                     DayOfBirth = new DateTime(1983, 11, 9),
                     Status = UserStatus.Active,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Olivia",
@@ -148,6 +153,7 @@ public class DbInitializer
                     Address = "Miami",
                     DayOfBirth = new DateTime(1998, 2, 18),
                     Status = UserStatus.Active,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Daniel",
@@ -161,6 +167,7 @@ public class DbInitializer
                     Address = "Boston",
                     DayOfBirth = new DateTime(1987, 9, 21),
                     Status = UserStatus.Inactive,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Sophia",
@@ -174,6 +181,7 @@ public class DbInitializer
                     Address = "Dallas",
                     DayOfBirth = new DateTime(1994, 12, 12),
                     Status = UserStatus.Active,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Michael",
@@ -187,6 +195,7 @@ public class DbInitializer
                     Address = "Phoenix",
                     DayOfBirth = new DateTime(1978, 8, 8),
                     Status = UserStatus.Inactive,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Isabella",
@@ -200,6 +209,7 @@ public class DbInitializer
                     Address = "San Diego",
                     DayOfBirth = new DateTime(1991, 1, 1),
                     Status = UserStatus.Active,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "David",
@@ -213,6 +223,7 @@ public class DbInitializer
                     Address = "Austin",
                     DayOfBirth = new DateTime(1984, 6, 6),
                     Status = UserStatus.Active,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Emma",
@@ -226,6 +237,7 @@ public class DbInitializer
                     Address = "Denver",
                     DayOfBirth = new DateTime(1993, 3, 3),
                     Status = UserStatus.Active,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Andrew",
@@ -239,6 +251,7 @@ public class DbInitializer
                     Address = "Portland",
                     DayOfBirth = new DateTime(1981, 10, 30),
                     Status = UserStatus.Inactive,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Ava",
@@ -252,6 +265,7 @@ public class DbInitializer
                     Address = "Las Vegas",
                     DayOfBirth = new DateTime(2000, 4, 14),
                     Status = UserStatus.Active,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Joshua",
@@ -265,6 +279,7 @@ public class DbInitializer
                     Address = "Orlando",
                     DayOfBirth = new DateTime(1986, 11, 17),
                     Status = UserStatus.Inactive,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Charlotte",
@@ -278,6 +293,7 @@ public class DbInitializer
                     Address = "New Orleans",
                     DayOfBirth = new DateTime(1997, 7, 7),
                     Status = UserStatus.Active,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Ethan",
@@ -291,6 +307,7 @@ public class DbInitializer
                     Address = "Philadelphia",
                     DayOfBirth = new DateTime(1999, 9, 9),
                     Status = UserStatus.Active,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Abigail",
@@ -304,6 +321,7 @@ public class DbInitializer
                     Address = "San Antonio",
                     DayOfBirth = new DateTime(1989, 2, 2),
                     Status = UserStatus.Active,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
                 new(
                     "Liam",
@@ -317,6 +335,7 @@ public class DbInitializer
                     Address = "Atlanta",
                     DayOfBirth = new DateTime(1988, 12, 25),
                     Status = UserStatus.Inactive,
+                    Gender = (Gender)new Random().Next(1,3)
                 },
             ];
 
