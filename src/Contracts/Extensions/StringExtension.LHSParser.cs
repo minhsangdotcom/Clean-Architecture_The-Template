@@ -73,8 +73,9 @@ public partial class StringExtension
             return rootObject;
         }
 
-        foreach (var property in rootObject)
+        for (int i = 0; i < rootObject.Count; i++)
         {
+            var property = rootObject.ElementAt(i);
             if (leafObject.TryGetValue(property.Key, out object? value))
             {
                 Type type = property.Value.GetType();

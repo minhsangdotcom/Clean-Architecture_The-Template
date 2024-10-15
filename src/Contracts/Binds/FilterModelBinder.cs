@@ -16,8 +16,8 @@ public class FilterModelBinder : IModelBinder
         if (filters != null)
         {
             Console.WriteLine(
-                "🚀 ~ filters have been successfully bound:"
-                    + SerializerExtension.Serialize(filters!)
+                "filters have been successfully bound:"
+                    + SerializerExtension.Serialize(filters!).StringJson
             );
         }
 

@@ -34,12 +34,6 @@ public static class FilterExtension
         string parameterName
     )
     {
-        Console.WriteLine(
-            JsonSerializer.Serialize(
-                filterObject,
-                new JsonSerializerOptions() { WriteIndented = true }
-            )
-        );
         var dynamicFilters = (IDictionary<string, object>)filterObject;
 
         Expression body = null!;
