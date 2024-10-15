@@ -11,7 +11,17 @@ public class FilterModelBinder : IModelBinder
     {
         var queryString = GetQueryParams(bindingContext.HttpContext);
 
-        bindingContext.Result = ModelBindingResult.Success(StringExtension.Parse(queryString));
+        object? filters = StringExtension.Parse(queryString);
+
+        if (filters != null)
+        {
+            Console.WriteLine(
+                "🚀 ~ filters have been successfully bound:"
+                    + SerializerExtension.Serialize(filters!)
+            );
+        }
+
+        bindingContext.Result = ModelBindingResult.Success(filters);
 
         return Task.CompletedTask;
     }

@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.Json;
 using Ardalis.GuardClauses;
 using Contracts.Extensions.Expressions;
 using Contracts.Extensions.Reflections;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Contracts.Extensions.QueryExtensions;
 
@@ -33,6 +34,12 @@ public static class FilterExtension
         string parameterName
     )
     {
+        Console.WriteLine(
+            JsonSerializer.Serialize(
+                filterObject,
+                new JsonSerializerOptions() { WriteIndented = true }
+            )
+        );
         var dynamicFilters = (IDictionary<string, object>)filterObject;
 
         Expression body = null!;
@@ -41,66 +48,138 @@ public static class FilterExtension
             string propertyName = dynamicFilter.Key;
             object value = dynamicFilter.Value;
 
-            if (propertyName.Contains('$'))
+            int isAndOperator = string.Compare(
+                propertyName,
+                "$and",
+                StringComparison.OrdinalIgnoreCase
+            );
+            int isOrOperator = string.Compare(
+                propertyName,
+                "$or",
+                StringComparison.OrdinalIgnoreCase
+            );
+
+            if (isAndOperator != 0 && isOrOperator != 0 && propertyName.Contains('$'))
             {
                 Expression left = paramOrMember;
                 return Compare(propertyName, left, value);
             }
 
-            PropertyInfo propertyInfo = type.GetNestedPropertyInfo(propertyName);
-            Type propertyType = propertyInfo.PropertyType;
-
-            Expression memeberExpression = ExpressionExtension.GetExpressionMember(
-                propertyName,
-                paramOrMember,
-                false,
-                type
-            );
-
             Expression expression = null!;
-            if (value is IEnumerable<object> arrayValue) { }
+            if (value is IEnumerable<object> values)
+            {
+                expression = ProcessList(
+                    values,
+                    new(paramOrMember, type, parameterName.NextUniformSequence()),
+                    isAndOperator == 0 && isOrOperator != 0
+                );
+            }
             else
             {
-                if (propertyType.IsArrayGenericType())
-                {
-                    propertyType = propertyInfo.PropertyType.GetGenericArguments()[0];
-                    ParameterExpression anyParameter = Expression.Parameter(
-                        propertyType,
-                        parameterName.NextUniformSequence()
-                    );
+                PropertyInfo propertyInfo = type.GetNestedPropertyInfo(propertyName);
+                Type propertyType = propertyInfo.PropertyType;
 
-                    Expression operationBody = FilterExpression(
-                        value,
-                        anyParameter,
-                        propertyType,
-                        parameterName.NextUniformSequence()
-                    );
+                Expression memeberExpression = ExpressionExtension.GetExpressionMember(
+                    propertyName,
+                    paramOrMember,
+                    false,
+                    type
+                );
 
-                    LambdaExpression anyLamda = Expression.Lambda(operationBody, anyParameter);
-
-                    expression = Expression.Call(
-                        typeof(Enumerable),
-                        nameof(Enumerable.Any),
-                        [propertyType],
-                        memeberExpression,
-                        anyLamda
-                    );
-                }
-                else
-                {
-                    expression = FilterExpression(
-                        value,
-                        memeberExpression,
-                        propertyType,
-                        parameterName.NextUniformSequence()
-                    );
-                }
+                expression = ProcessObject(
+                    propertyInfo,
+                    new(memeberExpression, propertyType, parameterName.NextUniformSequence(), value)
+                );
             }
 
             body = body == null ? expression : Expression.AndAlso(body, expression);
         }
 
         return body;
+    }
+
+    /// <summary>
+    /// Process array object property in filter
+    /// </summary>
+    /// <param name="values"></param>
+    /// <param name="payload"></param>
+    /// <param name="isAndOperator"></param>
+    /// <returns></returns>
+    private static Expression ProcessList(
+        IEnumerable<object> values,
+        FilterExpressionPayload payload,
+        bool isAndOperator = false
+    )
+    {
+        Expression body = null!;
+        foreach (var value in values)
+        {
+            Expression expression = FilterExpression(
+                value,
+                payload.ParamOrMember,
+                payload.Type,
+                payload.ParameterName
+            );
+
+            body =
+                body == null
+                    ? expression
+                    : (
+                        isAndOperator
+                            ? Expression.AndAlso(body, expression)
+                            : Expression.OrElse(body, expression)
+                    );
+        }
+
+        return body;
+    }
+
+    /// <summary>
+    /// Process object property in filter
+    /// </summary>
+    /// <param name="propertyInfo"></param>
+    /// <param name="payload"></param>
+    /// <returns></returns>
+    private static Expression ProcessObject(
+        PropertyInfo propertyInfo,
+        FilterExpressionPayload payload
+    )
+    {
+        Type propertyType = payload.Type;
+
+        //current property is array object then generate nested any
+        if (propertyType.IsArrayGenericType())
+        {
+            propertyType = propertyInfo.PropertyType.GetGenericArguments()[0];
+            ParameterExpression anyParameter = Expression.Parameter(
+                propertyType,
+                payload.ParameterName
+            );
+
+            Expression operationBody = FilterExpression(
+                payload.Value!,
+                anyParameter,
+                propertyType,
+                payload.ParameterName
+            );
+
+            LambdaExpression anyLamda = Expression.Lambda(operationBody, anyParameter);
+
+            return Expression.Call(
+                typeof(Enumerable),
+                nameof(Enumerable.Any),
+                [propertyType],
+                payload.ParamOrMember,
+                anyLamda
+            );
+        }
+
+        return FilterExpression(
+            payload.Value!,
+            payload.ParamOrMember,
+            propertyType,
+            payload.ParameterName
+        );
     }
 
     /// <summary>
@@ -434,6 +513,13 @@ internal record ConvertObjectTypeResult(
     object? Value,
     ConstantExpression Constant,
     Type Type
+);
+
+internal record FilterExpressionPayload(
+    Expression ParamOrMember,
+    Type Type,
+    string ParameterName,
+    object? Value = null
 );
 
 internal enum OperationType
