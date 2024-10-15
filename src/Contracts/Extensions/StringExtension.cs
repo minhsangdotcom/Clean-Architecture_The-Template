@@ -100,33 +100,44 @@ public static partial class StringExtension
     /// <returns></returns>
     public static string NextUniformSequence(this string input)
     {
-        // Convert the input string to a char array for manipulation
-        char[] arr = input.ToCharArray();
+        // Split the input into the alphabetic part and the numeric suffix
+        string alphabeticPart = input.TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+        string numericPart = input[alphabeticPart.Length..];
 
-        // Start by checking if all characters are 'z'
+        // Handle the numeric part: if no number exists, start with 1
+        int suffix = numericPart == string.Empty ? 1 : int.Parse(numericPart);
+
+        // Convert the alphabetic part to a character array
+        char[] arr = alphabeticPart.ToCharArray();
+
+        // Flag to track if all characters are 'z'
         bool allZ = true;
-        foreach (char c in arr)
+
+        // Check if the entire alphabetic part is 'z'
+        for (int i = 0; i < arr.Length; i++)
         {
-            if (c != 'z')
+            if (arr[i] != 'z')
             {
                 allZ = false;
                 break;
             }
         }
 
-        // If all characters are 'z', return the next sequence with an additional 'a'
+        // If all characters are 'z', start the next cycle with 'a' and increment the suffix
         if (allZ)
         {
-            return new string('a', arr.Length + 1);
+            // Return the next sequence with an incremented numeric suffix
+            return "a" + (suffix + 1);
         }
 
-        // Uniformly increment all characters in the string
+        // Otherwise, increment the alphabetic characters
         for (int i = 0; i < arr.Length; i++)
         {
-            arr[i] = (char)(arr[i] + 1);
+            arr[i] = (char)(arr[i] + 1); // Increment the character
         }
 
-        return new string(arr); // Return the modified array as a new string
+        // Combine the alphabetic part with the current suffix
+        return new string(arr) + (suffix > 1 ? suffix : string.Empty);
     }
 
     private static bool ShouldUnderscore(int i, string s)
