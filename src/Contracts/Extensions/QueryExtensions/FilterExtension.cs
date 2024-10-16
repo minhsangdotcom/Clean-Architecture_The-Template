@@ -73,12 +73,7 @@ public static class FilterExtension
                 PropertyInfo propertyInfo = type.GetNestedPropertyInfo(propertyName);
                 Type propertyType = propertyInfo.PropertyType;
 
-                Expression memeberExpression = ExpressionExtension.GetExpressionMember(
-                    propertyName,
-                    paramOrMember,
-                    false,
-                    type
-                );
+                Expression memeberExpression = paramOrMember.MemberExpression(type, propertyName);
 
                 expression = ProcessObject(
                     propertyInfo,

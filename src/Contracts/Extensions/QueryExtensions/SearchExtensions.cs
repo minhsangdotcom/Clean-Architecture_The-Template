@@ -128,7 +128,7 @@ public static class SearchExtensions
         {
             Expression expression =
                 field.Key == PropertyType.Array
-                    ? BuildAnyQuery(type, field.Value, keyword ?? string.Empty, rootParameter, 'a')
+                    ? BuildAnyQuery(new(type, field.Value, rootParameter, keyword, "b"))
                     : BuildContainsQuery(type, field.Value, rootParameter, constant, isNullCheck);
 
             body = body == null ? expression : Expression.OrElse(body, expression);
@@ -140,82 +140,101 @@ public static class SearchExtensions
     /// <summary>
     /// Build deep search by nested any
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="type"></param>
-    /// <param name="property"></param>
-    /// <param name="keyword"></param>
-    /// <param name="parameter"></param>
-    /// <param name="parameterName"></param>
-    /// <param name="body"></param>
-    /// <param name="isNullCheck"></param>
+    /// <param name="payload"></param>
     /// <returns></returns>
-    static Expression BuildAnyQuery(
-        Type type,
-        string property,
-        string keyword,
-        ParameterExpression parameter,
-        char parameterName,
-        Expression? body = null,
-        bool isNullCheck = false
-    )
+    static Expression BuildAnyQuery(BuildAnyQueryPayload payload)
     {
-        if (!property.Contains('.'))
+        string propertyPath = payload.PropertyPath;
+        string keyword = payload.Keyword;
+        Type type = payload.Type;
+        bool isNullChecking = payload.IsNullChecking;
+        Expression? nullCheck = payload.NullCheck;
+        Expression parameterOrMember = payload.ParameterOrMember;
+
+        if (!propertyPath.Contains('.'))
         {
             var constant = Expression.Call(
-                Expression.Constant(string.IsNullOrWhiteSpace(keyword) ? string.Empty : keyword),
+                Expression.Constant(payload.Keyword),
                 nameof(string.ToLower),
                 Type.EmptyTypes
             );
 
-            return BuildContainsQuery(type, property, parameter, constant, isNullCheck);
+            Expression member = parameterOrMember.MemberExpression(type, propertyPath);
+            Expression lower = Expression.Call(member, nameof(string.ToLower), Type.EmptyTypes);
+
+            Expression isNull = Expression.Equal(member, Expression.Constant(null));
+            Expression notExpression = Expression.Not(isNull);
+
+            return payload.IsNullChecking
+                ? Expression.Condition(
+                    AndOrNot(notExpression, nullCheck),
+                    Expression.Call(lower, nameof(string.Contains), Type.EmptyTypes, constant),
+                    Expression.Constant(false)
+                )
+                : Expression.Call(lower, nameof(string.Contains), Type.EmptyTypes, constant);
         }
 
-        var properties = property.Split('.');
+        string[] properties = propertyPath.Split('.');
         string propertyName = properties[0];
-        PropertyInfo propertyInfo = Reflections.PropertyInfoExtensions.GetNestedPropertyInfo(
-            type,
-            propertyName
-        );
+        PropertyInfo propertyInfo = type.GetNestedPropertyInfo(propertyName);
 
-        Expression expressionMember = ExpressionExtension.GetExpressionMember(
-            propertyName,
-            body ?? parameter,
-            isNullCheck,
-            type
-        );
+        Expression expressionMember = parameterOrMember.MemberExpression(type, propertyName);
+
+        if (isNullChecking)
+        {
+            nullCheck = AndOrNot(Expression.Not(NullOr(expressionMember)), nullCheck);
+        }
 
         Type propertyType = propertyInfo.PropertyType;
-        if (propertyInfo.IsArrayGenericType())
+        if (propertyType.IsArrayGenericType())
         {
             propertyType = propertyInfo.PropertyType.GetGenericArguments()[0];
-            var anyParameter = Expression.Parameter(propertyType, (++parameterName).ToString());
-            var contains = BuildAnyQuery(
+            ParameterExpression anyParameter = Expression.Parameter(
                 propertyType,
-                string.Join(".", properties.Skip(1)),
-                keyword,
-                anyParameter,
-                ++parameterName
+                payload.ParameterName.NextUniformSequence()
             );
-            var anyLamda = Expression.Lambda(contains, anyParameter);
-            var anyCall = Expression.Call(
+            Expression contains = BuildAnyQuery(
+                new(
+                    propertyType,
+                    string.Join(".", properties.Skip(1)),
+                    anyParameter,
+                    keyword,
+                    payload.ParameterName.NextUniformSequence(),
+                    isNullChecking
+                )
+            );
+            LambdaExpression anyLamda = Expression.Lambda(contains, anyParameter);
+
+            MethodCallExpression anyCall = Expression.Call(
                 typeof(Enumerable),
                 nameof(Enumerable.Any),
                 [propertyType],
                 expressionMember,
                 anyLamda
             );
-            return anyCall;
+            return isNullChecking
+                ? Expression.Condition(nullCheck!, anyCall, Expression.Constant(false))
+                : anyCall;
         }
 
         return BuildAnyQuery(
-            propertyType,
-            string.Join(".", properties.Skip(1)),
-            keyword,
-            parameter!,
-            ++parameterName,
-            expressionMember
+            new(
+                propertyType,
+                string.Join(".", properties.Skip(1)),
+                expressionMember,
+                keyword,
+                payload.ParameterName.NextUniformSequence(),
+                isNullChecking,
+                nullCheck
+            )
         );
     }
+
+    static BinaryExpression NullOr(Expression expressionMember) =>
+        Expression.Equal(expressionMember, Expression.Constant(null));
+
+    static Expression AndOrNot(Expression expression, Expression? root) =>
+        root == null ? expression : Expression.AndAlso(root, expression);
 
     /// <summary>
     /// Build contains query
@@ -234,23 +253,33 @@ public static class SearchExtensions
         bool isNullCheck = false
     )
     {
-        Expression member = ExpressionExtension.GetExpressionMember(
-            propertyName,
-            parameter,
-            isNullCheck,
-            type
+        if (!isNullCheck)
+        {
+            Expression member = parameter.MemberExpression(type, propertyName);
+            return Expression.Call(
+                Expression.Call(member, nameof(string.ToLower), Type.EmptyTypes),
+                nameof(string.Contains),
+                Type.EmptyTypes,
+                keyword
+            );
+        }
+
+        MemberExpressionResult memberExpressionResult = parameter.MemberExpressionNullCheck(
+            type,
+            propertyName
         );
 
-        Expression lower = Expression.Call(member, "ToLower", Type.EmptyTypes);
-        Expression nullCheck = Expression.Equal(member, Expression.Constant(null));
+        Expression lower = Expression.Call(
+            memberExpressionResult.Member,
+            nameof(string.ToLower),
+            Type.EmptyTypes
+        );
 
-        return isNullCheck
-            ? Expression.Condition(
-                nullCheck,
-                Expression.Constant(false),
-                Expression.Call(lower, "Contains", Type.EmptyTypes, keyword)
-            )
-            : Expression.Call(lower, "Contains", Type.EmptyTypes, keyword);
+        return Expression.Condition(
+            memberExpressionResult.NullCheck,
+            Expression.Call(lower, nameof(string.Contains), Type.EmptyTypes, keyword),
+            Expression.Constant(false)
+        );
     }
 
     /// <summary>
@@ -372,4 +401,14 @@ public static class SearchExtensions
     }
 
     internal record SearchResult(Expression Expression, ParameterExpression Parameter);
+
+    internal record BuildAnyQueryPayload(
+        Type Type,
+        string PropertyPath,
+        Expression ParameterOrMember,
+        string Keyword,
+        string ParameterName,
+        bool IsNullChecking = false,
+        Expression? NullCheck = null
+    );
 }

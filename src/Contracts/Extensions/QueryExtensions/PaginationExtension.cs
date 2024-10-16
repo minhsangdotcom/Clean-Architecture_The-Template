@@ -192,12 +192,7 @@ public static class PaginationExtension
             string field = orderField.Key;
 
             //* x."property"
-            Expression expressionMember = ExpressionExtension.GetExpressionMember(
-                field,
-                parameter,
-                false,
-                typeof(T)
-            );
+            Expression expressionMember = parameter.MemberExpression(typeof(T), field);
             object? value = cursors?[field];
             CompararisonValues.Add(new((MemberExpression)expressionMember, value));
 

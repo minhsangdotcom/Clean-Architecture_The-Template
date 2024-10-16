@@ -50,7 +50,7 @@ public static class SortExtension
                     ? (hasThenBy ? OrderType.ThenByDescending : OrderType.Descending)
                     : (hasThenBy ? SortType.ThenBy : SortType.OrderBy);
 
-            var member = ExpressionExtension.GetExpressionMember<T>(field, parameter, isNullCheck);
+            var member = parameter.MemberExpression<T>(field, isNullCheck);
             UnaryExpression converted = Expression.Convert(member, typeof(object));
             Expression<Func<T, object>> lamda = Expression.Lambda<Func<T, object>>(
                 converted,

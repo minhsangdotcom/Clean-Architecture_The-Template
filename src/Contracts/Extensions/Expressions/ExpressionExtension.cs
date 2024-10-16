@@ -8,17 +8,81 @@ namespace Contracts.Extensions.Expressions;
 
 public static class ExpressionExtension
 {
-    public static Expression GetExpressionMember<T>(
-        string property,
-        Expression expression,
-        bool isNullCheck
-    ) => GetExpressionMember(property, expression, isNullCheck, typeof(T));
-
-    public static Expression GetExpressionMember(
+    public static Expression MemberExpression<T>(
+        this Expression expression,
         string propertyPath,
-        Expression expression,
-        bool isNullCheck,
-        Type entityType
+        bool isNullCheck = false
+    )
+    {
+        Type type = typeof(T);
+        string[] properties = propertyPath.Trim().Split('.', StringSplitOptions.TrimEntries);
+
+        Expression propertyValue = expression;
+        Expression nullCheck = null!;
+
+        foreach (string property in properties)
+        {
+            PropertyInfo propertyInfo = type.GetNestedPropertyInfo(property);
+
+            try
+            {
+                propertyValue = Expression.PropertyOrField(propertyValue, property);
+            }
+            catch (ArgumentException)
+            {
+                propertyValue = Expression.MakeMemberAccess(propertyValue, propertyInfo);
+            }
+
+            if (isNullCheck)
+            {
+                nullCheck = GenerateOrderNullCheckExpression(propertyValue, nullCheck);
+            }
+
+            type = propertyInfo.PropertyType;
+        }
+
+        return nullCheck == null
+            ? propertyValue
+            : Expression.Condition(
+                nullCheck,
+                Expression.Default(propertyValue.Type),
+                propertyValue
+            );
+    }
+
+    public static Expression MemberExpression(
+        this Expression expression,
+        Type entityType,
+        string propertyPath
+    )
+    {
+        Type type = entityType;
+        string[] properties = propertyPath.Trim().Split('.', StringSplitOptions.TrimEntries);
+
+        Expression propertyValue = expression;
+        foreach (string property in properties)
+        {
+            PropertyInfo propertyInfo = type.GetNestedPropertyInfo(property);
+
+            try
+            {
+                propertyValue = Expression.PropertyOrField(propertyValue, property);
+            }
+            catch (ArgumentException)
+            {
+                propertyValue = Expression.MakeMemberAccess(propertyValue, propertyInfo);
+            }
+
+            type = propertyInfo.PropertyType;
+        }
+
+        return propertyValue;
+    }
+
+    public static MemberExpressionResult MemberExpressionNullCheck(
+        this Expression expression,
+        Type entityType,
+        string propertyPath
     )
     {
         Type type = entityType;
@@ -40,21 +104,12 @@ public static class ExpressionExtension
                 propertyValue = Expression.MakeMemberAccess(propertyValue, propertyInfo);
             }
 
-            if (isNullCheck)
-            {
-                nullCheck = GenerateNullCheckExpression(propertyValue, nullCheck);
-            }
+            nullCheck = GenerateNullCheckExpression(propertyValue, nullCheck);
 
             type = propertyInfo.PropertyType;
         }
 
-        return nullCheck == null
-            ? propertyValue
-            : Expression.Condition(
-                nullCheck,
-                Expression.Default(propertyValue.Type),
-                propertyValue
-            );
+        return new(nullCheck, propertyValue);
     }
 
     public static PropertyInfo ToPropertyInfo(this Expression expression)
@@ -116,7 +171,7 @@ public static class ExpressionExtension
         };
     }
 
-    private static BinaryExpression GenerateNullCheckExpression(
+    private static BinaryExpression GenerateOrderNullCheckExpression(
         Expression propertyValue,
         Expression nullCheckExpression
     ) =>
@@ -126,4 +181,19 @@ public static class ExpressionExtension
                 nullCheckExpression,
                 Expression.Equal(propertyValue, Expression.Default(propertyValue.Type))
             );
+
+    private static Expression GenerateNullCheckExpression(
+        Expression propertyValue,
+        Expression nullCheckExpression
+    )
+    {
+        Expression notExpression = Expression.Not(
+            Expression.Equal(propertyValue, Expression.Constant(null, propertyValue.Type))
+        );
+        return nullCheckExpression == null
+            ? notExpression
+            : Expression.AndAlso(nullCheckExpression, notExpression);
+    }
 }
+
+public record MemberExpressionResult(Expression NullCheck, Expression Member);
