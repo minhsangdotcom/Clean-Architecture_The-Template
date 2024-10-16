@@ -408,6 +408,12 @@ public static class FilterExtension
         Type leftType = left.GetMemberExpressionType();
         Type? rightType = right?.GetType();
 
+        if (leftType == typeof(Ulid))
+        {
+            Ulid ulid = right == null ? Ulid.Empty : Ulid.Parse(right.ToString());
+            return new(member, ulid, Expression.Constant(ulid), leftType);
+        }
+
         if (
             (
                 leftType.IsNullable()
