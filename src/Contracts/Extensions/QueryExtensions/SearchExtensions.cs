@@ -128,7 +128,7 @@ public static class SearchExtensions
         {
             Expression expression =
                 field.Key == PropertyType.Array
-                    ? BuildAnyQuery(new(type, field.Value, rootParameter, keyword, "b"))
+                    ? BuildAnyQuery(new(type, field.Value, rootParameter, keyword, "b", isNullCheck))
                     : BuildContainsQuery(type, field.Value, rootParameter, constant, isNullCheck);
 
             body = body == null ? expression : Expression.OrElse(body, expression);

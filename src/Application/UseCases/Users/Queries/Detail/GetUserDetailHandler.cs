@@ -16,9 +16,7 @@ public class GetUserDetailHandler(IUnitOfWork unitOfWork)
     ) =>
         await unitOfWork
             .Repository<User>()
-            .FindByConditionAsync<GetUserDetailResponse>(
-                new GetUserByIdSpecification(query.UserId)
-            )
+            .FindByConditionAsync<GetUserDetailResponse>(new GetUserByIdSpecification(query.UserId))
         ?? throw new NotFoundException(
             [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
         );
