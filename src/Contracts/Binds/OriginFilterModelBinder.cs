@@ -8,7 +8,9 @@ public class OriginFilterModelBinder : IModelBinder
     {
         string? query = bindingContext.HttpContext?.Request.QueryString.Value;
 
-        bindingContext.Result = ModelBindingResult.Success(query);
+        bindingContext.Result = ModelBindingResult.Success(
+            string.IsNullOrWhiteSpace(query) ? null : ModelBindingExtension.GetFilterQueries(query)
+        );
 
         return Task.CompletedTask;
     }

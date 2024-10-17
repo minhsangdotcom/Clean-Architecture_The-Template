@@ -139,21 +139,28 @@ public partial class StringExtension
         }
     }
 
-    static bool IsDigit(string str)
+    public static bool IsDigit(this string str)
     {
         if (string.IsNullOrEmpty(str))
         {
             return false;
         }
 
-        foreach (char c in str)
-        {
-            if (!char.IsDigit(c))
-            {
-                return false;
-            }
-        }
+        // foreach (char c in str)
+        // {
+        //     if (!char.IsDigit(c))
+        //     {
+        //         return false;
+        //     }
+        // }
 
+        // return true;
+
+        foreach (var c in str)
+        {
+            if (c is < '0' or > '9')
+                return false;
+        }
         return true;
     }
 }

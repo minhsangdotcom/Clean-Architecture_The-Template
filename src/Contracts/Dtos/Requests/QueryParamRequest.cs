@@ -37,7 +37,7 @@ public class QueryParamRequest
 
     [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
     [ModelBinder(BinderType = typeof(OriginFilterModelBinder))]
-    public string? OriginFilter { get; set; }
+    public string[]? OriginFilters { get; set; }
 }
 
 public class Cursor
