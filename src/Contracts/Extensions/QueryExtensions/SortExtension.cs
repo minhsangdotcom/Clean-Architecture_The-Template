@@ -9,7 +9,7 @@ namespace Contracts.Extensions.QueryExtensions;
 public static class SortExtension
 {
     /// <summary>
-    /// Dynamic sort but do not do nested sort for array of poprety
+    /// Dynamic sort but do not do nested sort for array propreties
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="entities"></param>
