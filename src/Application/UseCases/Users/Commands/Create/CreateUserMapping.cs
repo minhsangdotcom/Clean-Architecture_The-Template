@@ -33,6 +33,8 @@ public class CreateUserMapping : Profile
         CreateMap<User, CreateUserResponse>();
 
         CreateMap<Role, RoleProjection>();
+        
+        CreateMap<Role, RoleDetailProjection>();
         CreateMap<UserClaim, UserClaimDetailProjection>();
     }
 }
