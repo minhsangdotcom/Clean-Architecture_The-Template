@@ -1,4 +1,3 @@
-using Contracts.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -9,17 +8,7 @@ public class FilterModelBinder : IModelBinder
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
         string[] queryString = GetQueryParams(bindingContext.HttpContext);
-        object? filters = StringExtension.Parse(queryString);
-
-        if (filters != null)
-        {
-            Console.WriteLine(
-                "filters have been successfully bound:"
-                    + SerializerExtension.Serialize(filters!).StringJson
-            );
-        }
-
-        bindingContext.Result = ModelBindingResult.Success(filters);
+        bindingContext.Result = ModelBindingResult.Success(queryString);
 
         return Task.CompletedTask;
     }

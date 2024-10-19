@@ -7,6 +7,7 @@ using Contracts.Extensions;
 using Contracts.Extensions.Reflections;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
+using Serilog;
 using Wangkanai.Extensions;
 
 namespace Application.Common.QueryStringProcessing;
@@ -157,13 +158,20 @@ public static partial class QueryParamValidate
                 [
                     Messager
                         .Create<QueryParamRequest>("QueryParam")
-                        .Property(x => x.Filter!)
-                        .Message(MessageType.ValidFormat)
+                        .Property("FilterElement")
+                        .Message(MessageType.Unique)
                         .Negative()
                         .Build(),
                 ]
             );
         }
+
+        request.DynamicFilter = StringExtension.Parse(queries);
+
+        Log.Information(
+            "Filter has been bound {filter}",
+            SerializerExtension.Serialize(request.DynamicFilter!).StringJson
+        );
 
         return request;
     }

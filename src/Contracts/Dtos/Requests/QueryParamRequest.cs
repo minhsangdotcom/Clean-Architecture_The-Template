@@ -35,7 +35,7 @@ public class QueryParamRequest
     public object? DynamicFilter { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-    [ModelBinder(BinderType = typeof(OriginFilterModelBinder))]
+    [ModelBinder(BinderType = typeof(FilterModelBinder))]
     public string[]? OriginFilters { get; set; }
 }
 

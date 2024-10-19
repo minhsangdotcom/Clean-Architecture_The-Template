@@ -7,15 +7,15 @@ namespace Contracts.Extensions;
 
 public partial class StringExtension
 {
-    public static object? Parse(string[] queries)
+    public static object? Parse(IEnumerable<QueryResult> queries)
     {
-        if (queries == null || queries.Length == 0)
+        if (queries?.Any() == false)
         {
             return null;
         }
 
         dynamic filters = new ExpandoObject();
-        foreach (QueryResult query in TransformStringQuery(queries))
+        foreach (QueryResult query in queries!)
         {
             List<string> cleanKey = query.CleanKey;
             string value = query.Value;
