@@ -158,7 +158,19 @@ public partial class StringExtension
                     StringComparison.OrdinalIgnoreCase
                 )
                 .Split("]", StringSplitOptions.RemoveEmptyEntries);
-            List<string> cleanKey = keyList.Select(x => x.Replace("[", string.Empty)).ToList();
+            List<string> cleanKey = keyList
+                .Select(x =>
+                {
+                    string key = x.Trim().TrimStart('[');
+
+                    if (key.Contains('$'))
+                    {
+                        return key.ToLower();
+                    }
+
+                    return key;
+                })
+                .ToList();
             string value = queryString.Value.ToString();
 
             return new QueryResult(cleanKey, value);

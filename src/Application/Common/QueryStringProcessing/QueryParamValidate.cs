@@ -49,7 +49,7 @@ public static partial class QueryParamValidate
         foreach (QueryResult query in queries)
         {
             //if it's $and,$or,$in and $between then they must have a index after
-            if (!ValidateArrayOperator(query.CleanKey))
+            if (ValidateArrayOperator(query.CleanKey))
             {
                 throw new BadRequestException(
                     [
@@ -104,7 +104,7 @@ public static partial class QueryParamValidate
 
             //
             if (
-                (propertyInfo.PropertyType.IsEnum || IsNumericType(propertyInfo.PropertyType))
+                (nullableType.IsEnum || IsNumericType(nullableType))
                 && query.Value?.IsDigit() == false
             )
             {
@@ -195,22 +195,32 @@ public static partial class QueryParamValidate
         };
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns>true if any element is after $and,$or,$in,$between isn't degit otherwise false</returns>
     private static bool ValidateArrayOperator(List<string> input)
     {
         List<string> arrayOperators = ["$and", "$or", "$in", "$between"];
 
         return arrayOperators.Any(arrayOperator =>
         {
-            int index = input.FindIndex(x => x == arrayOperator);
+            int index = input.IndexOf(arrayOperator);
 
             if (index < 0)
             {
                 return false;
             }
 
+            if (index >= input.Count - 1)
+            {
+                return true;
+            }
+
             string afterArrayOperator = input[index + 1];
 
-            return afterArrayOperator.IsDigit();
+            return !afterArrayOperator.IsDigit();
         });
     }
 
