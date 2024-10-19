@@ -15,21 +15,10 @@ public partial class StringExtension
         }
 
         dynamic filters = new ExpandoObject();
-        foreach (var query in queries)
+        foreach (QueryResult query in TransformStringQuery(queries))
         {
-            Dictionary<string, StringValues> queryStrings = QueryHelpers.ParseQuery(query);
-            KeyValuePair<string, StringValues> queryString = queryStrings.ElementAt(0);
-
-            string[] keyList = queryString
-                .Key.Trim()
-                .Replace(
-                    nameof(QueryParamRequest.Filter),
-                    string.Empty,
-                    StringComparison.OrdinalIgnoreCase
-                )
-                .Split("]", StringSplitOptions.RemoveEmptyEntries);
-            List<string> cleanKey = keyList.Select(x => x.Replace("[", string.Empty)).ToList();
-            string value = queryString.Value.ToString();
+            List<string> cleanKey = query.CleanKey;
+            string value = query.Value;
 
             dynamic leaf = ParseKey(cleanKey, value);
             filters = Merge(filters, leaf);
@@ -146,16 +135,6 @@ public partial class StringExtension
             return false;
         }
 
-        // foreach (char c in str)
-        // {
-        //     if (!char.IsDigit(c))
-        //     {
-        //         return false;
-        //     }
-        // }
-
-        // return true;
-
         foreach (var c in str)
         {
             if (c is < '0' or > '9')
@@ -163,4 +142,28 @@ public partial class StringExtension
         }
         return true;
     }
+
+    public static IEnumerable<QueryResult> TransformStringQuery(string[] queries)
+    {
+        return queries.Select(query =>
+        {
+            Dictionary<string, StringValues> queryStrings = QueryHelpers.ParseQuery(query);
+            KeyValuePair<string, StringValues> queryString = queryStrings.ElementAt(0);
+
+            string[] keyList = queryString
+                .Key.Trim()
+                .Replace(
+                    nameof(QueryParamRequest.Filter),
+                    string.Empty,
+                    StringComparison.OrdinalIgnoreCase
+                )
+                .Split("]", StringSplitOptions.RemoveEmptyEntries);
+            List<string> cleanKey = keyList.Select(x => x.Replace("[", string.Empty)).ToList();
+            string value = queryString.Value.ToString();
+
+            return new QueryResult(cleanKey, value);
+        });
+    }
 }
+
+public record QueryResult(List<string> CleanKey, string Value);

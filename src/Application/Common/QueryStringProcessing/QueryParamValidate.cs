@@ -7,6 +7,7 @@ using Contracts.Extensions;
 using Contracts.Extensions.Reflections;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
+using Wangkanai.Extensions;
 
 namespace Application.Common.QueryStringProcessing;
 
@@ -40,12 +41,14 @@ public static partial class QueryParamValidate
             return request;
         }
 
-        string[] queries = request.OriginFilters!;
+        List<QueryResult> queries = StringExtension
+            .TransformStringQuery(request.OriginFilters!)
+            .ToList();
 
-        foreach (string query in queries)
+        foreach (QueryResult query in queries)
         {
             //if it's $and,$or,$in and $between then they must have a index after
-            if (!ValidateArrayOperator(query))
+            if (!ValidateArrayOperator(query.CleanKey))
             {
                 throw new BadRequestException(
                     [
@@ -60,7 +63,7 @@ public static partial class QueryParamValidate
             }
 
             // lack of operator
-            if (!ValidateLackOfOperator(query))
+            if (!ValidateLackOfOperator(query.CleanKey))
             {
                 throw new BadRequestException(
                     [
@@ -74,18 +77,35 @@ public static partial class QueryParamValidate
                 );
             }
 
-            Dictionary<string, StringValues> queryStrings = QueryHelpers.ParseQuery(query);
-            KeyValuePair<string, StringValues> queryString = queryStrings.ElementAt(0);
+            // if the last element is logical operator it's wrong.
+            if (!LackOfElementInArrayOperator(query.CleanKey))
+            {
+                throw new BadRequestException(
+                    [
+                        Messager
+                            .Create<QueryParamRequest>("QueryParam")
+                            .Property(x => x.Filter!)
+                            .Message(MessageType.ValidFormat)
+                            .Negative()
+                            .Build(),
+                    ]
+                );
+            }
 
-            string key = TransformKeyFilter(queryString.Key);
-            string? value = queryString.Value;
+            var validKey = query.CleanKey.Where(x =>
+                string.Compare(x, "$or", StringComparison.OrdinalIgnoreCase) != 0
+                && string.Compare(x, "$and", StringComparison.OrdinalIgnoreCase) != 0
+                && !x.IsDigit()
+                && !validOperators.Contains(x.ToLower())
+            );
 
+            string key = string.Join(".", validKey);
             PropertyInfo propertyInfo = type.GetNestedPropertyInfo(key);
 
             //
             if (
                 (propertyInfo.PropertyType.IsEnum || IsNumericType(propertyInfo.PropertyType))
-                && value?.IsDigit() == false
+                && query.Value?.IsDigit() == false
             )
             {
                 throw new BadRequestException(
@@ -101,10 +121,10 @@ public static partial class QueryParamValidate
             }
         }
 
-        var trimQueries = queries.Select(x => x[..x.IndexOf('=')]);
+        var trimQueries = queries.Select(x => string.Join(".", x.CleanKey));
 
         // duplicated element of filter
-        if (trimQueries.Distinct().Count() != queries.Length)
+        if (trimQueries.Distinct().Count() != queries.Count)
         {
             throw new BadRequestException(
                 [
@@ -121,7 +141,7 @@ public static partial class QueryParamValidate
         return request;
     }
 
-    public static bool IsNumericType(Type type)
+    private static bool IsNumericType(Type type)
     {
         return Type.GetTypeCode(type) switch
         {
@@ -140,64 +160,47 @@ public static partial class QueryParamValidate
         };
     }
 
-    private static string TransformKeyFilter(string input)
+    private static bool ValidateArrayOperator(List<string> input)
     {
-        // Step 1: Remove filter, $or, $and, digits, and valid operators
-        string pattern =
-            @"filter|\$or|\$and|\[\d+\]|\["
-            + string.Join("|", validOperators.Select(Regex.Escape))
-            + @"\]";
-        string cleanedInput = Regex.Replace(input, pattern, "");
+        List<string> arrayOperators = ["$and", "$or", "$in", "$between"];
 
-        // Step 2: Remove remaining square brackets and concatenate with "."
-        cleanedInput = MyRegex3().Replace(cleanedInput, ".");
-
-        // Step 3: Remove any leading or trailing dots
-        cleanedInput = cleanedInput.Trim('.');
-
-        return cleanedInput;
-    }
-
-    private static bool ValidateArrayOperator(string input)
-    {
-        // This regex checks for "$or","$and","$in" or "between" followed by something that is not a digit.
-        string pattern = @"(\$or|\$and|\$in|\$between)\[(?!\d)";
-
-        // Check if the pattern is found in the input
-        return !Regex.IsMatch(input, pattern);
-    }
-
-    private static bool ValidateLackOfOperator(string input)
-    {
-        // Regex to capture everything before the "=" operator
-        var match = MyRegex1().Match(input);
-
-        if (match.Success)
+        return arrayOperators.Any(arrayOperator =>
         {
-            // Extract the part before the "=" operator
-            string beforeEqual = match.Groups[1].Value;
+            int index = input.FindIndex(x => x == arrayOperator);
 
-            // Find the last operator in the string before the '='
-            var lastOperatorMatch = MyRegex2().Match(beforeEqual);
-
-            if (lastOperatorMatch.Success)
+            if (index < 0)
             {
-                string lastOperator = $"${lastOperatorMatch.Groups[1].Value.ToLower()}";
-
-                // Check if the last operator is $in or $between
-                if (specialOperators.Contains(lastOperator))
-                {
-                    // Skip further validation if it's a special operator
-                    return true;
-                }
-
-                // Otherwise, check if the operator is one of the valid ones
-                return validOperators.Contains(lastOperator);
+                return false;
             }
+
+            string afterArrayOperator = input[index + 1];
+
+            return afterArrayOperator.IsDigit();
+        });
+    }
+
+    private static bool ValidateLackOfOperator(List<string> input)
+    {
+        Stack<string> inputs = new(input);
+
+        string last = inputs.Pop();
+        string preLast = inputs.Pop();
+
+        if (arrayOperators.Contains(preLast.ToLower()))
+        {
+            return true;
         }
 
-        // If there is no valid match or no "=" operator, return false
-        return false;
+        return validOperators.Contains(last.ToLower());
+    }
+
+    private static bool LackOfElementInArrayOperator(List<string> input)
+    {
+        Stack<string> inputs = new(input);
+        string last = inputs.Pop();
+        string preLast = inputs.Pop();
+
+        return logicalOperators.Contains(preLast.ToLower()) && last.IsDigit();
     }
 
     // Array of valid operators
@@ -223,17 +226,7 @@ public static partial class QueryParamValidate
     ];
 
     // Operators that don't require further validation after them
-    private static readonly string[] specialOperators = ["$in", "$between"];
+    private static readonly string[] arrayOperators = ["$in", "$between"];
 
-    [GeneratedRegex(@"\[(.*?)\]")]
-    private static partial Regex MyRegex();
-
-    [GeneratedRegex(@"(.*)=")]
-    private static partial Regex MyRegex1();
-
-    [GeneratedRegex(@"\$(\w+)\]?$")]
-    private static partial Regex MyRegex2();
-
-    [GeneratedRegex(@"[\[\]]")]
-    private static partial Regex MyRegex3();
+    private static readonly string[] logicalOperators = ["$and", "$or"];
 }

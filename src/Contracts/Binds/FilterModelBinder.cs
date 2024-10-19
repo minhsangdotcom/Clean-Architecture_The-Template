@@ -1,4 +1,3 @@
-using Contracts.Dtos.Requests;
 using Contracts.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -9,8 +8,7 @@ public class FilterModelBinder : IModelBinder
 {
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
-        var queryString = GetQueryParams(bindingContext.HttpContext);
-
+        string[] queryString = GetQueryParams(bindingContext.HttpContext);
         object? filters = StringExtension.Parse(queryString);
 
         if (filters != null)
