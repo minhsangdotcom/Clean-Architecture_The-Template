@@ -101,12 +101,45 @@ public static partial class QueryParamValidate
 
             string key = string.Join(".", validKey);
             PropertyInfo propertyInfo = type.GetNestedPropertyInfo(key);
+            Type[] arguments = propertyInfo.PropertyType.GetGenericArguments();
+            Type nullableType = arguments.Length > 0 ? arguments[0] : propertyInfo.PropertyType;
 
             //
             if (
                 (propertyInfo.PropertyType.IsEnum || IsNumericType(propertyInfo.PropertyType))
                 && query.Value?.IsDigit() == false
             )
+            {
+                throw new BadRequestException(
+                    [
+                        Messager
+                            .Create<QueryParamRequest>("QueryParam")
+                            .Property(x => x.Filter!)
+                            .Message(MessageType.ValidFormat)
+                            .Negative()
+                            .Build(),
+                    ]
+                );
+            }
+
+            if (
+                (nullableType == typeof(DateTime) || nullableType == typeof(DateTimeOffset))
+                && !DateTime.TryParse(query.Value, out var value)
+            )
+            {
+                throw new BadRequestException(
+                    [
+                        Messager
+                            .Create<QueryParamRequest>("QueryParam")
+                            .Property(x => x.Filter!)
+                            .Message(MessageType.ValidFormat)
+                            .Negative()
+                            .Build(),
+                    ]
+                );
+            }
+
+            if ((nullableType == typeof(Ulid)) && !Ulid.TryParse(query.Value, out Ulid result))
             {
                 throw new BadRequestException(
                     [
