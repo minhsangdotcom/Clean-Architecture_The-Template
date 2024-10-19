@@ -55,8 +55,7 @@ public static partial class QueryParamValidate
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
-                            .Message(MessageType.ValidFormat)
-                            .Negative()
+                            .Message(MessageType.LackOfArrayOperatorIndex)
                             .Build(),
                     ]
                 );
@@ -70,23 +69,21 @@ public static partial class QueryParamValidate
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
-                            .Message(MessageType.ValidFormat)
-                            .Negative()
+                            .Message(MessageType.LackOfOperator)
                             .Build(),
                     ]
                 );
             }
 
             // if the last element is logical operator it's wrong.
-            if (!LackOfElementInArrayOperator(query.CleanKey))
+            if (LackOfElementInArrayOperator(query.CleanKey))
             {
                 throw new BadRequestException(
                     [
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
-                            .Message(MessageType.ValidFormat)
-                            .Negative()
+                            .Message(MessageType.LackOfArrayOperatorElement)
                             .Build(),
                     ]
                 );
@@ -114,9 +111,8 @@ public static partial class QueryParamValidate
                     [
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
-                            .Property(x => x.Filter!)
-                            .Message(MessageType.ValidFormat)
-                            .Negative()
+                            .Property("FilterElement")
+                            .Message(MessageType.MustBeInteger)
                             .Build(),
                     ]
                 );
@@ -131,9 +127,8 @@ public static partial class QueryParamValidate
                     [
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
-                            .Property(x => x.Filter!)
-                            .Message(MessageType.ValidFormat)
-                            .Negative()
+                            .Property("FilterElement")
+                            .Message(MessageType.MustBeDatetime)
                             .Build(),
                     ]
                 );
@@ -145,9 +140,8 @@ public static partial class QueryParamValidate
                     [
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
-                            .Property(x => x.Filter!)
-                            .Message(MessageType.ValidFormat)
-                            .Negative()
+                            .Property("FilterElement")
+                            .Message(MessageType.MustBeUlid)
                             .Build(),
                     ]
                 );

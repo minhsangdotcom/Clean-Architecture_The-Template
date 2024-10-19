@@ -18,6 +18,6 @@ public class ListUserHandler(IUnitOfWork unitOfWork)
             .Repository<User>()
             .CursorPagedListAsync<ListUserResponse>(
                 new ListUserSpecification(),
-                query.ValidateQuery().ValidateFilter(typeof(User))
+                query.ValidateQuery()
             );
 }

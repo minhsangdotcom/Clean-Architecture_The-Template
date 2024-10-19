@@ -32,6 +32,8 @@ public class Message<T>(string? entityName = null)
 
     private string CustomMessage = string.Empty;
 
+    private Dictionary<string, string> CustomMessageTranslations = [];
+
     private MessageType type = 0;
 
     private readonly Dictionary<MessageType, MessageDictionary> Messages = CommonMessage();
@@ -43,6 +45,9 @@ public class Message<T>(string? entityName = null)
     public void SetPropertyName(string value) => propertyName = value;
 
     public void SetCustomMessage(string value) => CustomMessage = value;
+
+    public void SetCustomMessageTranslations(Dictionary<string, string> translations) =>
+        CustomMessageTranslations = translations;
 
     public void SetMessage(MessageType value) => type = value;
 
@@ -386,6 +391,78 @@ public class Message<T>(string? entityName = null)
                         { LanguageType.Vi.ToString(), "Dư thừa" },
                     },
                     MessageType.Redundant
+                )
+            },
+            {
+                MessageType.LackOfArrayOperatorIndex,
+                new(
+                    MessageType.LackOfArrayOperatorIndex.ToString().ToKebabCase(),
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "Lack of array operator index" },
+                        { LanguageType.Vi.ToString(), "Thiếu chỉ số của toán tử mảng" },
+                    },
+                    MessageType.LackOfArrayOperatorIndex
+                )
+            },
+            {
+                MessageType.LackOfOperator,
+                new(
+                    MessageType.LackOfOperator.ToString().ToKebabCase(),
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "Lack of operator" },
+                        { LanguageType.Vi.ToString(), "Thiếu toán tử" },
+                    },
+                    MessageType.LackOfOperator
+                )
+            },
+            {
+                MessageType.LackOfArrayOperatorElement,
+                new(
+                    MessageType.LackOfArrayOperatorElement.ToString().ToKebabCase(),
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "Lack of array operator element" },
+                        { LanguageType.Vi.ToString(), "Thiếu phần tử của toán tử mảng" },
+                    },
+                    MessageType.LackOfArrayOperatorElement
+                )
+            },
+            {
+                MessageType.MustBeInteger,
+                new(
+                    MessageType.MustBeInteger.ToString().ToKebabCase(),
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "Must be integer" },
+                        { LanguageType.Vi.ToString(), "Phải là số" },
+                    },
+                    MessageType.MustBeInteger
+                )
+            },
+            {
+                MessageType.MustBeDatetime,
+                new(
+                    MessageType.MustBeDatetime.ToString().ToKebabCase(),
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "Must be datetime" },
+                        { LanguageType.Vi.ToString(), "Phải là kiểu ngày giờ" },
+                    },
+                    MessageType.MustBeDatetime
+                )
+            },
+            {
+                MessageType.MustBeUlid,
+                new(
+                    MessageType.MustBeUlid.ToString().ToKebabCase(),
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "Must be Ulid" },
+                        { LanguageType.Vi.ToString(), "Phải là kiểu Ulid" },
+                    },
+                    MessageType.MustBeUlid
                 )
             },
         };

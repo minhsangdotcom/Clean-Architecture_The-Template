@@ -32,7 +32,6 @@ public class QueryParamRequest
     public Dictionary<string, string>? Filter { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-    [ModelBinder(BinderType = typeof(FilterModelBinder))]
     public object? DynamicFilter { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
