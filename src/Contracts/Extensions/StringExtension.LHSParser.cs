@@ -111,7 +111,6 @@ public partial class StringExtension
         for (int i = 0; i < root.Length; i++)
         {
             object rootValue = root[i];
-
             if (rootValue == null)
             {
                 continue;
@@ -119,12 +118,16 @@ public partial class StringExtension
 
             if (results[i] != null)
             {
-                results[i] = Merge(results[i], rootValue);
+                var rootDict = (IDictionary<string, object>)rootValue;
+                var resultDict = (IDictionary<string, object>)results[i];
+
+                results[i] =
+                    rootDict.Count > resultDict.Count
+                        ? Merge(rootValue, results[i])
+                        : Merge(results[i], rootValue);
+                continue;
             }
-            else
-            {
-                results[i] = rootValue;
-            }
+            results[i] = rootValue;
         }
     }
 

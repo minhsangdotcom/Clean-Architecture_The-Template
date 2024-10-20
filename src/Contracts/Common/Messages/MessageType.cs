@@ -28,4 +28,5 @@ public enum MessageType
     MustBeInteger = 22,
     MustBeDatetime = 23,
     MustBeUlid = 24,
+    LackOfProperty = 25,
 }

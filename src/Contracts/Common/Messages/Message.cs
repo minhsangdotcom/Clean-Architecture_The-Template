@@ -465,5 +465,17 @@ public class Message<T>(string? entityName = null)
                     MessageType.MustBeUlid
                 )
             },
+            {
+                MessageType.LackOfProperty,
+                new(
+                    MessageType.LackOfProperty.ToString().ToKebabCase(),
+                    new Dictionary<string, string>
+                    {
+                        { LanguageType.En.ToString(), "Lack of property" },
+                        { LanguageType.Vi.ToString(), "Thiếu thuộc tính" },
+                    },
+                    MessageType.LackOfProperty
+                )
+            }
         };
 }

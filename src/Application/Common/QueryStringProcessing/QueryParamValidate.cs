@@ -76,7 +76,7 @@ public static partial class QueryParamValidate
                 );
             }
 
-            // if the last element is logical operator it's wrong.
+            // if the last element is logical operator it's wrong like filter[$and][0] which is lack of body
             if (LackOfElementInArrayOperator(query.CleanKey))
             {
                 throw new BadRequestException(
@@ -90,15 +90,28 @@ public static partial class QueryParamValidate
                 );
             }
 
-            var validKey = query.CleanKey.Where(x =>
+            IEnumerable<string> properties = query.CleanKey.Where(x =>
                 string.Compare(x, "$or", StringComparison.OrdinalIgnoreCase) != 0
                 && string.Compare(x, "$and", StringComparison.OrdinalIgnoreCase) != 0
                 && !x.IsDigit()
                 && !validOperators.Contains(x.ToLower())
             );
 
-            string key = string.Join(".", validKey);
-            PropertyInfo propertyInfo = type.GetNestedPropertyInfo(key);
+            // lack of property
+            if (!properties.Any())
+            {
+                throw new BadRequestException(
+                    [
+                        Messager
+                            .Create<QueryParamRequest>("QueryParam")
+                            .Property("FilterElement")
+                            .Message(MessageType.LackOfProperty)
+                            .Build(),
+                    ]
+                );
+            }
+
+            PropertyInfo propertyInfo = type.GetNestedPropertyInfo(string.Join(".", properties));
             Type[] arguments = propertyInfo.PropertyType.GetGenericArguments();
             Type nullableType = arguments.Length > 0 ? arguments[0] : propertyInfo.PropertyType;
 
@@ -149,9 +162,54 @@ public static partial class QueryParamValidate
             }
         }
 
-        var trimQueries = queries.Select(x => string.Join(".", x.CleanKey));
+        // validate between operator is correct in format like [age][$between][0] = 1 & [age][$between][1] = 2
+        IEnumerable<QueryResult> betweenOperators = queries.Where(x =>
+            x.CleanKey.Contains("$between")
+        );
+        var betweenOpratorFormat = betweenOperators
+            .Select(x =>
+            {
+                int betweenIndex = x.CleanKey.IndexOf("$between");
+                int index = betweenIndex - 1;
+
+                if (index < 0)
+                {
+                    throw new InvalidOperationException("Invalid format of cleanKey.");
+                }
+                string key = string.Join(
+                    ".",
+                    x.CleanKey.Skip(index).Take(x.CleanKey.Count - betweenIndex)
+                );
+
+                int indexValue = int.Parse(x.CleanKey.Last());
+                return new { key, indexValue };
+            })
+            .GroupBy(x => x.key)
+            .Select(x => new { x.Key, values = x.Select(x => x.indexValue).ToList() })
+            .ToList();
+
+        if (
+            betweenOperators.Any()
+            && (
+                betweenOpratorFormat.Count != 1
+                || !betweenOpratorFormat[0].values.SequenceEqual([0, 1])
+            )
+        )
+        {
+            throw new BadRequestException(
+                [
+                    Messager
+                        .Create<QueryParamRequest>("QueryParam")
+                        .Property("FilterElement")
+                        .Message(MessageType.ValidFormat)
+                        .Negative()
+                        .Build(),
+                ]
+            );
+        }
 
         // duplicated element of filter
+        var trimQueries = queries.Select(x => string.Join(".", x.CleanKey));
         if (trimQueries.Distinct().Count() != queries.Count)
         {
             throw new BadRequestException(
@@ -196,7 +254,7 @@ public static partial class QueryParamValidate
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="input"></param>
     /// <returns>true if any element is after $and,$or,$in,$between isn't degit otherwise false</returns>
