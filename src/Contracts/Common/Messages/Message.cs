@@ -71,6 +71,8 @@ public class Message<T>(string? entityName = null)
         }
 
         string message = CustomMessage.ToKebabCase();
+        string? en = CustomMessageTranslations[LanguageType.En.ToString()];
+        string? vi = CustomMessageTranslations[LanguageType.En.ToString()];
 
         if (string.IsNullOrWhiteSpace(message))
         {
@@ -87,8 +89,11 @@ public class Message<T>(string? entityName = null)
             messageBuilder.Append($"_{objectName.ToKebabCase()}");
         }
 
-        var en = Translation(LanguageType.En);
-        var vi = Translation(LanguageType.Vi);
+        if (string.IsNullOrWhiteSpace(en) && string.IsNullOrWhiteSpace(vi))
+        {
+            en = Translation(LanguageType.En);
+            vi = Translation(LanguageType.Vi);
+        }
 
         return new()
         {
@@ -476,6 +481,6 @@ public class Message<T>(string? entityName = null)
                     },
                     MessageType.LackOfProperty
                 )
-            }
+            },
         };
 }

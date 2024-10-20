@@ -202,6 +202,7 @@ public static partial class QueryParamValidate
                         .Create<QueryParamRequest>("QueryParam")
                         .Property("FilterElement")
                         .Message(MessageType.ValidFormat)
+                        .ObjectName("BetweenOperator")
                         .Negative()
                         .Build(),
                 ]

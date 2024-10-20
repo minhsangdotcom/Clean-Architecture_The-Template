@@ -332,41 +332,28 @@ public static class FilterExtension
     /// <returns></returns>
     private static ConvertObjectTypeResult ParseArray(MemberExpression left, object right)
     {
-        List<(Expression member, Type type, object? value)> results = [];
         IList rightValues = (IList)right;
         int count = rightValues.Count;
 
+        List<object?> results = [];
+        Expression member = null!;
+        Type type = null!;
         for (int i = 0; i < count; i++)
         {
             object? rightValue = rightValues[i];
             var result = Parse(left, rightValue!);
 
-            results.Add(new(result.Member, result.Type, result.Value));
+            if (member == null && type == null)
+            {
+                member = result.Member;
+                type = result.Type;
+            }
+
+            results.Add(result.Value);
         }
 
-        var groupedResults = results
-            .GroupBy(x => new { x.member, x.type })
-            .Select(x => new
-            {
-                Member = x.Key.member,
-                Type = x.Key.type,
-                values = x.Select(x => x.value).ToList(),
-            })
-            .ToList();
-
-        var groupedResult = groupedResults[0];
-        Type type = groupedResult.Type;
-        Expression member = groupedResult.Member;
-        List<object?> values = groupedResult.values;
-
-        (IList list, Type type) convertedListResult = ConvertListToType(values!, type);
-        IList convertedList = convertedListResult.list;
-        return new(
-            member,
-            convertedList,
-            Expression.Constant(convertedList, convertedListResult.type),
-            type
-        );
+        (IList list, Type convertedType) = ConvertListToType(results!, type);
+        return new(member!, list, Expression.Constant(list, convertedType), type);
     }
 
     /// <summary>
