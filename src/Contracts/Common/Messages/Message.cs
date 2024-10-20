@@ -71,8 +71,16 @@ public class Message<T>(string? entityName = null)
         }
 
         string message = CustomMessage.ToKebabCase();
-        string? en = CustomMessageTranslations[LanguageType.En.ToString()];
-        string? vi = CustomMessageTranslations[LanguageType.En.ToString()];
+        _ = CustomMessageTranslations.TryGetValue(
+            LanguageType.En.ToString(),
+            out string? enTranslation
+        );
+        _ = CustomMessageTranslations.TryGetValue(
+            LanguageType.En.ToString(),
+            out string? viTranslation
+        );
+        string? en = enTranslation;
+        string? vi = viTranslation;
 
         if (string.IsNullOrWhiteSpace(message))
         {

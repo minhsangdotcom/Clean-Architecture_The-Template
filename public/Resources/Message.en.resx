@@ -233,4 +233,8 @@
     <value>Filter</value>
     <comment> </comment>
   </data>
+  <data name="BetweenOperator" xml:space="preserve">
+    <value>Between operator</value>
+    <comment> </comment>
+  </data>
 </root>

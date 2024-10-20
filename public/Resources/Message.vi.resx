@@ -233,4 +233,8 @@
     <value>Bộ lọc</value>
     <comment> </comment>
   </data>
+  <data name="BetweenOperator" xml:space="preserve">
+    <value>phương thức nằm giữa</value>
+    <comment> </comment>
+  </data>
 </root>
