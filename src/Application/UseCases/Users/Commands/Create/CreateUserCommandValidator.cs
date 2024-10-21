@@ -40,7 +40,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                 Messager
                     .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.UserName!)
-                    .Message(MessageType.ValidFormat)
+                    .Message(MessageType.Valid)
                     .Negative()
                     .Build()
             )

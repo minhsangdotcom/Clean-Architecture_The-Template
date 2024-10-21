@@ -72,7 +72,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
                 Messager
                     .Create<User>()
                     .Property(x => x.Email)
-                    .Message(MessageType.ValidFormat)
+                    .Message(MessageType.Valid)
                     .Negative()
                     .Build()
             )
@@ -114,7 +114,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
                 Messager
                     .Create<User>()
                     .Property(x => x.PhoneNumber)
-                    .Message(MessageType.ValidFormat)
+                    .Message(MessageType.Valid)
                     .Negative()
                     .Build()
             );

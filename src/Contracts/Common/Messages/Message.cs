@@ -205,16 +205,16 @@ public class Message<T>(string? entityName = null)
                 )
             },
             {
-                MessageType.ValidFormat,
+                MessageType.Valid,
                 new(
-                    MessageType.ValidFormat.ToString().ToKebabCase(),
+                    MessageType.Valid.ToString().ToKebabCase(),
                     new Dictionary<string, string>
                     {
-                        { LanguageType.En.ToString(), "valid format" },
-                        { LanguageType.Vi.ToString(), "đúng định dạng" },
+                        { LanguageType.En.ToString(), "valid" },
+                        { LanguageType.Vi.ToString(), "không hợp lệ" },
                     },
-                    MessageType.ValidFormat,
-                    "invalid format"
+                    MessageType.Valid,
+                    "invalid"
                 )
             },
             {

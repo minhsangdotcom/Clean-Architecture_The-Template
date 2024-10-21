@@ -4,7 +4,7 @@ public enum MessageType
 {
     MaximumLength = 1,
     MinumumLength = 2,
-    ValidFormat = 3,
+    Valid = 3,
     Found = 4,
     Existence = 5,
     Correct = 6,
