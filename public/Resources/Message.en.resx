@@ -218,7 +218,7 @@
     <comment> </comment>
   </data>
   <data name="QueryParam" xml:space="preserve">
-    <value>Query Parameter</value>
+    <value>query parameter</value>
     <comment> </comment>
   </data>
   <data name="Cursor" xml:space="preserve">
@@ -234,7 +234,35 @@
     <comment> </comment>
   </data>
   <data name="BetweenOperator" xml:space="preserve">
-    <value>Between operator</value>
+    <value>the between operator</value>
+    <comment/>
+  </data>
+  <data name="ArrayIndex" xml:space="preserve">
+    <value>an array index</value>
+    <comment/>
+  </data>
+  <data name="Operator" xml:space="preserve">
+    <value>an operator</value>
+    <comment> </comment>
+  </data>
+  <data name="Element" xml:space="preserve">
+    <value>an element</value>
+    <comment> </comment>
+  </data>
+  <data name="Property" xml:space="preserve">
+    <value>a property</value>
+    <comment> </comment>
+  </data>
+  <data name="Integer" xml:space="preserve">
+    <value>integer data type</value>
+    <comment> </comment>
+  </data>
+  <data name="Datetime" xml:space="preserve">
+    <value>datetime data type</value>
+    <comment> </comment>
+  </data>
+  <data name="Ulid" xml:space="preserve">
+    <value>Ulid data type</value>
     <comment> </comment>
   </data>
 </root>

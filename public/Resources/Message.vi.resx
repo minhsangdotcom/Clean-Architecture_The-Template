@@ -235,6 +235,34 @@
   </data>
   <data name="BetweenOperator" xml:space="preserve">
     <value>phương thức nằm giữa</value>
+    <comment/>
+  </data>
+  <data name="ArrayIndex" xml:space="preserve">
+    <value>vị trí trong mảng</value>
+    <comment/>
+  </data>
+  <data name="Operator" xml:space="preserve">
+    <value>phương thức</value>
+    <comment/>
+  </data>
+  <data name="Element" xml:space="preserve">
+    <value>phần tử</value>
+    <comment> </comment>
+  </data>
+  <data name="Property" xml:space="preserve">
+    <value>thuộc tính</value>
+    <comment> </comment>
+  </data>
+  <data name="Integer" xml:space="preserve">
+    <value>kiểu số thực</value>
+    <comment> </comment>
+  </data>
+  <data name="Datetime" xml:space="preserve">
+    <value>kiểu ngày giờ</value>
+    <comment> </comment>
+  </data>
+  <data name="Ulid" xml:space="preserve">
+    <value>kiếu ulid</value>
     <comment> </comment>
   </data>
 </root>

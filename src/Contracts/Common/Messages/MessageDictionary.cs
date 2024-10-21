@@ -7,7 +7,8 @@ public class MessageDictionary(
     string message,
     Dictionary<string, string> translation,
     MessageType type,
-    string? negativeMessage = null
+    string? negativeMessage = null,
+    KeyValuePair<string, string>? preposition = null
 )
 {
     /// <summary>
@@ -19,14 +20,13 @@ public class MessageDictionary(
         Guard.Against.Null(translation, nameof(translation));
 
     /// <summary>
-    /// a better meanful of message in negative
+    /// a meaningful negative message instead of using (not + message)
     /// </summary>
     public string? NegativeMessage { get; set; } = negativeMessage?.ToKebabCase();
 
-    /// <summary>
-    /// 
-    /// </summary>
     public string? EnNegativeMessage { get; set; } = negativeMessage;
 
     public MessageType Type { get; set; } = type;
+
+    public KeyValuePair<string, string>? Preposition { get; set; } = preposition;
 }

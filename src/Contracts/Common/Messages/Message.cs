@@ -124,8 +124,7 @@ public class Message<T>(string? entityName = null)
 
         Dictionary<string, ResourceResult> translation = ResourceExtension.ReadResxFile(path);
 
-        var propertyTranslation = translation.GetValueOrDefault(propertyName);
-
+        ResourceResult? propertyTranslation = translation.GetValueOrDefault(propertyName);
         string property = propertyTranslation?.Value ?? string.Empty;
         string entity = translation.GetValueOrDefault(entityName)?.Value ?? string.Empty;
         string obj = translation.GetValueOrDefault(objectName)?.Value ?? string.Empty;
@@ -134,7 +133,6 @@ public class Message<T>(string? entityName = null)
         string message = mess.Translation[languageType.ToString()];
 
         string negative = string.Empty;
-
         if (
             isNegative == true
             && (
@@ -150,8 +148,16 @@ public class Message<T>(string? entityName = null)
             message = mess.EnNegativeMessage ?? mess.Message!;
         }
 
-        string verb = string.Empty;
+        string messagePreposition = string.Empty;
+        if (mess.Preposition.HasValue && !string.IsNullOrWhiteSpace(obj))
+        {
+            messagePreposition =
+                languageType == LanguageType.En
+                    ? mess.Preposition!.Value.Key
+                    : mess.Preposition!.Value.Value;
+        }
 
+        string verb = string.Empty;
         if (languageType == LanguageType.En)
         {
             var comment = propertyTranslation?.Comment?.Trim()?.Split(",");
@@ -168,11 +174,21 @@ public class Message<T>(string? entityName = null)
             verb = isPlural ? "are" : "is";
         }
 
-        string prePosition = !string.IsNullOrWhiteSpace(property)
+        string preposition = !string.IsNullOrWhiteSpace(property)
             ? (languageType == LanguageType.En ? "of" : "của")
             : string.Empty;
 
-        IEnumerable<string> results = [property, prePosition, entity, verb, negative, message, obj];
+        IEnumerable<string> results =
+        [
+            property,
+            preposition,
+            entity,
+            verb,
+            negative,
+            message,
+            messagePreposition,
+            obj,
+        ];
 
         return string.Join(" ", results.Where(x => !string.IsNullOrWhiteSpace(x)));
     }
@@ -214,7 +230,8 @@ public class Message<T>(string? entityName = null)
                         { LanguageType.Vi.ToString(), "không hợp lệ" },
                     },
                     MessageType.Valid,
-                    "invalid"
+                    "invalid",
+                    new("for", "cho")
                 )
             },
             {
@@ -407,87 +424,29 @@ public class Message<T>(string? entityName = null)
                 )
             },
             {
-                MessageType.LackOfArrayOperatorIndex,
+                MessageType.Absent,
                 new(
-                    MessageType.LackOfArrayOperatorIndex.ToString().ToKebabCase(),
+                    MessageType.Absent.ToString().ToKebabCase(),
                     new Dictionary<string, string>
                     {
-                        { LanguageType.En.ToString(), "Lack of array operator index" },
-                        { LanguageType.Vi.ToString(), "Thiếu chỉ số của toán tử mảng" },
+                        { LanguageType.En.ToString(), "Absent" },
+                        { LanguageType.Vi.ToString(), "Thiếu" },
                     },
-                    MessageType.LackOfArrayOperatorIndex
+                    MessageType.Absent,
+                    preposition: new("from", string.Empty)
                 )
             },
             {
-                MessageType.LackOfOperator,
+                MessageType.Matching,
                 new(
-                    MessageType.LackOfOperator.ToString().ToKebabCase(),
+                    MessageType.Matching.ToString().ToKebabCase(),
                     new Dictionary<string, string>
                     {
-                        { LanguageType.En.ToString(), "Lack of operator" },
-                        { LanguageType.Vi.ToString(), "Thiếu toán tử" },
+                        { LanguageType.En.ToString(), "Matching" },
+                        { LanguageType.Vi.ToString(), "khớp với" },
                     },
-                    MessageType.LackOfOperator
-                )
-            },
-            {
-                MessageType.LackOfArrayOperatorElement,
-                new(
-                    MessageType.LackOfArrayOperatorElement.ToString().ToKebabCase(),
-                    new Dictionary<string, string>
-                    {
-                        { LanguageType.En.ToString(), "Lack of array operator element" },
-                        { LanguageType.Vi.ToString(), "Thiếu phần tử của toán tử mảng" },
-                    },
-                    MessageType.LackOfArrayOperatorElement
-                )
-            },
-            {
-                MessageType.MustBeInteger,
-                new(
-                    MessageType.MustBeInteger.ToString().ToKebabCase(),
-                    new Dictionary<string, string>
-                    {
-                        { LanguageType.En.ToString(), "Must be integer" },
-                        { LanguageType.Vi.ToString(), "Phải là số" },
-                    },
-                    MessageType.MustBeInteger
-                )
-            },
-            {
-                MessageType.MustBeDatetime,
-                new(
-                    MessageType.MustBeDatetime.ToString().ToKebabCase(),
-                    new Dictionary<string, string>
-                    {
-                        { LanguageType.En.ToString(), "Must be datetime" },
-                        { LanguageType.Vi.ToString(), "Phải là kiểu ngày giờ" },
-                    },
-                    MessageType.MustBeDatetime
-                )
-            },
-            {
-                MessageType.MustBeUlid,
-                new(
-                    MessageType.MustBeUlid.ToString().ToKebabCase(),
-                    new Dictionary<string, string>
-                    {
-                        { LanguageType.En.ToString(), "Must be Ulid" },
-                        { LanguageType.Vi.ToString(), "Phải là kiểu Ulid" },
-                    },
-                    MessageType.MustBeUlid
-                )
-            },
-            {
-                MessageType.LackOfProperty,
-                new(
-                    MessageType.LackOfProperty.ToString().ToKebabCase(),
-                    new Dictionary<string, string>
-                    {
-                        { LanguageType.En.ToString(), "Lack of property" },
-                        { LanguageType.Vi.ToString(), "Thiếu thuộc tính" },
-                    },
-                    MessageType.LackOfProperty
+                    MessageType.Matching,
+                    preposition: new("with", "với")
                 )
             },
         };
