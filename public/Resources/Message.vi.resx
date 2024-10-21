@@ -218,7 +218,7 @@
     <comment> </comment>
   </data>
   <data name="QueryParam" xml:space="preserve">
-    <value>Tham số truy vấn</value>
+    <value>tham số truy vấn</value>
     <comment> </comment>
   </data>
   <data name="Cursor" xml:space="preserve">
@@ -264,5 +264,9 @@
   <data name="Ulid" xml:space="preserve">
     <value>kiếu ulid</value>
     <comment> </comment>
+  </data>
+  <data name="FilterValue" xml:space="preserve">
+    <value>Giá trị bộ lọc</value>
+    <comment>    </comment>
   </data>
 </root>

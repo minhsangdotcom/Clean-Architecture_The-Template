@@ -30,170 +30,14 @@ public class Message<T>(string? entityName = null)
         ? typeof(T).Name
         : entityName;
 
-    private string CustomMessage = string.Empty;
+    // private string CustomMessage = string.Empty;
+    // private Dictionary<string, string> CustomMessageTranslations = [];
 
-    private Dictionary<string, string> CustomMessageTranslations = [];
+    private CustomMessage? customMessage = null;
 
     private MessageType type = 0;
 
-    private readonly Dictionary<MessageType, MessageDictionary> Messages = CommonMessage();
-
-    public void SetNegative(bool value) => isNegative = value;
-
-    public void SetObjectName(string value) => objectName = value;
-
-    public void SetPropertyName(string value) => propertyName = value;
-
-    public void SetCustomMessage(string value) => CustomMessage = value;
-
-    public void SetCustomMessageTranslations(Dictionary<string, string> translations) =>
-        CustomMessageTranslations = translations;
-
-    public void SetMessage(MessageType value) => type = value;
-
-    public MessageResult BuildMessage()
-    {
-        string subjectProperty = entityName.ToKebabCase();
-
-        if (!string.IsNullOrWhiteSpace(propertyName))
-        {
-            subjectProperty += $"_{propertyName.ToKebabCase()}";
-        }
-
-        var messageBuilder = new StringBuilder($"{subjectProperty}");
-
-        if (
-            isNegative == true
-            && (type == 0 || string.IsNullOrWhiteSpace(Messages[type].NegativeMessage))
-        )
-        {
-            messageBuilder.Append("_not");
-        }
-
-        string message = CustomMessage.ToKebabCase();
-        _ = CustomMessageTranslations.TryGetValue(
-            LanguageType.En.ToString(),
-            out string? enTranslation
-        );
-        _ = CustomMessageTranslations.TryGetValue(
-            LanguageType.En.ToString(),
-            out string? viTranslation
-        );
-        string? en = enTranslation;
-        string? vi = viTranslation;
-
-        if (string.IsNullOrWhiteSpace(message))
-        {
-            message =
-                isNegative == true && !string.IsNullOrWhiteSpace(Messages[type].NegativeMessage)
-                    ? Messages[type].NegativeMessage!
-                    : Messages[type].Message!;
-        }
-
-        messageBuilder.Append($"_{message}");
-
-        if (!string.IsNullOrWhiteSpace(objectName))
-        {
-            messageBuilder.Append($"_{objectName.ToKebabCase()}");
-        }
-
-        if (string.IsNullOrWhiteSpace(en) && string.IsNullOrWhiteSpace(vi))
-        {
-            en = Translation(LanguageType.En);
-            vi = Translation(LanguageType.Vi);
-        }
-
-        return new()
-        {
-            Message = messageBuilder.ToString().ToLower(),
-            En = en,
-            Vi = vi,
-        };
-    }
-
-    private string Translation(LanguageType languageType)
-    {
-        string rootPath = Directory.GetParent(Directory.GetCurrentDirectory())!.Parent!.FullName;
-        string path = languageType switch
-        {
-            LanguageType.Vi => Path.Join(rootPath, "public", "Resources", "Message.vi.resx"),
-
-            LanguageType.En => Path.Join(rootPath, "public", "Resources", "Message.en.resx"),
-            _ => string.Empty,
-        };
-
-        Dictionary<string, ResourceResult> translation = ResourceExtension.ReadResxFile(path);
-
-        ResourceResult? propertyTranslation = translation.GetValueOrDefault(propertyName);
-        string property = propertyTranslation?.Value ?? string.Empty;
-        string entity = translation.GetValueOrDefault(entityName)?.Value ?? string.Empty;
-        string obj = translation.GetValueOrDefault(objectName)?.Value ?? string.Empty;
-
-        MessageDictionary mess = Messages[type];
-        string message = mess.Translation[languageType.ToString()];
-
-        string negative = string.Empty;
-        if (
-            isNegative == true
-            && (
-                string.IsNullOrWhiteSpace(mess.EnNegativeMessage) || languageType == LanguageType.Vi
-            )
-        )
-        {
-            negative = languageType == LanguageType.Vi ? "Không" : "not";
-        }
-
-        if (languageType == LanguageType.En && isNegative == true)
-        {
-            message = mess.EnNegativeMessage ?? mess.Message!;
-        }
-
-        string messagePreposition = string.Empty;
-        if (mess.Preposition.HasValue && !string.IsNullOrWhiteSpace(obj))
-        {
-            messagePreposition =
-                languageType == LanguageType.En
-                    ? mess.Preposition!.Value.Key
-                    : mess.Preposition!.Value.Value;
-        }
-
-        string verb = string.Empty;
-        if (languageType == LanguageType.En)
-        {
-            var comment = propertyTranslation?.Comment?.Trim()?.Split(",");
-
-            bool isPlural =
-                comment != null
-                && comment.Any(x =>
-                {
-                    var c = x.Split("=");
-
-                    return c[0] == "IsPlural" && c[1] == "true";
-                });
-
-            verb = isPlural ? "are" : "is";
-        }
-
-        string preposition = !string.IsNullOrWhiteSpace(property)
-            ? (languageType == LanguageType.En ? "of" : "của")
-            : string.Empty;
-
-        IEnumerable<string> results =
-        [
-            property,
-            preposition,
-            entity,
-            verb,
-            negative,
-            message,
-            messagePreposition,
-            obj,
-        ];
-
-        return string.Join(" ", results.Where(x => !string.IsNullOrWhiteSpace(x)));
-    }
-
-    private static Dictionary<MessageType, MessageDictionary> CommonMessage() =>
+    private readonly Dictionary<MessageType, MessageDictionary> Messages =
         new()
         {
             {
@@ -227,7 +71,7 @@ public class Message<T>(string? entityName = null)
                     new Dictionary<string, string>
                     {
                         { LanguageType.En.ToString(), "valid" },
-                        { LanguageType.Vi.ToString(), "không hợp lệ" },
+                        { LanguageType.Vi.ToString(), "hợp lệ" },
                     },
                     MessageType.Valid,
                     "invalid",
@@ -429,8 +273,8 @@ public class Message<T>(string? entityName = null)
                     MessageType.Absent.ToString().ToKebabCase(),
                     new Dictionary<string, string>
                     {
-                        { LanguageType.En.ToString(), "Absent" },
-                        { LanguageType.Vi.ToString(), "Thiếu" },
+                        { LanguageType.En.ToString(), "absent" },
+                        { LanguageType.Vi.ToString(), "thiếu" },
                     },
                     MessageType.Absent,
                     preposition: new("from", string.Empty)
@@ -442,12 +286,170 @@ public class Message<T>(string? entityName = null)
                     MessageType.Matching.ToString().ToKebabCase(),
                     new Dictionary<string, string>
                     {
-                        { LanguageType.En.ToString(), "Matching" },
-                        { LanguageType.Vi.ToString(), "khớp với" },
+                        { LanguageType.En.ToString(), "matching" },
+                        { LanguageType.Vi.ToString(), "khớp" },
                     },
                     MessageType.Matching,
                     preposition: new("with", "với")
                 )
             },
         };
+
+    public void SetNegative(bool value) => isNegative = value;
+
+    public void SetObjectName(string value) => objectName = value;
+
+    public void SetPropertyName(string value) => propertyName = value;
+
+    public void SetCustomMessage(CustomMessage value) => customMessage = value;
+
+    public void SetMessage(MessageType value) => type = value;
+
+    public MessageResult BuildMessage()
+    {
+        string subjectProperty = entityName.ToKebabCase();
+
+        if (!string.IsNullOrWhiteSpace(propertyName))
+        {
+            subjectProperty += $"_{propertyName.ToKebabCase()}";
+        }
+
+        StringBuilder messageBuilder = new($"{subjectProperty}");
+
+        string? message = customMessage?.Message?.ToKebabCase() ?? Messages[type].Message;
+        string? negativeMessage = customMessage?.NegativeMessage ?? Messages[type].NegativeMessage;
+
+        string strMessage = BuildMainRawMessage(isNegative, negativeMessage, message);
+        messageBuilder.Append($"_{strMessage}");
+
+        if (!string.IsNullOrWhiteSpace(objectName))
+        {
+            messageBuilder.Append($"_{objectName.ToKebabCase()}");
+        }
+
+        string en = Translation(LanguageType.En);
+        string vi = Translation(LanguageType.Vi);
+
+        return new()
+        {
+            Message = messageBuilder.ToString().ToLower(),
+            En = en,
+            Vi = vi,
+        };
+    }
+
+    private string Translation(LanguageType languageType)
+    {
+        string rootPath = Directory.GetParent(Directory.GetCurrentDirectory())!.Parent!.FullName;
+        string path = languageType switch
+        {
+            LanguageType.Vi => Path.Join(rootPath, "public", "Resources", "Message.vi.resx"),
+
+            LanguageType.En => Path.Join(rootPath, "public", "Resources", "Message.en.resx"),
+            _ => string.Empty,
+        };
+
+        Dictionary<string, ResourceResult> translation = ResourceExtension.ReadResxFile(path);
+
+        ResourceResult? propertyTranslation = translation.GetValueOrDefault(propertyName);
+        string property = propertyTranslation?.Value ?? string.Empty;
+        string entity = translation.GetValueOrDefault(entityName)?.Value ?? string.Empty;
+        string obj = translation.GetValueOrDefault(objectName)?.Value ?? string.Empty;
+
+        MessageDictionary mess = Messages[type];
+        string message = BuildMainTranslationMessage(
+            isNegative,
+            mess.NegativeMessage,
+            mess.Translation[languageType.ToString()],
+            languageType
+        );
+
+        string messagePreposition = string.Empty;
+        if (mess.Preposition.HasValue && !string.IsNullOrWhiteSpace(obj))
+        {
+            messagePreposition =
+                languageType == LanguageType.En
+                    ? mess.Preposition!.Value.Key
+                    : mess.Preposition!.Value.Value;
+        }
+
+        string verb = string.Empty;
+        if (languageType == LanguageType.En)
+        {
+            var comment = propertyTranslation?.Comment?.Trim()?.Split(",");
+
+            bool isPlural =
+                comment != null
+                && comment.Any(x =>
+                {
+                    var c = x.Split("=");
+
+                    return c[0] == "IsPlural" && c[1] == "true";
+                });
+
+            verb = isPlural ? "are" : "is";
+        }
+
+        string preposition = !string.IsNullOrWhiteSpace(property)
+            ? (languageType == LanguageType.En ? "of" : "của")
+            : string.Empty;
+
+        IEnumerable<string> results =
+        [
+            property,
+            preposition,
+            entity,
+            verb,
+            message,
+            messagePreposition,
+            obj,
+        ];
+
+        return string.Join(" ", results.Where(x => !string.IsNullOrWhiteSpace(x)));
+    }
+
+    private static string BuildMainRawMessage(
+        bool? isNegative,
+        string? negativeMessage,
+        string message
+    )
+    {
+        if (!isNegative.HasValue || isNegative == false)
+        {
+            return message;
+        }
+
+        if (!string.IsNullOrWhiteSpace(negativeMessage))
+        {
+            return negativeMessage;
+        }
+
+        return "not_" + message;
+    }
+
+    private static string BuildMainTranslationMessage(
+        bool? isNegative,
+        string? negativeMessage,
+        string message,
+        LanguageType languageType
+    )
+    {
+        if (!isNegative.HasValue || isNegative == false)
+        {
+            return message;
+        }
+
+        if (languageType == LanguageType.En && !string.IsNullOrWhiteSpace(negativeMessage))
+        {
+            return negativeMessage;
+        }
+
+        return (languageType == LanguageType.En ? "not" : "không") + " " + message;
+    }
 }
+
+public record CustomMessage(
+    string Message,
+    Dictionary<string, string> CustomMessageTranslations,
+    string NegativeMessage
+);

@@ -36,15 +36,10 @@ public static class Messager
         return message;
     }
 
-    public static Message<T> Message<T>(
-        this Message<T> message,
-        string mess,
-        Dictionary<string, string> translations
-    )
+    public static Message<T> Message<T>(this Message<T> message, CustomMessage customMessage)
         where T : class
     {
-        message.SetCustomMessage(mess);
-        message.SetCustomMessageTranslations(translations);
+        message.SetCustomMessage(customMessage);
         return message;
     }
 

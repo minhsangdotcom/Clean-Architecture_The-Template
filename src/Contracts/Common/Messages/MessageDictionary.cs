@@ -14,7 +14,7 @@ public class MessageDictionary(
     /// <summary>
     /// Origin message
     /// </summary>
-    public string? Message { get; set; } = Guard.Against.NullOrEmpty(message, nameof(message));
+    public string Message { get; set; } = Guard.Against.NullOrEmpty(message, nameof(message));
 
     public Dictionary<string, string> Translation { get; set; } =
         Guard.Against.Null(translation, nameof(translation));
@@ -22,9 +22,7 @@ public class MessageDictionary(
     /// <summary>
     /// a meaningful negative message instead of using (not + message)
     /// </summary>
-    public string? NegativeMessage { get; set; } = negativeMessage?.ToKebabCase();
-
-    public string? EnNegativeMessage { get; set; } = negativeMessage;
+    public string? NegativeMessage { get; set; } = negativeMessage;
 
     public MessageType Type { get; set; } = type;
 

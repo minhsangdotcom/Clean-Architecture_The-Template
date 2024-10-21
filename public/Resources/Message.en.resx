@@ -265,4 +265,8 @@
     <value>Ulid data type</value>
     <comment> </comment>
   </data>
+  <data name="FilterValue" xml:space="preserve">
+    <value>Filter value</value>
+    <comment> </comment>
+  </data>
 </root>

@@ -20,15 +20,6 @@ public enum MessageType
     Strong = 16,
     Expired = 17,
     Redundant = 18,
-
-    //* Custom message
-    // LackOfArrayOperatorIndex = 19,
-    // LackOfOperator = 20,
-    // LackOfArrayOperatorElement = 21,
-    // MustBeInteger = 22,
-    // MustBeDatetime = 23,
-    // MustBeUlid = 24,
-    // LackOfProperty = 25,
     Absent = 19,
     Matching = 20,
 }

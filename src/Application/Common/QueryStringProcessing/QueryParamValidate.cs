@@ -107,7 +107,7 @@ public static partial class QueryParamValidate
                     [
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
-                            .Property("FilterElement")
+                            .Property(x => x.Filter!)
                             .Message(MessageType.Absent)
                             .ObjectName("Property")
                             .Build(),
@@ -129,7 +129,7 @@ public static partial class QueryParamValidate
                     [
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
-                            .Property("FilterElementValue")
+                            .Property("FilterValue")
                             .Message(MessageType.Matching)
                             .Negative()
                             .ObjectName("Integer")
@@ -147,7 +147,7 @@ public static partial class QueryParamValidate
                     [
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
-                            .Property("FilterElementValue")
+                            .Property("FilterValue")
                             .Message(MessageType.Matching)
                             .Negative()
                             .ObjectName("Datetime")
@@ -162,7 +162,7 @@ public static partial class QueryParamValidate
                     [
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
-                            .Property("FilterElementValue")
+                            .Property("FilterValue")
                             .Message(MessageType.Matching)
                             .Negative()
                             .ObjectName("Ulid")
