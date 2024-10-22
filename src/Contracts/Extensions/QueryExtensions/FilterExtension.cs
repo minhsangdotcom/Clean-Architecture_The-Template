@@ -524,4 +524,3 @@ internal enum OperationType
     StartsWith = 16,
     EndsWith = 17,
 }
-//the next check element before equal operator have in ["$eq","$eqi","$ne",]
