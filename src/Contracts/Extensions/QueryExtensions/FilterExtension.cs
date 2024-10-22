@@ -393,7 +393,7 @@ public static class FilterExtension
         if (leftType == typeof(Ulid))
         {
             Ulid ulid = right == null ? Ulid.Empty : Ulid.Parse(right.ToString());
-            return new(member, ulid, Expression.Constant(ulid), leftType);
+            return new(member, ulid, Expression.Constant(ulid, leftType), leftType);
         }
 
         if (
