@@ -225,10 +225,6 @@
     <value>Cursor</value>
     <comment> </comment>
   </data>
-  <data name="FilterElement" xml:space="preserve">
-    <value>Filter element</value>
-    <comment> </comment>
-  </data>
   <data name="Filter" xml:space="preserve">
     <value>Filter</value>
     <comment> </comment>
@@ -238,20 +234,20 @@
     <comment/>
   </data>
   <data name="ArrayIndex" xml:space="preserve">
-    <value>an array index</value>
+    <value>its  array index</value>
     <comment/>
   </data>
   <data name="Operator" xml:space="preserve">
-    <value>an operator</value>
+    <value>its operator</value>
     <comment> </comment>
   </data>
   <data name="Element" xml:space="preserve">
-    <value>an element</value>
+    <value>its element</value>
     <comment> </comment>
   </data>
   <data name="Property" xml:space="preserve">
-    <value>a property</value>
-    <comment> </comment>
+    <value>its property</value>
+    <comment/>
   </data>
   <data name="Integer" xml:space="preserve">
     <value>integer data type</value>

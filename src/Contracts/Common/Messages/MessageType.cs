@@ -20,6 +20,6 @@ public enum MessageType
     Strong = 16,
     Expired = 17,
     Redundant = 18,
-    Absent = 19,
+    Missing = 19,
     Matching = 20,
 }

@@ -56,7 +56,7 @@ public static partial class QueryParamValidate
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
-                            .Message(MessageType.Absent)
+                            .Message(MessageType.Missing)
                             .ObjectName("ArrayIndex")
                             .Build(),
                     ]
@@ -71,7 +71,7 @@ public static partial class QueryParamValidate
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
-                            .Message(MessageType.Absent)
+                            .Message(MessageType.Missing)
                             .ObjectName("Operator")
                             .Build(),
                     ]
@@ -86,7 +86,7 @@ public static partial class QueryParamValidate
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
-                            .Message(MessageType.Absent)
+                            .Message(MessageType.Missing)
                             .ObjectName("Element")
                             .Build(),
                     ]
@@ -108,7 +108,7 @@ public static partial class QueryParamValidate
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
-                            .Message(MessageType.Absent)
+                            .Message(MessageType.Missing)
                             .ObjectName("Property")
                             .Build(),
                     ]
@@ -210,7 +210,7 @@ public static partial class QueryParamValidate
                 [
                     Messager
                         .Create<QueryParamRequest>("QueryParam")
-                        .Property("FilterElement")
+                        .Property(x => x.Filter!)
                         .Message(MessageType.Valid)
                         .ObjectName("BetweenOperator")
                         .Negative()

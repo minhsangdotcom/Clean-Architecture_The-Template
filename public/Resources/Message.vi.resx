@@ -225,10 +225,6 @@
     <value>Con trỏ</value>
     <comment> </comment>
   </data>
-  <data name="FilterElement" xml:space="preserve">
-    <value>Phần tử trong bộ lọc</value>
-    <comment> </comment>
-  </data>
   <data name="Filter" xml:space="preserve">
     <value>Bộ lọc</value>
     <comment> </comment>

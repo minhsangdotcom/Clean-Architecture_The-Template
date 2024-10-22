@@ -30,9 +30,6 @@ public class Message<T>(string? entityName = null)
         ? typeof(T).Name
         : entityName;
 
-    // private string CustomMessage = string.Empty;
-    // private Dictionary<string, string> CustomMessageTranslations = [];
-
     private CustomMessage? customMessage = null;
 
     private MessageType type = 0;
@@ -268,16 +265,15 @@ public class Message<T>(string? entityName = null)
                 )
             },
             {
-                MessageType.Absent,
+                MessageType.Missing,
                 new(
-                    MessageType.Absent.ToString().ToKebabCase(),
+                    MessageType.Missing.ToString().ToKebabCase(),
                     new Dictionary<string, string>
                     {
-                        { LanguageType.En.ToString(), "absent" },
+                        { LanguageType.En.ToString(), "missing" },
                         { LanguageType.Vi.ToString(), "thiếu" },
                     },
-                    MessageType.Absent,
-                    preposition: new("from", string.Empty)
+                    MessageType.Missing
                 )
             },
             {
@@ -327,8 +323,8 @@ public class Message<T>(string? entityName = null)
             messageBuilder.Append($"_{objectName.ToKebabCase()}");
         }
 
-        string en = Translation(LanguageType.En);
-        string vi = Translation(LanguageType.Vi);
+        string en = Translate(LanguageType.En);
+        string vi = Translate(LanguageType.Vi);
 
         return new()
         {
@@ -338,13 +334,12 @@ public class Message<T>(string? entityName = null)
         };
     }
 
-    private string Translation(LanguageType languageType)
+    private string Translate(LanguageType languageType)
     {
         string rootPath = Directory.GetParent(Directory.GetCurrentDirectory())!.Parent!.FullName;
         string path = languageType switch
         {
             LanguageType.Vi => Path.Join(rootPath, "public", "Resources", "Message.vi.resx"),
-
             LanguageType.En => Path.Join(rootPath, "public", "Resources", "Message.en.resx"),
             _ => string.Empty,
         };
@@ -359,8 +354,9 @@ public class Message<T>(string? entityName = null)
         MessageDictionary mess = Messages[type];
         string message = BuildMainTranslationMessage(
             isNegative,
-            mess.NegativeMessage,
-            mess.Translation[languageType.ToString()],
+            customMessage?.NegativeMessage ?? mess.NegativeMessage,
+            customMessage?.CustomMessageTranslations[languageType.ToString()]
+                ?? mess.Translation[languageType.ToString()],
             languageType
         );
 
@@ -414,7 +410,7 @@ public class Message<T>(string? entityName = null)
         string message
     )
     {
-        if (!isNegative.HasValue || isNegative == false)
+        if (isNegative != true)
         {
             return message;
         }
@@ -434,7 +430,7 @@ public class Message<T>(string? entityName = null)
         LanguageType languageType
     )
     {
-        if (!isNegative.HasValue || isNegative == false)
+        if (isNegative != true)
         {
             return message;
         }
