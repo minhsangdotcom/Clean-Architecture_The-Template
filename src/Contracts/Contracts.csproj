@@ -10,6 +10,7 @@
     <PackageReference Include="Ardalis.GuardClauses" Version="4.6.0" />
     <PackageReference Include="Ardalis.Result.AspNetCore" Version="8.0.0" />
     <PackageReference Include="CaseConverter" Version="2.0.1" />
+    <PackageReference Include="CSharpFunctionalExtensions" Version="3.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Ulid" Version="1.3.4" />

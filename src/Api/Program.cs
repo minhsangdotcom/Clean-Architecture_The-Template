@@ -38,6 +38,7 @@ try
     var scope = app.Services.CreateScope();
     var serviceProvider = scope.ServiceProvider;
     await DbInitializer.InitializeAsync(serviceProvider);
+    await RegionDataSeeding.SeedingAsync(serviceProvider);
 
     if (app.Environment.IsDevelopment())
     {
