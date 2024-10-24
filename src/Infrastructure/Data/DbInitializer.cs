@@ -37,7 +37,6 @@ public class DbInitializer
                     "0925123123"
                 )
                 {
-                    Address = "NYC",
                     DayOfBirth = new DateTime(1990, 10, 1),
                     Status = UserStatus.Active,
                 };
@@ -80,10 +79,9 @@ public class DbInitializer
                     "0803456789"
                 )
                 {
-                    Address = "Los Angeles",
                     DayOfBirth = new DateTime(1985, 4, 23),
                     Status = UserStatus.Active,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Alice",
@@ -94,10 +92,9 @@ public class DbInitializer
                     "0912345678"
                 )
                 {
-                    Address = "Chicago",
                     DayOfBirth = new DateTime(1992, 7, 19),
                     Status = UserStatus.Inactive,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Bob",
@@ -108,10 +105,9 @@ public class DbInitializer
                     "0934567890"
                 )
                 {
-                    Address = "San Francisco",
                     DayOfBirth = new DateTime(1980, 3, 15),
                     Status = UserStatus.Active,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Emily",
@@ -122,10 +118,9 @@ public class DbInitializer
                     "0945678901"
                 )
                 {
-                    Address = "Seattle",
                     DayOfBirth = new DateTime(1995, 5, 5),
                     Status = UserStatus.Active,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "James",
@@ -136,10 +131,9 @@ public class DbInitializer
                     "0978901234"
                 )
                 {
-                    Address = "Houston",
                     DayOfBirth = new DateTime(1983, 11, 9),
                     Status = UserStatus.Active,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Olivia",
@@ -150,10 +144,9 @@ public class DbInitializer
                     "0989012345"
                 )
                 {
-                    Address = "Miami",
                     DayOfBirth = new DateTime(1998, 2, 18),
                     Status = UserStatus.Active,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Daniel",
@@ -164,10 +157,9 @@ public class DbInitializer
                     "0901234567"
                 )
                 {
-                    Address = "Boston",
                     DayOfBirth = new DateTime(1987, 9, 21),
                     Status = UserStatus.Inactive,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Sophia",
@@ -178,10 +170,9 @@ public class DbInitializer
                     "0912345679"
                 )
                 {
-                    Address = "Dallas",
                     DayOfBirth = new DateTime(1994, 12, 12),
                     Status = UserStatus.Active,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Michael",
@@ -192,10 +183,9 @@ public class DbInitializer
                     "0913456789"
                 )
                 {
-                    Address = "Phoenix",
                     DayOfBirth = new DateTime(1978, 8, 8),
                     Status = UserStatus.Inactive,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Isabella",
@@ -206,10 +196,9 @@ public class DbInitializer
                     "0945678902"
                 )
                 {
-                    Address = "San Diego",
                     DayOfBirth = new DateTime(1991, 1, 1),
                     Status = UserStatus.Active,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "David",
@@ -220,10 +209,9 @@ public class DbInitializer
                     "0934567891"
                 )
                 {
-                    Address = "Austin",
                     DayOfBirth = new DateTime(1984, 6, 6),
                     Status = UserStatus.Active,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Emma",
@@ -234,10 +222,9 @@ public class DbInitializer
                     "0956789012"
                 )
                 {
-                    Address = "Denver",
                     DayOfBirth = new DateTime(1993, 3, 3),
                     Status = UserStatus.Active,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Andrew",
@@ -248,10 +235,9 @@ public class DbInitializer
                     "0923456789"
                 )
                 {
-                    Address = "Portland",
                     DayOfBirth = new DateTime(1981, 10, 30),
                     Status = UserStatus.Inactive,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Ava",
@@ -262,10 +248,9 @@ public class DbInitializer
                     "0935678903"
                 )
                 {
-                    Address = "Las Vegas",
                     DayOfBirth = new DateTime(2000, 4, 14),
                     Status = UserStatus.Active,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Joshua",
@@ -276,10 +261,9 @@ public class DbInitializer
                     "0914567890"
                 )
                 {
-                    Address = "Orlando",
                     DayOfBirth = new DateTime(1986, 11, 17),
                     Status = UserStatus.Inactive,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Charlotte",
@@ -290,10 +274,9 @@ public class DbInitializer
                     "0934567892"
                 )
                 {
-                    Address = "New Orleans",
                     DayOfBirth = new DateTime(1997, 7, 7),
                     Status = UserStatus.Active,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Ethan",
@@ -304,10 +287,9 @@ public class DbInitializer
                     "0923456781"
                 )
                 {
-                    Address = "Philadelphia",
                     DayOfBirth = new DateTime(1999, 9, 9),
                     Status = UserStatus.Active,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Abigail",
@@ -318,10 +300,9 @@ public class DbInitializer
                     "0916789013"
                 )
                 {
-                    Address = "San Antonio",
                     DayOfBirth = new DateTime(1989, 2, 2),
                     Status = UserStatus.Active,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
                 new(
                     "Liam",
@@ -332,16 +313,15 @@ public class DbInitializer
                     "0909876543"
                 )
                 {
-                    Address = "Atlanta",
                     DayOfBirth = new DateTime(1988, 12, 25),
                     Status = UserStatus.Inactive,
-                    Gender = (Gender)new Random().Next(1,3)
+                    Gender = (Gender)new Random().Next(1, 3),
                 },
             ];
 
             await unitOfWork.Repository<User>().AddRangeAsync(users);
             await unitOfWork.SaveAsync();
-            
+
             foreach (var user1 in users)
             {
                 await userManagerService.CreateUserAsync(
@@ -352,7 +332,7 @@ public class DbInitializer
                 );
             }
 
-            logger.Information("Seeding data has done.............");
+            logger.Information("Seeding data has finished.............");
             await unitOfWork.CommitAsync();
         }
         catch (Exception ex)
