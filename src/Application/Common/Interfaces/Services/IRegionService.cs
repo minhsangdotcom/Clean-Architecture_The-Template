@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Application.Common.Interfaces.Registers;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
@@ -14,4 +15,8 @@ public interface IRegionService : IScope
     Task<Province?> FindProvinceByCode(string code);
     Task<District?> FindDistrictyCode(string code);
     Task<Commune?> FindCommuneByCode(string code);
+
+    Task<IEnumerable<T>> CreateRangeAsync<T>(IEnumerable<T> data) where T : class;
+    
+    Task<bool> AnyAsync<T>(Expression<Func<T, bool>>? expression = null) where T : class;
 }

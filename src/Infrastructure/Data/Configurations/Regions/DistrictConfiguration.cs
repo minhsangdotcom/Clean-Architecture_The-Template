@@ -11,7 +11,5 @@ public class DistrictConfiguration : IEntityTypeConfiguration<District>
     {
         builder.HasKey(x => x.Id);
         builder.HasIndex(x => x.Code).IsUnique();
-
-        builder.HasMany(x => x.Communes).WithOne().HasForeignKey(x => x.DistrictId);
     }
 }

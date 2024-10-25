@@ -47,10 +47,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("character varying(26)")
                         .HasColumnName("district_id");
 
-                    b.Property<string>("DistrictId1")
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("district_id1");
-
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("text")
@@ -80,9 +76,6 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("DistrictId")
                         .HasDatabaseName("ix_commune_district_id");
-
-                    b.HasIndex("DistrictId1")
-                        .HasDatabaseName("ix_commune_district_id1");
 
                     b.ToTable("commune", (string)null);
                 });
@@ -523,17 +516,12 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Regions.Commune", b =>
                 {
-                    b.HasOne("Domain.Aggregates.Regions.District", null)
+                    b.HasOne("Domain.Aggregates.Regions.District", "District")
                         .WithMany("Communes")
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_commune_district_district_id");
-
-                    b.HasOne("Domain.Aggregates.Regions.District", "District")
-                        .WithMany()
-                        .HasForeignKey("DistrictId1")
-                        .HasConstraintName("fk_commune_district_district_id1");
 
                     b.Navigation("District");
                 });

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    [Migration("20241024140112_InitRegion")]
-    partial class InitRegion
+    [Migration("20241025154436_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -189,7 +189,7 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("province", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Users.Role", b =>
+            modelBuilder.Entity("Domain.Aggregates.Roles.Role", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("character varying(26)")
@@ -222,7 +222,7 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("role", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Users.RoleClaim", b =>
+            modelBuilder.Entity("Domain.Aggregates.Roles.RoleClaim", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("character varying(26)")
@@ -261,10 +261,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("character varying(26)")
                         .HasColumnName("id");
-
-                    b.Property<string>("Address")
-                        .HasColumnType("text")
-                        .HasColumnName("address");
 
                     b.Property<string>("Avatar")
                         .HasColumnType("text")
@@ -523,12 +519,14 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Regions.Commune", b =>
                 {
-                    b.HasOne("Domain.Aggregates.Regions.District", null)
+                    b.HasOne("Domain.Aggregates.Regions.District", "District")
                         .WithMany("Communes")
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_commune_district_district_id");
+
+                    b.Navigation("District");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Regions.District", b =>
@@ -541,9 +539,9 @@ namespace Infrastructure.Data.Migrations
                         .HasConstraintName("fk_district_province_province_id");
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Users.RoleClaim", b =>
+            modelBuilder.Entity("Domain.Aggregates.Roles.RoleClaim", b =>
                 {
-                    b.HasOne("Domain.Aggregates.Users.Role", "Role")
+                    b.HasOne("Domain.Aggregates.Roles.Role", "Role")
                         .WithMany("RoleClaims")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -553,9 +551,76 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
+                {
+                    b.OwnsOne("Domain.Aggregates.Users.ValueObjects.Address", "Address", b1 =>
+                        {
+                            b1.Property<string>("UserId")
+                                .HasColumnType("character varying(26)")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("CommuneId")
+                                .HasColumnType("character varying(26)")
+                                .HasColumnName("address_commune_id");
+
+                            b1.Property<string>("DistrictId")
+                                .HasColumnType("character varying(26)")
+                                .HasColumnName("address_district_id");
+
+                            b1.Property<string>("ProvinceId")
+                                .HasColumnType("character varying(26)")
+                                .HasColumnName("address_province_id");
+
+                            b1.Property<string>("Street")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("address_street");
+
+                            b1.HasKey("UserId");
+
+                            b1.HasIndex("CommuneId")
+                                .HasDatabaseName("ix_user_address_commune_id");
+
+                            b1.HasIndex("DistrictId")
+                                .HasDatabaseName("ix_user_address_district_id");
+
+                            b1.HasIndex("ProvinceId")
+                                .HasDatabaseName("ix_user_address_province_id");
+
+                            b1.ToTable("user");
+
+                            b1.HasOne("Domain.Aggregates.Regions.Commune", "Commune")
+                                .WithMany()
+                                .HasForeignKey("CommuneId")
+                                .HasConstraintName("fk_user_commune_address_commune_id");
+
+                            b1.HasOne("Domain.Aggregates.Regions.District", "District")
+                                .WithMany()
+                                .HasForeignKey("DistrictId")
+                                .HasConstraintName("fk_user_district_address_district_id");
+
+                            b1.HasOne("Domain.Aggregates.Regions.Province", "Province")
+                                .WithMany()
+                                .HasForeignKey("ProvinceId")
+                                .HasConstraintName("fk_user_province_address_province_id");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId")
+                                .HasConstraintName("fk_user_user_id");
+
+                            b1.Navigation("Commune");
+
+                            b1.Navigation("District");
+
+                            b1.Navigation("Province");
+                        });
+
+                    b.Navigation("Address");
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Users.UserClaim", b =>
                 {
-                    b.HasOne("Domain.Aggregates.Users.RoleClaim", "RoleClaim")
+                    b.HasOne("Domain.Aggregates.Roles.RoleClaim", "RoleClaim")
                         .WithMany("UserClaims")
                         .HasForeignKey("RoleClaimId")
                         .HasConstraintName("fk_user_claim_role_claim_role_claim_id");
@@ -586,7 +651,7 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Users.UserRole", b =>
                 {
-                    b.HasOne("Domain.Aggregates.Users.Role", "Role")
+                    b.HasOne("Domain.Aggregates.Roles.Role", "Role")
                         .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -627,14 +692,14 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Districts");
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Users.Role", b =>
+            modelBuilder.Entity("Domain.Aggregates.Roles.Role", b =>
                 {
                     b.Navigation("RoleClaims");
 
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Users.RoleClaim", b =>
+            modelBuilder.Entity("Domain.Aggregates.Roles.RoleClaim", b =>
                 {
                     b.Navigation("UserClaims");
                 });

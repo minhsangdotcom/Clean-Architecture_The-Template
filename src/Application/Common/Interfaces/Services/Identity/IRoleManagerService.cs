@@ -12,6 +12,8 @@ public interface IRoleManagerService : IScope
 
     Task<Role> CreateRoleAsync(Role role);
 
+    Task<IEnumerable<Role>> CreateRangeRoleAsync(IEnumerable<Role> roles);
+
     Task<Role> UpdateRoleAsync(Role role, IEnumerable<RoleClaim>? roleClaims);
 
     Task DeleteRoleAsync(Role role);

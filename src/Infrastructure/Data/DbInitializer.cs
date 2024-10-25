@@ -1,5 +1,6 @@
 using System.Text;
 using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Roles;
@@ -20,7 +21,7 @@ public class DbInitializer
         var unitOfWork = provider.GetRequiredService<IUnitOfWork>();
         var roleManagerService = provider.GetRequiredService<IRoleManagerService>();
         var userManagerService = provider.GetRequiredService<IUserManagerService>();
-        var dbContext = provider.GetRequiredService<IDbContext>();
+        var regionService = provider.GetRequiredService<IRegionService>();
         var logger = provider.GetRequiredService<ILogger>();
 
         if (await unitOfWork.Repository<User>().AnyAsync(x => true))
@@ -61,14 +62,9 @@ public class DbInitializer
                 },
             ];
 
-            await dbContext.Set<Role>().AddRangeAsync(roles);
-            await dbContext.SaveChangesAsync();
+            await roleManagerService.CreateRangeRoleAsync(roles);
 
-            User[] users = await UserData(
-                dbContext.Set<Province>(),
-                dbContext.Set<District>(),
-                dbContext.Set<Commune>()
-            );
+            User[] users = await UserData(regionService);
             await unitOfWork.Repository<User>().AddRangeAsync(users);
             await unitOfWork.SaveAsync();
 
@@ -93,11 +89,7 @@ public class DbInitializer
         }
     }
 
-    private static async Task<RandomRegionResult> RandomRegion(
-        DbSet<Province> provinces,
-        DbSet<District> districts,
-        DbSet<Commune> communes
-    )
+    private static async Task<RandomRegionResult> RandomRegion(IRegionService regionService)
     {
         string code;
         RandomRegionResult result = new();
@@ -106,7 +98,7 @@ public class DbInitializer
         do
         {
             code = GenerateRandomString(2);
-            province = await provinces.Where(x => x.Code == code).FirstOrDefaultAsync();
+            province = await regionService.FindProvinceByCode(code);
         } while (province == null);
         result.Province = province;
 
@@ -114,7 +106,7 @@ public class DbInitializer
         do
         {
             code = GenerateRandomString(3);
-            district = await districts.Where(x => x.Code == code).FirstOrDefaultAsync();
+            district = await regionService.FindDistrictyCode(code);
         } while (district == null);
         result.District = district;
 
@@ -122,7 +114,7 @@ public class DbInitializer
         do
         {
             code = GenerateRandomString(5);
-            commune = await communes.Where(x => x.Code == code).FirstOrDefaultAsync();
+            commune = await regionService.FindCommuneByCode(code);
         } while (commune == null);
         result.Commune = commune;
 
@@ -151,11 +143,7 @@ public class DbInitializer
         return builder.ToString();
     }
 
-    private static async Task<User[]> UserData(
-        DbSet<Province> provinces,
-        DbSet<District> districts,
-        DbSet<Commune> communes
-    )
+    private static async Task<User[]> UserData(IRegionService regionService)
     {
         string[] addresses =
         [
@@ -182,7 +170,7 @@ public class DbInitializer
             "1046 River Road",
             "8725 Hillcrest Drive",
         ];
-        RandomRegionResult region = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult region = await RandomRegion(regionService);
 
         User user =
             new(
@@ -204,7 +192,7 @@ public class DbInitializer
                 Status = UserStatus.Active,
             };
 
-        RandomRegionResult johnDoeRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult johnDoeRegion = await RandomRegion(regionService);
         User johnDoe =
             new(
                 "John",
@@ -226,7 +214,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult aliceSmithRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult aliceSmithRegion = await RandomRegion(regionService);
         User aliceSmith =
             new(
                 "Alice",
@@ -248,7 +236,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult bobJohnsonRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult bobJohnsonRegion = await RandomRegion(regionService);
         User bobJohnson =
             new(
                 "Bob",
@@ -270,7 +258,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult emilyBrownRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult emilyBrownRegion = await RandomRegion(regionService);
         User emilyBrown =
             new(
                 "Emily",
@@ -292,7 +280,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult jamesWilliamsRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult jamesWilliamsRegion = await RandomRegion(regionService);
         User jamesWilliams =
             new(
                 "James",
@@ -314,7 +302,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult oliviaTaylorRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult oliviaTaylorRegion = await RandomRegion(regionService);
         User oliviaTaylor =
             new(
                 "Olivia",
@@ -336,7 +324,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult danielLeeRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult danielLeeRegion = await RandomRegion(regionService);
         User danielLee =
             new(
                 "Daniel",
@@ -358,7 +346,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult sophiaGarciaRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult sophiaGarciaRegion = await RandomRegion(regionService);
         User sophiaGarcia =
             new(
                 "Sophia",
@@ -380,11 +368,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult michaelMartinezRegion = await RandomRegion(
-            provinces,
-            districts,
-            communes
-        );
+        RandomRegionResult michaelMartinezRegion = await RandomRegion(regionService);
         User michaelMartinez =
             new(
                 "Michael",
@@ -406,11 +390,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult isabellaHarrisRegion = await RandomRegion(
-            provinces,
-            districts,
-            communes
-        );
+        RandomRegionResult isabellaHarrisRegion = await RandomRegion(regionService);
         User isabellaHarris =
             new(
                 "Isabella",
@@ -432,7 +412,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult davidClarkRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult davidClarkRegion = await RandomRegion(regionService);
         User davidClark =
             new(
                 "David",
@@ -454,7 +434,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult emmaRodriguezRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult emmaRodriguezRegion = await RandomRegion(regionService);
         User emmaRodriguez =
             new(
                 "Emma",
@@ -476,7 +456,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult andrewMooreRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult andrewMooreRegion = await RandomRegion(regionService);
         User andrewMoore =
             new(
                 "Andrew",
@@ -498,7 +478,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult avaJacksonRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult avaJacksonRegion = await RandomRegion(regionService);
         User avaJackson =
             new(
                 "Ava",
@@ -520,7 +500,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult joshuaWhiteRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult joshuaWhiteRegion = await RandomRegion(regionService);
         User joshuaWhite =
             new(
                 "Joshua",
@@ -542,11 +522,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult charlotteThomasRegion = await RandomRegion(
-            provinces,
-            districts,
-            communes
-        );
+        RandomRegionResult charlotteThomasRegion = await RandomRegion(regionService);
         User charlotteThomas =
             new(
                 "Charlotte",
@@ -568,7 +544,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult ethanKingRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult ethanKingRegion = await RandomRegion(regionService);
         User ethanKing =
             new(
                 "Ethan",
@@ -590,7 +566,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult abigailScottRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult abigailScottRegion = await RandomRegion(regionService);
         User abigailScott =
             new(
                 "Abigail",
@@ -612,7 +588,7 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
             };
 
-        RandomRegionResult liamPerezRegion = await RandomRegion(provinces, districts, communes);
+        RandomRegionResult liamPerezRegion = await RandomRegion(regionService);
         User liamPerez =
             new(
                 "Liam",

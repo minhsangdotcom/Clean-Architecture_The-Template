@@ -33,6 +33,13 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         return role;
     }
 
+    public async Task<IEnumerable<Role>> CreateRangeRoleAsync(IEnumerable<Role> roles)
+    {
+        await roleContext.AddRangeAsync(roles);
+        await context.SaveChangesAsync();
+        return roles;
+    }
+
     public async Task<Role> UpdateRoleAsync(Role role, IEnumerable<RoleClaim>? roleClaims)
     {
         try

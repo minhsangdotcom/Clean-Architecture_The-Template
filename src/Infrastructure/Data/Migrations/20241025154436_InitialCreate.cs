@@ -15,6 +15,24 @@ namespace Infrastructure.Data.Migrations
                 .Annotation("Npgsql:PostgresExtension:citext", ",,");
 
             migrationBuilder.CreateTable(
+                name: "province",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    code = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    name_en = table.Column<string>(type: "text", nullable: false),
+                    full_name = table.Column<string>(type: "text", nullable: false),
+                    full_name_en = table.Column<string>(type: "text", nullable: false),
+                    custom_name = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_province", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "role",
                 columns: table => new
                 {
@@ -30,30 +48,28 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "user",
+                name: "district",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    first_name = table.Column<string>(type: "text", nullable: false),
-                    last_name = table.Column<string>(type: "text", nullable: false),
-                    user_name = table.Column<string>(type: "citext", nullable: false),
-                    password = table.Column<string>(type: "text", nullable: false),
-                    email = table.Column<string>(type: "citext", nullable: false),
-                    phone_number = table.Column<string>(type: "text", nullable: false),
-                    day_of_birth = table.Column<DateTime>(type: "date", nullable: true),
-                    gender = table.Column<int>(type: "integer", nullable: true),
-                    address = table.Column<string>(type: "text", nullable: true),
-                    avatar = table.Column<string>(type: "text", nullable: true),
-                    status = table.Column<byte>(type: "smallint", nullable: false),
+                    province_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    version = table.Column<long>(type: "bigint", nullable: false),
-                    created_by = table.Column<string>(type: "text", nullable: false),
-                    updated_by = table.Column<string>(type: "text", nullable: true),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                    code = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    name_en = table.Column<string>(type: "text", nullable: false),
+                    full_name = table.Column<string>(type: "text", nullable: false),
+                    full_name_en = table.Column<string>(type: "text", nullable: false),
+                    custom_name = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_user", x => x.id);
+                    table.PrimaryKey("pk_district", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_district_province_province_id",
+                        column: x => x.province_id,
+                        principalTable: "province",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -73,6 +89,104 @@ namespace Infrastructure.Data.Migrations
                         name: "fk_role_claim_role_role_id",
                         column: x => x.role_id,
                         principalTable: "role",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "commune",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    district_id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    code = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    name_en = table.Column<string>(type: "text", nullable: false),
+                    full_name = table.Column<string>(type: "text", nullable: false),
+                    full_name_en = table.Column<string>(type: "text", nullable: false),
+                    custom_name = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_commune", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_commune_district_district_id",
+                        column: x => x.district_id,
+                        principalTable: "district",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "user",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    first_name = table.Column<string>(type: "text", nullable: false),
+                    last_name = table.Column<string>(type: "text", nullable: false),
+                    user_name = table.Column<string>(type: "citext", nullable: false),
+                    password = table.Column<string>(type: "text", nullable: false),
+                    email = table.Column<string>(type: "citext", nullable: false),
+                    phone_number = table.Column<string>(type: "text", nullable: false),
+                    day_of_birth = table.Column<DateTime>(type: "date", nullable: true),
+                    gender = table.Column<int>(type: "integer", nullable: true),
+                    address_street = table.Column<string>(type: "text", nullable: true),
+                    address_province_id = table.Column<string>(type: "character varying(26)", nullable: true),
+                    address_district_id = table.Column<string>(type: "character varying(26)", nullable: true),
+                    address_commune_id = table.Column<string>(type: "character varying(26)", nullable: true),
+                    avatar = table.Column<string>(type: "text", nullable: true),
+                    status = table.Column<byte>(type: "smallint", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    version = table.Column<long>(type: "bigint", nullable: false),
+                    created_by = table.Column<string>(type: "text", nullable: false),
+                    updated_by = table.Column<string>(type: "text", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_user", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_user_commune_address_commune_id",
+                        column: x => x.address_commune_id,
+                        principalTable: "commune",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "fk_user_district_address_district_id",
+                        column: x => x.address_district_id,
+                        principalTable: "district",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "fk_user_province_address_province_id",
+                        column: x => x.address_province_id,
+                        principalTable: "province",
+                        principalColumn: "id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "user_claim",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    claim_type = table.Column<string>(type: "text", nullable: false),
+                    claim_value = table.Column<string>(type: "text", nullable: false),
+                    type = table.Column<int>(type: "integer", nullable: false),
+                    user_id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    role_claim_id = table.Column<string>(type: "character varying(26)", nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_user_claim", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_user_claim_role_claim_role_claim_id",
+                        column: x => x.role_claim_id,
+                        principalTable: "role_claim",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "fk_user_claim_user_user_id",
+                        column: x => x.user_id,
+                        principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -153,33 +267,33 @@ namespace Infrastructure.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "user_claim",
-                columns: table => new
-                {
-                    id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    claim_type = table.Column<string>(type: "text", nullable: false),
-                    claim_value = table.Column<string>(type: "text", nullable: false),
-                    type = table.Column<int>(type: "integer", nullable: false),
-                    user_id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    role_claim_id = table.Column<string>(type: "character varying(26)", nullable: true),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_user_claim", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_user_claim_role_claim_role_claim_id",
-                        column: x => x.role_claim_id,
-                        principalTable: "role_claim",
-                        principalColumn: "id");
-                    table.ForeignKey(
-                        name: "fk_user_claim_user_user_id",
-                        column: x => x.user_id,
-                        principalTable: "user",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.CreateIndex(
+                name: "ix_commune_code",
+                table: "commune",
+                column: "code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_commune_district_id",
+                table: "commune",
+                column: "district_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_district_code",
+                table: "district",
+                column: "code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_district_province_id",
+                table: "district",
+                column: "province_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_province_code",
+                table: "province",
+                column: "code",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_role_name",
@@ -191,6 +305,21 @@ namespace Infrastructure.Data.Migrations
                 name: "ix_role_claim_role_id",
                 table: "role_claim",
                 column: "role_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_user_address_commune_id",
+                table: "user",
+                column: "address_commune_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_user_address_district_id",
+                table: "user",
+                column: "address_district_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_user_address_province_id",
+                table: "user",
+                column: "address_province_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_user_email",
@@ -258,6 +387,15 @@ namespace Infrastructure.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "role");
+
+            migrationBuilder.DropTable(
+                name: "commune");
+
+            migrationBuilder.DropTable(
+                name: "district");
+
+            migrationBuilder.DropTable(
+                name: "province");
         }
     }
 }
