@@ -26,16 +26,6 @@ public class CreateUserMapping : Profile
                 }
             });
 
-        CreateMap<User, UserDetailProjection>()
-            .ForMember(dest => dest.Claims, opt => opt.MapFrom(src => src.UserClaims))
-            .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles!.Select(x => x.Role)))
-            .IncludeAllDerived();
-
         CreateMap<User, CreateUserResponse>();
-
-        CreateMap<Role, RoleProjection>();
-        
-        CreateMap<Role, RoleDetailProjection>();
-        CreateMap<UserClaim, UserClaimDetailProjection>();
     }
 }
