@@ -29,11 +29,6 @@ public class GetUserDetailMapping : Profile
         CreateMap<Role, RoleDetailProjection>();
         CreateMap<UserClaim, UserClaimDetailProjection>();
 
-        CreateMap<Commune, CommuneProjection>();
-        CreateMap<District, DistrictProjection>();
-        CreateMap<Province, ProvinceProjection>();
-
-        CreateMap<District, DistrictDetailProjection>();
         CreateMap<Province, ProvinceDetailProjection>();
     }
 }

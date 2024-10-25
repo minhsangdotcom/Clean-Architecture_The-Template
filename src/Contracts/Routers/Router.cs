@@ -47,4 +47,12 @@ public static class Router
          public const string AuditLog = $"{prefix}{nameof(AuditLog)}";
          public const string Tags = $"{nameof(AuditLog)} endpoint";
     }
+
+    public static class RegionRoute
+    {
+         public const string Provinces = $"{prefix}{nameof(Provinces)}";
+         public const string Districts = $"{prefix}{nameof(Districts)}";
+         public const string Communes = $"{prefix}{nameof(Communes)}";
+         public const string Tags = $"{nameof(RegionRoute)} endpoint";
+    }
 }

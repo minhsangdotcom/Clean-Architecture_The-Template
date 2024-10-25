@@ -10,5 +10,9 @@ public class CommuneConfiguration : IEntityTypeConfiguration<Commune>
     {
         builder.HasKey(x => x.Id);
         builder.HasIndex(x => x.Code).IsUnique();
+
+        builder.HasOne(x => x.District)
+            .WithMany(x => x.Communes)
+            .HasForeignKey(x => x.DistrictId);
     }
 }
