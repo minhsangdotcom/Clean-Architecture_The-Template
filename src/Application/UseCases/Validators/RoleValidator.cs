@@ -2,7 +2,7 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.UseCases.Projections.Roles;
 using Contracts.Common.Messages;
-using Domain.Aggregates.Users;
+using Domain.Aggregates.Roles;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 

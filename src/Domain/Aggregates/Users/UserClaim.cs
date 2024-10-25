@@ -1,3 +1,4 @@
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users.Enums;
 using Domain.Common;
 

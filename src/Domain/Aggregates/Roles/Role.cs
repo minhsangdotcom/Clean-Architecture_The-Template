@@ -1,5 +1,6 @@
+using Domain.Aggregates.Users;
 using Domain.Common;
-namespace Domain.Aggregates.Users;
+namespace Domain.Aggregates.Roles;
 
 public class Role : DefaultEntity
 {

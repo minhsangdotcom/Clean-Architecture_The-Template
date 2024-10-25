@@ -1,5 +1,5 @@
 using AutoMapper;
-using Domain.Aggregates.Users;
+using Domain.Aggregates.Roles;
 
 namespace Application.UseCases.Roles.Queries.List;
 

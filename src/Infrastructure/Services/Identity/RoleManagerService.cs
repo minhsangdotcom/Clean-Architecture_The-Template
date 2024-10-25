@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Services.Identity;
 using Ardalis.GuardClauses;
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;

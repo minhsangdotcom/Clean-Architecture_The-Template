@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.Registers;
-using Domain.Aggregates.Users;
+using Domain.Aggregates.Roles;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Common.Interfaces.Services.Identity;

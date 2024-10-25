@@ -1,6 +1,6 @@
 using System.Data.Common;
 using Application.Common.Interfaces.Registers;
-using Contracts.Dtos.Models;
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Microsoft.EntityFrameworkCore;
 

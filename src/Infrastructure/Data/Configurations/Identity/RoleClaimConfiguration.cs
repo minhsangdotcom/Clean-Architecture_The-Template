@@ -1,4 +1,4 @@
-using Domain.Aggregates.Users;
+using Domain.Aggregates.Roles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

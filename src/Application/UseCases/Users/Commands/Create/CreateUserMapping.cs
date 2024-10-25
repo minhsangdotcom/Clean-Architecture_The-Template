@@ -1,6 +1,7 @@
 using Application.UseCases.Projections.Roles;
 using Application.UseCases.Projections.Users;
 using AutoMapper;
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 

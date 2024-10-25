@@ -2,6 +2,7 @@ using System.Text;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services.Identity;
 using Domain.Aggregates.Regions;
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.ValueObjects;

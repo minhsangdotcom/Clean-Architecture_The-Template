@@ -3,6 +3,7 @@ using System.Data.Common;
 using Application.Common.Interfaces.Services.Identity;
 using Ardalis.GuardClauses;
 using Contracts.Dtos.Models;
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Infrastructure.Data;

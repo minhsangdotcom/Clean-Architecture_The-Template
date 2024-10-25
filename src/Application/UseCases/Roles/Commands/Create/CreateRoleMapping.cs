@@ -1,6 +1,6 @@
 using Application.UseCases.Projections.Roles;
 using AutoMapper;
-using Domain.Aggregates.Users;
+using Domain.Aggregates.Roles;
 
 namespace Application.UseCases.Roles.Commands.Create;
 

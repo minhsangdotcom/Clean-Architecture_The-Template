@@ -1,3 +1,5 @@
+using Domain.Aggregates.Roles;
+
 namespace Domain.Aggregates.Users;
 
 public class UserRole

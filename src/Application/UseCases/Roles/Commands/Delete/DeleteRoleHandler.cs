@@ -1,6 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
 using Contracts.Common.Messages;
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Mediator;
 
