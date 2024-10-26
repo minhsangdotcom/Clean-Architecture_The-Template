@@ -52,4 +52,12 @@ public class Address : ValueObject
     {
         return base.GetHashCode();
     }
+
+    public override string ToString()
+    {
+        return string.Join(
+            ",",
+            [Street, Province!.Name, District!.Name, Commune?.Name ?? string.Empty]
+        );
+    }
 }
