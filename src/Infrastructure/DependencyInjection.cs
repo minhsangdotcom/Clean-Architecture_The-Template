@@ -1,17 +1,17 @@
 using Application.Common.Interfaces.Registers;
-using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.Services.Mail;
+using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
-using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.Elastics;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Mail;
 using Infrastructure.Services.Token;
+using Infrastructure.UnitOfWorks;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -29,7 +29,7 @@ public static class DependencyInjection
         services.AddDetection();
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-         services
+        services
             .AddScoped<IDbContext, TheDbContext>()
             .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddSingleton<UpdateAuditableEntityInterceptor>()
@@ -71,7 +71,7 @@ public static class DependencyInjection
             .AddJwtAuth(configuration)
             .AddElasticSearch(configuration)
             .AddHostedService<ElasticsearchIndexBackgoundService>();
-            
+
         return services;
     }
 }

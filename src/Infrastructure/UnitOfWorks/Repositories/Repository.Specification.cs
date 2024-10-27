@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper.QueryableExtensions;
 using Contracts.Dtos.Models;
 using Contracts.Dtos.Requests;
@@ -10,7 +10,7 @@ using Domain.Specs;
 using Domain.Specs.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Repositories;
+namespace Infrastructure.UnitOfWorks.Repositories;
 
 public partial class Repository<T> : IRepository<T>
     where T : class

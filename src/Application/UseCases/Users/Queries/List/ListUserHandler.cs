@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.QueryStringProcessing;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;

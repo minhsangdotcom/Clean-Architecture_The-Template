@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Interfaces.Services.Identity;
 using AutoMapper;
 using Domain.Aggregates.Users;

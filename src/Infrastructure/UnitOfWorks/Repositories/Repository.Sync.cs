@@ -1,10 +1,9 @@
 using System.Linq.Expressions;
-using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.UnitOfWorks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Org.BouncyCastle.Math.EC.Rfc7748;
 
-namespace Infrastructure.Repositories;
+namespace Infrastructure.UnitOfWorks.Repositories;
 
 public partial class Repository<T> : IRepository<T>
     where T : class
