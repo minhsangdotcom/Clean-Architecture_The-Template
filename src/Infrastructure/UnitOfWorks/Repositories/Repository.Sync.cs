@@ -37,9 +37,11 @@ public partial class Repository<T> : IRepository<T>
 
     public void DeleteRange(IEnumerable<T> entities) => dbContext.Set<T>().RemoveRange(entities);
 
-    public bool Any(Expression<Func<T, bool>> criteria) => dbContext.Set<T>().Any(criteria);
+    public bool Any(Expression<Func<T, bool>>? criteria = null) =>
+        dbContext.Set<T>().Any(criteria ?? (x => true));
 
-    public int Count(Expression<Func<T, bool>> criteria) => dbContext.Set<T>().Count(criteria);
+    public int Count(Expression<Func<T, bool>>? criteria = null) =>
+        dbContext.Set<T>().Count(criteria ?? (x => true));
 
     public IEnumerable<T> ApplyQuerySync(Expression<Func<T, bool>>? criteria = null) =>
         dbContext.Set<T>().Where(criteria ?? (x => true)).AsEnumerable();

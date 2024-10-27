@@ -61,11 +61,11 @@ public partial class Repository<T>(IDbContext dbContext, IMapper mapper) : IRepo
         await Task.CompletedTask;
     }
 
-    public async Task<bool> AnyAsync(Expression<Func<T, bool>> criteria) =>
-        await dbContext.Set<T>().AnyAsync(criteria);
+    public async Task<bool> AnyAsync(Expression<Func<T, bool>>? criteria = null) =>
+        await dbContext.Set<T>().AnyAsync(criteria ?? (x => true));
 
-    public async Task<int> CountAsync(Expression<Func<T, bool>> criteria) =>
-        await dbContext.Set<T>().CountAsync(criteria);
+    public async Task<int> CountAsync(Expression<Func<T, bool>>? criteria = null) =>
+        await dbContext.Set<T>().CountAsync(criteria ?? (x => true));
 
     public IQueryable<T> ApplyQuery(Expression<Func<T, bool>>? criteria = null) =>
         dbContext.Set<T>().Where(criteria ?? (x => true));

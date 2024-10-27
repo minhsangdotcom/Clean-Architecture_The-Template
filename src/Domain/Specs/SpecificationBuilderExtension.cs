@@ -118,4 +118,11 @@ public static class SpecificationBuilderExtension
 
         return new IncludableSpecificationBuilder<T, TProperty>(Spec);
     }
+
+    public static void EnableCache<T>(this ISpecificationBuilder<T> builder, string cacheKey)
+        where T : class
+    {
+        builder.Spec!.CacheEnabled = true;
+        builder.Spec.CacheKey = cacheKey;
+    }
 }

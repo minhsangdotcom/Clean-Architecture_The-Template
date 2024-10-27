@@ -1,7 +1,9 @@
 using System.Linq.Expressions;
+
 namespace Application.Common.Interfaces.UnitOfWorks;
 
-public interface IRepositoryAsync<T> where T : class
+public interface IRepositoryAsync<T>
+    where T : class
 {
     Task<IEnumerable<T>> ListAsync();
 
@@ -23,9 +25,9 @@ public interface IRepositoryAsync<T> where T : class
 
     Task DeleteRangeAsync(IEnumerable<T> entities);
 
-    Task<bool> AnyAsync(Expression<Func<T, bool>> criteria);
+    Task<bool> AnyAsync(Expression<Func<T, bool>>? criteria = null);
 
-    Task<int> CountAsync(Expression<Func<T, bool>> criteria);
+    Task<int> CountAsync(Expression<Func<T, bool>>? criteria = null);
 
     IQueryable<T> ApplyQuery(Expression<Func<T, bool>>? criteria = null);
 

@@ -25,9 +25,9 @@ public interface IRepositorySync<T>
 
     void DeleteRange(IEnumerable<T> entities);
 
-    bool Any(Expression<Func<T, bool>> criteria);
+    bool Any(Expression<Func<T, bool>>? criteria = null);
 
-    int Count(Expression<Func<T, bool>> criteria);
+    int Count(Expression<Func<T, bool>>? criteria = null);
 
     IEnumerable<T> ApplyQuerySync(Expression<Func<T, bool>>? criteria = null);
 }

@@ -25,6 +25,17 @@ public interface IRepositorySpecification<T>
         QueryParamRequest queryParam
     );
 
+    PaginationResponse<TResult> PagedList<TResult>(
+        ISpecification<T> spec,
+        QueryParamRequest queryParam
+    );
+
+    PaginationResponse<TResult> PagedListWithGroupBy<TGroupProperty, TResult>(
+        ISpecification<T> spec,
+        QueryParamRequest queryParam,
+        Expression<Func<T, TGroupProperty>> groupByExpression
+    );
+
     Task<PaginationResponse<TResult>> PagedListWithGroupByAsync<TGroupProperty, TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,

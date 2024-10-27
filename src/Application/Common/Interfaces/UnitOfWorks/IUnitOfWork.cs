@@ -8,6 +8,9 @@ public interface IUnitOfWork : IDisposable
     IRepository<TEntity> Repository<TEntity>()
         where TEntity : class;
 
+    IRepository<TEntity> CachedRepository<TEntity>()
+        where TEntity : class;
+
     Task<DbTransaction> CreateTransactionAsync();
 
     Task UseTransactionAsync(DbTransaction transaction);

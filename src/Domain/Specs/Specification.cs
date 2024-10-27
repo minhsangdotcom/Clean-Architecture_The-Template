@@ -26,6 +26,10 @@ public abstract class Specification<T> : ISpecification<T>
 
     public bool IsSplitQuery { get; internal set; }
 
+    public bool CacheEnabled { get; internal set; }
+
+    public string? CacheKey { get; internal set; }
+
     internal void CombineExpression(Expression<Func<T, bool>> criteria, BinaryExpressionType type)
     {
         const string message = "is null while combing expression.";

@@ -1,11 +1,9 @@
 using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text.Json;
 using Ardalis.GuardClauses;
 using Contracts.Extensions.Expressions;
 using Contracts.Extensions.Reflections;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Contracts.Extensions.QueryExtensions;
 
@@ -26,6 +24,9 @@ public static class FilterExtension
 
         return query.Where(lamda);
     }
+
+    public static IEnumerable<T> Filter<T>(this IEnumerable<T> query, object? filterObject) =>
+        query.AsQueryable().Filter(filterObject);
 
     private static Expression FilterExpression(
         dynamic filterObject,

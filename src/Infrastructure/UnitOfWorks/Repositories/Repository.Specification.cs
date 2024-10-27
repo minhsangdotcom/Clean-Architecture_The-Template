@@ -30,11 +30,7 @@ public partial class Repository<T> : IRepository<T>
         QueryParamRequest queryParam
     )
     {
-        string defaultSort = string.IsNullOrWhiteSpace(queryParam.Sort)
-            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
-            : queryParam.Sort.Trim();
-        string uniqueSort = $"{defaultSort},{nameof(BaseEntity.Id)}";
-
+        string uniqueSort = GetSort(queryParam.Sort);
         Search? search = queryParam.Search;
 
         return await ApplySpecification(spec)
@@ -51,11 +47,7 @@ public partial class Repository<T> : IRepository<T>
         Expression<Func<T, TGroupProperty>> groupByExpression
     )
     {
-        string defaultSort = string.IsNullOrWhiteSpace(queryParam.Sort)
-            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
-            : queryParam.Sort.Trim();
-        string uniqueSort = $"{defaultSort},{nameof(BaseEntity.Id)}";
-
+        string uniqueSort = GetSort(queryParam.Sort);
         Search? search = queryParam.Search;
 
         return await ApplySpecification(spec)
@@ -71,10 +63,7 @@ public partial class Repository<T> : IRepository<T>
         QueryParamRequest queryParam
     )
     {
-        string defaultSort = string.IsNullOrWhiteSpace(queryParam.Sort)
-            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
-            : queryParam.Sort.Trim();
-        string uniqueSort = $"{defaultSort},{nameof(BaseEntity.Id)}";
+        string uniqueSort = GetSort(queryParam.Sort);
         Search? search = queryParam.Search;
 
         return await ApplySpecification(spec)
@@ -83,6 +72,22 @@ public partial class Repository<T> : IRepository<T>
             .Search(search?.Keyword, search?.Targets)
             .Sort(uniqueSort)
             .ToPagedListAsync(queryParam.Page, queryParam.PageSize);
+    }
+
+    public PaginationResponse<TResult> PagedList<TResult>(
+        ISpecification<T> spec,
+        QueryParamRequest queryParam
+    )
+    {
+        string uniqueSort = GetSort(queryParam.Sort);
+        Search? search = queryParam.Search;
+
+        return ApplySpecification(spec)
+            .ProjectTo<TResult>(_configurationProvider)
+            .Filter(queryParam.DynamicFilter)
+            .Search(search?.Keyword, search?.Targets)
+            .Sort(uniqueSort)
+            .ToPagedList(queryParam.Page, queryParam.PageSize);
     }
 
     //? i will come up with the best idea for groupby
@@ -95,11 +100,7 @@ public partial class Repository<T> : IRepository<T>
         Expression<Func<T, TGroupProperty>> groupByExpression
     )
     {
-        string defaultSort = string.IsNullOrWhiteSpace(queryParam.Sort)
-            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
-            : queryParam.Sort.Trim();
-        string uniqueSort = $"{defaultSort},{nameof(BaseEntity.Id)}";
-
+        string uniqueSort = GetSort(queryParam.Sort);
         Search? search = queryParam.Search;
 
         return await ApplySpecification(spec)
@@ -108,6 +109,23 @@ public partial class Repository<T> : IRepository<T>
             .Search(search?.Keyword, search?.Targets)
             .Sort(uniqueSort)
             .ToPagedListAsync(queryParam.Page, queryParam.PageSize);
+    }
+
+    public PaginationResponse<TResult> PagedListWithGroupBy<TGroupProperty, TResult>(
+        ISpecification<T> spec,
+        QueryParamRequest queryParam,
+        Expression<Func<T, TGroupProperty>> groupByExpression
+    )
+    {
+        string uniqueSort = GetSort(queryParam.Sort);
+        Search? search = queryParam.Search;
+
+        return ApplySpecification(spec)
+            .GroupBy(groupByExpression)
+            .ProjectTo<TResult>(_configurationProvider)
+            .Search(search?.Keyword, search?.Targets)
+            .Sort(uniqueSort)
+            .ToPagedList(queryParam.Page, queryParam.PageSize);
     }
 
     public async Task<PaginationResponse<TResult>> CursorPagedListAsync<TResult>(
@@ -155,4 +173,12 @@ public partial class Repository<T> : IRepository<T>
 
     private IQueryable<T> ApplySpecification(ISpecification<T> spec) =>
         SpecificationEvaluator<T>.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
+
+    private static string GetSort(string? sort)
+    {
+        string defaultSort = string.IsNullOrWhiteSpace(sort)
+            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
+            : sort.Trim();
+        return $"{defaultSort},{nameof(BaseEntity.Id)}";
+    }
 }

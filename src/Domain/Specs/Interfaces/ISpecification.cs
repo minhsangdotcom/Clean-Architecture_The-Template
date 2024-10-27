@@ -15,4 +15,8 @@ public interface ISpecification<T>
     bool IsNoTracking { get; }
 
     bool IsSplitQuery { get; }
+
+    bool CacheEnabled { get; }
+
+    string? CacheKey { get; }
 }

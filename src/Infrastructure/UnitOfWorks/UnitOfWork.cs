@@ -3,14 +3,17 @@ using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
 using Domain.Common;
 using Infrastructure.Data;
+using Infrastructure.UnitOfWorks.CachedRepositories;
 using Infrastructure.UnitOfWorks.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 
 namespace Infrastructure.UnitOfWorks;
 
-public class UnitOfWork(IMapper mapper, IDbContext dbContext, ILogger logger) : IUnitOfWork
+public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache, ILogger logger)
+    : IUnitOfWork
 {
     public DbTransaction? Transaction { get; set; } =
         dbContext.DatabaseFacade.CurrentTransaction?.GetDbTransaction();
@@ -31,6 +34,32 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, ILogger logger) : 
                 [dbContext, mapper]
             );
             value = repositoryInstance;
+            repositories.Add(type, value);
+        }
+
+        return (IRepository<TEntity>)value!;
+    }
+
+    public IRepository<TEntity> CachedRepository<TEntity>()
+        where TEntity : class
+    {
+        typeof(TEntity).IsValidBaseType();
+        string type = $"{typeof(TEntity).Name}-cached";
+
+        if (!repositories.TryGetValue(type, out object? value))
+        {
+            Type cachedRepositoryType = typeof(CachedRepository<>);
+            Type repositoryType = typeof(Repository<>);
+
+            object? repositoryInstance = Activator.CreateInstance(
+                repositoryType.MakeGenericType(typeof(TEntity)),
+                [dbContext, mapper]
+            );
+            object? cachedRepositoryInstance = Activator.CreateInstance(
+                cachedRepositoryType.MakeGenericType(typeof(TEntity)),
+                [repositoryInstance, cache, logger]
+            );
+            value = cachedRepositoryInstance;
             repositories.Add(type, value);
         }
 
