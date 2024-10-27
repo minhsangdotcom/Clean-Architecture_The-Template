@@ -55,6 +55,7 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
                 repositoryType.MakeGenericType(typeof(TEntity)),
                 [dbContext, mapper]
             );
+            // proxy design pattern
             object? cachedRepositoryInstance = Activator.CreateInstance(
                 cachedRepositoryType.MakeGenericType(typeof(TEntity)),
                 [repositoryInstance, cache, logger]
