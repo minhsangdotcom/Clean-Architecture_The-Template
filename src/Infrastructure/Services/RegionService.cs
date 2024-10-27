@@ -38,7 +38,8 @@ public class RegionService(IDbContext dbContext, IMapper mapper) : IRegionServic
             .ToPagedListAsync(request.Page, request.PageSize);
     }
 
-    public async Task<IEnumerable<T>> CreateRangeAsync<T>(IEnumerable<T> data) where T : class
+    public async Task<IEnumerable<T>> CreateRangeAsync<T>(IEnumerable<T> data)
+        where T : class
     {
         await dbContext.Set<T>().AddRangeAsync(data);
         await dbContext.SaveChangesAsync();
