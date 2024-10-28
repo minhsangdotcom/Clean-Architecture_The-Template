@@ -70,7 +70,8 @@ public static class DependencyInjection
             .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
             .AddJwtAuth(configuration)
             .AddElasticSearch(configuration)
-            .AddHostedService<ElasticsearchIndexBackgoundService>();
+            .AddHostedService<ElasticsearchIndexBackgoundService>()
+            .AddMemoryCache();
 
         return services;
     }

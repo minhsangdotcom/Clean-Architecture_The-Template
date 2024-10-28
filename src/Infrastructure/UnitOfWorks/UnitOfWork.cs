@@ -24,7 +24,7 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
         where TEntity : class
     {
         typeof(TEntity).IsValidBaseType();
-        string type = typeof(TEntity).Name;
+        string type = typeof(TEntity).FullName!;
 
         if (!repositories.TryGetValue(type, out object? value))
         {
@@ -44,7 +44,7 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
         where TEntity : class
     {
         typeof(TEntity).IsValidBaseType();
-        string type = $"{typeof(TEntity).Name}-cached";
+        string type = $"{typeof(TEntity).FullName}-cached";
 
         if (!repositories.TryGetValue(type, out object? value))
         {

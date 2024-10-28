@@ -6,6 +6,13 @@ public class ListUserSpecification : Specification<User>
 {
     public ListUserSpecification()
     {
-        Query.AsNoTracking();
+        Query
+            .Include(x => x.Address!.Province)
+            .Include(x => x.Address!.District)
+            .Include(x => x.Address!.Commune)
+            .AsNoTracking();
+            //.AsSplitQuery();
+
+        Query.EnableCache(typeof(User).FullName!);
     }
 }

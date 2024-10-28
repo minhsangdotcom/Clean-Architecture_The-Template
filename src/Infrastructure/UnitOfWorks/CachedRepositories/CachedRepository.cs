@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Application.Common.Interfaces.UnitOfWorks;
+using Infrastructure.Data;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 
@@ -14,7 +15,7 @@ public partial class CachedRepository<T>(
 {
     private readonly MemoryCacheEntryOptions cacheOptions =
         new MemoryCacheEntryOptions().SetAbsoluteExpiration(
-            relative: TimeSpan.FromMicroseconds(10)
+            relative: TimeSpan.FromMinutes(5)
         );
 
     public async Task<IEnumerable<T>> ListAsync() => await repository.ListAsync();
