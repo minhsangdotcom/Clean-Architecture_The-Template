@@ -21,7 +21,8 @@ public class NotFoundExceptionHandler : IHandlerException<NotFoundException>
                 {
                     TraceId = Activity.Current?.Context.TraceId.ToString(),
                     SpanId = Activity.Current?.Context.SpanId.ToString(),
-                }
+                },
+                exception.HttpStatusCode
             );
 
         await httpContext.Response.WriteAsJsonAsync(error, error.GetOptions());

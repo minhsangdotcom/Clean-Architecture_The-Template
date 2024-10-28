@@ -20,8 +20,7 @@ public partial class CachedRepository<T> : IRepository<T>
     {
         if (spec.CacheEnabled)
         {
-            string specKey = SpecificationEvaluator<T>.SpecUniqueKey(spec);
-            string key = $"{specKey}-{nameof(FindByConditionAsync)}";
+            string key = $"{spec.CacheKey}-{nameof(FindByConditionAsync)}";
             string hashingKey = HashKey(key);
             logger.Information("checking cache for {key}", hashingKey);
             return cache.GetOrCreateAsync(
@@ -41,8 +40,7 @@ public partial class CachedRepository<T> : IRepository<T>
     {
         if (spec.CacheEnabled)
         {
-            string specKey = SpecificationEvaluator<T>.SpecUniqueKey(spec);
-            string key = $"{specKey}-{nameof(FindByConditionAsync)}";
+            string key = $"{spec.CacheKey}-{nameof(FindByConditionAsync)}";
             string hashingKey = HashKey(key);
             logger.Information("checking cache for {key}", hashingKey);
             return cache.GetOrCreateAsync(
@@ -62,8 +60,7 @@ public partial class CachedRepository<T> : IRepository<T>
     {
         if (spec.CacheEnabled)
         {
-            string specKey = SpecificationEvaluator<T>.SpecUniqueKey(spec);
-            string key = $"{specKey}-{nameof(ListAsync)}";
+            string key = $"{spec.CacheKey}-{nameof(ListAsync)}";
             string hashingKey = HashKey(key, queryParam);
             logger.Information("checking cache for {key}", hashingKey);
             return cache.GetOrCreateAsync(
@@ -88,8 +85,7 @@ public partial class CachedRepository<T> : IRepository<T>
     {
         if (spec.CacheEnabled)
         {
-            string specKey = SpecificationEvaluator<T>.SpecUniqueKey(spec);
-            string key = $"{specKey}-{nameof(ListWithGroupbyAsync)}";
+            string key = $"{spec.CacheKey}-{nameof(ListWithGroupbyAsync)}";
             string hashingKey = HashKey(key, queryParam, groupByExpression.ToString());
             logger.Information("checking cache for {key}", hashingKey);
             return cache.GetOrCreateAsync(
@@ -120,8 +116,7 @@ public partial class CachedRepository<T> : IRepository<T>
     {
         if (spec.CacheEnabled)
         {
-            string specKey = SpecificationEvaluator<T>.SpecUniqueKey(spec);
-            string key = $"{specKey}-{nameof(PagedListAsync)}";
+            string key = $"{spec.CacheKey}-{nameof(PagedListAsync)}";
             string hashingKey = HashKey(key, queryParam);
             logger.Information("checking cache for {key}", hashingKey);
             return cache.GetOrCreateAsync(
@@ -144,8 +139,7 @@ public partial class CachedRepository<T> : IRepository<T>
     {
         if (spec.CacheEnabled)
         {
-            string specKey = SpecificationEvaluator<T>.SpecUniqueKey(spec);
-            string key = $"{specKey}-{nameof(PagedList)}";
+            string key = $"{spec.CacheKey}-{nameof(PagedList)}";
             string hashingKey = HashKey(key, queryParam);
             logger.Information("checking cache for {key}", hashingKey);
             return cache.GetOrCreate(
@@ -170,8 +164,7 @@ public partial class CachedRepository<T> : IRepository<T>
     {
         if (spec.CacheEnabled)
         {
-            string specKey = SpecificationEvaluator<T>.SpecUniqueKey(spec);
-            string key = $"{specKey}-{nameof(PagedListWithGroupByAsync)}";
+            string key = $"{spec.CacheKey}-{nameof(PagedListWithGroupByAsync)}";
             string hashingKey = HashKey(key, queryParam, groupByExpression.ToString()!);
             logger.Information("checking cache for {key}", hashingKey);
             return cache.GetOrCreate(
@@ -203,8 +196,7 @@ public partial class CachedRepository<T> : IRepository<T>
     {
         if (spec.CacheEnabled)
         {
-            string specKey = SpecificationEvaluator<T>.SpecUniqueKey(spec);
-            string key = $"{specKey}-{nameof(PagedListWithGroupBy)}";
+            string key = $"{spec.CacheKey}-{nameof(PagedListWithGroupBy)}";
             string hashingKey = HashKey(key, queryParam, groupByExpression.ToString());
             logger.Information("checking cache for {key}", hashingKey);
             return cache.GetOrCreate(
@@ -236,8 +228,7 @@ public partial class CachedRepository<T> : IRepository<T>
     {
         if (spec.CacheEnabled)
         {
-            string specKey = SpecificationEvaluator<T>.SpecUniqueKey(spec);
-            string key = $"{specKey}-{nameof(CursorPagedListAsync)}";
+            string key = $"{spec.CacheKey}-{nameof(CursorPagedListAsync)}";
             string hashingKey = HashKey(key, queryParam, uniqueSort);
             logger.Information("checking cache for {key}", hashingKey);
             return cache.GetOrCreateAsync(
@@ -266,8 +257,7 @@ public partial class CachedRepository<T> : IRepository<T>
     {
         if (spec.CacheEnabled)
         {
-            string specKey = SpecificationEvaluator<T>.SpecUniqueKey(spec);
-            string key = $"{specKey}-{nameof(CursorPagedListWithGroupByAsync)}";
+            string key = $"{spec.CacheKey}-{nameof(CursorPagedListWithGroupByAsync)}";
             string hashingKey = HashKey(key, queryParam, uniqueSort);
             logger.Information("checking cache for {key}", hashingKey);
             return cache.GetOrCreateAsync(

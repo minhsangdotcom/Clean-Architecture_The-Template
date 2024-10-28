@@ -12,19 +12,11 @@ public class SpecificationEvaluator<T>
         return Evaluate(query, specification);
     }
 
-    public static string SpecUniqueKey(ISpecification<T> specification)
+    public static string SpecStringQuery(ISpecification<T> specification)
     {
         IQueryable<T> query = Enumerable.Empty<T>().AsQueryable();
         query = Evaluate(query, specification);
-
-        if (specification.CacheEnabled)
-        {
-            string key = query.Expression.ToString();
-
-            return $"{key}_{specification.CacheKey}";
-        }
-
-        return specification.CacheKey!;
+        return query.Expression.ToString();
     }
 
     private static IQueryable<T> Evaluate(IQueryable<T> query, ISpecification<T> specification)

@@ -4,7 +4,6 @@ using Contracts.Extensions.Visitors;
 using Domain.Common;
 using Domain.Specs.Interfaces;
 using Domain.Specs.Models;
-
 namespace Domain.Specs;
 
 public abstract class Specification<T> : ISpecification<T>

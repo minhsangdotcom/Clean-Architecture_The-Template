@@ -12,7 +12,7 @@ public class ListUserSpecification : Specification<User>
             .Include(x => x.Address!.Commune)
             .AsNoTracking();
             //.AsSplitQuery();
-
-        Query.EnableCache(typeof(User).FullName!);
+        string query = SpecificationEvaluator<User>.SpecStringQuery(this);
+        Query.EnableCache(query);
     }
 }
