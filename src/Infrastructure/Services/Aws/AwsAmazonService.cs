@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 namespace Infrastructure.Services.Aws;
 
 public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSetting)
-    : IAwsAmazonService
+    : IAmazonS3Service
 {
     private readonly S3AwsSettings s3AwsSettings = awsSetting.Value;
 

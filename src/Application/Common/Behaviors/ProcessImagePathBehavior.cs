@@ -10,7 +10,7 @@ namespace Application.Common.Behaviors;
 
 public class ProcessImagePathBehavior<TMessage, TResponse>(
     ILogger logger,
-    IAwsAmazonService awsAmazonService
+    IAmazonS3Service awsAmazonService
 ) : MessagePostProcessor<TMessage, TResponse>
     where TMessage : notnull, IMessage
 {

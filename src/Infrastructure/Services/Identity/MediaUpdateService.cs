@@ -1,13 +1,12 @@
 using Application.Common.Interfaces.Services.Aws;
 using Application.Common.Interfaces.Services.Identity;
 using Contracts.Dtos.Responses;
-using Domain.Common;
 using Microsoft.AspNetCore.Http;
 using Serilog;
 
 namespace Infrastructure.Services.Identity;
 
-public class MediaUpdateService<T>(IAwsAmazonService awsAmazonService, ILogger logger)
+public class MediaUpdateService<T>(IAmazonS3Service awsAmazonService, ILogger logger)
     : IMediaUpdateService<T>
     where T : class
 {

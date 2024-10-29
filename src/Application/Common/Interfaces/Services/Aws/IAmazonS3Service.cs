@@ -4,7 +4,7 @@ using Contracts.Dtos.Responses;
 
 namespace Application.Common.Interfaces.Services.Aws;
 
-public interface IAwsAmazonService : ISingleton
+public interface IAmazonS3Service : ISingleton
 {
     Task<AwsResponse> UploadAsync(Stream stream, string key);
 
