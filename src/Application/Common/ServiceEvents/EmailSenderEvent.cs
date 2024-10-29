@@ -1,6 +1,6 @@
 using Mediator;
 
-namespace Application.Common.Events;
+namespace Application.Common.ServiceEvents;
 
 public record EmailSenderEvent(
     string Email,

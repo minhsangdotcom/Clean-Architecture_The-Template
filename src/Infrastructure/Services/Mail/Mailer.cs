@@ -4,12 +4,13 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.Mail;
 
-public class Mailer(IServiceScopeFactory serviceScopeFactory, IOptions<EmailSettings> options) : IMailer
+public class Mailer(IServiceScopeFactory serviceScopeFactory, IOptions<EmailSettings> options)
+    : IMailer
 {
-    public IMailService GetEmailService()
+    public IMailService Email()
     {
         MailType type = options.Value.MailType;
-        
+
         using var scope = serviceScopeFactory.CreateScope();
         IServiceProvider serviceProvider = scope.ServiceProvider;
         return type switch

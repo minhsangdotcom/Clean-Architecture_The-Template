@@ -3,17 +3,16 @@ using Contracts.Dtos.Models;
 using Contracts.Dtos.Requests;
 using Mediator;
 
-namespace Application.Common.Events;
+namespace Application.Common.ServiceEvents;
 
 public class EmailSenderEventHandler(IMailer mailer) : INotificationHandler<EmailSenderEvent>
 {
     public async ValueTask Handle(
         EmailSenderEvent notification,
         CancellationToken cancellationToken
-    )
-    {
+    ) =>
         await mailer
-            .GetEmailService()
+            .Email()
             .SendWithTemplateAsync(
                 new TemplateMailMetaData()
                 {
@@ -30,5 +29,4 @@ public class EmailSenderEventHandler(IMailer mailer) : INotificationHandler<Emai
                     ),
                 }
             );
-    }
 }
