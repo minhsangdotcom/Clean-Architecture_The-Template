@@ -7,6 +7,7 @@ using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Services;
 using Infrastructure.Services.Aws;
+using Infrastructure.Services.DistributedCache;
 using Infrastructure.Services.Elastics;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Mail;
@@ -71,7 +72,8 @@ public static class DependencyInjection
             .AddJwtAuth(configuration)
             .AddElasticSearch(configuration)
             .AddHostedService<ElasticsearchIndexBackgoundService>()
-            .AddMemoryCache();
+            .AddMemoryCache()
+            .AddRedis(configuration);
 
         return services;
     }

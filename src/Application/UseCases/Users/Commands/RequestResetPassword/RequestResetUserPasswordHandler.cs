@@ -1,6 +1,6 @@
-using Application.Common.Events;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.ServiceEvents;
 using Contracts.Common.Messages;
 using Contracts.Extensions;
 using Domain.Aggregates.Users;
