@@ -29,6 +29,6 @@ public static class RedisCacheExtension
             return result.StringJson;
         }
 
-        return currentValue!;
+        return currentValue;
     }
 }
