@@ -18,6 +18,8 @@ public static class RedisRegisterExtension
             configuration.GetSection(nameof(RedisDatabaseSettings)).Bind(options)
         );
 
+        services.AddHostedService<QueueBackgroundService>();
+
         return services;
     }
 }
