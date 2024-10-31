@@ -1,7 +1,6 @@
 using Application.Common.Interfaces.Services.DistributedCache;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
-using Contracts.Extensions;
 using Microsoft.Extensions.Hosting;
 
 namespace Infrastructure.Services.DistributedCache;
@@ -34,12 +33,13 @@ public class QueueBackgroundService(IQueueService queueService) : BackgroundServ
 
             if (result.IsSuccess)
             {
+                //log
                 break;
             }
 
             if (result.ErrorType == QueueErrorType.Persistent)
             {
-                // put it into dead letter queue for reviewing or logging into db
+                //logging into db
                 break;
             }
 
@@ -57,9 +57,8 @@ public class QueueBackgroundService(IQueueService queueService) : BackgroundServ
         } while (retry > 0);
         if (!result.IsSuccess && result.ErrorType == QueueErrorType.Transient)
         {
-            // put it into dead letter queue for reviewing or logging into db
+            //logging into db
         }
-        Console.WriteLine(SerializerExtension.Serialize(result).StringJson);
     }
 
     private static async Task<QueueResponse<int>> FakeTask(int request, Guid payloadId) =>
@@ -73,6 +72,7 @@ public class QueueBackgroundService(IQueueService queueService) : BackgroundServ
                     PayloadId = payloadId,
                     LastAttemptTime = DateTimeOffset.UtcNow,
                     Error = new { Message = "error" },
+                    ErrorType = QueueErrorType.Transient,
                 };
             }
             int data = 10 + request;
