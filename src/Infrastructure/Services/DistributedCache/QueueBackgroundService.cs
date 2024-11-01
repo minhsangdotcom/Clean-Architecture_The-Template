@@ -11,14 +11,16 @@ public class QueueBackgroundService(IQueueService queueService) : BackgroundServ
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        long length = queueService.Size;
-        while (length > 0)
+        while (!stoppingToken.IsCancellationRequested)
         {
             QueueRequest<int>? payload = await queueService.DequeueAsync<int>();
-            await Process(payload!);
 
-            length = queueService.Size;
-            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+            if (payload != null)
+            {
+                await Process(payload!);
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
         }
     }
 
