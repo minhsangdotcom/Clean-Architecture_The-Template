@@ -253,6 +253,115 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("role_claim", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Aggregates.Tickets.Customer", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("text")
+                        .HasColumnName("address");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("FullName")
+                        .HasColumnType("text")
+                        .HasColumnName("full_name");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text")
+                        .HasColumnName("phone_number");
+
+                    b.HasKey("Id")
+                        .HasName("pk_customer");
+
+                    b.ToTable("customer", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Tickets.Order", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("customer_id");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("quantity");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TicketId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("ticket_id");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_amount");
+
+                    b.HasKey("Id")
+                        .HasName("pk_order");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_order_customer_id");
+
+                    b.HasIndex("TicketId")
+                        .HasDatabaseName("ix_order_ticket_id");
+
+                    b.ToTable("order", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Tickets.Ticket", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("id");
+
+                    b.Property<int>("AvailableQuantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("available_quantity");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("EventDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("event_date");
+
+                    b.Property<string>("EventName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("event_name");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric")
+                        .HasColumnName("price");
+
+                    b.Property<int>("TotalQuantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_quantity");
+
+                    b.HasKey("Id")
+                        .HasName("pk_ticket");
+
+                    b.ToTable("ticket", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
                 {
                     b.Property<string>("Id")
@@ -548,6 +657,27 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("Domain.Aggregates.Tickets.Order", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Tickets.Customer", "Customer")
+                        .WithMany("Orders")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_order_customer_customer_id");
+
+                    b.HasOne("Domain.Aggregates.Tickets.Ticket", "Ticket")
+                        .WithMany("Orders")
+                        .HasForeignKey("TicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_order_ticket_ticket_id");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Ticket");
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
                 {
                     b.OwnsOne("Domain.Aggregates.Users.ValueObjects.Address", "Address", b1 =>
@@ -699,6 +829,16 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Roles.RoleClaim", b =>
                 {
                     b.Navigation("UserClaims");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Tickets.Customer", b =>
+                {
+                    b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Tickets.Ticket", b =>
+                {
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
