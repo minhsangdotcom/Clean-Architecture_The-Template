@@ -1,6 +1,8 @@
 using Application.Common.Interfaces.Services.DistributedCache;
 using Contracts.Dtos.Requests;
 using Contracts.Extensions;
+using NRedisStack;
+using StackExchange.Redis;
 
 namespace Infrastructure.Services.DistributedCache;
 
@@ -13,14 +15,14 @@ public class QueueService(IRedisCacheService redisCache) : IQueueService
 
     public async Task<QueueRequest<T>?> DequeueAsync<T>()
     {
-        string? value = await redisCache.Database.ListLeftPopAsync(QUEUE_NAME);
+        Tuple<RedisKey, RedisValue>? value = await redisCache.Database.BRPopAsync([QUEUE_NAME], 1);
 
         if (value == null)
         {
             return null;
         }
 
-        var result = SerializerExtension.Deserialize<QueueRequest<T>?>(value);
+        var result = SerializerExtension.Deserialize<QueueRequest<T>?>(value.Item2!);
         size = Length();
         return result.Object;
     }
