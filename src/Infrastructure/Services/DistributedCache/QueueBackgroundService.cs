@@ -7,7 +7,7 @@ namespace Infrastructure.Services.DistributedCache;
 
 public class QueueBackgroundService(IQueueService queueService) : BackgroundService
 {
-    private const int MAXIMUM_RETRY = 5;
+    protected const int MAXIMUM_RETRY = 5;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -17,46 +17,50 @@ public class QueueBackgroundService(IQueueService queueService) : BackgroundServ
 
             if (payload != null)
             {
-                await Process(payload!);
+                await Process(payload!, request => FakeTask(request.Payload, request.PayloadId));
             }
-            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
         }
     }
 
-    private static async Task Process(QueueRequest<int> payload)
+    private static async Task Process<TRequest, TResponse>(
+        QueueRequest<TRequest> request,
+        Func<QueueRequest<TRequest>, Task<QueueResponse<TResponse>>> task
+    )
     {
-        QueueResponse<int> result;
+        QueueResponse<TResponse> queueResponse;
         int retry = 0;
         int retryTimeInSec = 5;
         do
         {
-            result = await FakeTask(payload!.Payload, payload.PayloadId);
+            queueResponse = await task(request);
 
-            if (result.IsSuccess)
+            if (queueResponse.IsSuccess)
             {
                 //log
                 break;
             }
 
-            if (result.ErrorType == QueueErrorType.Persistent)
+            if (queueResponse.ErrorType == QueueErrorType.Persistent)
             {
                 //logging into db
                 break;
             }
 
-            if (result.ErrorType == QueueErrorType.Transient && retry == 0)
+            if (queueResponse.ErrorType == QueueErrorType.Transient && retry == 0)
             {
                 retry = MAXIMUM_RETRY;
                 continue;
             }
 
             retry--;
-            result.RetryCount = MAXIMUM_RETRY - retry;
-            retryTimeInSec *= 2;
+            queueResponse.RetryCount = MAXIMUM_RETRY - retry;
+            retryTimeInSec += 1;
 
             await Task.Delay(TimeSpan.FromSeconds(retryTimeInSec));
         } while (retry > 0);
-        if (!result.IsSuccess && result.ErrorType == QueueErrorType.Transient)
+        
+        if (!queueResponse.IsSuccess && queueResponse.ErrorType == QueueErrorType.Transient)
         {
             //logging into db
         }
