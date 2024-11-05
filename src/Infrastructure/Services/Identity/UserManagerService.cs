@@ -1,12 +1,11 @@
 using System.Data;
 using System.Data.Common;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
 using Ardalis.GuardClauses;
-using Contracts.Dtos.Models;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
-using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
