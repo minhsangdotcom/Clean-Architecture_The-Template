@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Contracts.Dtos.Models;
@@ -8,7 +9,6 @@ using Contracts.Dtos.Responses;
 using Contracts.Extensions.QueryExtensions;
 using Domain.Aggregates.Regions;
 using Domain.Common;
-using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
