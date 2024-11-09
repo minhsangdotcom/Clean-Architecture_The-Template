@@ -13,9 +13,5 @@ public class ProvinceConfiguration : IEntityTypeConfiguration<Province>
         builder.HasIndex(x => x.Code).IsUnique();
 
         builder.HasMany(x => x.Districts).WithOne().HasForeignKey(x => x.ProvinceId);
-
-        builder.Ignore(x => x.CreatedBy);
-        builder.Ignore(x => x.UpdatedAt);
-        builder.Ignore(x => x.UpdatedBy);
     }
 }

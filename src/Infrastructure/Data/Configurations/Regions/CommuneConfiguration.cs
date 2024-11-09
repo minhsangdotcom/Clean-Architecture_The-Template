@@ -12,9 +12,5 @@ public class CommuneConfiguration : IEntityTypeConfiguration<Commune>
         builder.HasIndex(x => x.Code).IsUnique();
 
         builder.HasOne(x => x.District).WithMany(x => x.Communes).HasForeignKey(x => x.DistrictId);
-
-        builder.Ignore(x => x.CreatedBy);
-        builder.Ignore(x => x.UpdatedAt);
-        builder.Ignore(x => x.UpdatedBy);
     }
 }
