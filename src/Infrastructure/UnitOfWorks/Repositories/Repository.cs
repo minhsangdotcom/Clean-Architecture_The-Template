@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
-using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 

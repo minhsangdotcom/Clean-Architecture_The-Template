@@ -1,8 +1,8 @@
-using Domain.Aggregates.Tickets;
+using Domain.Aggregates.Orders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Data.Configurations.Tickets;
+namespace Infrastructure.Data.Configurations.Orders;
 
 public class OrderConfiguration : IEntityTypeConfiguration<Order>
 {
@@ -13,9 +13,5 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.HasOne(x => x.Customer)
             .WithMany(x => x.Orders)
             .HasForeignKey(x => x.CustomerId);
-
-         builder.HasOne(x => x.Ticket)
-            .WithMany(x => x.Orders)
-            .HasForeignKey(x => x.TicketId);
     }
 }

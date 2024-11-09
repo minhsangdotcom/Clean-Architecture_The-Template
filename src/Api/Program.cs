@@ -39,6 +39,7 @@ try
     var serviceProvider = scope.ServiceProvider;
     await RegionDataSeeding.SeedingAsync(serviceProvider);
     await DbInitializer.InitializeAsync(serviceProvider);
+    await TicketSeeding.SeedingAsync(serviceProvider);
 
     if (app.Environment.IsDevelopment())
     {

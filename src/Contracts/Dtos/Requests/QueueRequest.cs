@@ -6,3 +6,11 @@ public class QueueRequest<T>
 
     public T? Payload { get; set; }
 }
+
+public enum PurchaseStatus
+{
+    Pending,
+    Processing,
+    Completed,
+    Failed
+}

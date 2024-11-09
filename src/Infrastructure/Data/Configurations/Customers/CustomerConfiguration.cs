@@ -1,8 +1,8 @@
-using Domain.Aggregates.Tickets;
+using Domain.Aggregates.Customers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Data.Configurations.Tickets;
+namespace Infrastructure.Data.Configurations.Customers;
 
 public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
 {
