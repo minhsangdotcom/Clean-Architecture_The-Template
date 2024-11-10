@@ -1,8 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using Application.Common.Exceptions;
-using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.UseCases.Projections.Users;
 using AutoMapper;
 using Contracts.Common.Messages;
@@ -33,7 +33,8 @@ public class UserLoginHandler(
             await unitOfWork
                 .Repository<User>()
                 .FindByConditionAsync(
-                    new GetUserByUsernameSpecification(request.Username!)
+                    new GetUserByUsernameSpecification(request.Username!),
+                    cancellationToken
                 )
             ?? throw new NotFoundException(
                 [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
@@ -84,7 +85,7 @@ public class UserLoginHandler(
 
         userToken.RefreshToken = refreshToken;
 
-        await unitOfWork.Repository<UserToken>().AddAsync(userToken);
+        await unitOfWork.Repository<UserToken>().AddAsync(userToken, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
 
         return new UserLoginResponse()

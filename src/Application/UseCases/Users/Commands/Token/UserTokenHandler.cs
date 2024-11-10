@@ -1,8 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using Application.Common.Exceptions;
-using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
+using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Common.Messages;
 using Contracts.Constants;
 using Contracts.Dtos.Models;
@@ -35,7 +35,8 @@ public class UserTokenHandler(
                 new GetRefreshtokenSpecification(
                     command.RefreshToken!,
                     Ulid.Parse(decodeToken.Sub!)
-                )
+                ),
+                cancellationToken
             );
 
         IEnumerable<UserToken> refreshTokens = await unitOfWork
@@ -45,7 +46,8 @@ public class UserTokenHandler(
                     decodeToken.FamilyId!,
                     Ulid.Parse(decodeToken.Sub!)
                 ),
-                new() { Sort = $"{nameof(UserToken.CreatedAt)} {OrderTerm.DESC}" }
+                new() { Sort = $"{nameof(UserToken.CreatedAt)} {OrderTerm.DESC}" },
+                cancellationToken
             );
 
         if (refresh == null)
@@ -104,7 +106,7 @@ public class UserTokenHandler(
             ClientIp = currentUser.ClientIp,
         };
 
-        await unitOfWork.Repository<UserToken>().AddAsync(userToken);
+        await unitOfWork.Repository<UserToken>().AddAsync(userToken, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
 
         return new UserTokenResponse() { Token = accessToken, RefreshToken = refreshToken };
