@@ -25,13 +25,14 @@ public static class PaginationExtension
     public static async Task<PaginationResponse<T>> ToPagedListAsync<T>(
         this IQueryable<T> query,
         int current,
-        int size
+        int size,
+        CancellationToken cancellationToken = default
     )
     {
         int totalPage = query.Count();
 
         return new PaginationResponse<T>(
-            await query.Skip((current - 1) * size).Take(size).ToListAsync(),
+            await query.Skip((current - 1) * size).Take(size).ToListAsync(cancellationToken),
             totalPage,
             current,
             size

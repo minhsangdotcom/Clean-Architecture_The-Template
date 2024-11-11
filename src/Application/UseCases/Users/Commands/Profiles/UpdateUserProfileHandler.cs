@@ -27,7 +27,8 @@ public class UpdateUserProfileHandler(
             await unitOfWork
                 .Repository<User>()
                 .FindByConditionAsync(
-                    new GetUserByIdWithoutIncludeSpecification(currentUser.Id ?? Ulid.Empty)
+                    new GetUserByIdWithoutIncludeSpecification(currentUser.Id ?? Ulid.Empty),
+                    cancellationToken
                 )
             ?? throw new NotFoundException(
                 [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
@@ -50,7 +51,8 @@ public class UpdateUserProfileHandler(
             await unitOfWork
                 .Repository<User>()
                 .FindByConditionAsync<UpdateUserProfileResponse>(
-                    new GetUserByIdSpecification(user.Id)
+                    new GetUserByIdSpecification(user.Id),
+                    cancellationToken
                 )
         )!;
     }

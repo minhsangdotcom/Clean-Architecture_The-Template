@@ -5,13 +5,13 @@ namespace Infrastructure.Data.Configurations.Regions;
 
 public class ProvinceConfiguration : IEntityTypeConfiguration<Province>
 {
-    public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<Province> builder)
+    public void Configure(
+        Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<Province> builder
+    )
     {
         builder.HasKey(x => x.Id);
         builder.HasIndex(x => x.Code).IsUnique();
 
-        builder.HasMany(x => x.Districts)
-                .WithOne()
-                .HasForeignKey(x => x.ProvinceId);
+        builder.HasMany(x => x.Districts).WithOne().HasForeignKey(x => x.ProvinceId);
     }
 }

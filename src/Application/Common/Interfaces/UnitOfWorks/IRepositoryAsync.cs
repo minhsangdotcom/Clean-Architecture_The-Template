@@ -5,15 +5,25 @@ namespace Application.Common.Interfaces.UnitOfWorks;
 public interface IRepositoryAsync<T>
     where T : class
 {
-    Task<IEnumerable<T>> ListAsync();
+    Task<IEnumerable<T>> ListAsync(CancellationToken cancellationToken = default);
 
-    Task<T?> FindByIdAsync(object id);
+    Task<IEnumerable<TResult>> ListAsync<TResult>(CancellationToken cancellationToken = default)
+        where TResult : class;
 
-    Task<T?> FindByConditionAsync(Expression<Func<T, bool>> criteria);
+    Task<T?> FindByIdAsync<TId>(TId id, CancellationToken cancellationToken = default)
+        where TId : notnull;
 
-    Task<T> AddAsync(T entity);
+    Task<T?> FindByConditionAsync(
+        Expression<Func<T, bool>> criteria,
+        CancellationToken cancellationToken = default
+    );
 
-    Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities);
+    Task<T> AddAsync(T entity, CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<T>> AddRangeAsync(
+        IEnumerable<T> entities,
+        CancellationToken cancellationToken = default
+    );
 
     Task EditAsync(T entity);
 
@@ -25,9 +35,15 @@ public interface IRepositoryAsync<T>
 
     Task DeleteRangeAsync(IEnumerable<T> entities);
 
-    Task<bool> AnyAsync(Expression<Func<T, bool>>? criteria = null);
+    Task<bool> AnyAsync(
+        Expression<Func<T, bool>>? criteria = null,
+        CancellationToken cancellationToken = default
+    );
 
-    Task<int> CountAsync(Expression<Func<T, bool>>? criteria = null);
+    Task<int> CountAsync(
+        Expression<Func<T, bool>>? criteria = null,
+        CancellationToken cancellationToken = default
+    );
 
     IQueryable<T> ApplyQuery(Expression<Func<T, bool>>? criteria = null);
 

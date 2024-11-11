@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -11,22 +12,39 @@ public partial class Repository<T>(IDbContext dbContext, IMapper mapper) : IRepo
 {
     private readonly IConfigurationProvider _configurationProvider = mapper.ConfigurationProvider;
 
-    public async Task<IEnumerable<T>> ListAsync() => await dbContext.Set<T>().ToListAsync();
+    public async Task<IEnumerable<T>> ListAsync(CancellationToken cancellationToken = default) =>
+        await dbContext.Set<T>().ToListAsync(cancellationToken);
 
-    public async Task<T?> FindByIdAsync(object id) => await dbContext.Set<T>().FindAsync(id);
+    public async Task<IEnumerable<TResult>> ListAsync<TResult>(
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class =>
+        await dbContext
+            .Set<T>()
+            .ProjectTo<TResult>(_configurationProvider)
+            .ToListAsync(cancellationToken);
 
-    public async Task<T?> FindByConditionAsync(Expression<Func<T, bool>> criteria) =>
-        await dbContext.Set<T>().Where(criteria).FirstOrDefaultAsync();
+    public async Task<T?> FindByIdAsync<TId>(TId id, CancellationToken cancellationToken = default)
+        where TId : notnull =>
+        await dbContext.Set<T>().FindAsync([id], cancellationToken: cancellationToken);
 
-    public async Task<T> AddAsync(T entity)
+    public async Task<T?> FindByConditionAsync(
+        Expression<Func<T, bool>> criteria,
+        CancellationToken cancellationToken = default
+    ) => await dbContext.Set<T>().Where(criteria).FirstOrDefaultAsync(cancellationToken);
+
+    public async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
     {
-        EntityEntry<T> entityEntry = await dbContext.Set<T>().AddAsync(entity);
+        EntityEntry<T> entityEntry = await dbContext.Set<T>().AddAsync(entity, cancellationToken);
         return entityEntry.Entity;
     }
 
-    public async Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities)
+    public async Task<IEnumerable<T>> AddRangeAsync(
+        IEnumerable<T> entities,
+        CancellationToken cancellationToken = default
+    )
     {
-        await dbContext.Set<T>().AddRangeAsync(entities);
+        await dbContext.Set<T>().AddRangeAsync(entities, cancellationToken);
         return entities;
     }
 
@@ -60,11 +78,15 @@ public partial class Repository<T>(IDbContext dbContext, IMapper mapper) : IRepo
         await Task.CompletedTask;
     }
 
-    public async Task<bool> AnyAsync(Expression<Func<T, bool>>? criteria = null) =>
-        await dbContext.Set<T>().AnyAsync(criteria ?? (x => true));
+    public async Task<bool> AnyAsync(
+        Expression<Func<T, bool>>? criteria = null,
+        CancellationToken cancellationToken = default
+    ) => await dbContext.Set<T>().AnyAsync(criteria ?? (x => true), cancellationToken);
 
-    public async Task<int> CountAsync(Expression<Func<T, bool>>? criteria = null) =>
-        await dbContext.Set<T>().CountAsync(criteria ?? (x => true));
+    public async Task<int> CountAsync(
+        Expression<Func<T, bool>>? criteria = null,
+        CancellationToken cancellationToken = default
+    ) => await dbContext.Set<T>().CountAsync(criteria ?? (x => true), cancellationToken);
 
     public IQueryable<T> ApplyQuery(Expression<Func<T, bool>>? criteria = null) =>
         dbContext.Set<T>().Where(criteria ?? (x => true));

@@ -2,7 +2,7 @@ using Domain.Common;
 
 namespace Domain.Aggregates.Regions;
 
-public class Region : DefaultEntity
+public class Region : BaseEntity
 {
     public string Code { get; set; } = string.Empty;
 

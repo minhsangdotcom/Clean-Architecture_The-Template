@@ -24,14 +24,17 @@ public class RequestResetUserPasswordHandler(
         User user =
             await unitOfWork
                 .CachedRepository<User>()
-                .FindByConditionAsync(new GetUserByEmailSpecification(command.Email))
+                .FindByConditionAsync(
+                    new GetUserByEmailSpecification(command.Email),
+                    cancellationToken
+                )
             ?? throw new NotFoundException(
                 [Messager.Create<User>().Message(MessageType.Found).Negative().Build()]
             );
 
         string token = StringExtension.GenerateRandomString(40);
-        Console.WriteLine(token +" - " + user.Id);
-        
+        Console.WriteLine(token + " - " + user.Id);
+
         DateTimeOffset expiredTime = DateTimeOffset.UtcNow.AddHours(
             configuration.GetValue<int>("ForgotPasswordExpiredTimeInHour")
         );
@@ -44,7 +47,9 @@ public class RequestResetUserPasswordHandler(
             };
 
         await unitOfWork.Repository<UserResetPassword>().DeleteRangeAsync(user.UserResetPasswords!);
-        await unitOfWork.Repository<UserResetPassword>().AddAsync(userResetPassword);
+        await unitOfWork
+            .Repository<UserResetPassword>()
+            .AddAsync(userResetPassword, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
 
         string domain = configuration.GetValue<string>("ForgotPassowordUrl")!;

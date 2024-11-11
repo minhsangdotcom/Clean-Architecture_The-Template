@@ -8,21 +8,34 @@ namespace Application.Common.Interfaces.UnitOfWorks;
 public interface IRepositorySpecification<T>
     where T : class
 {
-    Task<TResult?> FindByConditionAsync<TResult>(ISpecification<T> spec);
+    Task<TResult?> FindByConditionAsync<TResult>(
+        ISpecification<T> spec,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class;
 
-    Task<T?> FindByConditionAsync(ISpecification<T> spec);
+    Task<T?> FindByConditionAsync(
+        ISpecification<T> spec,
+        CancellationToken cancellationToken = default
+    );
 
-    Task<IEnumerable<T>> ListAsync(ISpecification<T> spec, QueryParamRequest queryParam);
+    Task<IEnumerable<T>> ListAsync(
+        ISpecification<T> spec,
+        QueryParamRequest queryParam,
+        CancellationToken cancellationToken = default
+    );
 
     Task<IEnumerable<TResult>> ListWithGroupbyAsync<TGroupProperty, TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TGroupProperty>> groupByExpression
+        Expression<Func<T, TGroupProperty>> groupByExpression,
+        CancellationToken cancellationToken = default
     );
 
     Task<PaginationResponse<TResult>> PagedListAsync<TResult>(
         ISpecification<T> spec,
-        QueryParamRequest queryParam
+        QueryParamRequest queryParam,
+        CancellationToken cancellationToken = default
     );
 
     PaginationResponse<TResult> PagedList<TResult>(
@@ -39,7 +52,8 @@ public interface IRepositorySpecification<T>
     Task<PaginationResponse<TResult>> PagedListWithGroupByAsync<TGroupProperty, TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TGroupProperty>> groupByExpression
+        Expression<Func<T, TGroupProperty>> groupByExpression,
+        CancellationToken cancellationToken = default
     );
 
     Task<PaginationResponse<TResult>> CursorPagedListAsync<TResult>(

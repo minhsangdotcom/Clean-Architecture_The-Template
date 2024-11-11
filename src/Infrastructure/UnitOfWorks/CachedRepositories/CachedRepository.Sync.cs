@@ -8,7 +8,11 @@ public partial class CachedRepository<T> : IRepository<T>
 {
     public IEnumerable<T> List() => repository.List();
 
-    public T? FindById(object id) => repository.FindById(id);
+    public IEnumerable<TResult> List<TResult>()
+        where TResult : class => repository.List<TResult>();
+
+    public T? FindById<TId>(TId id)
+        where TId : notnull => repository.FindById(id);
 
     public T? FindByCondition(Expression<Func<T, bool>> criteria) =>
         repository.FindByCondition(criteria);
