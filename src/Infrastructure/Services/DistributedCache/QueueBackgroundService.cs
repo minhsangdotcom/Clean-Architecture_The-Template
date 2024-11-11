@@ -11,16 +11,18 @@ public class QueueBackgroundService(IQueueService queueService) : BackgroundServ
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            QueueRequest<int>? payload = await queueService.DequeueAsync<int>();
+        // while (!stoppingToken.IsCancellationRequested)
+        // {
+        //     QueueRequest<int>? payload = await queueService.DequeueAsync<int>();
 
-            if (payload != null)
-            {
-                await Process(payload!, request => FakeTask(request.Payload, request.PayloadId));
-            }
-            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-        }
+        //     if (payload != null)
+        //     {
+        //         await Process(payload!, request => FakeTask(request.Payload, request.PayloadId));
+        //     }
+        //     await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+        // }
+
+        await Task.CompletedTask;
     }
 
     private static async Task Process<TRequest, TResponse>(
@@ -65,28 +67,4 @@ public class QueueBackgroundService(IQueueService queueService) : BackgroundServ
             //logging into db
         }
     }
-
-    private static async Task<QueueResponse<int>> FakeTask(int request, Guid payloadId) =>
-        await Task.Run(() =>
-        {
-            if (request < 0)
-            {
-                return new QueueResponse<int>()
-                {
-                    IsSuccess = true,
-                    PayloadId = payloadId,
-                    LastAttemptTime = DateTimeOffset.UtcNow,
-                    Error = new { Message = "error" },
-                    ErrorType = QueueErrorType.Transient,
-                };
-            }
-            int data = 10 + request;
-
-            return new QueueResponse<int>()
-            {
-                IsSuccess = true,
-                PayloadId = payloadId,
-                ResponseData = data,
-            };
-        });
 }

@@ -55,4 +55,10 @@ public static class Router
          public const string Communes = $"{prefix}{nameof(Communes)}";
          public const string Tags = $"{nameof(RegionRoute)} endpoint";
     }
+
+    public static class CartRoute
+    {
+         public const string Cart = $"{prefix}{nameof(Cart)}";
+         public const string Tags = $"{nameof(CartRoute)} endpoint";
+    }
 }

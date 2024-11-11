@@ -8,14 +8,17 @@ namespace Domain.Aggregates.Carts;
 public class Cart : AggregateRoot
 {
     public Ulid CustomerId { get; set; }
+    
     public Customer? Customer { get; set; }
 
     public string? ShippingAddress { get; set; }
+
     public int ShippingFee { get; set; }
 
     public string? PhoneNumber { get; set; }
 
     public int Total { get; set; }
+
     public CartStatus CartStatus { get; set; }
 
     public string? InvalidReason { get; set; }
