@@ -21,7 +21,14 @@ public class Cart : AggregateRoot
 
     public CartStatus CartStatus { get; set; }
 
-    public string? InvalidReason { get; set; }
+    /// <summary>
+    /// record bad request error reason
+    /// </summary>
+    public string? PersistentError { get; set; }
+
+    public string? PaymentResult { get; set; }
+
+    public bool IsPaid { get; set; }
 
     public ICollection<CartItem>? CartItems { get; set; }
 

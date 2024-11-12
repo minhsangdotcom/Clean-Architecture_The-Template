@@ -1,3 +1,6 @@
+using Application.UseCases.Projections.Customers;
+using Application.UseCases.Projections.Tickets;
+using Application.UseCases.Projections.Tickets.Carts;
 using AutoMapper;
 using Domain.Aggregates.Carts;
 using Domain.Aggregates.Customers;
@@ -13,8 +16,8 @@ public class CreateCartMapping : Profile
         CreateMap<CartItemCommand, CartItem>();
 
         CreateMap<Cart, CreateCartResponse>();
-        CreateMap<Customer, CustomerResponse>();
-        CreateMap<CartItem, CartItemResponse>();
-        CreateMap<Ticket, TicketResponse>();
+        CreateMap<Customer, CustomerProjection>();
+        CreateMap<CartItem, CartItemProjection>();
+        CreateMap<Ticket, TicketProjection>();
     }
 }

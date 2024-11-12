@@ -7,5 +7,4 @@ public enum CartStatus
     Completed = 3,
     Canceled = 4,
     failed = 5,
-    Invalid = 6,
 }

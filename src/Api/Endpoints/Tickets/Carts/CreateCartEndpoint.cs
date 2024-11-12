@@ -12,7 +12,7 @@ namespace Api.Endpoints.Tickets.Carts;
 public class CreateCartEndpoint(ISender sender)
     : EndpointBaseAsync.WithRequest<CreateCartCommand>.WithActionResult<ApiResponse>
 {
-    [HttpPost(Router.CartRoute.Cart)]
+    [HttpPost(Router.CartRoute.Carts)]
     [SwaggerOperation(Tags = [Router.CartRoute.Tags], Summary = "create cart")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         CreateCartCommand request,
