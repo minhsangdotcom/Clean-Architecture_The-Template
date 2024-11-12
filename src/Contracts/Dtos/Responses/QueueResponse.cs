@@ -10,7 +10,7 @@ public class QueueResponse<T>
 
     public int RetryCount { get; set; }
 
-    public DateTimeOffset LastAttemptTime { get; set; }
+    public DateTimeOffset? LastAttemptTime { get; set; }
 
     public object? Error { get; set; }
 
@@ -19,7 +19,7 @@ public class QueueResponse<T>
 
 public enum QueueErrorType
 {
-    /// <summary>
+     /// <summary>
     /// 3-party service error
     /// </summary>
     Transient  = 1,
