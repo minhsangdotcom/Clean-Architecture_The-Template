@@ -22,7 +22,8 @@ public class ChangeUserPasswordHandler(IUnitOfWork unitOfWork, ICurrentUser curr
             await unitOfWork
                 .Repository<User>()
                 .FindByConditionAsync(
-                    new GetUserByIdWithoutIncludeSpecification(userId ?? Ulid.Empty)
+                    new GetUserByIdWithoutIncludeSpecification(userId ?? Ulid.Empty),
+                    cancellationToken
                 )
             ?? throw new NotFoundException(
                 [Messager.Create<User>().Message(MessageType.Found).Negative().Build()]

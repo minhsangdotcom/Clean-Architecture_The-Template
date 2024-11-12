@@ -16,7 +16,7 @@ public abstract class DefaultEntity<T>
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 
-public abstract class BaseEntity() : DefaultEntity, IAuditable
+public abstract class BaseEntity : DefaultEntity, IAuditable
 {
     public string CreatedBy { get; set; } = string.Empty;
     public string? UpdatedBy { get; set; }

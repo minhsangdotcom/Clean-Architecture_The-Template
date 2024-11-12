@@ -4,7 +4,6 @@ using System.Text;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
-using Domain.Specs;
 using Domain.Specs.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
@@ -16,7 +15,11 @@ public partial class CachedRepository<T> : IRepository<T>
 {
     public IQueryable<T> ApplyQuery(ISpecification<T> spec) => repository.ApplyQuery(spec);
 
-    public Task<TResult?> FindByConditionAsync<TResult>(ISpecification<T> spec)
+    public Task<TResult?> FindByConditionAsync<TResult>(
+        ISpecification<T> spec,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class
     {
         if (spec.CacheEnabled)
         {
@@ -29,14 +32,17 @@ public partial class CachedRepository<T> : IRepository<T>
                 {
                     entry.SetOptions(cacheOptions);
                     logger.Warning("fetching source for {key}", hashingKey);
-                    return repository.FindByConditionAsync<TResult>(spec);
+                    return repository.FindByConditionAsync<TResult>(spec, cancellationToken);
                 }
             );
         }
-        return repository.FindByConditionAsync<TResult>(spec);
+        return repository.FindByConditionAsync<TResult>(spec, cancellationToken);
     }
 
-    public Task<T?> FindByConditionAsync(ISpecification<T> spec)
+    public Task<T?> FindByConditionAsync(
+        ISpecification<T> spec,
+        CancellationToken cancellationToken = default
+    )
     {
         if (spec.CacheEnabled)
         {
@@ -49,14 +55,18 @@ public partial class CachedRepository<T> : IRepository<T>
                 {
                     entry.SetOptions(cacheOptions);
                     logger.Warning("fetching source for {key}", hashingKey);
-                    return repository.FindByConditionAsync(spec);
+                    return repository.FindByConditionAsync(spec, cancellationToken);
                 }
             );
         }
-        return repository.FindByConditionAsync(spec);
+        return repository.FindByConditionAsync(spec, cancellationToken);
     }
 
-    public Task<IEnumerable<T>> ListAsync(ISpecification<T> spec, QueryParamRequest queryParam)
+    public Task<IEnumerable<T>> ListAsync(
+        ISpecification<T> spec,
+        QueryParamRequest queryParam,
+        CancellationToken cancellationToken = default
+    )
     {
         if (spec.CacheEnabled)
         {
@@ -69,18 +79,19 @@ public partial class CachedRepository<T> : IRepository<T>
                 {
                     entry.SetOptions(cacheOptions);
                     logger.Warning("fetching source for {key}", hashingKey);
-                    return repository.ListAsync(spec, queryParam);
+                    return repository.ListAsync(spec, queryParam, cancellationToken);
                 }
             )!;
         }
-        return repository.ListAsync(spec, queryParam);
+        return repository.ListAsync(spec, queryParam, cancellationToken);
     }
 
     //? i will come up with the best idea for groupby
     public Task<IEnumerable<TResult>> ListWithGroupbyAsync<TGroupProperty, TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TGroupProperty>> groupByExpression
+        Expression<Func<T, TGroupProperty>> groupByExpression,
+        CancellationToken cancellationToken = default
     )
     {
         if (spec.CacheEnabled)
@@ -97,7 +108,8 @@ public partial class CachedRepository<T> : IRepository<T>
                     return repository.ListWithGroupbyAsync<TGroupProperty, TResult>(
                         spec,
                         queryParam,
-                        groupByExpression
+                        groupByExpression,
+                        cancellationToken
                     );
                 }
             )!;
@@ -105,13 +117,15 @@ public partial class CachedRepository<T> : IRepository<T>
         return repository.ListWithGroupbyAsync<TGroupProperty, TResult>(
             spec,
             queryParam,
-            groupByExpression
+            groupByExpression,
+            cancellationToken
         );
     }
 
     public Task<PaginationResponse<TResult>> PagedListAsync<TResult>(
         ISpecification<T> spec,
-        QueryParamRequest queryParam
+        QueryParamRequest queryParam,
+        CancellationToken cancellationToken = default
     )
     {
         if (spec.CacheEnabled)
@@ -125,11 +139,11 @@ public partial class CachedRepository<T> : IRepository<T>
                 {
                     entry.SetOptions(cacheOptions);
                     logger.Warning("fetching source for {key}", hashingKey);
-                    return repository.PagedListAsync<TResult>(spec, queryParam);
+                    return repository.PagedListAsync<TResult>(spec, queryParam, cancellationToken);
                 }
             )!;
         }
-        return repository.PagedListAsync<TResult>(spec, queryParam);
+        return repository.PagedListAsync<TResult>(spec, queryParam, cancellationToken);
     }
 
     public PaginationResponse<TResult> PagedList<TResult>(
@@ -159,7 +173,8 @@ public partial class CachedRepository<T> : IRepository<T>
     public Task<PaginationResponse<TResult>> PagedListWithGroupByAsync<TGroupProperty, TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TGroupProperty>> groupByExpression
+        Expression<Func<T, TGroupProperty>> groupByExpression,
+        CancellationToken cancellationToken = default
     )
     {
         if (spec.CacheEnabled)
@@ -176,7 +191,8 @@ public partial class CachedRepository<T> : IRepository<T>
                     return repository.PagedListWithGroupByAsync<TGroupProperty, TResult>(
                         spec,
                         queryParam,
-                        groupByExpression
+                        groupByExpression,
+                        cancellationToken
                     );
                 }
             )!;
@@ -184,7 +200,8 @@ public partial class CachedRepository<T> : IRepository<T>
         return repository.PagedListWithGroupByAsync<TGroupProperty, TResult>(
             spec,
             queryParam,
-            groupByExpression
+            groupByExpression,
+            cancellationToken
         );
     }
 

@@ -17,17 +17,24 @@ public partial class Repository<T> : IRepository<T>
 {
     public IQueryable<T> ApplyQuery(ISpecification<T> spec) => ApplySpecification(spec);
 
-    public async Task<TResult?> FindByConditionAsync<TResult>(ISpecification<T> spec) =>
+    public async Task<TResult?> FindByConditionAsync<TResult>(
+        ISpecification<T> spec,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class =>
         await ApplySpecification(spec)
             .ProjectTo<TResult>(_configurationProvider)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<T?> FindByConditionAsync(ISpecification<T> spec) =>
-        await ApplySpecification(spec).FirstOrDefaultAsync();
+    public async Task<T?> FindByConditionAsync(
+        ISpecification<T> spec,
+        CancellationToken cancellationToken = default
+    ) => await ApplySpecification(spec).FirstOrDefaultAsync(cancellationToken);
 
     public async Task<IEnumerable<T>> ListAsync(
         ISpecification<T> spec,
-        QueryParamRequest queryParam
+        QueryParamRequest queryParam,
+        CancellationToken cancellationToken = default
     )
     {
         string uniqueSort = GetSort(queryParam.Sort);
@@ -37,14 +44,15 @@ public partial class Repository<T> : IRepository<T>
             .Filter(queryParam.DynamicFilter)
             .Search(search?.Keyword, search?.Targets)
             .Sort(uniqueSort)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
     //? i will come up with the best idea for groupby
     public async Task<IEnumerable<TResult>> ListWithGroupbyAsync<TGroupProperty, TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TGroupProperty>> groupByExpression
+        Expression<Func<T, TGroupProperty>> groupByExpression,
+        CancellationToken cancellationToken = default
     )
     {
         string uniqueSort = GetSort(queryParam.Sort);
@@ -55,12 +63,13 @@ public partial class Repository<T> : IRepository<T>
             .ProjectTo<TResult>(_configurationProvider)
             .Search(search?.Keyword, search?.Targets)
             .Sort(uniqueSort)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<PaginationResponse<TResult>> PagedListAsync<TResult>(
         ISpecification<T> spec,
-        QueryParamRequest queryParam
+        QueryParamRequest queryParam,
+        CancellationToken cancellationToken = default
     )
     {
         string uniqueSort = GetSort(queryParam.Sort);
@@ -71,7 +80,7 @@ public partial class Repository<T> : IRepository<T>
             .Filter(queryParam.DynamicFilter)
             .Search(search?.Keyword, search?.Targets)
             .Sort(uniqueSort)
-            .ToPagedListAsync(queryParam.Page, queryParam.PageSize);
+            .ToPagedListAsync(queryParam.Page, queryParam.PageSize, cancellationToken);
     }
 
     public PaginationResponse<TResult> PagedList<TResult>(
@@ -97,7 +106,8 @@ public partial class Repository<T> : IRepository<T>
     >(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TGroupProperty>> groupByExpression
+        Expression<Func<T, TGroupProperty>> groupByExpression,
+        CancellationToken cancellationToken = default
     )
     {
         string uniqueSort = GetSort(queryParam.Sort);
@@ -108,7 +118,7 @@ public partial class Repository<T> : IRepository<T>
             .ProjectTo<TResult>(_configurationProvider)
             .Search(search?.Keyword, search?.Targets)
             .Sort(uniqueSort)
-            .ToPagedListAsync(queryParam.Page, queryParam.PageSize);
+            .ToPagedListAsync(queryParam.Page, queryParam.PageSize, cancellationToken);
     }
 
     public PaginationResponse<TResult> PagedListWithGroupBy<TGroupProperty, TResult>(

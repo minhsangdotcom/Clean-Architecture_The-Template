@@ -7,7 +7,11 @@ public interface IRepositorySync<T>
 {
     IEnumerable<T> List();
 
-    T? FindById(object id);
+    IEnumerable<TResult> List<TResult>()
+        where TResult : class;
+
+    T? FindById<TId>(TId id)
+        where TId : notnull;
 
     T? FindByCondition(Expression<Func<T, bool>> criteria);
 

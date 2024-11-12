@@ -1,8 +1,8 @@
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
-using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.Identity;

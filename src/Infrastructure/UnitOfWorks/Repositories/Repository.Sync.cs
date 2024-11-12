@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Application.Common.Interfaces.UnitOfWorks;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -10,7 +11,11 @@ public partial class Repository<T> : IRepository<T>
 {
     public IEnumerable<T> List() => [.. dbContext.Set<T>()];
 
-    public T? FindById(object id) => dbContext.Set<T>().Find(id);
+    public IEnumerable<TResult> List<TResult>()
+        where TResult : class => [.. dbContext.Set<T>().ProjectTo<TResult>(_configurationProvider)];
+
+    public T? FindById<TId>(TId id)
+        where TId : notnull => dbContext.Set<T>().Find(id);
 
     public T? FindByCondition(Expression<Func<T, bool>> criteria) =>
         dbContext.Set<T>().Where(criteria).FirstOrDefault();

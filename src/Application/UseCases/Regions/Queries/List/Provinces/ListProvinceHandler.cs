@@ -1,18 +1,24 @@
-using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.QueryStringProcessing;
 using Application.UseCases.Projections.Regions;
-using AutoMapper;
+using Contracts.Dtos.Responses;
+using Domain.Aggregates.Regions;
+using Domain.Aggregates.Regions.Specifications;
 using Mediator;
 
 namespace Application.UseCases.Regions.Queries.List.Provinces;
 
-public class ListProvinceHandler(IRegionService regionService, IMapper mapper)
-    : IRequestHandler<ListProvinceQuery, IEnumerable<ProvinceProjection>>
+public class ListProvinceHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<ListProvinceQuery, PaginationResponse<ProvinceProjection>>
 {
-    public async ValueTask<IEnumerable<ProvinceProjection>> Handle(
+    public async ValueTask<PaginationResponse<ProvinceProjection>> Handle(
         ListProvinceQuery request,
         CancellationToken cancellationToken
-    )
-    {
-        return mapper.Map<IEnumerable<ProvinceProjection>>(await regionService.Provinces());
-    }
+    ) =>
+        await unitOfWork
+            .Repository<Province>()
+            .PagedListAsync<ProvinceProjection>(
+                new ListProvinceSpecification(),
+                request.ValidateQuery().ValidateFilter(typeof(ProvinceProjection))
+            );
 }

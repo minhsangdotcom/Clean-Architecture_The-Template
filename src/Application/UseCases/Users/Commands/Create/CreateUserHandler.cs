@@ -1,5 +1,5 @@
-using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -29,7 +29,9 @@ public class CreateUserHandler(
         {
             await unitOfWork.CreateTransactionAsync();
 
-            User user = await unitOfWork.Repository<User>().AddAsync(userCreation);
+            User user = await unitOfWork
+                .Repository<User>()
+                .AddAsync(userCreation, cancellationToken);
             await unitOfWork.SaveAsync(cancellationToken);
 
             // update claim to user consist of default and custom claims
@@ -53,7 +55,10 @@ public class CreateUserHandler(
             return (
                 await unitOfWork
                     .Repository<User>()
-                    .FindByConditionAsync<CreateUserResponse>(new GetUserByIdSpecification(user.Id))
+                    .FindByConditionAsync<CreateUserResponse>(
+                        new GetUserByIdSpecification(user.Id),
+                        cancellationToken
+                    )
             )!;
         }
         catch (Exception)
