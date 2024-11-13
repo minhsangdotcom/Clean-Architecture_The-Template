@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace Infrastructure;
 
@@ -38,7 +39,13 @@ public static class DependencyInjection
             .AddDbContext<TheDbContext>(
                 (sp, options) =>
                     options
-                        .UseNpgsql(configuration.GetConnectionString("default"))
+                        .UseNpgsql(
+                            new NpgsqlDataSourceBuilder(
+                                configuration.GetConnectionString("default")
+                            )
+                                .EnableDynamicJson()
+                                .Build()
+                        )
                         .AddInterceptors(
                             sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
                             sp.GetRequiredService<DispatchDomainEventInterceptor>()

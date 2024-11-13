@@ -13,18 +13,18 @@ public class QueueService(IRedisCacheService redisCache) : IQueueService
     public long Size => size;
     private long size = 0;
 
-    public async Task<QueueRequest<T>?> DequeueAsync<T>()
+    public async Task<T?> DequeueAsync<T>()
     {
         Tuple<RedisKey, RedisValue>? value = await redisCache.Database.BRPopAsync([QUEUE_NAME], 1);
 
         if (value == null)
         {
-            return null;
+            return default;
         }
 
-        var result = SerializerExtension.Deserialize<QueueRequest<T>?>(value.Item2!);
+        var result = SerializerExtension.Deserialize<T>(value.Item2.ToString());
         size = Length();
-        return result.Object;
+        return result.Object!;
     }
 
     public async Task<bool> EnqueueAsync<T>(T payload)

@@ -5,6 +5,7 @@ using FluentValidation;
 using Mediator;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace Application;
 
