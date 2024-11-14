@@ -9,34 +9,36 @@ using Serilog;
 
 namespace Infrastructure.Services.DistributedCache;
 
-public class QueueBackgroundService(
-    IQueueService queueService,
-    IServiceProvider serviceProvider,
-    ILogger logger
-) : BackgroundService
+public class QueueBackgroundService(IQueueService queueService, IServiceProvider serviceProvider)
+    : BackgroundService
 {
-    protected const int MAXIMUM_RETRY = 5;
+    protected const int MAXIMUM_RETRY = 10;
     private const int INITIAL_RETRY_TIME_IN_SEC = 3;
     private const int MAX_RETRY_INCREMENT_SEC = 1;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        using IServiceScope scope = serviceProvider.CreateScope();
+        ISender sender = scope.ServiceProvider.GetRequiredService<ISender>();
+        ILogger logger = scope.ServiceProvider.GetRequiredService<ILogger>();
+        IUnitOfWork unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         while (!stoppingToken.IsCancellationRequested)
         {
             PayCartPayload? request = await queueService.DequeueAsync<PayCartPayload>();
-
-            using IServiceScope scope = serviceProvider.CreateScope();
-            ISender sender = scope.ServiceProvider.GetRequiredService<ISender>();
             if (request != null)
             {
-                await Process(sender.Send(request, stoppingToken));
+                await Process(sender.Send(request, stoppingToken), logger, unitOfWork);
             }
 
             await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
         }
     }
 
-    private async Task Process<T>(ValueTask<QueueResponse<T>> task)
+    private static async Task Process<T>(
+        ValueTask<QueueResponse<T>> task,
+        ILogger logger,
+        IUnitOfWork unitOfWork
+    )
         where T : class
     {
         QueueResponse<T> queueResponse = new();
@@ -67,7 +69,7 @@ public class QueueBackgroundService(
 
             if (queueResponse.ErrorType == QueueErrorType.Persistent)
             {
-                await PushToDeadLetterQueue(queueResponse);
+                await PushToDeadLetterQueue(queueResponse, logger, unitOfWork);
                 break;
             }
 
@@ -80,11 +82,15 @@ public class QueueBackgroundService(
         if (!queueResponse.IsSuccess && queueResponse.ErrorType == QueueErrorType.Transient)
         {
             //logging into db
-            await PushToDeadLetterQueue(queueResponse);
+            await PushToDeadLetterQueue(queueResponse, logger, unitOfWork);
         }
     }
 
-    private async Task PushToDeadLetterQueue<T>(QueueResponse<T> response)
+    private static async Task PushToDeadLetterQueue<T>(
+        QueueResponse<T> response,
+        ILogger logger,
+        IUnitOfWork unitOfWork
+    )
         where T : class
     {
         logger.Information("Pushing request {payloadId} to dead letter queue.", response.PayloadId);
@@ -94,8 +100,6 @@ public class QueueBackgroundService(
             ErrorDetail = response.Error,
             RetryCount = response.RetryCount,
         };
-        using IServiceScope scope = serviceProvider.CreateScope();
-        IUnitOfWork unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         await unitOfWork.Repository<DeadLetterQueue>().AddAsync(deadLetterQueue);
         await unitOfWork.SaveAsync();
     }

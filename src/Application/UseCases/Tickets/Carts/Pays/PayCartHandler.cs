@@ -31,18 +31,40 @@ public class PayCartHandler(IUnitOfWork unitOfWork, IMapper mapper)
                 ErrorType = QueueErrorType.Persistent,
                 IsSuccess = false,
                 PayloadId = request.PayloadId,
-                Error = new { Message = "Car has not found", Type = QueueErrorType.Persistent },
+                Error = new
+                {
+                    Message = "Car has not found",
+                    Type = QueueErrorType.Persistent,
+                    request.Payload!.CartId,
+                },
             };
         }
+        List<CartItem> cartItems = [.. cart.CartItems!];
+        if (cartItems.Any(x => x.Ticket!.UsedQuantity + x.Quantity > x.Ticket.TotalQuantity))
+        {
+            return new QueueResponse<PayCartResponse>()
+            {
+                ErrorType = QueueErrorType.Persistent,
+                IsSuccess = false,
+                PayloadId = request.PayloadId,
+                Error = new
+                {
+                    Message = $"pay has failed for ticket is not enough quantity",
+                    Type = QueueErrorType.Persistent,
+                    request.Payload!.CartId,
+                },
+            };
+        }
+        // fake payment processing
         Random random = new();
         int fakeTime = random.Next(1, 6);
         await Task.Delay(fakeTime * 1000, cancellationToken);
 
         cart.IsPaid = true;
         cart.PaymentResult = "paying has been success";
+        cart.CartStatus = Domain.Aggregates.Carts.Enums.CartStatus.Completed;
         await unitOfWork.Repository<Cart>().UpdateAsync(cart);
 
-        List<CartItem> cartItems = [.. cart.CartItems!];
         List<Ticket> tickets = [];
         foreach (var cartItem in cartItems)
         {
