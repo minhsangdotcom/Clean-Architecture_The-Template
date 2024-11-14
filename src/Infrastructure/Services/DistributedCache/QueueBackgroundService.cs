@@ -49,6 +49,7 @@ public class QueueBackgroundService(IQueueService queueService, IServiceProvider
         {
             queueResponse = await task;
 
+            // sucess case
             if (queueResponse.IsSuccess)
             {
                 logger.Information(
@@ -58,25 +59,21 @@ public class QueueBackgroundService(IQueueService queueService, IServiceProvider
                 break;
             }
 
-            if (queueResponse.ErrorType == null)
-            {
-                logger.Warning(
-                    "Occuring request {requestId} with Unknown error",
-                    queueResponse.PayloadId
-                );
-                break;
-            }
-
+            // 500 or 400 error
             if (queueResponse.ErrorType == QueueErrorType.Persistent)
             {
                 await PushToDeadLetterQueue(queueResponse, logger, unitOfWork);
                 break;
             }
 
-            retry++;
-            queueResponse.RetryCount = retry;
-            await Task.Delay(TimeSpan.FromSeconds(retryDelay));
-            retryDelay += MAX_RETRY_INCREMENT_SEC;
+            // transient error retry but
+            if (queueResponse.ErrorType == QueueErrorType.Transient)
+            {
+                retry++;
+                queueResponse.RetryCount = retry;
+                await Task.Delay(TimeSpan.FromSeconds(retryDelay));
+                retryDelay += MAX_RETRY_INCREMENT_SEC;
+            }
         }
 
         if (!queueResponse.IsSuccess && queueResponse.ErrorType == QueueErrorType.Transient)
