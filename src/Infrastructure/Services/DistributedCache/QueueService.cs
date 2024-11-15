@@ -11,7 +11,8 @@ public class QueueService(IRedisCacheService redisCache) : IQueueService
     private const string QUEUE_NAME = "the_queue";
 
     public long Size => size;
-    private long size = 0;
+
+    private long size;
 
     public async Task<T?> DequeueAsync<T>()
     {

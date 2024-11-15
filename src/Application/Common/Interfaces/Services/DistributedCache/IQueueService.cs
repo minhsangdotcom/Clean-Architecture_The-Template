@@ -1,5 +1,4 @@
 using Application.Common.Interfaces.Registers;
-using Contracts.Dtos.Requests;
 
 namespace Application.Common.Interfaces.Services.DistributedCache;
 
