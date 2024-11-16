@@ -291,7 +291,7 @@ public class Message<T>(string? entityName = null)
 
     public MessageResult BuildMessage()
     {
-        string subjectProperty = entityName.ToKebabCase();
+        string subjectProperty = EntityName.ToKebabCase();
         if (!string.IsNullOrWhiteSpace(PropertyName))
         {
             subjectProperty += $"_{PropertyName.ToKebabCase()}";
@@ -334,7 +334,7 @@ public class Message<T>(string? entityName = null)
 
         ResourceResult? propertyTranslation = translator!.GetValueOrDefault(PropertyName);
         string property = propertyTranslation?.Value ?? string.Empty;
-        string entity = translator!.GetValueOrDefault(entityName)?.Value ?? string.Empty;
+        string entity = translator!.GetValueOrDefault(EntityName)?.Value ?? string.Empty;
         string obj = translator.GetValueOrDefault(ObjectName)?.Value ?? string.Empty;
 
         MessageDictionary mess = Messages[Type];
