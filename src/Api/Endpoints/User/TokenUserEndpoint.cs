@@ -13,9 +13,9 @@ public class TokenUserEndpoint(ISender sender) : EndpointBaseAsync.WithRequest<U
 {
     private readonly ISender sender = sender;
 
-    [HttpPost(Router.AuthRoute.Token)]
+    [HttpPost(Router.LoginRoute.Token)]
     [SwaggerOperation(
-            Tags = [Router.AuthRoute.Tags],
+            Tags = [Router.LoginRoute.Tags],
             Summary = "refresh token"
         )]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(UserTokenCommand request, CancellationToken cancellationToken = default) =>

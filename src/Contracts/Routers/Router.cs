@@ -18,16 +18,16 @@ public static class Router
         public const string Tags = $"{nameof(Users)} endpoint";
     }
 
-    public static class AuthRoute
+    public static class LoginRoute
     {
-        public const string Auths = $"{prefix}{nameof(Auths)}";
+        public const string Login = $"{prefix}{nameof(Login)}";
 
         /// <summary>
         /// Refresh token
         /// </summary>
         public const string Token = $"{prefix}{nameof(Token)}";
 
-        public const string Tags = $"{nameof(Auths)} endpoint";
+        public const string Tags = $"{nameof(Login)} endpoint";
     }
 
     public static class RoleRoute
