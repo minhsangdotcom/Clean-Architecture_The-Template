@@ -1,4 +1,3 @@
-using System.Text;
 using CaseConverter;
 using Contracts.Extensions;
 
@@ -20,19 +19,18 @@ public static class Message
 public class Message<T>(string? entityName = null)
     where T : class
 {
-    private bool? isNegative = null;
+    public string EntityName { get; } =
+        string.IsNullOrWhiteSpace(entityName) ? typeof(T).Name : entityName;
 
-    private string objectName = string.Empty;
+    public string ObjectName { get; internal set; } = string.Empty;
 
-    private string propertyName = string.Empty;
+    public string? PropertyName { get; internal set; } = string.Empty;
 
-    private readonly string entityName = string.IsNullOrWhiteSpace(entityName)
-        ? typeof(T).Name
-        : entityName;
+    public CustomMessage? CustomMessage { get; internal set; }
 
-    private CustomMessage? customMessage = null;
+    public MessageType Type { get; internal set; } = 0;
 
-    private MessageType type = 0;
+    public bool? IsNegative { get; internal set; } = null;
 
     private readonly Dictionary<MessageType, MessageDictionary> Messages =
         new()
@@ -291,36 +289,25 @@ public class Message<T>(string? entityName = null)
             },
         };
 
-    public void SetNegative(bool value) => isNegative = value;
-
-    public void SetObjectName(string value) => objectName = value;
-
-    public void SetPropertyName(string value) => propertyName = value;
-
-    public void SetCustomMessage(CustomMessage value) => customMessage = value;
-
-    public void SetMessage(MessageType value) => type = value;
-
     public MessageResult BuildMessage()
     {
         string subjectProperty = entityName.ToKebabCase();
-
-        if (!string.IsNullOrWhiteSpace(propertyName))
+        if (!string.IsNullOrWhiteSpace(PropertyName))
         {
-            subjectProperty += $"_{propertyName.ToKebabCase()}";
+            subjectProperty += $"_{PropertyName.ToKebabCase()}";
         }
 
-        StringBuilder messageBuilder = new($"{subjectProperty}");
+        List<string> results = [subjectProperty];
 
-        string? message = customMessage?.Message?.ToKebabCase() ?? Messages[type].Message;
-        string? negativeMessage = customMessage?.NegativeMessage ?? Messages[type].NegativeMessage;
+        string? message = CustomMessage?.Message?.ToKebabCase() ?? Messages[Type].Message;
+        string? negativeMessage = CustomMessage?.NegativeMessage ?? Messages[Type].NegativeMessage;
 
-        string strMessage = BuildMainRawMessage(isNegative, negativeMessage, message);
-        messageBuilder.Append($"_{strMessage}");
+        string strMessage = BuildMainRawMessage(IsNegative, negativeMessage, message);
+        results.Add(strMessage);
 
-        if (!string.IsNullOrWhiteSpace(objectName))
+        if (!string.IsNullOrWhiteSpace(ObjectName))
         {
-            messageBuilder.Append($"_{objectName.ToKebabCase()}");
+            results.Add(ObjectName.ToKebabCase());
         }
 
         string en = Translate(LanguageType.En);
@@ -328,7 +315,7 @@ public class Message<T>(string? entityName = null)
 
         return new()
         {
-            Message = messageBuilder.ToString().ToLower(),
+            Message = string.Join("_", results).ToLower(),
             En = en,
             Vi = vi,
         };
@@ -344,18 +331,18 @@ public class Message<T>(string? entityName = null)
             _ => string.Empty,
         };
 
-        Dictionary<string, ResourceResult> translation = ResourceExtension.ReadResxFile(path);
+        Dictionary<string, ResourceResult> translator = ResourceExtension.ReadResxFile(path) ?? [];
 
-        ResourceResult? propertyTranslation = translation.GetValueOrDefault(propertyName);
+        ResourceResult? propertyTranslation = translator!.GetValueOrDefault(PropertyName);
         string property = propertyTranslation?.Value ?? string.Empty;
-        string entity = translation.GetValueOrDefault(entityName)?.Value ?? string.Empty;
-        string obj = translation.GetValueOrDefault(objectName)?.Value ?? string.Empty;
+        string entity = translator!.GetValueOrDefault(entityName)?.Value ?? string.Empty;
+        string obj = translator.GetValueOrDefault(ObjectName)?.Value ?? string.Empty;
 
-        MessageDictionary mess = Messages[type];
+        MessageDictionary mess = Messages[Type];
         string message = BuildMainTranslationMessage(
-            isNegative,
-            customMessage?.NegativeMessage ?? mess.NegativeMessage,
-            customMessage?.CustomMessageTranslations[languageType.ToString()]
+            IsNegative,
+            CustomMessage?.NegativeMessage ?? mess.NegativeMessage,
+            CustomMessage?.CustomMessageTranslations[languageType.ToString()]
                 ?? mess.Translation[languageType.ToString()],
             languageType
         );
@@ -372,15 +359,14 @@ public class Message<T>(string? entityName = null)
         string verb = string.Empty;
         if (languageType == LanguageType.En)
         {
-            var comment = propertyTranslation?.Comment?.Trim()?.Split(",");
+            string[]? comment = propertyTranslation?.Comment?.Trim()?.Split(",");
 
             bool isPlural =
                 comment != null
                 && comment.Any(x =>
                 {
-                    var c = x.Split("=");
-
-                    return c[0] == "IsPlural" && c[1] == "true";
+                    string[] parts = x.Split("=");
+                    return parts[0] == "IsPlural" && parts[1] == "true";
                 });
 
             verb = isPlural ? "are" : "is";
@@ -390,7 +376,7 @@ public class Message<T>(string? entityName = null)
             ? (languageType == LanguageType.En ? "of" : "của")
             : string.Empty;
 
-        IEnumerable<string> results =
+        List<string> words =
         [
             property,
             preposition,
@@ -400,8 +386,10 @@ public class Message<T>(string? entityName = null)
             messagePreposition,
             obj,
         ];
-
-        return string.Join(" ", results.Where(x => !string.IsNullOrWhiteSpace(x)));
+        IReadOnlyCollection<string> notEmptyWord = words.FindAll(word =>
+            !string.IsNullOrWhiteSpace(word)
+        );
+        return string.Join(' ', notEmptyWord);
     }
 
     private static string BuildMainRawMessage(
@@ -420,7 +408,7 @@ public class Message<T>(string? entityName = null)
             return negativeMessage;
         }
 
-        return "not_" + message;
+        return string.Join('_', ["not", message]);
     }
 
     private static string BuildMainTranslationMessage(
@@ -440,7 +428,8 @@ public class Message<T>(string? entityName = null)
             return negativeMessage;
         }
 
-        return (languageType == LanguageType.En ? "not" : "không") + " " + message;
+        string localeNegativeWord = languageType == LanguageType.En ? "not" : "không";
+        return $"{localeNegativeWord} {message}";
     }
 }
 
