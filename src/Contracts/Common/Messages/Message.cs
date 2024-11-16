@@ -301,7 +301,6 @@ public class Message<T>(string? entityName = null)
 
         string? message = CustomMessage?.Message?.ToKebabCase() ?? Messages[Type].Message;
         string? negativeMessage = CustomMessage?.NegativeMessage ?? Messages[Type].NegativeMessage;
-
         string strMessage = BuildMainRawMessage(IsNegative, negativeMessage, message);
         results.Add(strMessage);
 
