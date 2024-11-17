@@ -1,9 +1,10 @@
 using System.Text.RegularExpressions;
-using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.UseCases.Projections.Users;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Users;
+using Domain.Aggregates.Users.ValueObjects;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -79,7 +80,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
             .MustAsync((email, _) => IsExistedEmail(unitOfWork, email!, id))
             .When(_ => accessorService.GetHttpMethod() == HttpMethod.Put.ToString())
             .WithState(x =>
-                 Messager
+                Messager
                     .Create<User>()
                     .Property(x => x.Email)
                     .Message(MessageType.Existence)
@@ -88,7 +89,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
             .MustAsync((email, _) => IsExistedEmail(unitOfWork, email!))
             .When(_ => accessorService.GetHttpMethod() == HttpMethod.Post.ToString())
             .WithState(x =>
-                 Messager
+                Messager
                     .Create<User>()
                     .Property(x => x.Email)
                     .Message(MessageType.Existence)
@@ -119,16 +120,37 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Build()
             );
 
-        RuleFor(x => x.Address)
-            .MaximumLength(1000)
-            .When(x => x.Address != null)
+        RuleFor(x => x.ProvinceId)
+            .NotEmpty()
             .WithState(x =>
                 Messager
                     .Create<User>()
-                    .Property(x => x.Address!)
-                    .Message(MessageType.MaximumLength)
+                    .Property(nameof(UserModel.ProvinceId))
+                    .Message(MessageType.Null)
+                    .Negative()
                     .Build()
-                    .Message
+            );
+
+        RuleFor(x => x.DistrictId)
+            .NotEmpty()
+            .WithState(x =>
+                Messager
+                    .Create<User>()
+                    .Property(nameof(UserModel.DistrictId))
+                    .Message(MessageType.Null)
+                    .Negative()
+                    .Build()
+            );
+
+        RuleFor(x => x.Street)
+            .NotEmpty()
+            .WithState(x =>
+                Messager
+                    .Create<User>()
+                    .Property(nameof(UserModel.Street))
+                    .Message(MessageType.Null)
+                    .Negative()
+                    .Build()
             );
     }
 
@@ -138,7 +160,11 @@ public partial class UserValidator : AbstractValidator<UserModel>
     [GeneratedRegex(@"^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$")]
     private static partial Regex VietnamesePhoneValidationRegex();
 
-    private static async Task<bool> IsExistedEmail(IUnitOfWork unitOfWork, string email, Ulid? id = null)
+    private static async Task<bool> IsExistedEmail(
+        IUnitOfWork unitOfWork,
+        string email,
+        Ulid? id = null
+    )
     {
         return !await unitOfWork
             .Repository<User>()

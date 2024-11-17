@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
+using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
@@ -20,10 +21,27 @@ public class CreateUserHandler(
         CancellationToken cancellationToken
     )
     {
-        User userCreation = mapper.Map<User>(command);
+        User userMapping = mapper.Map<User>(command);
+
+        Province? province = await unitOfWork
+            .Repository<Province>()
+            .FindByIdAsync(command.ProvinceId, cancellationToken);
+        District? district = await unitOfWork
+            .Repository<District>()
+            .FindByIdAsync(command.DistrictId, cancellationToken);
+
+        Commune? commune = null;
+        if (command.CommuneId.HasValue)
+        {
+            commune = await unitOfWork
+                .Repository<Commune>()
+                .FindByIdAsync(command.CommuneId.Value, cancellationToken);
+        }
+
+        userMapping.UpdateAddress(new(province!, district!, commune, command.Street!));
 
         string? key = MediaUpdateService.GetKey(command.Avatar);
-        userCreation.Avatar = await MediaUpdateService.UploadAvatarAsync(command.Avatar, key);
+        userMapping.Avatar = await MediaUpdateService.UploadAvatarAsync(command.Avatar, key);
 
         try
         {
@@ -31,7 +49,7 @@ public class CreateUserHandler(
 
             User user = await unitOfWork
                 .Repository<User>()
-                .AddAsync(userCreation, cancellationToken);
+                .AddAsync(userMapping, cancellationToken);
             await unitOfWork.SaveAsync(cancellationToken);
 
             // update claim to user consist of default and custom claims

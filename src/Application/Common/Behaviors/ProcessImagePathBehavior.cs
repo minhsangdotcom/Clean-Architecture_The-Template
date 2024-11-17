@@ -88,7 +88,7 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
         }
     }
 
-    // Updates the property value if the key does not already have a public URL
+    // Updates the property value if the key does not already have http url
     private void UpdatePropertyIfNotPublicUrl(object target, PropertyInfo property, object key)
     {
         string imageKeyStr = key.ToString()!;

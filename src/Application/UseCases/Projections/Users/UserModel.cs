@@ -14,7 +14,13 @@ public class UserModel
 
     public DateTime? DayOfBirth { get; set; }
 
-    public string? Address { get; set; }
+    public Ulid ProvinceId { get; set; }
+
+    public Ulid DistrictId { get; set; }
+
+    public Ulid? CommuneId { get; set; }
+
+    public string? Street { get; set; }
 
     public IFormFile? Avatar { get; set; }
 }

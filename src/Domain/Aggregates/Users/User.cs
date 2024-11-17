@@ -72,7 +72,7 @@ public class User : AggregateRoot
     public void SetPassword(string password) =>
         Password = Guard.Against.NullOrWhiteSpace(password, nameof(password));
 
-    private void UpdateAddress(Address address) => Address = address;
+    public void UpdateAddress(Address address) => Address = address;
 
     public void AddUserClaim(IEnumerable<UserClaim> userClaims)
     {
