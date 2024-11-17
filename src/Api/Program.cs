@@ -1,7 +1,6 @@
 using Api.Converters;
 using Api.Extensions;
 using Application;
-using Contracts.Binds;
 using Infrastructure;
 using Infrastructure.Data;
 using Serilog;

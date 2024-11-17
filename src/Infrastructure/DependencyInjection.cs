@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure;
 
@@ -32,6 +34,11 @@ public static class DependencyInjection
         services.AddDetection();
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
+        services.Configure<DatabaseSettings>(options =>
+            configuration.GetSection(nameof(DatabaseSettings)).Bind(options)
+        );
+        services.TryAddSingleton<IValidateOptions<DatabaseSettings>, ValidateDatabaseSetting>();
+
         services
             .AddScoped<IDbContext, TheDbContext>()
             .AddScoped<IUnitOfWork, UnitOfWork>()
@@ -39,12 +46,17 @@ public static class DependencyInjection
             .AddSingleton<DispatchDomainEventInterceptor>()
             .AddDbContext<TheDbContext>(
                 (sp, options) =>
+                {
+                    DatabaseSettings settings = sp.GetRequiredService<
+                        IOptions<DatabaseSettings>
+                    >().Value;
                     options
-                        .UseNpgsql(configuration.GetConnectionString("default"))
+                        .UseNpgsql(settings.DatabaseConnection)
                         .AddInterceptors(
                             sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
                             sp.GetRequiredService<DispatchDomainEventInterceptor>()
-                        )
+                        );
+                }
             )
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentUser, CurrentUserService>()
