@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.Services.DistributedCache;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,10 +11,20 @@ public static class RedisRegisterExtension
         IConfiguration configuration
     )
     {
-        services.Configure<RedisDatabaseSettings>(options =>
-            configuration.GetSection(nameof(RedisDatabaseSettings)).Bind(options)
-        );
-        services.AddHostedService<QueueBackgroundService>();
+        RedisDatabaseSettings databaseSettings =
+            configuration.GetSection(nameof(RedisDatabaseSettings)).Get<RedisDatabaseSettings>()
+            ?? new();
+
+        if (databaseSettings.IsEnbaled)
+        {
+            services.Configure<RedisDatabaseSettings>(options =>
+                configuration.GetSection(nameof(RedisDatabaseSettings)).Bind(options)
+            );
+            services
+                .AddHostedService<QueueBackgroundService>()
+                .AddSingleton<IRedisCacheService, RedisCacheService>()
+                .AddSingleton<IQueueService, QueueService>();
+        }
 
         return services;
     }

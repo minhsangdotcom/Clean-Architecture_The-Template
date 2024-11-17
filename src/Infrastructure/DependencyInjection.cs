@@ -1,7 +1,5 @@
 using Application.Common.Interfaces.Registers;
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.DistributedCache;
-using Application.Common.Interfaces.Services.Elastics;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -11,6 +9,7 @@ using Infrastructure.Services;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.DistributedCache;
 using Infrastructure.Services.Elastics;
+using Infrastructure.Services.Hangfires;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Mail;
 using Infrastructure.Services.Token;
@@ -89,31 +88,10 @@ public static class DependencyInjection
             )
             .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
             .AddJwtAuth(configuration)
-            .AddMemoryCache();
-
-        RedisDatabaseSettings databaseSettings =
-            configuration.GetSection(nameof(RedisDatabaseSettings)).Get<RedisDatabaseSettings>()
-            ?? new();
-
-        ElasticsearchSettings elasticsearchSettings =
-            configuration.GetSection(nameof(ElasticsearchSettings)).Get<ElasticsearchSettings>()
-            ?? new();
-
-        if (databaseSettings.IsEnbaled)
-        {
-            services
-                .AddRedis(configuration)
-                .AddSingleton<IRedisCacheService, RedisCacheService>()
-                .AddSingleton<IQueueService, QueueService>();
-        }
-
-        if (elasticsearchSettings.IsEnbaled)
-        {
-            services
-                .AddElasticSearch(configuration)
-                .AddHostedService<ElasticsearchIndexBackgoundService>()
-                .AddSingleton<IElasticsearchServiceFactory, ElasticsearchServiceFactory>();
-        }
+            .AddMemoryCache()
+            .AddRedis(configuration)
+            .AddHangfireConfiguration(configuration)
+            .AddElasticSearch(configuration);
 
         return services;
     }

@@ -3,6 +3,7 @@ using Api.Extensions;
 using Application;
 using Infrastructure;
 using Infrastructure.Data;
+using Infrastructure.Services.Hangfires;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,6 +39,8 @@ try
     var serviceProvider = scope.ServiceProvider;
     await RegionDataSeeding.SeedingAsync(serviceProvider);
     await DbInitializer.InitializeAsync(serviceProvider);
+
+    app.UseHangfireDashboard(configuration);
 
     if (app.Environment.IsDevelopment())
     {

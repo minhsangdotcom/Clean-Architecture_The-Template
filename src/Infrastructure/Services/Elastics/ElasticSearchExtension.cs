@@ -1,4 +1,5 @@
 using System.Reflection;
+using Application.Common.Interfaces.Services.Elastics;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
 using Microsoft.Extensions.Configuration;
@@ -13,30 +14,39 @@ public static class ElasticSearchExtension
         IConfiguration configuration
     )
     {
-        ElasticsearchSettings? elasticsearch = configuration
-            .GetSection(nameof(ElasticsearchSettings))
-            .Get<ElasticsearchSettings>();
+        ElasticsearchSettings elasticsearch =
+            configuration.GetSection(nameof(ElasticsearchSettings)).Get<ElasticsearchSettings>()
+            ?? new();
 
-        IEnumerable<Uri> nodes = elasticsearch!.Nodes.Select(x => new Uri(x));
-        var pool = new StaticNodePool(nodes);
-        string? userName = elasticsearch.Username;
-        string? password = elasticsearch.Password;
-
-        var settings = new ElasticsearchClientSettings(pool).DefaultIndex(elasticsearch.DefaultIndex!);
-
-        if (!string.IsNullOrWhiteSpace(userName) && !string.IsNullOrWhiteSpace(password))
+        if (elasticsearch.IsEnbaled)
         {
-            settings.Authentication(new BasicAuthentication(userName, password));
-        }
+            IEnumerable<Uri> nodes = elasticsearch!.Nodes.Select(x => new Uri(x));
+            var pool = new StaticNodePool(nodes);
+            string? userName = elasticsearch.Username;
+            string? password = elasticsearch.Password;
 
-        IEnumerable<ElasticConfigureResult> elkConfigbuilder =
-            ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
-                Assembly.GetExecutingAssembly()
+            var settings = new ElasticsearchClientSettings(pool).DefaultIndex(
+                elasticsearch.DefaultIndex!
             );
-        ElasticsearchRegisterHelper.ConfigureConnectionSettings(ref settings, elkConfigbuilder);
 
-        var client = new ElasticsearchClient(settings);
-        services.AddSingleton(client);
+            if (!string.IsNullOrWhiteSpace(userName) && !string.IsNullOrWhiteSpace(password))
+            {
+                settings.Authentication(new BasicAuthentication(userName, password));
+            }
+
+            IEnumerable<ElasticConfigureResult> elkConfigbuilder =
+                ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
+                    Assembly.GetExecutingAssembly()
+                );
+            ElasticsearchRegisterHelper.ConfigureConnectionSettings(ref settings, elkConfigbuilder);
+
+            var client = new ElasticsearchClient(settings);
+
+            services
+                .AddSingleton(client)
+                .AddHostedService<ElasticsearchIndexBackgoundService>()
+                .AddSingleton<IElasticsearchServiceFactory, ElasticsearchServiceFactory>();
+        }
 
         return services;
     }
