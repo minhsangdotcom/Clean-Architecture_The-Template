@@ -21,6 +21,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using Npgsql;
 
 namespace Infrastructure;
 
@@ -51,7 +52,11 @@ public static class DependencyInjection
                         IOptions<DatabaseSettings>
                     >().Value;
                     options
-                        .UseNpgsql(settings.DatabaseConnection)
+                        .UseNpgsql(
+                            new NpgsqlDataSourceBuilder(settings.DatabaseConnection)
+                                .EnableDynamicJson()
+                                .Build()
+                        )
                         .AddInterceptors(
                             sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
                             sp.GetRequiredService<DispatchDomainEventInterceptor>()
