@@ -1,6 +1,8 @@
 using Application.Common.Security;
+using Application.UseCases.Projections.Regions;
 using Contracts.Dtos.Models;
 using Domain.Aggregates.Users.Enums;
+
 namespace Application.UseCases.Projections.Users;
 
 public class UserProjection : BaseResponse
@@ -19,7 +21,11 @@ public class UserProjection : BaseResponse
 
     public Gender? Gender { get; set; }
 
-    public string? Address { get; set; }
+    public ProvinceProjection? Province { get; set; }
+
+    public DistrictProjection? District { get; set; }
+
+    public CommuneProjection? Commune { get; set; }
 
     [File]
     public string? Avatar { get; set; }

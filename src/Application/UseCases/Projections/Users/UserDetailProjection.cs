@@ -10,10 +10,4 @@ public class UserDetailProjection : UserProjection
     public IEnumerable<UserClaimDetailProjection>? Claims { get; set; }
 
     public string? Street { get; set; }
-
-    public ProvinceProjection? Province { get; set; }
-
-    public DistrictProjection? District { get; set; }
-
-    public CommuneProjection? Commune { get; set; }
 }
