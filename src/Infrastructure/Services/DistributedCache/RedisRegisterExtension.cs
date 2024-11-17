@@ -10,14 +10,9 @@ public static class RedisRegisterExtension
         IConfiguration configuration
     )
     {
-        RedisDatabaseSettings? databaseSettings = configuration
-            .GetSection(nameof(RedisDatabaseSettings))
-            .Get<RedisDatabaseSettings>();
-
         services.Configure<RedisDatabaseSettings>(options =>
             configuration.GetSection(nameof(RedisDatabaseSettings)).Bind(options)
         );
-
         services.AddHostedService<QueueBackgroundService>();
 
         return services;

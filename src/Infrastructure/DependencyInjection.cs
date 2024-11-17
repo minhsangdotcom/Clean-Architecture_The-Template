@@ -1,5 +1,7 @@
 using Application.Common.Interfaces.Registers;
 using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.DistributedCache;
+using Application.Common.Interfaces.Services.Elastics;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -70,10 +72,31 @@ public static class DependencyInjection
             )
             .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
             .AddJwtAuth(configuration)
-            .AddElasticSearch(configuration)
-            .AddHostedService<ElasticsearchIndexBackgoundService>()
-            .AddMemoryCache()
-            .AddRedis(configuration);
+            .AddMemoryCache();
+
+        RedisDatabaseSettings databaseSettings =
+            configuration.GetSection(nameof(RedisDatabaseSettings)).Get<RedisDatabaseSettings>()
+            ?? new();
+
+        ElasticsearchSettings elasticsearchSettings =
+            configuration.GetSection(nameof(ElasticsearchSettings)).Get<ElasticsearchSettings>()
+            ?? new();
+
+        if (databaseSettings.IsEnbaled)
+        {
+            services
+                .AddRedis(configuration)
+                .AddSingleton<IRedisCacheService, RedisCacheService>()
+                .AddSingleton<IQueueService, QueueService>();
+        }
+
+        if (elasticsearchSettings.IsEnbaled)
+        {
+            services
+                .AddElasticSearch(configuration)
+                .AddHostedService<ElasticsearchIndexBackgoundService>()
+                .AddSingleton<IElasticsearchServiceFactory, ElasticsearchServiceFactory>();
+        }
 
         return services;
     }

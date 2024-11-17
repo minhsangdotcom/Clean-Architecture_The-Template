@@ -1,5 +1,4 @@
 using System.Reflection;
-using Application.Common.Interfaces.Services.Elastics;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
 using Microsoft.Extensions.Configuration;
@@ -23,7 +22,7 @@ public static class ElasticSearchExtension
         string? userName = elasticsearch.Username;
         string? password = elasticsearch.Password;
 
-        var settings = new ElasticsearchClientSettings(pool).DefaultIndex("default_index");
+        var settings = new ElasticsearchClientSettings(pool).DefaultIndex(elasticsearch.DefaultIndex!);
 
         if (!string.IsNullOrWhiteSpace(userName) && !string.IsNullOrWhiteSpace(password))
         {

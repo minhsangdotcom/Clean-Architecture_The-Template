@@ -16,6 +16,7 @@ public class ElasticsearchIndexBackgoundService(
         {
             if (!(await elasticsearchClient.PingAsync(cancellationToken)).IsSuccess())
             {
+                logger.Warning("Cannot connect elasticsearch server");
                 return;
             }
 
