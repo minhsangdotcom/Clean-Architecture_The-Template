@@ -22,7 +22,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
         ApplyRules();
     }
 
-    public void ApplyRules()
+    private void ApplyRules()
     {
         _ = Ulid.TryParse(accessorService.Id, out Ulid id);
 

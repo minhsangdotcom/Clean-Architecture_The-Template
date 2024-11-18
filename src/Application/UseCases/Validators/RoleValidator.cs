@@ -10,10 +10,20 @@ namespace Application.UseCases.Validators;
 
 public class RoleValidator : AbstractValidator<RoleModel>
 {
+    private readonly IRoleManagerService roleManagerService;
+    private readonly IActionAccessorService actionAccessorService;
+
     public RoleValidator(
         IRoleManagerService roleManagerService,
         IActionAccessorService actionAccessorService
     )
+    {
+        this.roleManagerService = roleManagerService;
+        this.actionAccessorService = actionAccessorService;
+        ApplyRules();
+    }
+
+    private void ApplyRules()
     {
         _ = Ulid.TryParse(actionAccessorService.Id, out Ulid id);
 
@@ -36,8 +46,8 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     .Build()
             )
             .MustAsync(
-                (name, CancellationToken) =>
-                    IsExistedNameAsync(roleManagerService, name, CancellationToken)
+                (name, cancellationToken) =>
+                    IsExistedNameAsync(name, cancellationToken: cancellationToken)
             )
             .When(
                 _ => actionAccessorService.GetHttpMethod() == HttpMethod.Post.ToString(),
@@ -50,10 +60,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     .Message(MessageType.Existence)
                     .Build()
             )
-            .MustAsync(
-                (name, CancellationToken) =>
-                    IsExistedNameAsync(roleManagerService, name, CancellationToken, id)
-            )
+            .MustAsync((name, cancellationToken) => IsExistedNameAsync(name, id, cancellationToken))
             .When(
                 _ => actionAccessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
                 ApplyConditionTo.CurrentValidator
@@ -101,9 +108,8 @@ public class RoleValidator : AbstractValidator<RoleModel>
 
                 RuleFor(x => x.Claims)
                     .MustAsync(
-                        (roleClaim, CancellationToken) =>
+                        (roleClaim, _) =>
                             IsExistClaimAsync(
-                                roleManagerService,
                                 id,
                                 roleClaim!
                                     .Where(x => x.Id == null)
@@ -128,11 +134,10 @@ public class RoleValidator : AbstractValidator<RoleModel>
         );
     }
 
-    private static async Task<bool> IsExistedNameAsync(
-        IRoleManagerService roleManagerService,
+    private async Task<bool> IsExistedNameAsync(
         string name,
-        CancellationToken cancellationToken,
-        Ulid? id = null
+        Ulid? id = null,
+        CancellationToken cancellationToken = default
     )
     {
         return !await roleManagerService.Roles.AnyAsync(
@@ -143,8 +148,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
         );
     }
 
-    public static async Task<bool> IsExistClaimAsync(
-        IRoleManagerService roleManagerService,
+    private async Task<bool> IsExistClaimAsync(
         Ulid id,
         IEnumerable<KeyValuePair<string, string>> roleClaims
     ) => !await roleManagerService.HasClaimInRoleAsync(id, roleClaims);
