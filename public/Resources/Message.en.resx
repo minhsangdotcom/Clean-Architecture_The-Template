@@ -265,4 +265,20 @@
     <value>Filter value</value>
     <comment> </comment>
   </data>
+  <data name="ProvinceId" xml:space="preserve">
+    <value>Province</value>
+    <comment> </comment>
+  </data>
+  <data name="DistrictId" xml:space="preserve">
+    <value>District</value>
+    <comment> </comment>
+  </data>
+  <data name="CommuneId" xml:space="preserve">
+    <value>Commune</value>
+    <comment> </comment>
+  </data>
+  <data name="Street" xml:space="preserve">
+    <value>Street</value>
+    <comment> </comment>
+  </data>
 </root>

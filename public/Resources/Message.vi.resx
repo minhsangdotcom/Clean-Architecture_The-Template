@@ -265,4 +265,20 @@
     <value>Giá trị bộ lọc</value>
     <comment>    </comment>
   </data>
+  <data name="ProvinceId" xml:space="preserve">
+    <value>Tỉnh hoặc thành phố</value>
+    <comment>   </comment>
+  </data>
+  <data name="DistrictId" xml:space="preserve">
+    <value>Quận huyện</value>
+    <comment> </comment>
+  </data>
+  <data name="CommuneId" xml:space="preserve">
+    <value>Phường xã</value>
+    <comment>  </comment>
+  </data>
+  <data name="Street" xml:space="preserve">
+    <value>Tên đường</value>
+    <comment> </comment>
+  </data>
 </root>
