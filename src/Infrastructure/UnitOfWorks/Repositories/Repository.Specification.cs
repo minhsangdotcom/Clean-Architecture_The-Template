@@ -152,7 +152,7 @@ public partial class Repository<T> : IRepository<T>
                     queryParam.Cursor?.Before,
                     queryParam.Cursor?.After,
                     queryParam.PageSize,
-                    queryParam.Sort,
+                    GetDefaultSort(queryParam.Sort),
                     uniqueSort ?? nameof(BaseEntity.Id)
                 )
             );
@@ -176,7 +176,7 @@ public partial class Repository<T> : IRepository<T>
                     queryParam.Cursor?.Before,
                     queryParam.Cursor?.After,
                     queryParam.PageSize,
-                    queryParam.Sort,
+                    GetDefaultSort(queryParam.Sort),
                     uniqueSort ?? nameof(BaseEntity.Id)
                 )
             );
@@ -186,9 +186,12 @@ public partial class Repository<T> : IRepository<T>
 
     private static string GetSort(string? sort)
     {
-        string defaultSort = string.IsNullOrWhiteSpace(sort)
-            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
-            : sort.Trim();
+        string defaultSort = GetDefaultSort(sort);
         return $"{defaultSort},{nameof(BaseEntity.Id)}";
     }
+
+    private static string GetDefaultSort(string? sort) =>
+        string.IsNullOrWhiteSpace(sort)
+            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
+            : sort.Trim();
 }
