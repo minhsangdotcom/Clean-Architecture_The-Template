@@ -1,7 +1,6 @@
 using System.Text.RegularExpressions;
-using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.UseCases.Validators;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Users;
@@ -12,13 +11,23 @@ namespace Application.UseCases.Users.Commands.Create;
 
 public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 {
+    private readonly IUnitOfWork unitOfWork;
+    private readonly IActionAccessorService accessorService;
+
     public CreateUserCommandValidator(
         IUnitOfWork unitOfWork,
         IActionAccessorService accessorService
     )
     {
-        Include(new UserValidator(unitOfWork, accessorService));
+        this.unitOfWork = unitOfWork;
+        this.accessorService = accessorService;
 
+        ApplyRules();
+    }
+
+    private void ApplyRules()
+    {
+        Include(new UserValidator(unitOfWork, accessorService));
         RuleFor(x => x.UserName)
             .NotEmpty()
             .WithState(x =>
@@ -44,9 +53,9 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     .Negative()
                     .Build()
             )
-            .MustAsync((userName, _) => IsExistedUsername(unitOfWork, userName!))
+            .MustAsync((userName, cancellationToken) => IsExistedUsername(userName!, cancellationToken: cancellationToken))
             .WithState(x =>
-                 Messager
+                Messager
                     .Create<User>()
                     .Property(x => x.UserName)
                     .Message(MessageType.Existence)
@@ -136,7 +145,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     .Negative()
                     .Build()
             );
-    
+
         When(
             x => x.Claims != null,
             () =>
@@ -162,19 +171,25 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
         );
     }
 
+    private async Task<bool> IsExistedUsername(
+        string userName,
+        Ulid? id = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return !await unitOfWork
+            .Repository<User>()
+            .AnyAsync(
+                x =>
+                    (!id.HasValue && EF.Functions.ILike(x.UserName, userName))
+                    || (x.Id != id && EF.Functions.ILike(x.UserName, userName)),
+                cancellationToken
+            );
+    }
+
     [GeneratedRegex(@"^[a-zA-Z0-9_.]+$")]
     private static partial Regex UserNamValidationRegex();
 
     [GeneratedRegex(@"^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{7,})\S$")]
     private static partial Regex PassowrdValidationRegex();
-
-    private static async Task<bool> IsExistedUsername(IUnitOfWork unitOfWork, string userName, Ulid? id = null)
-    {
-        return !await unitOfWork
-            .Repository<User>()
-            .AnyAsync(x =>
-                (!id.HasValue && EF.Functions.ILike(x.UserName, userName))
-                || (x.Id != id && EF.Functions.ILike(x.UserName, userName))
-            );
-    } 
 }
