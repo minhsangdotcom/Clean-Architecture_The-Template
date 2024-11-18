@@ -1,9 +1,10 @@
 using Application.Common.Exceptions;
-using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
 using Contracts.Common.Messages;
+using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
@@ -16,10 +17,10 @@ public class UpdateUserProfileHandler(
     ICurrentUser currentUser,
     IMapper mapper,
     IMediaUpdateService<User> avatarUpdate
-) : IRequestHandler<UpdateUserProfileQuery, UpdateUserProfileResponse>
+) : IRequestHandler<UpdateUserProfileCommand, UpdateUserProfileResponse>
 {
     public async ValueTask<UpdateUserProfileResponse> Handle(
-        UpdateUserProfileQuery command,
+        UpdateUserProfileCommand command,
         CancellationToken cancellationToken
     )
     {
@@ -38,6 +39,22 @@ public class UpdateUserProfileHandler(
         string? oldAvatar = user.Avatar;
 
         mapper.Map(command, user);
+
+        Province? province = await unitOfWork
+            .Repository<Province>()
+            .FindByIdAsync(command.ProvinceId, cancellationToken);
+        District? district = await unitOfWork
+            .Repository<District>()
+            .FindByIdAsync(command.DistrictId, cancellationToken);
+
+        Commune? commune = null;
+        if (command.CommuneId.HasValue)
+        {
+            commune = await unitOfWork
+                .Repository<Commune>()
+                .FindByIdAsync(command.CommuneId.Value, cancellationToken);
+        }
+        user.UpdateAddress(new(province!, district!, commune, command.Street!));
 
         string? key = avatarUpdate.GetKey(avatar);
         user.Avatar = await avatarUpdate.UploadAvatarAsync(avatar, key);

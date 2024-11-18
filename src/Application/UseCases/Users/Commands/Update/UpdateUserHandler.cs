@@ -40,7 +40,7 @@ public class UpdateUserHandler(
 
         mapper.Map(command.User, user);
 
-         Province? province = await unitOfWork
+        Province? province = await unitOfWork
             .Repository<Province>()
             .FindByIdAsync(command.User.ProvinceId, cancellationToken);
         District? district = await unitOfWork

@@ -3,4 +3,4 @@ using Mediator;
 
 namespace Application.UseCases.Users.Commands.Profiles;
 
-public class UpdateUserProfileQuery : UserModel, IRequest<UpdateUserProfileResponse>;
+public class UpdateUserProfileCommand : UserModel, IRequest<UpdateUserProfileResponse>;
