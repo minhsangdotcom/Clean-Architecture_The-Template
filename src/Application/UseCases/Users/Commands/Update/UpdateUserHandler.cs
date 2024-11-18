@@ -8,6 +8,7 @@ using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.AspNetCore.Http;
+using Domain.Aggregates.Regions;
 
 namespace Application.UseCases.Users.Commands.Update;
 
@@ -38,6 +39,22 @@ public class UpdateUserHandler(
         string? oldAvatar = user.Avatar;
 
         mapper.Map(command.User, user);
+
+         Province? province = await unitOfWork
+            .Repository<Province>()
+            .FindByIdAsync(command.User.ProvinceId, cancellationToken);
+        District? district = await unitOfWork
+            .Repository<District>()
+            .FindByIdAsync(command.User.DistrictId, cancellationToken);
+
+        Commune? commune = null;
+        if (command.User.CommuneId.HasValue)
+        {
+            commune = await unitOfWork
+                .Repository<Commune>()
+                .FindByIdAsync(command.User.CommuneId.Value, cancellationToken);
+        }
+        user.UpdateAddress(new(province!, district!, commune, command.User.Street!));
 
         string? key = avatarUpdate.GetKey(avatar);
         user.Avatar = await avatarUpdate.UploadAvatarAsync(avatar, key);
