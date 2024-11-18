@@ -1,6 +1,6 @@
-using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.UseCases.Validators;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Users;
@@ -10,11 +10,24 @@ namespace Application.UseCases.Users.Commands.Update;
 
 public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
 {
+    private readonly IUnitOfWork unitOfWork;
+    private readonly IActionAccessorService accessorService;
+    private readonly IUserManagerService userManagerService;
+
     public UpdateUserCommandValidator(
         IUnitOfWork unitOfWork,
         IActionAccessorService accessorService,
         IUserManagerService userManagerService
     )
+    {
+        this.unitOfWork = unitOfWork;
+        this.accessorService = accessorService;
+        this.userManagerService = userManagerService;
+        
+        ApplyRules();
+    }
+
+    private void ApplyRules()
     {
         _ = Ulid.TryParse(accessorService.Id, out Ulid id);
 
@@ -56,7 +69,6 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
                     .MustAsync(
                         (roleClaim, CancellationToken) =>
                             IsExistClaimAsync(
-                                userManagerService,
                                 id,
                                 roleClaim!
                                     .Where(x => x.Id == null)
@@ -77,8 +89,7 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
         );
     }
 
-    public static async Task<bool> IsExistClaimAsync(
-        IUserManagerService userManagerService,
+    public async Task<bool> IsExistClaimAsync(
         Ulid id,
         IEnumerable<KeyValuePair<string, string>> userClaims
     ) => !await userManagerService.HasClaimsInUserAsync(id, userClaims);
