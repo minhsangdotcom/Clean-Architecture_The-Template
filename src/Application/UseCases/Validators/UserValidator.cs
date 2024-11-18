@@ -3,8 +3,8 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.UseCases.Projections.Users;
 using Contracts.Common.Messages;
+using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.ValueObjects;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +12,17 @@ namespace Application.UseCases.Validators;
 
 public partial class UserValidator : AbstractValidator<UserModel>
 {
+    private readonly IUnitOfWork unitOfWork;
+    private readonly IActionAccessorService accessorService;
+
     public UserValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
+    {
+        this.unitOfWork = unitOfWork;
+        this.accessorService = accessorService;
+        ApplyRules();
+    }
+
+    public void ApplyRules()
     {
         _ = Ulid.TryParse(accessorService.Id, out Ulid id);
 
@@ -77,7 +87,9 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Negative()
                     .Build()
             )
-            .MustAsync((email, _) => IsExistedEmail(unitOfWork, email!, id))
+            .MustAsync(
+                (email, cancellationToken) => IsEmailAvailableAsync(email!, id, cancellationToken)
+            )
             .When(_ => accessorService.GetHttpMethod() == HttpMethod.Put.ToString())
             .WithState(x =>
                 Messager
@@ -86,7 +98,10 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Message(MessageType.Existence)
                     .Build()
             )
-            .MustAsync((email, _) => IsExistedEmail(unitOfWork, email!))
+            .MustAsync(
+                (email, cancellationToken) =>
+                    IsEmailAvailableAsync(email!, cancellationToken: cancellationToken)
+            )
             .When(_ => accessorService.GetHttpMethod() == HttpMethod.Post.ToString())
             .WithState(x =>
                 Messager
@@ -125,8 +140,17 @@ public partial class UserValidator : AbstractValidator<UserModel>
             .WithState(x =>
                 Messager
                     .Create<User>()
-                    .Property(nameof(UserModel.ProvinceId))
+                    .Property(nameof(x.ProvinceId))
                     .Message(MessageType.Null)
+                    .Negative()
+                    .Build()
+            )
+            .MustAsync(IsProvinceAvailableAsync)
+            .WithState(x =>
+                Messager
+                    .Create<User>()
+                    .Property(nameof(x.ProvinceId))
+                    .Message(MessageType.Existence)
                     .Negative()
                     .Build()
             );
@@ -138,6 +162,27 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Create<User>()
                     .Property(nameof(UserModel.DistrictId))
                     .Message(MessageType.Null)
+                    .Negative()
+                    .Build()
+            )
+            .MustAsync(IsDistrictAvailableAsync)
+            .WithState(x =>
+                Messager
+                    .Create<User>()
+                    .Property(nameof(x.DistrictId))
+                    .Message(MessageType.Existence)
+                    .Negative()
+                    .Build()
+            );
+
+        RuleFor(x => x.CommuneId)
+            .MustAsync((communeId, cancellationToken) => IsCommuneAvailableAsync(communeId!.Value, cancellationToken))
+            .When(x => x.CommuneId != null, ApplyConditionTo.CurrentValidator)
+            .WithState(x =>
+                Messager
+                    .Create<User>()
+                    .Property(nameof(x.CommuneId))
+                    .Message(MessageType.Existence)
                     .Negative()
                     .Build()
             );
@@ -154,23 +199,47 @@ public partial class UserValidator : AbstractValidator<UserModel>
             );
     }
 
+    private async Task<bool> IsEmailAvailableAsync(
+        string email,
+        Ulid? id = null,
+        CancellationToken cancellationToken = default
+    ) =>
+        !await unitOfWork
+            .Repository<User>()
+            .AnyAsync(
+                x =>
+                    (!id.HasValue && EF.Functions.ILike(x.Email, email))
+                    || (x.Id != id && EF.Functions.ILike(x.Email, email)),
+                cancellationToken
+            );
+
+    private async Task<bool> IsProvinceAvailableAsync(
+        Ulid provinceId,
+        CancellationToken cancellationToken
+    ) =>
+        await unitOfWork
+            .Repository<Province>()
+            .AnyAsync(x => x.Id == provinceId, cancellationToken);
+
+    private async Task<bool> IsDistrictAvailableAsync(
+        Ulid districtId,
+        CancellationToken cancellationToken
+    ) =>
+        await unitOfWork
+            .Repository<District>()
+            .AnyAsync(x => x.Id == districtId, cancellationToken);
+
+    private async Task<bool> IsCommuneAvailableAsync(
+        Ulid communeId,
+        CancellationToken cancellationToken
+    ) =>
+        await unitOfWork
+            .Repository<Commune>()
+            .AnyAsync(x => x.Id == communeId, cancellationToken);
+
     [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
     private static partial Regex EmailValidationRegex();
 
     [GeneratedRegex(@"^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$")]
     private static partial Regex VietnamesePhoneValidationRegex();
-
-    private static async Task<bool> IsExistedEmail(
-        IUnitOfWork unitOfWork,
-        string email,
-        Ulid? id = null
-    )
-    {
-        return !await unitOfWork
-            .Repository<User>()
-            .AnyAsync(x =>
-                (!id.HasValue && EF.Functions.ILike(x.Email, email))
-                || (x.Id != id && EF.Functions.ILike(x.Email, email))
-            );
-    }
 }
