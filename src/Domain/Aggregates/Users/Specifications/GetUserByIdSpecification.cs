@@ -12,6 +12,7 @@ public class GetUserByIdSpecification : Specification<User>
             .ThenInclude(x => x.Role)
             .ThenInclude(x => x!.RoleClaims)
             .Include(x => x.UserClaims)
+            .AsSplitQuery()
             .AsNoTracking();
     }
 }
