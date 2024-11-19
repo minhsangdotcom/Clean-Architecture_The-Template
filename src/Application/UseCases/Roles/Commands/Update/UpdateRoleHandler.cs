@@ -1,9 +1,9 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
+using Application.UseCases.Projections.Roles;
 using AutoMapper;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Roles;
-using Domain.Aggregates.Users;
 using Mediator;
 
 namespace Application.UseCases.Roles.Commands.Update;
@@ -17,17 +17,20 @@ public class UpdateRoleHandler(IRoleManagerService roleManagerService, IMapper m
     )
     {
         Role role =
-            await roleManagerService.FindByIdAsync(Ulid.Parse(command.RoleId))
+            await roleManagerService.GetByIdAsync(Ulid.Parse(command.RoleId))
             ?? throw new NotFoundException(
                 [Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage()]
             );
 
         mapper.Map(command.Role, role);
 
-        List<RoleClaim> roleClaims = mapper.Map<List<RoleClaim>>(command.Role.Claims) ?? [];
-        roleClaims.ForEach(x => x.RoleId = role.Id);
+        List<RoleClaimModel>? claims = command.Role.Claims;
+        if (claims?.Count > 0)
+        {
+            List<RoleClaim> roleClaims = mapper.Map<List<RoleClaim>>(claims);
+            await roleManagerService.UpdateRoleAsync(role, roleClaims);
+        }
 
-        await roleManagerService.UpdateRoleAsync(role, roleClaims);
         return mapper.Map<UpdateRoleResponse>(role);
     }
 }

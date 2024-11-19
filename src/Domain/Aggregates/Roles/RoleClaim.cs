@@ -23,7 +23,7 @@ public class RoleClaim : DefaultEntity
             return [];
         }
 
-        List<UserClaim> userClaims = [..UserClaims];
+        List<UserClaim> userClaims = (List<UserClaim>)UserClaims;
         Span<UserClaim> spans = CollectionsMarshal.AsSpan(userClaims);
 
         for (int i = 0; i < spans.Length; i++)

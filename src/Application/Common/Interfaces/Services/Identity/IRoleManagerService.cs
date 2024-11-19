@@ -20,6 +20,10 @@ public interface IRoleManagerService : IScope
 
     Task<IEnumerable<Role>> ListAsync();
 
+    // get role only
+    Task<Role?> GetByIdAsync(Ulid id);
+
+    // ger role with claims
     Task<Role?> FindByIdAsync(Ulid id);
 
     Task<Role?> FindByNameAsync(string name);

@@ -15,12 +15,12 @@ public class CreateRoleMapping : Profile
             dest.Name = src.Name!.ToUpper();
         });
 
-        CreateMap<RoleClaimModel, RoleClaim>()
-            .ForMember(dest => dest.Id, opt =>
-            {
-                opt.PreCondition(x => x.Id == Ulid.Empty);
-                opt.Ignore();
-            });
+        CreateMap<RoleClaimModel, RoleClaim>();
+            // .ForMember(dest => dest.Id, opt =>
+            // {
+            //     opt.PreCondition(x => x.Id == null);
+            //     opt.Ignore();
+            // });
 
         CreateMap<RoleClaim, RoleClaimDetailProjection>();
         CreateMap<Role, CreateRoleResponse>();
