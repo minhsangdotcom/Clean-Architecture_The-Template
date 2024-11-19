@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Domain.Aggregates.Users;
 using Domain.Common;
 
@@ -15,13 +16,21 @@ public class RoleClaim : DefaultEntity
 
     public ICollection<UserClaim>? UserClaims { get; set; } = [];
 
-    public void UpdateUserClaim()
+    public List<UserClaim> UpdateUserClaim()
     {
-        if (UserClaims?.Count == 0)
+        if (UserClaims!.Count == 0)
         {
-            return;
+            return [];
         }
 
-        UserClaims!.ToList().ForEach(x => x.ClaimValue = ClaimValue);
+        List<UserClaim> userClaims = [..UserClaims];
+        Span<UserClaim> spans = CollectionsMarshal.AsSpan(userClaims);
+
+        for (int i = 0; i < spans.Length; i++)
+        {
+            spans[i].ClaimValue = ClaimValue;
+        }
+
+        return userClaims;
     }
 }

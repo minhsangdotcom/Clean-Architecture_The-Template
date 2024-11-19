@@ -24,7 +24,7 @@ public interface IRoleManagerService : IScope
 
     Task<Role?> FindByNameAsync(string name);
 
-    Task UpdateRoleClaimAsync(Role role, IEnumerable<RoleClaim> roleClaims);
+    Task UpdateRoleClaimAsync(IEnumerable<RoleClaim> roleClaims, Role role);
 
     Task AddClaimsToRoleAsync(Role role, IEnumerable<KeyValuePair<string, string>> claims);
 
