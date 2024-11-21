@@ -1,7 +1,9 @@
 using Application.Common.Exceptions;
+using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Common.ServiceEvents;
 using Contracts.Common.Messages;
+using Contracts.Dtos.Models;
+using Contracts.Dtos.Requests;
 using Contracts.Extensions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
@@ -12,8 +14,8 @@ namespace Application.UseCases.Users.Commands.RequestResetPassword;
 
 public class RequestResetUserPasswordHandler(
     IUnitOfWork unitOfWork,
-    IPublisher mediator,
-    IConfiguration configuration
+    IConfiguration configuration,
+    IMailer mailer
 ) : IRequestHandler<RequestResetUserPasswordCommand>
 {
     public async ValueTask<Unit> Handle(
@@ -56,10 +58,20 @@ public class RequestResetUserPasswordHandler(
         var link = new UriBuilder(domain) { Query = $"token={token}&id={user.Id}" };
         string expiry = expiredTime.ToLocalTime().ToString("dd/MM/yyyy hh:mm:ss");
 
-        await mediator.Publish(
-            new EmailSenderEvent(user.Email, link.ToString(), expiry, "ForgotPassword"),
-            cancellationToken
-        );
+        _ = await mailer
+            .Email()
+            .SendWithTemplateAsync(
+                new TemplateMailMetaData()
+                {
+                    DisplayName = "The template Reset password",
+                    Subject = "Reset password",
+                    To = [user.Email],
+                    Template = new(
+                        "ForgotPassword",
+                        new ResetPasswordModel() { ResetLink = link.ToString(), Expiry = expiry }
+                    ),
+                }
+            );
         return Unit.Value;
     }
 }
