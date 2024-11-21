@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.InteropServices;
 using Ardalis.GuardClauses;
 using Contracts.Constants;
 using Contracts.Extensions.Reflections;
@@ -41,8 +42,9 @@ public class User : AggregateRoot
 
     public ICollection<UserResetPassword>? UserResetPasswords { get; set; } = [];
 
+    // default user claim are ready to update into db
     [NotMapped]
-    public IReadOnlyList<UserClaim> DefaultUserClaims => GetUserClaims();
+    public IReadOnlyCollection<UserClaim> DefaultUserClaims { get; private set; } = [];
 
     public User(
         string firstName,
@@ -77,6 +79,36 @@ public class User : AggregateRoot
         Password = Guard.Against.NullOrWhiteSpace(password, nameof(password));
 
     public void UpdateAddress(Address address) => Address = address;
+
+    private void UpdateUserClaims()
+    {
+        Span<UserClaim> currentUserClaims = CollectionsMarshal.AsSpan(
+            UserClaims!.Where(x => x.Type == KindaUserClaimType.Default).ToList()
+        );
+        IDictionary<string, string> userClaims = GetUserClaims()
+            .ToDictionary(
+                x => $"{x.ClaimType}:{x.ClaimValue}",
+                x => $"{x.ClaimType}:{x.ClaimValue}"
+            );
+
+        for (int i = 0; i < currentUserClaims.Length; i++)
+        {
+            UserClaim currentUserClaim = currentUserClaims[i];
+
+            string? value = userClaims[
+                $"{currentUserClaim.ClaimType}:{currentUserClaim.ClaimValue}"
+            ];
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                continue;
+            }
+
+            currentUserClaim.ClaimValue = value;
+        }
+
+        DefaultUserClaims = currentUserClaims.ToArray();
+    }
 
     private List<UserClaim> GetUserClaims() =>
         [

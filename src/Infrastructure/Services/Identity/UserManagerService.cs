@@ -96,10 +96,10 @@ public class UserManagerService(
             await UpdateRolesToUserAsync(user, roleIds);
 
             // update default user claim
-            var defautClaims = userClaimsContext
-                .Where(x => x.UserId == user.Id && x.Type == KindaUserClaimType.Default)
-                .ToDictionary(x => x.ClaimType, x => x.ClaimValue);
-            await ReplaceDefaultClaimsToUserAsync(user, defautClaims);
+            // var defautClaims = userClaimsContext
+            //     .Where(x => x.UserId == user.Id && x.Type == KindaUserClaimType.Default)
+            //     .ToDictionary(x => x.ClaimType, x => x.ClaimValue);
+            // await ReplaceDefaultClaimsToUserAsync(user, defautClaims);
 
             // update custom user claim
             await UpdateClaimsToUserAsync(user, claims);
@@ -276,29 +276,6 @@ public class UserManagerService(
         // });
 
         await userClaimsContext.AddRangeAsync(claims);
-        await context.SaveChangesAsync();
-    }
-
-    //? what the fuck man
-    public async Task ReplaceDefaultClaimsToUserAsync(User user, Dictionary<string, string> claims)
-    {
-        List<UserClaim> userClaims = await userClaimsContext
-            .Where(x => x.UserId == user.Id && x.Type == KindaUserClaimType.Default)
-            .ToListAsync();
-
-        for (int i = 0; i < userClaims.Count; i++)
-        {
-            UserClaim claim = userClaims[i];
-            string? correctspondingClaim = claims.GetValueOrDefault(claim.ClaimType);
-            if (string.IsNullOrWhiteSpace(correctspondingClaim))
-            {
-                continue;
-            }
-
-            claim.ClaimValue = correctspondingClaim;
-        }
-
-        userClaimsContext.UpdateRange(userClaims);
         await context.SaveChangesAsync();
     }
 

@@ -53,11 +53,16 @@ public class CreateUserHandler(
             await unitOfWork.SaveAsync(cancellationToken);
 
             // update claim to user consist of default and custom claims
-            IEnumerable<UserClaim> allClaims = user.DefaultUserClaims.Concat(
-                mapper.Map<List<UserClaim>>(
-                    command.Claims,
-                    opt => opt.Items[nameof(UserClaimType.Type)] = KindaUserClaimType.Custom
-                )
+            // IEnumerable<UserClaim> allClaims = user.DefaultUserClaims.Concat(
+            //     mapper.Map<List<UserClaim>>(
+            //         command.Claims,
+            //         opt => opt.Items[nameof(UserClaimType.Type)] = KindaUserClaimType.Custom
+            //     )
+            // );
+
+            IEnumerable<UserClaim> allClaims = mapper.Map<List<UserClaim>>(
+                command.Claims,
+                opt => opt.Items[nameof(UserClaimType.Type)] = KindaUserClaimType.Custom
             );
 
             await userManagerService.CreateUserAsync(
