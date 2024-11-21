@@ -154,14 +154,13 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             NOT_FOUND_MESSAGE
         );
 
-        List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.AsList();
         if (
             claims.Any(x =>
-                currentRoleClaims.Exists(p => p.ClaimType == x.Key && p.ClaimValue == x.Value)
+                currentRole.RoleClaims.Any(p => p.ClaimType == x.Key && p.ClaimValue == x.Value)
             )
         )
         {
-            throw new Exception($"At least 1 element of {nameof(claims)} exists in role claims");
+            throw new Exception($"1 or more elements of {nameof(claims)} exists in role claims");
         }
 
         List<RoleClaim> roleClaims = claims
@@ -174,11 +173,11 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             .ToList();
 
         // update new user claims for users who are in role
-        var users = currentRole.UserRoles;
+        ICollection<UserRole> users = currentRole.UserRoles;
         List<UserClaim> userClaims = [];
-        for (int i = 0; i < users.Count; i++)
+        foreach (UserRole user in users)
         {
-            Ulid userId = users.ElementAt(i).UserId;
+            Ulid userId = user.UserId;
             IEnumerable<UserClaim> additionUserClaims = roleClaims.Select(
                 roleClaim => new UserClaim()
                 {
@@ -207,27 +206,19 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
 
         Role currentRole = Guard.Against.NotFound(
             $"{role.Id}",
-            // await roleContext
-            //     .Where(x => x.Id == role.Id)
-            //     .Include(x => x.RoleClaims)
-            //     .ThenInclude(x => x.UserClaims)
-            //     .FirstOrDefaultAsync(),
             await FindByIdAsync(role.Id),
             NOT_FOUND_MESSAGE
         );
 
         List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.AsList();
-
         if (claimIds.Any(x => !currentRoleClaims.Exists(p => p.Id == x)))
         {
             throw new Exception($"{nameof(claimIds)} is not existed in role {nameof(role.Id)}.");
         }
 
         IEnumerable<RoleClaim> roleClaims = currentRoleClaims.FindAll(x => claimIds.Contains(x.Id));
-        //IEnumerable<UserClaim> userClaims = roleClaims.SelectMany(x => x.UserClaims!);
 
         roleClaimContext.RemoveRange(roleClaims);
-        //UserClaimsContext.RemoveRange(userClaims);
         await context.SaveChangesAsync();
     }
 
