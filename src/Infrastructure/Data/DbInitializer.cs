@@ -70,7 +70,7 @@ public class DbInitializer
                 await userManagerService.CreateUserAsync(
                     user,
                     [roles[new Random().Next(0, 2)].Id],
-                    user.GetUserClaims(),
+                    user.DefaultUserClaims,
                     unitOfWork.Transaction
                 );
             }
