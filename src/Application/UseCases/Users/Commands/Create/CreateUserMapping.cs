@@ -1,7 +1,5 @@
-using Application.UseCases.Projections.Roles;
 using Application.UseCases.Projections.Users;
 using AutoMapper;
-using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 
@@ -12,19 +10,38 @@ public class CreateUserMapping : Profile
     public CreateUserMapping()
     {
         CreateMap<CreateUserCommand, User>()
-            .AfterMap((src, dest) =>
-            {
-                dest.SetPassword(HashPassword(src.Password));
-            });
-
-        CreateMap<UserClaimModel, UserClaimType>()
-            .AfterMap((src, dest, context) =>
-            {
-                if (Enum.TryParse(context.Items[nameof(UserClaimType.Type)]?.ToString(), out KindaUserClaimType type))
+            .AfterMap(
+                (src, dest) =>
                 {
-                    dest.Type = type;
+                    dest.SetPassword(HashPassword(src.Password));
                 }
-            });
+            );
+
+        CreateMap<UserClaimModel, UserClaim>()
+            .AfterMap(
+                (src, dest, context) =>
+                {
+                    if (
+                        Enum.TryParse(
+                            context.Items[nameof(UserClaim.Type)]?.ToString(),
+                            out KindaUserClaimType type
+                        )
+                    )
+                    {
+                        dest.Type = type;
+                    }
+
+                    if (
+                        Enum.TryParse(
+                            context.Items[nameof(UserClaim.UserId)]?.ToString(),
+                            out Ulid id
+                        )
+                    )
+                    {
+                        dest.UserId = id;
+                    }
+                }
+            );
 
         CreateMap<User, CreateUserResponse>();
     }

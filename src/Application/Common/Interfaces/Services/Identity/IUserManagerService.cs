@@ -17,30 +17,32 @@ public interface IUserManagerService : IScope
     Task CreateUserAsync(
         User user,
         IEnumerable<Ulid> roleIds,
-        IEnumerable<UserClaimType> claims,
+        IEnumerable<UserClaim>? claims,
         DbTransaction? transaction = null
     );
 
     Task UpdateUserAsync(
         User user,
-        IEnumerable<Ulid> roleIds,
-        IEnumerable<UserClaimType> claims,
+        IEnumerable<Ulid>? roleIds,
+        IEnumerable<UserClaim>? claims,
         DbTransaction? transaction = null
     );
 
-    Task AddRoleToUserAsync(User user, List<Ulid> roleIds);
+    Task AddRoleToUserAsync(User user, IEnumerable<Ulid> roleIds);
 
     Task UpdateRolesToUserAsync(User user, IEnumerable<Ulid>? roleIds);
 
     Task RemoveRoleFromUserAsync(User user, IEnumerable<Ulid> roleIds);
 
-    Task AddClaimsToUserAsync(User user, IEnumerable<UserClaimType> claims);
+    Task AddClaimsToUserAsync(User user, IEnumerable<UserClaim> claims);
 
-    Task UpdateClaimsToUserAsync(User user, IEnumerable<UserClaimType> claims);
+    Task UpdateClaimsToUserAsync(User user, IEnumerable<UserClaim> claims);
 
     Task ReplaceDefaultClaimsToUserAsync(User user, Dictionary<string, string> claims);
 
     Task RemoveClaimsToUserAsync(User user, IEnumerable<Ulid> claimIds);
+
+    Task RemoveClaimsToUserAsync(User user, IEnumerable<UserClaim> claims);
 
     Task<IEnumerable<Role>> GetRolesInUser(Ulid userId);
 

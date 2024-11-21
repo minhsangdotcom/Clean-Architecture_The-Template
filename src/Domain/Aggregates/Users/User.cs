@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using Ardalis.GuardClauses;
 using Contracts.Constants;
 using Contracts.Extensions.Reflections;
@@ -40,6 +41,9 @@ public class User : AggregateRoot
 
     public ICollection<UserResetPassword>? UserResetPasswords { get; set; } = [];
 
+    [NotMapped]
+    public IReadOnlyList<UserClaim> DefaultUserClaims => GetUserClaims();
+
     public User(
         string firstName,
         string lastName,
@@ -74,47 +78,56 @@ public class User : AggregateRoot
 
     public void UpdateAddress(Address address) => Address = address;
 
-    public void AddUserClaim(IEnumerable<UserClaim> userClaims)
-    {
-        Guard.Against.NullOrEmpty(userClaims, nameof(userClaims));
-        Guard.Against.InvalidInput(
-            userClaims,
-            nameof(userClaims),
-            userClaims =>
-                userClaims.DistinctBy(x => new { x.ClaimType, x.ClaimValue }).Count()
-                != userClaims.Count(),
-            $"{nameof(userClaims)} is duplicated"
-        );
-
-        Enumerable.ToList(UserClaims!).AddRange(userClaims);
-    }
-
-    public IEnumerable<UserClaimType> GetUserClaims() =>
+    private List<UserClaim> GetUserClaims() =>
         [
             new()
             {
                 ClaimType = ClaimTypes.GivenName,
                 ClaimValue = this.GetValue(x => x.FirstName!),
+                UserId = Id,
             },
             new()
             {
                 ClaimType = ClaimTypes.FamilyName,
                 ClaimValue = this.GetValue(x => x.LastName!),
+                UserId = Id,
             },
             new()
             {
                 ClaimType = ClaimTypes.PreferredUsername,
                 ClaimValue = this.GetValue(x => x.UserName!),
+                UserId = Id,
             },
             new()
             {
                 ClaimType = ClaimTypes.BirthDate,
                 ClaimValue = this.GetValue(x => x.DayOfBirth!),
+                UserId = Id,
             },
-            new() { ClaimType = ClaimTypes.Address, ClaimValue = this.GetValue(x => x.Address!) },
-            new() { ClaimType = ClaimTypes.Picture, ClaimValue = this.GetValue(x => x.Avatar!) },
-            new() { ClaimType = ClaimTypes.Gender, ClaimValue = this.GetValue(x => x.Gender!) },
-            new() { ClaimType = ClaimTypes.Email, ClaimValue = this.GetValue(x => x.Email!) },
+            new()
+            {
+                ClaimType = ClaimTypes.Address,
+                ClaimValue = this.GetValue(x => x.Address!),
+                UserId = Id,
+            },
+            new()
+            {
+                ClaimType = ClaimTypes.Picture,
+                ClaimValue = this.GetValue(x => x.Avatar!),
+                UserId = Id,
+            },
+            new()
+            {
+                ClaimType = ClaimTypes.Gender,
+                ClaimValue = this.GetValue(x => x.Gender!),
+                UserId = Id,
+            },
+            new()
+            {
+                ClaimType = ClaimTypes.Email,
+                ClaimValue = this.GetValue(x => x.Email!),
+                UserId = Id,
+            },
         ];
 
     protected override bool TryApplyDomainEvent(INotification domainEvent)

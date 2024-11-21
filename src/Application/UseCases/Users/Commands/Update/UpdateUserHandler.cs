@@ -69,9 +69,12 @@ public class UpdateUserHandler(
             await userManagerService.UpdateUserAsync(
                 user,
                 command.User.RoleIds!,
-                mapper.Map<List<UserClaimType>>(
+                mapper.Map<IEnumerable<UserClaim>>(
                     command.User.Claims,
-                    opt => opt.Items[nameof(UserClaimType.Type)] = KindaUserClaimType.Custom
+                    opt => {
+                        opt.Items[nameof(UserClaim.Type)] = KindaUserClaimType.Custom;
+                        opt.Items[nameof(UserClaim.UserId)] = user.Id;
+                    }
                 ),
                 unitOfWork.Transaction
             );
