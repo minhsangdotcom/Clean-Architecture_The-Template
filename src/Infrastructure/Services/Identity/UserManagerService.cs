@@ -279,6 +279,12 @@ public class UserManagerService(
         await context.SaveChangesAsync();
     }
 
+    public async Task ReplaceDefaultClaimsToUserAsync(IEnumerable<UserClaim> defaultUserClaims)
+    {
+        userClaimsContext.UpdateRange(defaultUserClaims);
+        await context.SaveChangesAsync();
+    }
+
     public async Task UpdateClaimsToUserAsync(User user, IEnumerable<UserClaim>? claims)
     {
         if (claims == null || !claims.Any())

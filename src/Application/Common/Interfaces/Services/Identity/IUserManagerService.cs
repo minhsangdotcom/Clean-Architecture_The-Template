@@ -38,6 +38,8 @@ public interface IUserManagerService : IScope
 
     Task UpdateClaimsToUserAsync(User user, IEnumerable<UserClaim> claims);
 
+    Task ReplaceDefaultClaimsToUserAsync(IEnumerable<UserClaim> defaultUserClaims);
+
     Task RemoveClaimsToUserAsync(User user, IEnumerable<Ulid> claimIds);
 
     Task RemoveClaimsToUserAsync(User user, IEnumerable<UserClaim> claims);
