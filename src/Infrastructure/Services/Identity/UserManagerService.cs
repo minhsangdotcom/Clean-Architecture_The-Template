@@ -32,7 +32,7 @@ public class UserManagerService(
     public async Task CreateUserAsync(
         User user,
         IEnumerable<Ulid> roleIds,
-        IEnumerable<UserClaim>? claims,
+        IEnumerable<UserClaim>? claims = null,
         DbTransaction? transaction = null
     )
     {
@@ -77,7 +77,7 @@ public class UserManagerService(
     public async Task UpdateUserAsync(
         User user,
         IEnumerable<Ulid>? roleIds,
-        IEnumerable<UserClaim>? claims,
+        IEnumerable<UserClaim>? claims = null,
         DbTransaction? transaction = null
     )
     {
@@ -141,19 +141,26 @@ public class UserManagerService(
             .FirstOrDefaultAsync();
 
         Guard.Against.NotFound($"{user.Id}", currentUser, nameof(user));
+        List<Ulid> rolesToProcess = roleIds.AsList();
 
-        if (await roleContext.CountAsync(x => roleIds.Contains(x.Id)) != roleIds.Count())
+        if (
+            await roleContext.CountAsync(x => rolesToProcess.Contains(x.Id)) != rolesToProcess.Count
+        )
         {
             throw new ArgumentException($"{nameof(roleIds)} is not found", nameof(roleIds));
         }
 
-        if (await userRoleContext.AnyAsync(x => x.UserId == user.Id && roleIds.Contains(x.RoleId)))
+        if (
+            await userRoleContext.AnyAsync(x =>
+                x.UserId == user.Id && rolesToProcess.Contains(x.RoleId)
+            )
+        )
         {
             throw new ArgumentException($"{nameof(roleIds)} is existence in user", nameof(roleIds));
         }
 
         IEnumerable<UserRole> currentUserRoles = currentUser.UserRoles!;
-        IEnumerable<Ulid> rolesToInsert = roleIds.Where(x =>
+        List<Ulid> rolesToInsert = rolesToProcess.FindAll(x =>
             !currentUserRoles.Any(p => p.RoleId == x)
         );
 

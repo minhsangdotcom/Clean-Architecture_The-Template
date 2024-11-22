@@ -61,7 +61,8 @@ public class DbInitializer
 
             await roleManagerService.CreateRangeRoleAsync(roles);
 
-            User[] users = await UserData(unitOfWork);
+            List<User> users = await UserData(unitOfWork);
+            users.ForEach(x => x.CreateDefaultUserClaims());
             await unitOfWork.Repository<User>().AddRangeAsync(users);
             await unitOfWork.SaveAsync();
 
@@ -70,8 +71,7 @@ public class DbInitializer
                 await userManagerService.CreateUserAsync(
                     user,
                     [roles[new Random().Next(0, 2)].Id],
-                    user.DefaultUserClaims,
-                    unitOfWork.Transaction
+                    transaction: unitOfWork.Transaction
                 );
             }
 
@@ -108,7 +108,7 @@ public class DbInitializer
         return new(province, district, commune);
     }
 
-    private static async Task<User[]> UserData(IUnitOfWork unitOfWork)
+    private static async Task<List<User>> UserData(IUnitOfWork unitOfWork)
     {
         string[] addresses =
         [
@@ -159,6 +159,8 @@ public class DbInitializer
             {
                 DayOfBirth = new DateTime(1990, 10, 1),
                 Status = UserStatus.Active,
+                Gender = Gender.Female,
+                Id = Credential.UserIds.CHLOE_KIM_ID,
             };
 
         RandomRegionResult johnDoeRegion = await RandomRegion(unitOfWork, sg, "760", "26743");
@@ -181,6 +183,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1985, 4, 23),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.JOHN_DOE_ID,
             };
 
         RandomRegionResult aliceSmithRegion = await RandomRegion(unitOfWork, sg, "760", "26737");
@@ -203,6 +206,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1992, 7, 19),
                 Status = UserStatus.Inactive,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.ALICE_SMITH_ID,
             };
 
         RandomRegionResult bobJohnsonRegion = await RandomRegion(unitOfWork, sg, "760", "26758");
@@ -225,6 +229,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1980, 3, 15),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.BOB_JOHNSON_ID,
             };
 
         RandomRegionResult emilyBrownRegion = await RandomRegion(unitOfWork, sg, "760", "26746");
@@ -247,6 +252,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1995, 5, 5),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.EMILY_BROWN_ID,
             };
 
         RandomRegionResult jamesWilliamsRegion = await RandomRegion(unitOfWork, sg, "771", "27163");
@@ -269,6 +275,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1983, 11, 9),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.JAMES_WILLIAMS_ID,
             };
 
         RandomRegionResult oliviaTaylorRegion = await RandomRegion(unitOfWork, sg, "771", "27172");
@@ -291,6 +298,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1998, 2, 18),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.OLIVIA_TAYLOR_ID,
             };
 
         RandomRegionResult danielLeeRegion = await RandomRegion(unitOfWork, sg, "771", "27196");
@@ -313,6 +321,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1987, 9, 21),
                 Status = UserStatus.Inactive,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.DANIEL_LEE_ID,
             };
 
         RandomRegionResult sophiaGarciaRegion = await RandomRegion(unitOfWork, sg, "771", "27166");
@@ -335,6 +344,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1994, 12, 12),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.SHOPHIA_GARCIA_ID,
             };
 
         RandomRegionResult michaelMartinezRegion = await RandomRegion(
@@ -362,6 +372,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1978, 8, 8),
                 Status = UserStatus.Inactive,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.MICHAEL_MARTINEZ_ID,
             };
 
         RandomRegionResult isabellaHarrisRegion = await RandomRegion(
@@ -389,6 +400,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1991, 1, 1),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.ISABELLA_HARRIS_ID,
             };
 
         RandomRegionResult davidClarkRegion = await RandomRegion(unitOfWork, sg, "766", "26986");
@@ -411,6 +423,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1984, 6, 6),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.DAVID_CLARK_ID,
             };
 
         RandomRegionResult emmaRodriguezRegion = await RandomRegion(unitOfWork, hn, "001", "00007");
@@ -433,6 +446,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1993, 3, 3),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.EMMA_RODRIGUEZ_ID,
             };
 
         RandomRegionResult andrewMooreRegion = await RandomRegion(unitOfWork, hn, "001", "00006");
@@ -455,6 +469,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1981, 10, 30),
                 Status = UserStatus.Inactive,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.ANDREW_MOORE_ID,
             };
 
         RandomRegionResult avaJacksonRegion = await RandomRegion(unitOfWork, hn, "001", "00025");
@@ -477,6 +492,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(2000, 4, 14),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.AVA_JACKSON_ID,
             };
 
         RandomRegionResult joshuaWhiteRegion = await RandomRegion(unitOfWork, hn, "002", "00076");
@@ -499,6 +515,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1986, 11, 17),
                 Status = UserStatus.Inactive,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.JOSHUA_WHITE_ID,
             };
 
         RandomRegionResult charlotteThomasRegion = await RandomRegion(
@@ -526,6 +543,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1997, 7, 7),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.CHARLOTTE_THOMAS_ID,
             };
 
         RandomRegionResult ethanKingRegion = await RandomRegion(unitOfWork, dn, "495", "20306");
@@ -548,6 +566,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1999, 9, 9),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.ETHAN_KING_ID,
             };
 
         RandomRegionResult abigailScottRegion = await RandomRegion(unitOfWork, dn, "495", "20314");
@@ -570,6 +589,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1989, 2, 2),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.ABIGAIL_SCOTT_ID,
             };
 
         RandomRegionResult liamPerezRegion = await RandomRegion(unitOfWork, dn, "495", "20305");
@@ -592,6 +612,7 @@ public class DbInitializer
                 DayOfBirth = new DateTime(1988, 12, 25),
                 Status = UserStatus.Inactive,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.LIAM_PEREZ_ID,
             };
 
         return

@@ -4,6 +4,7 @@ using Ardalis.GuardClauses;
 using Contracts.Constants;
 using Contracts.Extensions.Reflections;
 using Domain.Aggregates.Users.Enums;
+using Domain.Aggregates.Users.Events;
 using Domain.Aggregates.Users.ValueObjects;
 using Domain.Common;
 using Mediator;
@@ -44,7 +45,7 @@ public class User : AggregateRoot
 
     // default user claim are ready to update into db
     [NotMapped]
-    public IReadOnlyCollection<UserClaim> DefaultUserClaims { get; private set; } = [];
+    public IReadOnlyCollection<UserClaim> DefaultUserClaimsToUpdates { get; private set; } = [];
 
     public User(
         string firstName,
@@ -80,24 +81,87 @@ public class User : AggregateRoot
 
     public void UpdateAddress(Address address) => Address = address;
 
-    private void UpdateUserClaims()
+    public void UpdateDefaultUserClaims()
     {
+        Emit(new UpdateDefaultUserClaimEvent() { User = this });
+    }
+
+    public void CreateDefaultUserClaims()
+    {
+        ApplyCreateDefaultUserClaim();
+    }
+
+    private List<UserClaim> GetUserClaims(bool isCreated = false) =>
+        [
+            new()
+            {
+                ClaimType = ClaimTypes.GivenName,
+                ClaimValue = this.GetValue(x => x.FirstName!),
+                UserId = isCreated ? Ulid.Empty : Id,
+            },
+            new()
+            {
+                ClaimType = ClaimTypes.FamilyName,
+                ClaimValue = this.GetValue(x => x.LastName!),
+                UserId = isCreated ? Ulid.Empty : Id,
+            },
+            new()
+            {
+                ClaimType = ClaimTypes.PreferredUsername,
+                ClaimValue = this.GetValue(x => x.UserName!),
+                UserId = isCreated ? Ulid.Empty : Id,
+            },
+            new()
+            {
+                ClaimType = ClaimTypes.BirthDate,
+                ClaimValue = this.GetValue(x => x.DayOfBirth!),
+                UserId = isCreated ? Ulid.Empty : Id,
+            },
+            new()
+            {
+                ClaimType = ClaimTypes.Address,
+                ClaimValue = this.GetValue(x => x.Address!),
+                UserId = isCreated ? Ulid.Empty : Id,
+            },
+            new()
+            {
+                ClaimType = ClaimTypes.Picture,
+                ClaimValue = this.GetValue(x => x.Avatar!),
+                UserId = isCreated ? Ulid.Empty : Id,
+            },
+            new()
+            {
+                ClaimType = ClaimTypes.Gender,
+                ClaimValue = this.GetValue(x => x.Gender!),
+                UserId = isCreated ? Ulid.Empty : Id,
+            },
+            new()
+            {
+                ClaimType = ClaimTypes.Email,
+                ClaimValue = this.GetValue(x => x.Email!),
+                UserId = isCreated ? Ulid.Empty : Id,
+            },
+        ];
+
+    private void ApplyUpdateDefaultUserClaim()
+    {
+        if (UserClaims == null || UserClaims.Count <= 0)
+        {
+            return;
+        }
+
         Span<UserClaim> currentUserClaims = CollectionsMarshal.AsSpan(
-            UserClaims!.Where(x => x.Type == KindaUserClaimType.Default).ToList()
+            ((List<UserClaim>)UserClaims).FindAll(x => x.Type == KindaUserClaimType.Default)
         );
+        // default claims with claim type are unique but it's difference with custom claims
         IDictionary<string, string> userClaims = GetUserClaims()
-            .ToDictionary(
-                x => $"{x.ClaimType}:{x.ClaimValue}",
-                x => $"{x.ClaimType}:{x.ClaimValue}"
-            );
+            .ToDictionary(x => x.ClaimType, x => x.ClaimValue);
 
         for (int i = 0; i < currentUserClaims.Length; i++)
         {
             UserClaim currentUserClaim = currentUserClaims[i];
 
-            string? value = userClaims[
-                $"{currentUserClaim.ClaimType}:{currentUserClaim.ClaimValue}"
-            ];
+            string? value = userClaims[currentUserClaim.ClaimType];
 
             if (string.IsNullOrWhiteSpace(value))
             {
@@ -107,63 +171,27 @@ public class User : AggregateRoot
             currentUserClaim.ClaimValue = value;
         }
 
-        DefaultUserClaims = currentUserClaims.ToArray();
+        DefaultUserClaimsToUpdates = currentUserClaims.ToArray();
     }
 
-    private List<UserClaim> GetUserClaims() =>
-        [
-            new()
-            {
-                ClaimType = ClaimTypes.GivenName,
-                ClaimValue = this.GetValue(x => x.FirstName!),
-                UserId = Id,
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.FamilyName,
-                ClaimValue = this.GetValue(x => x.LastName!),
-                UserId = Id,
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.PreferredUsername,
-                ClaimValue = this.GetValue(x => x.UserName!),
-                UserId = Id,
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.BirthDate,
-                ClaimValue = this.GetValue(x => x.DayOfBirth!),
-                UserId = Id,
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.Address,
-                ClaimValue = this.GetValue(x => x.Address!),
-                UserId = Id,
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.Picture,
-                ClaimValue = this.GetValue(x => x.Avatar!),
-                UserId = Id,
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.Gender,
-                ClaimValue = this.GetValue(x => x.Gender!),
-                UserId = Id,
-            },
-            new()
-            {
-                ClaimType = ClaimTypes.Email,
-                ClaimValue = this.GetValue(x => x.Email!),
-                UserId = Id,
-            },
-        ];
+    private void ApplyCreateDefaultUserClaim()
+    {
+        if (UserClaims != null && UserClaims.Count > 0)
+        {
+            return;
+        }
+        UserClaims = GetUserClaims(true);
+    }
 
     protected override bool TryApplyDomainEvent(INotification domainEvent)
     {
-        return false;
+        switch (domainEvent)
+        {
+            case UpdateDefaultUserClaimEvent:
+                ApplyUpdateDefaultUserClaim();
+                return true;
+            default:
+                return false;
+        }
     }
 }
