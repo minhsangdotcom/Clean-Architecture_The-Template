@@ -3,6 +3,7 @@ using System.Data.Common;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Ardalis.GuardClauses;
+using Contracts.Extensions.Collections;
 using Dapper;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
@@ -95,12 +96,6 @@ public class UserManagerService(
             // update role for user
             await UpdateRolesToUserAsync(user, roleIds);
 
-            // update default user claim
-            // var defautClaims = userClaimsContext
-            //     .Where(x => x.UserId == user.Id && x.Type == KindaUserClaimType.Default)
-            //     .ToDictionary(x => x.ClaimType, x => x.ClaimValue);
-            // await ReplaceDefaultClaimsToUserAsync(user, defautClaims);
-
             // update custom user claim
             await UpdateClaimsToUserAsync(user, claims);
 
@@ -141,7 +136,7 @@ public class UserManagerService(
             .FirstOrDefaultAsync();
 
         Guard.Against.NotFound($"{user.Id}", currentUser, nameof(user));
-        List<Ulid> rolesToProcess = roleIds.AsList();
+        List<Ulid> rolesToProcess = roleIds.CastToList();
 
         if (
             await roleContext.CountAsync(x => rolesToProcess.Contains(x.Id)) != rolesToProcess.Count
@@ -159,9 +154,9 @@ public class UserManagerService(
             throw new ArgumentException($"{nameof(roleIds)} is existence in user", nameof(roleIds));
         }
 
-        IEnumerable<UserRole> currentUserRoles = currentUser.UserRoles!;
+        List<UserRole> currentUserRoles = currentUser.UserRoles!.CastToList();
         List<Ulid> rolesToInsert = rolesToProcess.FindAll(x =>
-            !currentUserRoles.Any(p => p.RoleId == x)
+            !currentUserRoles.Exists(p => p.RoleId == x)
         );
 
         await userRoleContext.AddRangeAsync(
@@ -202,17 +197,19 @@ public class UserManagerService(
             nameof(user)
         );
 
-        if (await roleContext.CountAsync(x => roleIds.Contains(x.Id)) != roleIds.Count())
+        List<Ulid> rolesToProcess = roleIds.CastToList();
+
+        if (await roleContext.CountAsync(x => rolesToProcess.Contains(x.Id)) != rolesToProcess.Count)
         {
             throw new ArgumentException($"{nameof(roleIds)} is invalid");
         }
 
-        List<UserRole> currentUserRoles = currentUser.UserRoles.AsList();
+        List<UserRole> currentUserRoles = currentUser.UserRoles!.CastToList();
 
         IEnumerable<Ulid> rolesToRemove = currentUserRoles
-            .FindAll(x => !roleIds.Contains(x.RoleId))
+            .FindAll(x => !rolesToProcess.Contains(x.RoleId))
             .Select(x => x.RoleId);
-        IEnumerable<Ulid> rolesToInsert = roleIds.Where(x =>
+        List<Ulid> rolesToInsert = rolesToProcess.FindAll(x =>
             !currentUserRoles.Exists(p => p.RoleId == x)
         );
 
@@ -240,20 +237,21 @@ public class UserManagerService(
             nameof(user)
         );
 
-        if (await roleContext.CountAsync(x => roleIds.Contains(x.Id)) != roleIds.Count())
+        List<Ulid> rolesToProcess = roleIds.CastToList();
+        if (await roleContext.CountAsync(x => rolesToProcess.Contains(x.Id)) != rolesToProcess.Count)
         {
             throw new ArgumentException($"{nameof(roleIds)} is invalid");
         }
 
         List<UserRole> currentUserRoles = currentUser.UserRoles.AsList();
-        if (roleIds.Any(x => !currentUserRoles.Exists(p => p.RoleId == x)))
+        if (rolesToProcess.Any(x => !currentUserRoles.Exists(p => p.RoleId == x)))
         {
             throw new ArgumentException(
                 $"{nameof(roleIds)} is not existed in user {nameof(user.Id)}"
             );
         }
 
-        List<UserRole> userRoles = currentUserRoles.FindAll(x => roleIds.Contains(x.RoleId));
+        List<UserRole> userRoles = currentUserRoles.FindAll(x => rolesToProcess.Contains(x.RoleId));
 
         IEnumerable<UserClaim> userClaims = userRoles
             .Select(x => x.Role)

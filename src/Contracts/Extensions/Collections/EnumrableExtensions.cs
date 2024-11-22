@@ -2,16 +2,13 @@ namespace Contracts.Extensions.Collections;
 
 public static class EnumrableExtensions
 {
-    public static List<T> Cast2List<T>(this IEnumerable<T> source)
+    public static List<T> CastToList<T>(this IEnumerable<T> source)
     {
-        try
+        if (source != null && source is not List<T>)
         {
-            List<T>? list = source as List<T>;
-            return list!;
+            return [.. source];
         }
-        catch (Exception)
-        {
-            return source.ToList();
-        }
+
+        return (List<T>)source!;
     }
 }

@@ -93,8 +93,8 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         );
         Guard.Against.Null(roleClaims, nameof(roleClaims), $"{nameof(roleClaims)} is not null");
 
-        List<RoleClaim> rolesToProcess = roleClaims.Cast2List();
-        List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.Cast2List();
+        List<RoleClaim> rolesToProcess = roleClaims.CastToList();
+        List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.CastToList();
 
         IEnumerable<RoleClaim> shouldInsert = rolesToProcess.FindAll(x =>
             !currentRoleClaims.Exists(p => p.Id == x.Id)
@@ -152,8 +152,8 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
                 .FirstOrDefaultAsync(),
             NOT_FOUND_MESSAGE
         );
-        List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.Cast2List();
-        List<KeyValuePair<string, string>> roleClaimsToProcess = claims.Cast2List();
+        List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.CastToList();
+        List<KeyValuePair<string, string>> roleClaimsToProcess = claims.CastToList();
 
         if (
             roleClaimsToProcess.Any(x =>
@@ -209,7 +209,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             NOT_FOUND_MESSAGE
         );
 
-        List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.Cast2List();
+        List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.CastToList();
         if (claimIds.Any(x => !currentRoleClaims.Exists(p => p.Id == x)))
         {
             throw new Exception($"{nameof(claimIds)} is not existed in role {nameof(role.Id)}.");

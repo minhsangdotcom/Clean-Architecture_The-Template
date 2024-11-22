@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Contracts.Extensions.Collections;
 using Domain.Aggregates.Users;
 using Domain.Common;
 
@@ -23,7 +24,7 @@ public class RoleClaim : DefaultEntity
             return [];
         }
 
-        List<UserClaim>? userClaims = UserClaims as List<UserClaim>;
+        List<UserClaim>? userClaims = UserClaims.CastToList();
         Span<UserClaim> spans = CollectionsMarshal.AsSpan(userClaims);
 
         for (int i = 0; i < spans.Length; i++)

@@ -152,7 +152,7 @@ public class User : AggregateRoot
         }
 
         Span<UserClaim> currentUserClaims = CollectionsMarshal.AsSpan(
-            (UserClaims as List<UserClaim>)!.FindAll(x => x.Type == KindaUserClaimType.Default)
+            UserClaims!.CastToList().FindAll(x => x.Type == KindaUserClaimType.Default)
         );
         // default claims with claim type are unique but it's difference with custom claims
         IDictionary<string, string> userClaims = GetUserClaims()
