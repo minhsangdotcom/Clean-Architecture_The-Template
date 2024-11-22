@@ -18,12 +18,12 @@ public class RoleClaim : DefaultEntity
 
     public List<UserClaim> UpdateUserClaim()
     {
-        if (UserClaims!.Count == 0)
+        if (UserClaims == null || UserClaims.Count <= 0)
         {
             return [];
         }
 
-        List<UserClaim> userClaims = (List<UserClaim>)UserClaims;
+        List<UserClaim>? userClaims = UserClaims as List<UserClaim>;
         Span<UserClaim> spans = CollectionsMarshal.AsSpan(userClaims);
 
         for (int i = 0; i < spans.Length; i++)
@@ -31,6 +31,6 @@ public class RoleClaim : DefaultEntity
             spans[i].ClaimValue = ClaimValue;
         }
 
-        return userClaims;
+        return userClaims!;
     }
 }

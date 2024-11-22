@@ -1,8 +1,7 @@
-using System.Runtime.InteropServices;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Ardalis.GuardClauses;
-using Dapper;
+using Contracts.Extensions.Collections;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -92,26 +91,26 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
                 .FirstOrDefaultAsync(),
             NOT_FOUND_MESSAGE
         );
-
         Guard.Against.Null(roleClaims, nameof(roleClaims), $"{nameof(roleClaims)} is not null");
-        List<RoleClaim> listRoleClaim = roleClaims.AsList();
 
-        List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.AsList();
-        IEnumerable<RoleClaim> shouldInsert = listRoleClaim.FindAll(x =>
+        List<RoleClaim> rolesToProcess = roleClaims.Cast2List();
+        List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.Cast2List();
+
+        IEnumerable<RoleClaim> shouldInsert = rolesToProcess.FindAll(x =>
             !currentRoleClaims.Exists(p => p.Id == x.Id)
         );
         List<RoleClaim> shouldModify = currentRoleClaims.FindAll(x =>
-            listRoleClaim.Exists(p => p.Id == x.Id)
+            rolesToProcess.Exists(p => p.Id == x.Id)
         );
         IEnumerable<RoleClaim> shouldRemove = currentRoleClaims.FindAll(x =>
-            !listRoleClaim.Exists(p => p.Id == x.Id)
+            !rolesToProcess.Exists(p => p.Id == x.Id)
         );
 
         List<UserClaim> userClaims = [];
         for (int i = 0; i < shouldModify.Count; i++)
         {
             RoleClaim claim = shouldModify[i];
-            RoleClaim? correspondedClaim = listRoleClaim.Find(x => x.Id == claim.Id);
+            RoleClaim? correspondedClaim = rolesToProcess.Find(x => x.Id == claim.Id);
 
             if (correspondedClaim == null)
             {
@@ -153,24 +152,24 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
                 .FirstOrDefaultAsync(),
             NOT_FOUND_MESSAGE
         );
+        List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.Cast2List();
+        List<KeyValuePair<string, string>> roleClaimsToProcess = claims.Cast2List();
 
         if (
-            claims.Any(x =>
-                currentRole.RoleClaims.Any(p => p.ClaimType == x.Key && p.ClaimValue == x.Value)
+            roleClaimsToProcess.Any(x =>
+                currentRoleClaims.Exists(p => p.ClaimType == x.Key && p.ClaimValue == x.Value)
             )
         )
         {
             throw new Exception($"1 or more elements of {nameof(claims)} exists in role claims");
         }
 
-        List<RoleClaim> roleClaims = claims
-            .Select(x => new RoleClaim
-            {
-                ClaimType = x.Key,
-                ClaimValue = x.Value,
-                RoleId = currentRole.Id,
-            })
-            .ToList();
+        List<RoleClaim> roleClaims = roleClaimsToProcess.ConvertAll(x => new RoleClaim
+        {
+            ClaimType = x.Key,
+            ClaimValue = x.Value,
+            RoleId = currentRole.Id,
+        });
 
         // update new user claims for users who are in role
         ICollection<UserRole> users = currentRole.UserRoles;
@@ -210,7 +209,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             NOT_FOUND_MESSAGE
         );
 
-        List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.AsList();
+        List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.Cast2List();
         if (claimIds.Any(x => !currentRoleClaims.Exists(p => p.Id == x)))
         {
             throw new Exception($"{nameof(claimIds)} is not existed in role {nameof(role.Id)}.");
