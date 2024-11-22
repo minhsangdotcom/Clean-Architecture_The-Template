@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.InteropServices;
 using Ardalis.GuardClauses;
 using Contracts.Constants;
+using Contracts.Extensions.Collections;
 using Contracts.Extensions.Reflections;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Events;
@@ -151,7 +152,7 @@ public class User : AggregateRoot
         }
 
         Span<UserClaim> currentUserClaims = CollectionsMarshal.AsSpan(
-            ((List<UserClaim>)UserClaims).FindAll(x => x.Type == KindaUserClaimType.Default)
+            (UserClaims as List<UserClaim>)!.FindAll(x => x.Type == KindaUserClaimType.Default)
         );
         // default claims with claim type are unique but it's difference with custom claims
         IDictionary<string, string> userClaims = GetUserClaims()
