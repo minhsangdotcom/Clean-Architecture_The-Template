@@ -51,21 +51,17 @@ public class CreateUserHandler(
                 .Repository<User>()
                 .AddAsync(userMapping, cancellationToken);
 
-            //add event to update default claims
+            // add default claims
             user.CreateDefaultUserClaims();
             await unitOfWork.SaveAsync(cancellationToken);
 
-            // update claim to user consist of default and custom claims
-            // IEnumerable<UserClaim> allClaims = user.DefaultUserClaims.Concat(
-            //     mapper.Map<List<UserClaim>>(
-            //         command.Claims,
-            //         opt => opt.Items[nameof(UserClaimType.Type)] = KindaUserClaimType.Custom
-            //     )
-            // );
-
             IEnumerable<UserClaim> customClaims = mapper.Map<List<UserClaim>>(
                 command.Claims,
-                opt => opt.Items[nameof(UserClaimType.Type)] = KindaUserClaimType.Custom
+                opt =>
+                {
+                    opt.Items[nameof(UserClaim.Type)] = KindaUserClaimType.Custom;
+                    opt.Items[nameof(UserClaim.UserId)] = user.Id;
+                }
             );
 
             await userManagerService.CreateUserAsync(
