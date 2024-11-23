@@ -136,10 +136,11 @@ public class UserManagerService(
             .FirstOrDefaultAsync();
 
         Guard.Against.NotFound($"{user.Id}", currentUser, nameof(user));
-        List<Ulid> rolesToProcess = roleIds.CastToList();
+        IEnumerable<Ulid> rolesToProcess = roleIds;
 
         if (
-            await roleContext.CountAsync(x => rolesToProcess.Contains(x.Id)) != rolesToProcess.Count
+            await roleContext.CountAsync(x => rolesToProcess.Contains(x.Id))
+            != rolesToProcess.Count()
         )
         {
             throw new ArgumentException($"{nameof(roleIds)} is not found", nameof(roleIds));
@@ -154,10 +155,11 @@ public class UserManagerService(
             throw new ArgumentException($"{nameof(roleIds)} is existence in user", nameof(roleIds));
         }
 
-        List<UserRole> currentUserRoles = currentUser.UserRoles!.CastToList();
-        List<Ulid> rolesToInsert = rolesToProcess.FindAll(x =>
-            !currentUserRoles.Exists(p => p.RoleId == x)
-        );
+        ICollection<UserRole> currentUserRoles = currentUser.UserRoles!;
+        List<Ulid> rolesToInsert =
+        [
+            .. rolesToProcess.Where(x => !currentUserRoles.Any(p => p.RoleId == x)),
+        ];
 
         await userRoleContext.AddRangeAsync(
             rolesToInsert.Select(x => new UserRole { RoleId = x, UserId = currentUser.Id })
@@ -199,7 +201,9 @@ public class UserManagerService(
 
         List<Ulid> rolesToProcess = roleIds.CastToList();
 
-        if (await roleContext.CountAsync(x => rolesToProcess.Contains(x.Id)) != rolesToProcess.Count)
+        if (
+            await roleContext.CountAsync(x => rolesToProcess.Contains(x.Id)) != rolesToProcess.Count
+        )
         {
             throw new ArgumentException($"{nameof(roleIds)} is invalid");
         }
@@ -238,7 +242,9 @@ public class UserManagerService(
         );
 
         List<Ulid> rolesToProcess = roleIds.CastToList();
-        if (await roleContext.CountAsync(x => rolesToProcess.Contains(x.Id)) != rolesToProcess.Count)
+        if (
+            await roleContext.CountAsync(x => rolesToProcess.Contains(x.Id)) != rolesToProcess.Count
+        )
         {
             throw new ArgumentException($"{nameof(roleIds)} is invalid");
         }
