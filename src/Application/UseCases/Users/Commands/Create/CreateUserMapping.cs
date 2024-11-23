@@ -10,6 +10,8 @@ public class CreateUserMapping : Profile
     public CreateUserMapping()
     {
         CreateMap<CreateUserCommand, User>()
+            .ForMember(dest => dest.UserClaims, opt => opt.Ignore())
+            .ForMember(dest => dest.UserRoles, opt => opt.Ignore())
             .AfterMap(
                 (src, dest) =>
                 {
@@ -32,7 +34,7 @@ public class CreateUserMapping : Profile
                     }
 
                     if (
-                        Enum.TryParse(
+                        Ulid.TryParse(
                             context.Items[nameof(UserClaim.UserId)]?.ToString(),
                             out Ulid id
                         )

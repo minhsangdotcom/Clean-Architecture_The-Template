@@ -55,7 +55,7 @@ public class CreateUserHandler(
             user.CreateDefaultUserClaims();
             await unitOfWork.SaveAsync(cancellationToken);
 
-            IEnumerable<UserClaim> customClaims = mapper.Map<List<UserClaim>>(
+            List<UserClaim> customClaims = mapper.Map<List<UserClaim>>(
                 command.UserClaims,
                 opt =>
                 {
