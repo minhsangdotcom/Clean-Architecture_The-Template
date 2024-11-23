@@ -111,25 +111,9 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             ref roleClaimsToModify,
             rolesClaimsToProcess
         );
-        // for (int i = 0; i < roleClaimsToModify.Count; i++)
-        // {
-        //     RoleClaim claim = roleClaimsToModify[i];
-        //     RoleClaim? correspondedClaim = rolesClaimsToProcess.FirstOrDefault(x =>
-        //         x.Id == claim.Id
-        //     );
-
-        //     if (correspondedClaim == null)
-        //     {
-        //         continue;
-        //     }
-
-        //     claim.ClaimValue = correspondedClaim.ClaimValue;
-        //     List<UserClaim> updatedUserClaims = claim.UpdateUserClaim();
-        //     userClaims.AddRange(updatedUserClaims);
-        // }
 
         // remove
-        await RemoveClaimsFromRoleAsync(role, roleClaimsToRemove.Select(x => x.Id));
+        await RemoveClaimsFromRoleAsync(role, roleClaimsToRemove.Select(x => x.Id).ToArray());
 
         //update
         roleClaimContext.UpdateRange(roleClaimsToModify);
