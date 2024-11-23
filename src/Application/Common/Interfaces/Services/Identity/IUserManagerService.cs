@@ -44,9 +44,9 @@ public interface IUserManagerService : IScope
 
     Task RemoveClaimsToUserAsync(User user, IEnumerable<UserClaim> claims);
 
-    Task<IEnumerable<Role>> GetRolesInUser(Ulid userId);
+    Task<List<Role>> GetRolesInUser(Ulid userId);
 
-    Task<IEnumerable<UserClaim>> GetClaimsInUser(Ulid userId);
+    Task<List<UserClaim>> GetClaimsInUser(Ulid userId);
 
     Task<bool> HasRolesInUserAsync(Ulid id, IEnumerable<string> roleNames);
 

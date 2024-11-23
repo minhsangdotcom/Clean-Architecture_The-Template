@@ -167,7 +167,7 @@ public class UserManagerService(
         await context.SaveChangesAsync();
 
         //derive all role claims for users if user is assigned specific role.
-        IEnumerable<RoleClaim> roleClaims = await roleManagerService.GetClaimsByRolesAsync(
+        List<RoleClaim> roleClaims = await roleManagerService.GetClaimsByRolesAsync(
             rolesToInsert
         );
         IEnumerable<UserClaim> userClaims = roleClaims.Select(x => new UserClaim
@@ -178,7 +178,6 @@ public class UserManagerService(
             RoleClaimId = x.Id,
             Type = KindaUserClaimType.Custom,
         });
-
         await userClaimsContext.AddRangeAsync(userClaims);
         await context.SaveChangesAsync();
     }
@@ -381,10 +380,10 @@ public class UserManagerService(
     public async Task RemoveClaimsToUserAsync(User user, IEnumerable<UserClaim> claims) =>
         await RemoveClaimsToUserAsync(user, claims.Select(x => x.Id));
 
-    public async Task<IEnumerable<Role>> GetRolesInUser(Ulid userId) =>
+    public async Task<List<Role>> GetRolesInUser(Ulid userId) =>
         await userRoleContext.Where(x => x.UserId == userId).Select(x => x.Role!).ToListAsync();
 
-    public async Task<IEnumerable<UserClaim>> GetClaimsInUser(Ulid userId) =>
+    public async Task<List<UserClaim>> GetClaimsInUser(Ulid userId) =>
         await userClaimsContext.Where(x => x.UserId == userId).ToListAsync();
 
     public async Task<bool> HasRolesInUserAsync(Ulid id, IEnumerable<string> roleNames) =>
