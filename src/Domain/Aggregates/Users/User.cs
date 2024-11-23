@@ -1,8 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.InteropServices;
 using Ardalis.GuardClauses;
 using Contracts.Constants;
-using Contracts.Extensions.Collections;
 using Contracts.Extensions.Reflections;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Events;
