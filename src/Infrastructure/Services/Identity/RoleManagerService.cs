@@ -93,24 +93,25 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         );
         Guard.Against.Null(roleClaims, nameof(roleClaims), $"{nameof(roleClaims)} is not null");
 
-        List<RoleClaim> rolesToProcess = roleClaims.CastToList();
-        List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.CastToList();
+        IEnumerable<RoleClaim> rolesToProcess = roleClaims;
+        ICollection<RoleClaim> currentRoleClaims = currentRole.RoleClaims;
 
-        IEnumerable<RoleClaim> shouldInsert = rolesToProcess.FindAll(x =>
-            !currentRoleClaims.Exists(p => p.Id == x.Id)
+        IEnumerable<RoleClaim> shouldInsert = rolesToProcess.Where(x =>
+            !currentRoleClaims.Any(p => p.Id == x.Id)
         );
-        List<RoleClaim> shouldModify = currentRoleClaims.FindAll(x =>
-            rolesToProcess.Exists(p => p.Id == x.Id)
-        );
-        IEnumerable<RoleClaim> shouldRemove = currentRoleClaims.FindAll(x =>
-            !rolesToProcess.Exists(p => p.Id == x.Id)
+        List<RoleClaim> shouldModify =
+        [
+            .. currentRoleClaims.Where(x => rolesToProcess.Any(p => p.Id == x.Id)),
+        ];
+        IEnumerable<RoleClaim> shouldRemove = currentRoleClaims.Where(x =>
+            !rolesToProcess.Any(p => p.Id == x.Id)
         );
 
         List<UserClaim> userClaims = [];
         for (int i = 0; i < shouldModify.Count; i++)
         {
             RoleClaim claim = shouldModify[i];
-            RoleClaim? correspondedClaim = rolesToProcess.Find(x => x.Id == claim.Id);
+            RoleClaim? correspondedClaim = rolesToProcess.FirstOrDefault(x => x.Id == claim.Id);
 
             if (correspondedClaim == null)
             {
@@ -152,24 +153,27 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
                 .FirstOrDefaultAsync(),
             NOT_FOUND_MESSAGE
         );
-        List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.CastToList();
-        List<KeyValuePair<string, string>> roleClaimsToProcess = claims.CastToList();
+        ICollection<RoleClaim> currentRoleClaims = currentRole.RoleClaims;
+        IEnumerable<KeyValuePair<string, string>> roleClaimsToProcess = claims;
 
         if (
             roleClaimsToProcess.Any(x =>
-                currentRoleClaims.Exists(p => p.ClaimType == x.Key && p.ClaimValue == x.Value)
+                currentRoleClaims.Any(p => p.ClaimType == x.Key && p.ClaimValue == x.Value)
             )
         )
         {
             throw new Exception($"1 or more elements of {nameof(claims)} exists in role claims");
         }
 
-        List<RoleClaim> roleClaims = roleClaimsToProcess.ConvertAll(x => new RoleClaim
-        {
-            ClaimType = x.Key,
-            ClaimValue = x.Value,
-            RoleId = currentRole.Id,
-        });
+        List<RoleClaim> roleClaims =
+        [
+            .. roleClaimsToProcess.Select(x => new RoleClaim
+            {
+                ClaimType = x.Key,
+                ClaimValue = x.Value,
+                RoleId = currentRole.Id,
+            }),
+        ];
 
         // update new user claims for users who are in role
         ICollection<UserRole> users = currentRole.UserRoles;
@@ -209,13 +213,13 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             NOT_FOUND_MESSAGE
         );
 
-        List<RoleClaim> currentRoleClaims = currentRole.RoleClaims.CastToList();
-        if (claimIds.Any(x => !currentRoleClaims.Exists(p => p.Id == x)))
+        ICollection<RoleClaim> currentRoleClaims = currentRole.RoleClaims;
+        if (claimIds.Any(x => !currentRoleClaims.Any(p => p.Id == x)))
         {
             throw new Exception($"{nameof(claimIds)} is not existed in role {nameof(role.Id)}.");
         }
 
-        IEnumerable<RoleClaim> roleClaims = currentRoleClaims.FindAll(x => claimIds.Contains(x.Id));
+        IEnumerable<RoleClaim> roleClaims = currentRoleClaims.Where(x => claimIds.Contains(x.Id));
 
         roleClaimContext.RemoveRange(roleClaims);
         await context.SaveChangesAsync();
