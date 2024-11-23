@@ -52,7 +52,7 @@ public static class DependencyInjection
             .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddSingleton<UpdateAuditableEntityInterceptor>()
             .AddSingleton<DispatchDomainEventInterceptor>()
-            .AddDbContext<TheDbContext>(
+            .AddDbContextPool<TheDbContext>(
                 (sp, options) =>
                 {
                     NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
