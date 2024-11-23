@@ -1,9 +1,9 @@
 using System.Data;
 using System.Data.Common;
+using System.Runtime.InteropServices;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Ardalis.GuardClauses;
-using Contracts.Extensions.Collections;
 using Dapper;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
@@ -167,9 +167,7 @@ public class UserManagerService(
         await context.SaveChangesAsync();
 
         //derive all role claims for users if user is assigned specific role.
-        List<RoleClaim> roleClaims = await roleManagerService.GetClaimsByRolesAsync(
-            rolesToInsert
-        );
+        List<RoleClaim> roleClaims = await roleManagerService.GetClaimsByRolesAsync(rolesToInsert);
         IEnumerable<UserClaim> userClaims = roleClaims.Select(x => new UserClaim
         {
             UserId = user.Id,
@@ -198,22 +196,23 @@ public class UserManagerService(
             nameof(user)
         );
 
-        List<Ulid> rolesToProcess = roleIds.CastToList();
+        IEnumerable<Ulid> rolesToProcess = roleIds;
 
         if (
-            await roleContext.CountAsync(x => rolesToProcess.Contains(x.Id)) != rolesToProcess.Count
+            await roleContext.CountAsync(x => rolesToProcess.Contains(x.Id))
+            != rolesToProcess.Count()
         )
         {
             throw new ArgumentException($"{nameof(roleIds)} is invalid");
         }
 
-        List<UserRole> currentUserRoles = currentUser.UserRoles!.CastToList();
+        ICollection<UserRole> currentUserRoles = currentUser.UserRoles!;
 
         IEnumerable<Ulid> rolesToRemove = currentUserRoles
-            .FindAll(x => !rolesToProcess.Contains(x.RoleId))
+            .Where(x => !rolesToProcess.Contains(x.RoleId))
             .Select(x => x.RoleId);
-        List<Ulid> rolesToInsert = rolesToProcess.FindAll(x =>
-            !currentUserRoles.Exists(p => p.RoleId == x)
+        IEnumerable<Ulid> rolesToInsert = rolesToProcess.Where(x =>
+            !currentUserRoles.Any(p => p.RoleId == x)
         );
 
         await RemoveRoleFromUserAsync(currentUser, rolesToRemove);
@@ -240,23 +239,27 @@ public class UserManagerService(
             nameof(user)
         );
 
-        List<Ulid> rolesToProcess = roleIds.CastToList();
+        IEnumerable<Ulid> rolesToProcess = roleIds;
         if (
-            await roleContext.CountAsync(x => rolesToProcess.Contains(x.Id)) != rolesToProcess.Count
+            await roleContext.CountAsync(x => rolesToProcess.Contains(x.Id))
+            != rolesToProcess.Count()
         )
         {
             throw new ArgumentException($"{nameof(roleIds)} is invalid");
         }
 
-        List<UserRole> currentUserRoles = currentUser.UserRoles.AsList();
-        if (rolesToProcess.Any(x => !currentUserRoles.Exists(p => p.RoleId == x)))
+        ICollection<UserRole> currentUserRoles = currentUser.UserRoles!;
+        if (rolesToProcess.Any(x => !currentUserRoles.Any(p => p.RoleId == x)))
         {
             throw new ArgumentException(
                 $"{nameof(roleIds)} is not existed in user {nameof(user.Id)}"
             );
         }
 
-        List<UserRole> userRoles = currentUserRoles.FindAll(x => rolesToProcess.Contains(x.RoleId));
+        IList<UserRole> userRoles =
+        [
+            .. currentUserRoles.Where(x => rolesToProcess.Contains(x.RoleId)),
+        ];
 
         IEnumerable<UserClaim> userClaims = userRoles
             .Select(x => x.Role)
@@ -306,38 +309,38 @@ public class UserManagerService(
             $"{user}",
             await userContext
                 .Where(x => x.Id == user.Id)
-                .Include(x => x.UserClaims)
+                .Include(x => x.UserClaims!.Where(p => p.Type == KindaUserClaimType.Custom))
                 .FirstOrDefaultAsync(),
             nameof(user)
         );
 
-        List<UserClaim> customUserClaims = currentUser
-            .UserClaims.AsList()
-            .FindAll(x => x.Type == KindaUserClaimType.Custom);
-        List<UserClaim> claimsToProcess = claims.AsList();
+        ICollection<UserClaim> customUserClaims = currentUser.UserClaims!;
+        IEnumerable<UserClaim> claimsToProcess = claims;
 
-        IEnumerable<UserClaim> claimsToInsert = claimsToProcess.FindAll(x =>
-            !customUserClaims.Exists(p => p.Id == x.Id)
+        IEnumerable<UserClaim> claimsToInsert = claimsToProcess.Where(x =>
+            !customUserClaims.Any(p => p.Id == x.Id)
         );
-        List<UserClaim> claimsToUpdate = claimsToProcess.FindAll(x =>
-            customUserClaims.Exists(p => p.Id == x.Id)
+        List<UserClaim> claimsToUpdate =
+        [
+            .. claimsToProcess.Where(x => customUserClaims.Any(p => p.Id == x.Id)),
+        ];
+
+        IEnumerable<UserClaim> claimsToRemove = customUserClaims.Where(x =>
+            !claimsToProcess.Any(p => p.Id == x.Id)
         );
 
-        IEnumerable<UserClaim> claimsToRemove = customUserClaims.FindAll(x =>
-            !claimsToProcess.Exists(p => p.Id == x.Id)
-        );
+        ProcessUserClaimUpdate(ref claimsToUpdate, claimsToProcess);
+        // for (int i = 0; i < claimsToUpdate.Count; i++)
+        // {
+        //     UserClaim claim = claimsToUpdate[i];
+        //     var correspondenceClaim = claimsToProcess.FirstOrDefault(x => x.Id == claim.Id);
 
-        for (int i = 0; i < claimsToUpdate.Count; i++)
-        {
-            UserClaim claim = claimsToUpdate[i];
-            var correspondenceClaim = claimsToProcess.Find(x => x.Id == claim.Id);
-
-            if (correspondenceClaim == null)
-            {
-                continue;
-            }
-            claim.ClaimValue = correspondenceClaim.ClaimValue!;
-        }
+        //     if (correspondenceClaim == null)
+        //     {
+        //         continue;
+        //     }
+        //     claim.ClaimValue = correspondenceClaim.ClaimValue!;
+        // }
 
         await RemoveClaimsToUserAsync(currentUser, claimsToRemove);
         userClaimsContext.UpdateRange(claimsToUpdate);
@@ -422,4 +425,23 @@ public class UserManagerService(
             await userContext.Where(x => x.Id == id).FirstOrDefaultAsync(),
             nameof(id)
         );
+
+    private static void ProcessUserClaimUpdate(
+        ref List<UserClaim> claimsToUpdate,
+        IEnumerable<UserClaim> claimsToProcess
+    )
+    {
+        Span<UserClaim> spans = CollectionsMarshal.AsSpan(claimsToUpdate);
+        for (int i = 0; i < spans.Length; i++)
+        {
+            UserClaim claim = spans[i];
+            var correspondenceClaim = claimsToProcess.FirstOrDefault(x => x.Id == claim.Id);
+
+            if (correspondenceClaim == null)
+            {
+                continue;
+            }
+            claim.ClaimValue = correspondenceClaim.ClaimValue!;
+        }
+    }
 }

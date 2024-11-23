@@ -1,5 +1,4 @@
 using System.Runtime.InteropServices;
-using Contracts.Extensions.Collections;
 using Domain.Aggregates.Users;
 using Domain.Common;
 

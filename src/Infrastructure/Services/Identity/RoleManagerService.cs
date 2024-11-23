@@ -1,7 +1,7 @@
+using System.Runtime.InteropServices;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Ardalis.GuardClauses;
-using Contracts.Extensions.Collections;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -93,48 +93,56 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         );
         Guard.Against.Null(roleClaims, nameof(roleClaims), $"{nameof(roleClaims)} is not null");
 
-        IEnumerable<RoleClaim> rolesToProcess = roleClaims;
+        IEnumerable<RoleClaim> rolesClaimsToProcess = roleClaims;
         ICollection<RoleClaim> currentRoleClaims = currentRole.RoleClaims;
 
-        IEnumerable<RoleClaim> shouldInsert = rolesToProcess.Where(x =>
+        IEnumerable<RoleClaim> roleClaimsToInsert = rolesClaimsToProcess.Where(x =>
             !currentRoleClaims.Any(p => p.Id == x.Id)
         );
-        List<RoleClaim> shouldModify =
+        List<RoleClaim> roleClaimsToModify =
         [
-            .. currentRoleClaims.Where(x => rolesToProcess.Any(p => p.Id == x.Id)),
+            .. currentRoleClaims.Where(x => rolesClaimsToProcess.Any(p => p.Id == x.Id)),
         ];
-        IEnumerable<RoleClaim> shouldRemove = currentRoleClaims.Where(x =>
-            !rolesToProcess.Any(p => p.Id == x.Id)
+        IEnumerable<RoleClaim> roleClaimsToRemove = currentRoleClaims.Where(x =>
+            !rolesClaimsToProcess.Any(p => p.Id == x.Id)
         );
 
-        List<UserClaim> userClaims = [];
-        for (int i = 0; i < shouldModify.Count; i++)
-        {
-            RoleClaim claim = shouldModify[i];
-            RoleClaim? correspondedClaim = rolesToProcess.FirstOrDefault(x => x.Id == claim.Id);
+        List<UserClaim> userClaims = ProcessUserClaimUpdate(
+            ref roleClaimsToModify,
+            rolesClaimsToProcess
+        );
+        // for (int i = 0; i < roleClaimsToModify.Count; i++)
+        // {
+        //     RoleClaim claim = roleClaimsToModify[i];
+        //     RoleClaim? correspondedClaim = rolesClaimsToProcess.FirstOrDefault(x =>
+        //         x.Id == claim.Id
+        //     );
 
-            if (correspondedClaim == null)
-            {
-                continue;
-            }
+        //     if (correspondedClaim == null)
+        //     {
+        //         continue;
+        //     }
 
-            claim.ClaimValue = correspondedClaim.ClaimValue;
-            List<UserClaim> updatedUserClaims = claim.UpdateUserClaim();
-            userClaims.AddRange(updatedUserClaims);
-        }
+        //     claim.ClaimValue = correspondedClaim.ClaimValue;
+        //     List<UserClaim> updatedUserClaims = claim.UpdateUserClaim();
+        //     userClaims.AddRange(updatedUserClaims);
+        // }
 
         // remove
-        await RemoveClaimsFromRoleAsync(role, shouldRemove.Select(x => x.Id));
+        await RemoveClaimsFromRoleAsync(role, roleClaimsToRemove.Select(x => x.Id));
 
         //update
-        roleClaimContext.UpdateRange(shouldModify);
+        roleClaimContext.UpdateRange(roleClaimsToModify);
         UserClaimsContext.UpdateRange(userClaims);
         await context.SaveChangesAsync();
 
         // insert
         await AddClaimsToRoleAsync(
             role,
-            shouldInsert.Select(x => new KeyValuePair<string, string>(x.ClaimType, x.ClaimValue))
+            roleClaimsToInsert.Select(x => new KeyValuePair<string, string>(
+                x.ClaimType,
+                x.ClaimValue
+            ))
         );
     }
 
@@ -260,4 +268,31 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
 
     private async Task<Role> GetAsync(Ulid id) =>
         Guard.Against.NotFound($"{id}", await GetByIdAsync(id), NOT_FOUND_MESSAGE);
+
+    private static List<UserClaim> ProcessUserClaimUpdate(
+        ref List<RoleClaim> roleClaimsToModify,
+        IEnumerable<RoleClaim> rolesClaimsToProcess
+    )
+    {
+        List<UserClaim> userClaims = [];
+        Span<RoleClaim> spans = CollectionsMarshal.AsSpan(roleClaimsToModify);
+        for (int i = 0; i < spans.Length; i++)
+        {
+            RoleClaim claim = spans[i];
+            RoleClaim? correspondedClaim = rolesClaimsToProcess.FirstOrDefault(x =>
+                x.Id == claim.Id
+            );
+
+            if (correspondedClaim == null)
+            {
+                continue;
+            }
+
+            claim.ClaimValue = correspondedClaim.ClaimValue;
+            List<UserClaim> updatedUserClaims = claim.UpdateUserClaim();
+            userClaims.AddRange(updatedUserClaims);
+        }
+
+        return userClaims;
+    }
 }
