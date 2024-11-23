@@ -12,13 +12,13 @@ public interface IRoleManagerService : IScope
 
     Task<Role> CreateRoleAsync(Role role);
 
-    Task<IEnumerable<Role>> CreateRangeRoleAsync(IEnumerable<Role> roles);
+    Task<IList<Role>> CreateRangeRoleAsync(IEnumerable<Role> roles);
 
     Task<Role> UpdateRoleAsync(Role role, IEnumerable<RoleClaim>? roleClaims);
 
     Task DeleteRoleAsync(Role role);
 
-    Task<IEnumerable<Role>> ListAsync();
+    Task<List<Role>> ListAsync();
 
     // get role only
     Task<Role?> GetByIdAsync(Ulid id);
@@ -34,9 +34,9 @@ public interface IRoleManagerService : IScope
 
     Task RemoveClaimsFromRoleAsync(Role role, IEnumerable<Ulid> claimIds);
 
-    Task<IEnumerable<RoleClaim>> GetClaimsByRoleAsync(Ulid roleId);
+    Task<List<RoleClaim>> GetClaimsByRoleAsync(Ulid roleId);
 
-    Task<IEnumerable<RoleClaim>> GetClaimsByRolesAsync(IEnumerable<Ulid> roleIds);
+    Task<List<RoleClaim>> GetClaimsByRolesAsync(IEnumerable<Ulid> roleIds);
 
     Task<bool> HasClaimInRoleAsync(Ulid roleId, Ulid claimId);
 

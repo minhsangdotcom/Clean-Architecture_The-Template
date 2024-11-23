@@ -35,11 +35,11 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         return role;
     }
 
-    public async Task<IEnumerable<Role>> CreateRangeRoleAsync(IEnumerable<Role> roles)
+    public async Task<IList<Role>> CreateRangeRoleAsync(IEnumerable<Role> roles)
     {
         await roleContext.AddRangeAsync(roles);
         await context.SaveChangesAsync();
-        return roles;
+        return [.. roles];
     }
 
     public async Task<Role> UpdateRoleAsync(Role role, IEnumerable<RoleClaim>? roleClaims)
@@ -78,7 +78,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             .Include(x => x.RoleClaims)
             .FirstOrDefaultAsync();
 
-    public async Task<IEnumerable<Role>> ListAsync() => await roleContext.ToListAsync();
+    public async Task<List<Role>> ListAsync() => await roleContext.ToListAsync();
 
     public async Task UpdateRoleClaimAsync(IEnumerable<RoleClaim> roleClaims, Role role)
     {
@@ -225,10 +225,10 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         await context.SaveChangesAsync();
     }
 
-    public Task<IEnumerable<RoleClaim>> GetClaimsByRoleAsync(Ulid roleId) =>
+    public Task<List<RoleClaim>> GetClaimsByRoleAsync(Ulid roleId) =>
         GetClaimsByRolesAsync([roleId]);
 
-    public async Task<IEnumerable<RoleClaim>> GetClaimsByRolesAsync(IEnumerable<Ulid> roleIds) =>
+    public async Task<List<RoleClaim>> GetClaimsByRolesAsync(IEnumerable<Ulid> roleIds) =>
         await roleClaimContext.Where(x => roleIds.Contains(x.RoleId)).ToListAsync();
 
     public async Task<bool> HasClaimInRoleAsync(Ulid roleId, Ulid claimId) =>
