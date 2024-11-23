@@ -85,12 +85,12 @@ public class RoleValidator : AbstractValidator<RoleModel>
             );
 
         When(
-            x => x.Claims != null,
+            x => x.RoleClaims != null,
             () =>
             {
-                RuleForEach(x => x.Claims).SetValidator(new RoleClaimValidator());
+                RuleForEach(x => x.RoleClaims).SetValidator(new RoleClaimValidator());
 
-                RuleFor(x => x.Claims)
+                RuleFor(x => x.RoleClaims)
                     .Must(x =>
                         x!
                             .FindAll(x => x.Id == null)
@@ -99,20 +99,20 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     )
                     .WithState(x =>
                         Messager
-                            .Create<RoleModel>(nameof(Role))
-                            .Property(x => x.Claims!)
+                            .Create<Role>()
+                            .Property(x => x.RoleClaims!)
                             .Message(MessageType.Unique)
                             .Negative()
                             .Build()
                     );
 
-                RuleFor(x => x.Claims)
+                RuleFor(x => x.RoleClaims)
                     .MustAsync(
                         (roleClaim, _) =>
                             IsExistClaimAsync(
                                 id,
                                 roleClaim!
-                                    .Where(x => x.Id == null)
+                                    .FindAll(x => x.Id == null)
                                     .Select(x => new KeyValuePair<string, string>(
                                         x.ClaimType!,
                                         x.ClaimValue!
@@ -125,8 +125,8 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     )
                     .WithState(x =>
                         Messager
-                            .Create<RoleModel>(nameof(Role))
-                            .Property(x => x.Claims!)
+                            .Create<Role>()
+                            .Property(x => x.RoleClaims!)
                             .Message(MessageType.Existence)
                             .Build()
                     );

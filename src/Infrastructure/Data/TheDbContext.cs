@@ -5,6 +5,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Ardalis.GuardClauses;
 using Domain.Common;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Infrastructure.Data;

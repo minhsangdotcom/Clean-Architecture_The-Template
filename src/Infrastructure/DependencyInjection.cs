@@ -39,6 +39,14 @@ public static class DependencyInjection
         );
         services.TryAddSingleton<IValidateOptions<DatabaseSettings>, ValidateDatabaseSetting>();
 
+        services.AddSingleton(sp =>
+        {
+            var databaseSettings = sp.GetRequiredService<IOptions<DatabaseSettings>>().Value;
+            return new NpgsqlDataSourceBuilder(databaseSettings.DatabaseConnection)
+                .EnableDynamicJson()
+                .Build();
+        });
+
         services
             .AddScoped<IDbContext, TheDbContext>()
             .AddScoped<IUnitOfWork, UnitOfWork>()
@@ -47,15 +55,9 @@ public static class DependencyInjection
             .AddDbContext<TheDbContext>(
                 (sp, options) =>
                 {
-                    DatabaseSettings settings = sp.GetRequiredService<
-                        IOptions<DatabaseSettings>
-                    >().Value;
+                    NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
                     options
-                        .UseNpgsql(
-                            new NpgsqlDataSourceBuilder(settings.DatabaseConnection)
-                                .EnableDynamicJson()
-                                .Build()
-                        )
+                        .UseNpgsql(npgsqlDataSource)
                         .AddInterceptors(
                             sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
                             sp.GetRequiredService<DispatchDomainEventInterceptor>()

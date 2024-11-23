@@ -1,5 +1,6 @@
 using Application.UseCases.Projections.Roles;
 using Contracts.Common.Messages;
+using Domain.Aggregates.Roles;
 using FluentValidation;
 
 namespace Application.UseCases.Validators;
@@ -13,7 +14,7 @@ public class RoleClaimValidator : AbstractValidator<RoleClaimModel>
             .NotEmpty()
             .WithState(x =>
                 Messager
-                    .Create<RoleClaimModel>(nameof(RoleModel.Claims))
+                    .Create<RoleClaim>(nameof(Role.RoleClaims))
                     .Property(x => x.ClaimType!)
                     .Message(MessageType.Null)
                     .Negative()
@@ -25,7 +26,7 @@ public class RoleClaimValidator : AbstractValidator<RoleClaimModel>
             .NotEmpty()
             .WithState(x =>
                 Messager
-                    .Create<RoleClaimModel>(nameof(RoleModel.Claims))
+                    .Create<RoleClaim>(nameof(Role.RoleClaims))
                     .Property(x => x.ClaimValue!)
                     .Message(MessageType.Null)
                     .Negative()

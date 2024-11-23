@@ -24,7 +24,7 @@ public class UpdateRoleHandler(IRoleManagerService roleManagerService, IMapper m
 
         mapper.Map(command.Role, role);
 
-        List<RoleClaimModel>? claims = command.Role.Claims;
+        List<RoleClaimModel>? claims = command.Role.RoleClaims;
         if (claims?.Count > 0)
         {
             List<RoleClaim> roleClaims = mapper.Map<List<RoleClaim>>(claims);

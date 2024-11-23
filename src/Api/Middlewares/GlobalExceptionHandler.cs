@@ -1,5 +1,7 @@
 using System.Reflection;
 using Api.Middlewares.GlobalExceptionHandlers;
+using Application.Common.Exceptions;
+using Contracts.Extensions;
 
 namespace Api.Middlewares;
 
