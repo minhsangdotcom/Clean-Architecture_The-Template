@@ -173,7 +173,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             throw new Exception($"1 or more elements of {nameof(claims)} exists in role claims");
         }
 
-        List<RoleClaim> roleClaims =
+        List<RoleClaim> roleClaimsToInsert =
         [
             .. roleClaimsToProcess.Select(x => new RoleClaim
             {
@@ -189,7 +189,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         foreach (UserRole user in users)
         {
             Ulid userId = user.UserId;
-            IEnumerable<UserClaim> additionUserClaims = roleClaims.Select(
+            IEnumerable<UserClaim> additionUserClaims = roleClaimsToInsert.Select(
                 roleClaim => new UserClaim()
                 {
                     ClaimType = roleClaim.ClaimType,
@@ -202,7 +202,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             userClaims.AddRange(additionUserClaims);
         }
 
-        await roleClaimContext.AddRangeAsync(roleClaims);
+        await roleClaimContext.AddRangeAsync(roleClaimsToInsert);
         await context.SaveChangesAsync();
         await UserClaimsContext.AddRangeAsync(userClaims);
         await context.SaveChangesAsync();
