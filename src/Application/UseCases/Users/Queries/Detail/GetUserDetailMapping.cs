@@ -16,7 +16,7 @@ public class GetUserDetailMapping : Profile
         CreateMap<User, GetUserDetailResponse>();
 
         CreateMap<User, UserDetailProjection>().IncludeMembers(x => x.Address)
-            .ForMember(dest => dest.Claims, opt => opt.MapFrom(src => src.UserClaims))
+            //.ForMember(dest => dest.UserClaims, opt => opt.MapFrom(src => src.UserClaims))
             .ForMember(
                 dest => dest.Roles,
                 opt => opt.MapFrom(src => src.UserRoles!.Select(x => x.Role))

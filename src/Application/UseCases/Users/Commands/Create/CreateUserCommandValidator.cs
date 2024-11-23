@@ -53,7 +53,10 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     .Negative()
                     .Build()
             )
-            .MustAsync((userName, cancellationToken) => IsExistedUsername(userName!, cancellationToken: cancellationToken))
+            .MustAsync(
+                (userName, cancellationToken) =>
+                    IsExistedUsername(userName!, cancellationToken: cancellationToken)
+            )
             .WithState(x =>
                 Messager
                     .Create<User>()
@@ -126,12 +129,12 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     .Build()
             );
 
-        RuleFor(x => x.RoleIds)
+        RuleFor(x => x.Roles)
             .NotEmpty()
             .WithState(x =>
                 Messager
                     .Create<CreateUserCommand>(nameof(User))
-                    .Property(x => x.RoleIds!)
+                    .Property(x => x.Roles!)
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
@@ -140,19 +143,19 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             .WithState(x =>
                 Messager
                     .Create<CreateUserCommand>(nameof(User))
-                    .Property(x => x.RoleIds!)
+                    .Property(x => x.Roles!)
                     .Message(MessageType.Unique)
                     .Negative()
                     .Build()
             );
 
         When(
-            x => x.Claims != null,
+            x => x.UserClaims != null,
             () =>
             {
-                RuleForEach(x => x.Claims).SetValidator(new UserClaimValidator());
+                RuleForEach(x => x.UserClaims).SetValidator(new UserClaimValidator());
 
-                RuleFor(x => x.Claims)
+                RuleFor(x => x.UserClaims)
                     .Must(x =>
                         x!
                             .FindAll(x => x.Id == null)
@@ -161,8 +164,8 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     )
                     .WithState(x =>
                         Messager
-                            .Create<CreateUserCommand>(nameof(User))
-                            .Property(x => x.Claims!)
+                            .Create<User>()
+                            .Property(x => x.UserClaims!)
                             .Message(MessageType.Unique)
                             .Negative()
                             .BuildMessage()

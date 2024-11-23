@@ -14,7 +14,7 @@ public class CreateUserCommand : UserModel, IRequest<CreateUserResponse>
 
     public UserStatus Status { get; set; }
 
-    public List<Ulid>? RoleIds { get; set; }
+    public List<Ulid>? Roles { get; set; }
 
-    public List<UserClaimModel>? Claims { get; set; }
+    public List<UserClaimModel>? UserClaims { get; set; }
 }

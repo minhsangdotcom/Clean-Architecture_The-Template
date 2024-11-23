@@ -7,7 +7,7 @@ public class UserDetailProjection : UserProjection
 {
     public IEnumerable<RoleDetailProjection>? Roles { get; set; }
 
-    public IEnumerable<UserClaimDetailProjection>? Claims { get; set; }
+    public IEnumerable<UserClaimDetailProjection>? UserClaims { get; set; }
 
     public string? Street { get; set; }
 }

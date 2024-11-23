@@ -1,6 +1,7 @@
 using Application.UseCases.Projections.Users;
 using Application.UseCases.Users.Commands.Create;
 using Contracts.Common.Messages;
+using Domain.Aggregates.Users;
 using FluentValidation;
 
 namespace Application.UseCases.Validators;
@@ -14,7 +15,7 @@ public class UserClaimValidator : AbstractValidator<UserClaimModel>
             .NotEmpty()
             .WithState(x =>
                 Messager
-                    .Create<UserClaimModel>(nameof(CreateUserCommand.Claims))
+                    .Create<UserClaim>(nameof(User.UserClaims))
                     .Property(x => x.ClaimType!)
                     .Message(MessageType.Null)
                     .Negative()
@@ -26,11 +27,11 @@ public class UserClaimValidator : AbstractValidator<UserClaimModel>
             .NotEmpty()
             .WithState(x =>
                 Messager
-                    .Create<UserClaimModel>(nameof(CreateUserCommand.Claims))
+                    .Create<UserClaim>(nameof(User.UserClaims))
                     .Property(x => x.ClaimValue!)
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
             );
-    }    
+    }
 }

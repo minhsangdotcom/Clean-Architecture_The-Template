@@ -13,7 +13,7 @@ public class UpdateUserCommand : IRequest<UpdateUserResponse>
 
 public class UpdateUser : UserModel
 {
-    public List<Ulid>? RoleIds { get; set; }
+    public List<Ulid>? Roles { get; set; }
 
-    public List<UserClaimModel>? Claims { get; set; }
+    public List<UserClaimModel>? UserClaims { get; set; }
 }

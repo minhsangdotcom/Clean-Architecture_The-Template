@@ -56,7 +56,7 @@ public class CreateUserHandler(
             await unitOfWork.SaveAsync(cancellationToken);
 
             IEnumerable<UserClaim> customClaims = mapper.Map<List<UserClaim>>(
-                command.Claims,
+                command.UserClaims,
                 opt =>
                 {
                     opt.Items[nameof(UserClaim.Type)] = KindaUserClaimType.Custom;
@@ -66,7 +66,7 @@ public class CreateUserHandler(
 
             await userManagerService.CreateUserAsync(
                 user,
-                command.RoleIds!,
+                command.Roles!,
                 customClaims,
                 unitOfWork.Transaction
             );

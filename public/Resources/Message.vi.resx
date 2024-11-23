@@ -193,7 +193,7 @@
     <value>Trạng thái</value>
     <comment> </comment>
   </data>
-  <data name="RoleIds" xml:space="preserve">
+  <data name="Roles" xml:space="preserve">
     <value>Danh sách vai trò</value>
     <comment> </comment>
   </data>
@@ -280,5 +280,9 @@
   <data name="Street" xml:space="preserve">
     <value>Tên đường</value>
     <comment> </comment>
+  </data>
+  <data name="UserClaims" xml:space="preserve">
+    <value>Các thông tin xác nhận</value>
+    <comment>  </comment>
   </data>
 </root>

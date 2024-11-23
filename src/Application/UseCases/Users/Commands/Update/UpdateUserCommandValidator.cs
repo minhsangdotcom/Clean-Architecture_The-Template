@@ -44,12 +44,12 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
             .SetValidator(new UserValidator(unitOfWork, accessorService)!);
 
         When(
-            x => x.User!.Claims != null,
+            x => x.User!.UserClaims != null,
             () =>
             {
-                RuleForEach(x => x.User!.Claims).SetValidator(new UserClaimValidator());
+                RuleForEach(x => x.User!.UserClaims).SetValidator(new UserClaimValidator());
 
-                RuleFor(x => x.User!.Claims)
+                RuleFor(x => x.User!.UserClaims)
                     .Must(x =>
                         x!
                             .FindAll(x => x.Id == null)
@@ -58,14 +58,14 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
                     )
                     .WithState(x =>
                         Messager
-                            .Create<UpdateUser>(nameof(User))
-                            .Property(x => x.Claims!)
+                            .Create<User>()
+                            .Property(x => x.UserClaims!)
                             .Message(MessageType.Unique)
                             .Negative()
                             .Build()
                     );
 
-                RuleFor(x => x.User!.Claims)
+                RuleFor(x => x.User!.UserClaims)
                     .MustAsync(
                         (roleClaim, CancellationToken) =>
                             IsExistClaimAsync(
@@ -80,8 +80,8 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
                     )
                     .WithState(x =>
                         Messager
-                            .Create<UpdateUser>(nameof(User))
-                            .Property(x => x.Claims!)
+                            .Create<User>()
+                            .Property(x => x.UserClaims!)
                             .Message(MessageType.Existence)
                             .Build()
                     );
