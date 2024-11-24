@@ -31,7 +31,11 @@ public static class ElasticSearchExtension
 
             if (!string.IsNullOrWhiteSpace(userName) && !string.IsNullOrWhiteSpace(password))
             {
-                settings.Authentication(new BasicAuthentication(userName, password));
+                settings
+                    .Authentication(new BasicAuthentication(userName, password))
+                    // without ssl trust
+                    .ServerCertificateValidationCallback((o, certificate, chain, errors) => true)
+                    .ServerCertificateValidationCallback(CertificateValidations.AllowAll);
             }
 
             IEnumerable<ElasticConfigureResult> elkConfigbuilder =
