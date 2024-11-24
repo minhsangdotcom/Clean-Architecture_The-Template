@@ -133,6 +133,7 @@ public class UserManagerService(
         User? currentUser = await userContext
             .Where(x => x.Id == user.Id)
             .Include(x => x.UserRoles)
+            .Include(x => x.UserClaims)
             .FirstOrDefaultAsync();
 
         Guard.Against.NotFound($"{user.Id}", currentUser, nameof(user));
@@ -168,7 +169,7 @@ public class UserManagerService(
 
         //derive all role claims for users if user is assigned specific role.
         List<RoleClaim> roleClaims = await roleManagerService.GetClaimsByRolesAsync(rolesToInsert);
-        IEnumerable<UserClaim> userClaims = roleClaims.Select(x => new UserClaim
+        IEnumerable<UserClaim> userClaimsToInsert = roleClaims.Select(x => new UserClaim
         {
             UserId = user.Id,
             ClaimType = x.ClaimType,
@@ -176,7 +177,13 @@ public class UserManagerService(
             RoleClaimId = x.Id,
             Type = KindaUserClaimType.Custom,
         });
-        await userClaimsContext.AddRangeAsync(userClaims);
+        ICollection<UserClaim> currentUserClaims = currentUser.UserClaims!;
+
+        IEnumerable<UserClaim> uniqueUserClaimsToInsert = userClaimsToInsert.Where(x =>
+            !currentUserClaims.Any(p => p.ClaimType == x.ClaimType && p.ClaimValue == x.ClaimValue)
+        );
+
+        await userClaimsContext.AddRangeAsync(uniqueUserClaimsToInsert);
         await context.SaveChangesAsync();
     }
 

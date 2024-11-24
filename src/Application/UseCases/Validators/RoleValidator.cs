@@ -89,47 +89,6 @@ public class RoleValidator : AbstractValidator<RoleModel>
             () =>
             {
                 RuleForEach(x => x.RoleClaims).SetValidator(new RoleClaimValidator());
-
-                RuleFor(x => x.RoleClaims)
-                    .Must(x =>
-                        x!
-                            .FindAll(x => x.Id == null)
-                            .DistinctBy(x => new { x.ClaimType, x.ClaimValue })
-                            .Count() == x.FindAll(x => x.Id == null).Count
-                    )
-                    .WithState(x =>
-                        Messager
-                            .Create<Role>()
-                            .Property(x => x.RoleClaims!)
-                            .Message(MessageType.Unique)
-                            .Negative()
-                            .Build()
-                    );
-
-                RuleFor(x => x.RoleClaims)
-                    .MustAsync(
-                        (roleClaim, _) =>
-                            IsExistClaimAsync(
-                                id,
-                                roleClaim!
-                                    .FindAll(x => x.Id == null)
-                                    .Select(x => new KeyValuePair<string, string>(
-                                        x.ClaimType!,
-                                        x.ClaimValue!
-                                    ))
-                            )
-                    )
-                    .When(
-                        _ => actionAccessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
-                        ApplyConditionTo.CurrentValidator
-                    )
-                    .WithState(x =>
-                        Messager
-                            .Create<Role>()
-                            .Property(x => x.RoleClaims!)
-                            .Message(MessageType.Existence)
-                            .Build()
-                    );
             }
         );
     }
@@ -147,9 +106,4 @@ public class RoleValidator : AbstractValidator<RoleModel>
             cancellationToken
         );
     }
-
-    private async Task<bool> IsExistClaimAsync(
-        Ulid id,
-        IEnumerable<KeyValuePair<string, string>> roleClaims
-    ) => !await roleManagerService.HasClaimInRoleAsync(id, roleClaims);
 }
