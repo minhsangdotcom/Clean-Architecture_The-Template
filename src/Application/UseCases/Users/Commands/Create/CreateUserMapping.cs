@@ -42,6 +42,11 @@ public class CreateUserMapping : Profile
                     {
                         dest.UserId = id;
                     }
+
+                    if (src.Id == null || src.Id == Ulid.Empty)
+                    {
+                        dest.Id = Ulid.NewUlid();
+                    }
                 }
             );
 

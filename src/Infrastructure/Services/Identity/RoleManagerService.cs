@@ -17,7 +17,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
     private readonly DbSet<RoleClaim> roleClaimContext = context.Set<RoleClaim>();
     public DbSet<RoleClaim> RoleClaims => roleClaimContext;
 
-    public DbSet<UserClaim> UserClaimsContext = context.Set<UserClaim>();
+    private readonly DbSet<UserClaim> userClaimContext = context.Set<UserClaim>();
 
     private const string NOT_FOUND_MESSAGE = $"{nameof(Role)} is not found";
 
@@ -117,7 +117,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
 
         //update
         roleClaimContext.UpdateRange(roleClaimsToModify);
-        UserClaimsContext.UpdateRange(userClaims);
+        userClaimContext.UpdateRange(userClaims);
         await context.SaveChangesAsync();
 
         // insert
@@ -188,7 +188,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
 
         await roleClaimContext.AddRangeAsync(roleClaimsToInsert);
         await context.SaveChangesAsync();
-        await UserClaimsContext.AddRangeAsync(userClaims);
+        await userClaimContext.AddRangeAsync(userClaims);
         await context.SaveChangesAsync();
     }
 

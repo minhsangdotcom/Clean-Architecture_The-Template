@@ -7,7 +7,9 @@ public class UpdateUserMapping : Profile
 {
     public UpdateUserMapping()
     {
-        CreateMap<UpdateUser, User>();
-        CreateMap<User, UpdateUserResponse>(); 
+        CreateMap<UpdateUser, User>()
+            .ForMember(dest => dest.UserClaims, opt => opt.Ignore())
+            .ForMember(dest => dest.UserRoles, opt => opt.Ignore());
+        CreateMap<User, UpdateUserResponse>();
     }
 }

@@ -1,14 +1,14 @@
 using Application.Common.Exceptions;
-using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
 using Contracts.Common.Messages;
+using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.AspNetCore.Http;
-using Domain.Aggregates.Regions;
 
 namespace Application.UseCases.Users.Commands.Update;
 
@@ -58,6 +58,8 @@ public class UpdateUserHandler(
 
         string? key = avatarUpdate.GetKey(avatar);
         user.Avatar = await avatarUpdate.UploadAvatarAsync(avatar, key);
+        // update default claim
+        user.UpdateDefaultUserClaims();
 
         try
         {
@@ -66,16 +68,19 @@ public class UpdateUserHandler(
             await unitOfWork.Repository<User>().UpdateAsync(user);
             await unitOfWork.SaveAsync(cancellationToken);
 
+            List<UserClaim> customUserClaims = mapper.Map<List<UserClaim>>(
+                command.User.UserClaims,
+                opt =>
+                {
+                    opt.Items[nameof(UserClaim.Type)] = KindaUserClaimType.Custom;
+                    opt.Items[nameof(UserClaim.UserId)] = user.Id;
+                }
+            );
+
             await userManagerService.UpdateUserAsync(
                 user,
                 command.User.Roles!,
-                mapper.Map<IEnumerable<UserClaim>>(
-                    command.User.UserClaims,
-                    opt => {
-                        opt.Items[nameof(UserClaim.Type)] = KindaUserClaimType.Custom;
-                        opt.Items[nameof(UserClaim.UserId)] = user.Id;
-                    }
-                ),
+                customUserClaims,
                 unitOfWork.Transaction
             );
             await unitOfWork.CommitAsync();
