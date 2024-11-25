@@ -44,7 +44,7 @@ public static class ElasticFunctionalityHelper
             if (!isNestedSort)
             {
                 // A.ARAW
-                results.Add(SortOptions.Field(property!, new FieldSort() { Order = sortOrder }));
+                results.Add(SortOptions.Field(property.ToCamelCase()!, new FieldSort() { Order = sortOrder }));
             }
             else
             {

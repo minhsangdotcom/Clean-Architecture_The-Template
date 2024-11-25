@@ -81,7 +81,7 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                             .Analyzer("myTokenizer")
                             .SearchAnalyzer("standardAnalyzer")
                 )
-                .Date(d => d.CreatedAt)
+                .Keyword(d => d.CreatedAt)
                 .Nested(
                     n => n.Agent!,
                     nest =>
@@ -145,7 +145,7 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                 )
                                 .Date(d => d.Agent!.DayOfBirth!)
                                 .ByteNumber(b => b.Agent!.Gender!)
-                                .Date(x => x.Agent!.CreatedAt)
+                                .Keyword(x => x.Agent!.CreatedAt)
                                 .Nested(
                                     n => n.Agent!.Role!,
                                     config =>
