@@ -1,9 +1,11 @@
 using System.Linq.Expressions;
 using Ardalis.GuardClauses;
+using Contracts.Extensions;
 using Contracts.Extensions.Visitors;
 using Domain.Common;
 using Domain.Specs.Interfaces;
 using Domain.Specs.Models;
+
 namespace Domain.Specs;
 
 public abstract class Specification<T> : ISpecification<T>
@@ -57,5 +59,17 @@ public abstract class Specification<T> : ISpecification<T>
                 : Expression.Or(leftExpression, rightExpression);
 
         Criteria = Expression.Lambda<Func<T, bool>>(body, parameter);
+    }
+
+    protected string GetUniqueCachedKey(object? queryParemeter = null)
+    {
+        string query = SpecificationEvaluator<T>.SpecStringQuery(this);
+        string code = $"{query}";
+        if (queryParemeter != null)
+        {
+            string param = SerializerExtension.Serialize(queryParemeter).StringJson;
+            code += $"~{param}";
+        }
+        return code;
     }
 }
