@@ -11,7 +11,7 @@ public class GetUserByEmailSpecification : Specification<User>
 
         string query = SpecificationEvaluator<User>.SpecStringQuery(this);
         string param = SerializerExtension.Serialize(new { Email = email }).StringJson;
-        string code = $"{query}_{param}";
+        string code = $"{query}~{param}";
         Query.EnableCache($"{code}");
     }
 }
