@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Regions;
@@ -29,7 +30,7 @@ public class DbInitializer
         logger.Information("Seeding data is starting.............");
         try
         {
-            await unitOfWork.CreateTransactionAsync();
+            DbTransaction dbTransaction = await unitOfWork.CreateTransactionAsync();
 
             Role[] roles =
             [
@@ -71,7 +72,7 @@ public class DbInitializer
                 await userManagerService.CreateUserAsync(
                     user,
                     [roles[new Random().Next(0, 2)].Id],
-                    transaction: unitOfWork.Transaction
+                    transaction: dbTransaction
                 );
             }
 

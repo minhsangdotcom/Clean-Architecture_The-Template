@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -15,7 +16,7 @@ namespace Application.UseCases.Users.Commands.Update;
 public class UpdateUserHandler(
     IUnitOfWork unitOfWork,
     IMapper mapper,
-    IMediaUpdateService<User> avatarUpdate,
+    IMediaUpdateService<User> mediaUpdateService,
     IUserManagerService userManagerService
 ) : IRequestHandler<UpdateUserCommand, UpdateUserResponse>
 {
@@ -56,14 +57,14 @@ public class UpdateUserHandler(
         }
         user.UpdateAddress(new(province!, district!, commune, command.User.Street!));
 
-        string? key = avatarUpdate.GetKey(avatar);
-        user.Avatar = await avatarUpdate.UploadAvatarAsync(avatar, key);
+        string? key = mediaUpdateService.GetKey(avatar);
+        user.Avatar = await mediaUpdateService.UploadAvatarAsync(avatar, key);
         // update default claim
         user.UpdateDefaultUserClaims();
 
         try
         {
-            await unitOfWork.CreateTransactionAsync();
+            DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
 
             await unitOfWork.Repository<User>().UpdateAsync(user);
             await unitOfWork.SaveAsync(cancellationToken);
@@ -81,20 +82,17 @@ public class UpdateUserHandler(
                 user,
                 command.User.Roles!,
                 customUserClaims,
-                unitOfWork.Transaction
+                transaction
             );
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(cancellationToken);
 
-            await avatarUpdate.DeleteAvatarAsync(oldAvatar);
+            await mediaUpdateService.DeleteAvatarAsync(oldAvatar);
             return mapper.Map<UpdateUserResponse>(user);
         }
         catch (Exception)
         {
-            if (!string.IsNullOrWhiteSpace(user.Avatar))
-            {
-                await avatarUpdate.DeleteAvatarAsync(user.Avatar);
-            }
-            await unitOfWork.RollbackAsync();
+            await mediaUpdateService.DeleteAvatarAsync(user.Avatar);
+            await unitOfWork.RollbackAsync(cancellationToken);
             throw;
         }
     }

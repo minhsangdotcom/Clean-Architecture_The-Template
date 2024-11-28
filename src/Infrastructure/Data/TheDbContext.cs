@@ -27,6 +27,12 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(op
         }
 
         Guard.Against.Null(transaction, nameof(transaction), "transaction is not null");
+
+        if (transaction.Connection != dbConnection)
+        {
+            throw new Exception("Cannot share transaction with difference connections");
+        }
+
         await Database.UseTransactionAsync(transaction);
     }
 

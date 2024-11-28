@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
@@ -12,7 +13,7 @@ namespace Application.UseCases.Users.Commands.Create;
 public class CreateUserHandler(
     IUnitOfWork unitOfWork,
     IMapper mapper,
-    IMediaUpdateService<User> MediaUpdateService,
+    IMediaUpdateService<User> mediaUpdateService,
     IUserManagerService userManagerService
 ) : IRequestHandler<CreateUserCommand, CreateUserResponse>
 {
@@ -40,16 +41,18 @@ public class CreateUserHandler(
 
         userMapping.UpdateAddress(new(province!, district!, commune, command.Street!));
 
-        string? key = MediaUpdateService.GetKey(command.Avatar);
-        userMapping.Avatar = await MediaUpdateService.UploadAvatarAsync(command.Avatar, key);
+        string? key = mediaUpdateService.GetKey(command.Avatar);
+        userMapping.Avatar = await mediaUpdateService.UploadAvatarAsync(command.Avatar, key);
 
+        string? userAvatar = null;
         try
         {
-            await unitOfWork.CreateTransactionAsync();
+            DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
 
             User user = await unitOfWork
                 .Repository<User>()
                 .AddAsync(userMapping, cancellationToken);
+            userAvatar = user.Avatar;
 
             // add default claims
             user.CreateDefaultUserClaims();
@@ -68,10 +71,10 @@ public class CreateUserHandler(
                 user,
                 command.Roles!,
                 customClaims,
-                unitOfWork.Transaction
+                transaction
             );
 
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(cancellationToken);
 
             return (
                 await unitOfWork
@@ -84,7 +87,8 @@ public class CreateUserHandler(
         }
         catch (Exception)
         {
-            await unitOfWork.RollbackAsync();
+            await mediaUpdateService.DeleteAvatarAsync(userAvatar);
+            await unitOfWork.RollbackAsync(cancellationToken);
             throw;
         }
     }

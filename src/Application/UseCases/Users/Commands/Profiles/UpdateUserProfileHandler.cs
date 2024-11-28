@@ -59,10 +59,17 @@ public class UpdateUserProfileHandler(
         string? key = avatarUpdate.GetKey(avatar);
         user.Avatar = await avatarUpdate.UploadAvatarAsync(avatar, key);
 
-        await unitOfWork.Repository<User>().UpdateAsync(user);
-        await unitOfWork.SaveAsync(cancellationToken);
-
-        await avatarUpdate.DeleteAvatarAsync(oldAvatar);
+        try
+        {
+            await unitOfWork.Repository<User>().UpdateAsync(user);
+            await unitOfWork.SaveAsync(cancellationToken);
+            await avatarUpdate.DeleteAvatarAsync(oldAvatar);
+        }
+        catch (Exception)
+        {
+            await avatarUpdate.DeleteAvatarAsync(user.Avatar);
+            throw;
+        }
 
         return (
             await unitOfWork
