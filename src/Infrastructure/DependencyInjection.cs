@@ -21,6 +21,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Npgsql;
+using Serilog;
+using Serilog.Core;
 
 namespace Infrastructure;
 
@@ -28,7 +30,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services,
-        IConfiguration configuration
+        IConfiguration configuration,
+        string? environmentName = "Development"
     )
     {
         services.AddDetection();
@@ -51,8 +54,11 @@ public static class DependencyInjection
             .AddScoped<IDbContext, TheDbContext>()
             .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddSingleton<UpdateAuditableEntityInterceptor>()
-            .AddSingleton<DispatchDomainEventInterceptor>()
-            .AddDbContextPool<TheDbContext>(
+            .AddSingleton<DispatchDomainEventInterceptor>();
+
+        if (environmentName!.CompareTo("Testing") == 0)
+        {
+            services.AddDbContext<TheDbContext>(
                 (sp, options) =>
                 {
                     NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
@@ -63,7 +69,25 @@ public static class DependencyInjection
                             sp.GetRequiredService<DispatchDomainEventInterceptor>()
                         );
                 }
-            )
+            );
+        }
+        else
+        {
+            services.AddDbContextPool<TheDbContext>(
+                (sp, options) =>
+                {
+                    NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
+                    options
+                        .UseNpgsql(npgsqlDataSource)
+                        .AddInterceptors(
+                            sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
+                            sp.GetRequiredService<DispatchDomainEventInterceptor>()
+                        );
+                }
+            );
+        }
+
+        services
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentUser, CurrentUserService>()
             .AddSingleton(typeof(IMediaUpdateService<>), typeof(MediaUpdateService<>))

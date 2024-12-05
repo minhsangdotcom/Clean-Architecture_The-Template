@@ -28,7 +28,7 @@ builder.AddSerialogs();
 
 //-----------------------------
 
-services.AddInfrastructureServices(configuration);
+services.AddInfrastructureServices(configuration, builder.Environment.EnvironmentName);
 services.AddApplicationServices();
 
 try
