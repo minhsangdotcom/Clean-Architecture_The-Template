@@ -17,84 +17,87 @@ public static class OpenTelemetryExtensions
         services.Configure<OpenTelemetrySettings>(
             configuration.GetSection(nameof(OpenTelemetrySettings))
         );
-        var openTelemetrySettings = configuration
-            .GetSection(nameof(OpenTelemetrySettings))
-            .Get<OpenTelemetrySettings>();
+        OpenTelemetrySettings openTelemetrySettings =
+            configuration.GetSection(nameof(OpenTelemetrySettings)).Get<OpenTelemetrySettings>()
+            ?? new();
 
-        ActivitySource source = new(openTelemetrySettings!.ActivitySourceName!);
+        if (openTelemetrySettings.IsEnabled)
+        {
+            ActivitySource source = new(openTelemetrySettings!.ActivitySourceName!);
 
-        services
-            .AddOpenTelemetry()
-            .ConfigureResource(r =>
-                r.AddService(
-                    serviceName: openTelemetrySettings!.ServiceName!,
-                    serviceVersion: openTelemetrySettings.ServiceVersion ?? "unknown",
-                    serviceInstanceId: Environment.MachineName
+            services
+                .AddOpenTelemetry()
+                .ConfigureResource(r =>
+                    r.AddService(
+                        serviceName: openTelemetrySettings!.ServiceName!,
+                        serviceVersion: openTelemetrySettings.ServiceVersion ?? "unknown",
+                        serviceInstanceId: Environment.MachineName
+                    )
                 )
-            )
-            .WithTracing(options =>
-            {
-                options
-                    .AddSource(openTelemetrySettings!.ActivitySourceName!)
-                    .AddHttpClientInstrumentation();
-
-                options.AddAspNetCoreInstrumentation(options =>
+                .WithTracing(options =>
                 {
-                    // to trace only api requests
-                    options.Filter = (context) =>
-                        !string.IsNullOrEmpty(context.Request.Path.Value)
-                        && context.Request.Path.Value.Contains(
-                            Router.prefix.Replace("/", string.Empty),
-                            StringComparison.InvariantCulture
-                        );
+                    options
+                        .AddSource(openTelemetrySettings!.ActivitySourceName!)
+                        .AddHttpClientInstrumentation();
 
-                    // enrich activity with http request and response
-                    options.EnrichWithHttpRequest = (activity, httpRequest) =>
+                    options.AddAspNetCoreInstrumentation(options =>
                     {
-                        activity.SetTag("requestProtocol", httpRequest.Protocol);
-                    };
-                    options.EnrichWithHttpResponse = (activity, httpResponse) =>
-                    {
-                        activity.SetTag("responseLength", httpResponse.ContentLength);
-                    };
+                        // to trace only api requests
+                        options.Filter = (context) =>
+                            !string.IsNullOrEmpty(context.Request.Path.Value)
+                            && context.Request.Path.Value.Contains(
+                                Router.prefix.Replace("/", string.Empty),
+                                StringComparison.InvariantCulture
+                            );
 
-                    // automatically sets Activity Status to Error if an unhandled exception is thrown
-                    options.RecordException = true;
-                    options.EnrichWithException = (activity, exception) =>
-                    {
-                        activity.SetTag("exceptionType", exception?.GetType().ToString());
-                        activity.SetTag("stackTrace", exception?.StackTrace);
-                    };
-                });
-
-                options.AddEntityFrameworkCoreInstrumentation(opt =>
-                {
-                    opt.SetDbStatementForText = true;
-                    opt.SetDbStatementForStoredProcedure = true;
-                    opt.EnrichWithIDbCommand = (activity, command) => {
-                        // var stateDisplayName = $"{command.CommandType} main";
-                        // activity.DisplayName = stateDisplayName;
-                        // activity.SetTag("db.name", stateDisplayName);
-                    };
-                });
-
-                switch (openTelemetrySettings.OtelpOption)
-                {
-                    case OtelpOption.Active:
-                        options.AddOtlpExporter(options =>
+                        // enrich activity with http request and response
+                        options.EnrichWithHttpRequest = (activity, httpRequest) =>
                         {
-                            options.Endpoint = new Uri(openTelemetrySettings.Otelp!.ToString());
-                            options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
-                            options.TimeoutMilliseconds = 300000;
-                        });
-                        break;
-                    case OtelpOption.Inactive:
-                        options.AddConsoleExporter();
-                        break;
-                    default:
-                        break;
-                }
-            });
+                            activity.SetTag("requestProtocol", httpRequest.Protocol);
+                        };
+                        options.EnrichWithHttpResponse = (activity, httpResponse) =>
+                        {
+                            activity.SetTag("responseLength", httpResponse.ContentLength);
+                        };
+
+                        // automatically sets Activity Status to Error if an unhandled exception is thrown
+                        options.RecordException = true;
+                        options.EnrichWithException = (activity, exception) =>
+                        {
+                            activity.SetTag("exceptionType", exception?.GetType().ToString());
+                            activity.SetTag("stackTrace", exception?.StackTrace);
+                        };
+                    });
+
+                    options.AddEntityFrameworkCoreInstrumentation(opt =>
+                    {
+                        opt.SetDbStatementForText = true;
+                        opt.SetDbStatementForStoredProcedure = true;
+                        opt.EnrichWithIDbCommand = (activity, command) => {
+                            // var stateDisplayName = $"{command.CommandType} main";
+                            // activity.DisplayName = stateDisplayName;
+                            // activity.SetTag("db.name", stateDisplayName);
+                        };
+                    });
+
+                    switch (openTelemetrySettings.OtelpOption)
+                    {
+                        case OtelpOption.DistributedServer:
+                            options.AddOtlpExporter(options =>
+                            {
+                                options.Endpoint = new Uri(openTelemetrySettings.Otelp!.ToString());
+                                options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                                options.TimeoutMilliseconds = 300000;
+                            });
+                            break;
+                        case OtelpOption.Console:
+                            options.AddConsoleExporter();
+                            break;
+                        default:
+                            break;
+                    }
+                });
+        }
 
         return services;
     }

@@ -11,6 +11,7 @@ var services = builder.Services;
 var configuration = builder.Configuration;
 
 // ---------------------------------------------
+builder.AddConfiguration();
 builder
     .Services.AddControllers()
     .AddJsonOptions(option =>
@@ -35,14 +36,19 @@ try
     Log.Logger.Information("Application is starting....");
     var app = builder.Build();
 
+    bool isDevelopment = app.Environment.IsDevelopment();
+
     var scope = app.Services.CreateScope();
     var serviceProvider = scope.ServiceProvider;
-    await RegionDataSeeding.SeedingAsync(serviceProvider);
-    await DbInitializer.InitializeAsync(serviceProvider);
+    if (isDevelopment)
+    {
+        await RegionDataSeeding.SeedingAsync(serviceProvider);
+        await DbInitializer.InitializeAsync(serviceProvider);
+    }
 
     app.UseHangfireDashboard(configuration);
 
-    if (app.Environment.IsDevelopment())
+    if (isDevelopment)
     {
         app.UseSwagger();
         app.UseSwaggerUI(x =>
@@ -63,7 +69,10 @@ try
     app.ExceptionHandler();
     app.MapControllers();
 
-    Log.Logger.Information("Application is launching");
+    Log.Logger.Information(
+        "Application is launching with {environment}",
+        app.Environment.EnvironmentName
+    );
     app.Run();
 }
 catch (Exception ex)
