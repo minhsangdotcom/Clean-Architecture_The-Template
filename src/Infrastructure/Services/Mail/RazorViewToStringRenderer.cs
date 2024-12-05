@@ -28,8 +28,8 @@ public class RazorViewToStringRenderer
 
     public static string GetPath(string viewName)
     {
-        string root = Directory.GetParent(Directory.GetCurrentDirectory())!.Parent!.FullName;
-        return Path.Combine(root, "public", "Templates", $"{viewName}.cshtml");
+        string root = Path.Join(Directory.GetCurrentDirectory(), "Assets");
+        return Path.Combine(root, "Templates", $"{viewName}.cshtml");
     }
 
     private static RazorLightEngine CreateRazorlight(Type type) =>
