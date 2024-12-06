@@ -30,7 +30,7 @@ public class CustomWebApplicationFactory<TProgram>(DbConnection dbConnection)
         >();
         try
         {
-            db.Database.EnsureCreated();
+            //db.Database.EnsureCreated();
             //do seeding database here
 
             return host;
