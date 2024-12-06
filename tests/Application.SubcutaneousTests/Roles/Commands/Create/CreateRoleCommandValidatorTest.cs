@@ -6,9 +6,8 @@ using FluentAssertions;
 
 namespace Application.SubcutaneousTests.Roles.Commands.Create;
 
-[Collection("CustomWebApplication")]
-public class CreateRoleCommandValidatorTest(TestingFixture testingFixture)
-    : IClassFixture<TestingFixture>
+[Collection(nameof(TestingCollectionFixture))]
+public class CreateRoleCommandValidatorTest(TestingFixture testingFixture) : IAsyncLifetime
 {
     private readonly Fixture fixture = new();
 
@@ -16,7 +15,6 @@ public class CreateRoleCommandValidatorTest(TestingFixture testingFixture)
     public async Task CreateRole_WhenMissingName_ShouldReturnValidationException()
     {
         var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
-
         var command = fixture
             .Build<CreateRoleCommand>()
             .Without(x => x.Name)
@@ -27,5 +25,15 @@ public class CreateRoleCommandValidatorTest(TestingFixture testingFixture)
             .Invoking(() => testingFixture.SendAsync(command))
             .Should()
             .ThrowAsync<ValidationException>();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await testingFixture.DisposeAsync();
+    }
+
+    public async Task InitializeAsync()
+    {
+        await testingFixture.ResetAsync();
     }
 }
