@@ -44,4 +44,13 @@ public class TestingFixture : IAsyncLifetime
         ISender sender = scope.ServiceProvider.GetRequiredService<ISender>();
         return await sender.Send(request);
     }
+
+    public HttpClient CreateClient()
+    {
+        if (factory == null)
+        {
+            throw new NullReferenceException("factory is null");
+        }
+        return factory.CreateClient();
+    }
 }

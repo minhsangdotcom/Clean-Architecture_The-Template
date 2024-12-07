@@ -1,4 +1,6 @@
 using System.Data.Common;
+using Domain.Aggregates.Roles;
+using Infrastructure.Constants;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -32,7 +34,22 @@ public class CustomWebApplicationFactory<TProgram>(DbConnection dbConnection)
         {
             //db.Database.EnsureCreated();
             //do seeding database here
-
+            db.Set<Role>()
+                .Add(
+                    new()
+                    {
+                        Id = Ulid.Parse("01JEFWVDRM2KTAZVK6EZBEXAW5"),
+                        Name = "ADMIN",
+                        RoleClaims = Credential
+                            .ADMIN_CLAIMS.Select(x => new RoleClaim
+                            {
+                                ClaimType = x.Key,
+                                ClaimValue = x.Value,
+                            })
+                            .ToList(),
+                    }
+                );
+            db.SaveChanges();
             return host;
         }
         catch (Exception ex)

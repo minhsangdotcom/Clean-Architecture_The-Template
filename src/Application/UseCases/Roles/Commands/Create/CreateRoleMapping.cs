@@ -9,13 +9,14 @@ public class CreateRoleMapping : Profile
     public CreateRoleMapping()
     {
         CreateMap<CreateRoleCommand, Role>()
-        .ForMember(dest => dest.RoleClaims, opt => opt.MapFrom(src => src.RoleClaims))
-        .AfterMap((src,dest) =>
-        {
-            dest.Name = src.Name!.ToUpper();
-        });
+            .AfterMap(
+                (src, dest) =>
+                {
+                    dest.Name = src.Name!.ToUpper();
+                }
+            );
 
-        CreateMap<RoleClaimModel, RoleClaim>();
+        CreateMap<RoleClaimModel, RoleClaim>().ForMember(dest => dest.Id, opt => opt.Ignore());
 
         CreateMap<RoleClaim, RoleClaimDetailProjection>();
         CreateMap<Role, CreateRoleResponse>();
