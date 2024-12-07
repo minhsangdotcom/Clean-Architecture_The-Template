@@ -1,5 +1,6 @@
 using Application.UseCases.Projections.Roles;
 using AutoMapper;
+using CaseConverter;
 using Domain.Aggregates.Roles;
 
 namespace Application.UseCases.Roles.Commands.Create;
@@ -12,7 +13,7 @@ public class CreateRoleMapping : Profile
             .AfterMap(
                 (src, dest) =>
                 {
-                    dest.Name = src.Name!.ToUpper();
+                    dest.Name = src.Name.ToSnakeCase().ToUpper();
                 }
             );
 

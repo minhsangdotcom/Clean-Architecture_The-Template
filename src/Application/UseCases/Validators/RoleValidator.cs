@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.UseCases.Projections.Roles;
+using CaseConverter;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Roles;
 using FluentValidation;
@@ -99,10 +100,11 @@ public class RoleValidator : AbstractValidator<RoleModel>
         CancellationToken cancellationToken = default
     )
     {
+        string caseName = name.ToSnakeCase();
         return !await roleManagerService.Roles.AnyAsync(
             x =>
-                (!id.HasValue && EF.Functions.ILike(x.Name, name))
-                || (x.Id != id && EF.Functions.ILike(x.Name, name)),
+                (!id.HasValue && EF.Functions.ILike(x.Name, caseName))
+                || (x.Id != id && EF.Functions.ILike(x.Name, caseName)),
             cancellationToken
         );
     }

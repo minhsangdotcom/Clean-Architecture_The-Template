@@ -53,6 +53,7 @@ public class CreateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateRole_WhenDuplicatedName_ShouldReturnDuplicatedMessage()
     {
+        _ = await CreateRoleAsync("admin");
         var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
         var command = fixture
             .Build<CreateRoleCommand>()
@@ -102,7 +103,12 @@ public class CreateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateRole_WhenMissingClaimTypeOfRoleClaim_ShouldReturnValidationException()
     {
-        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).Without(x => x.ClaimType).CreateMany(2).ToList();
+        var roleClaims = fixture
+            .Build<RoleClaimModel>()
+            .Without(x => x.Id)
+            .Without(x => x.ClaimType)
+            .CreateMany(2)
+            .ToList();
         var command = fixture
             .Build<CreateRoleCommand>()
             .With(x => x.Name)
@@ -118,7 +124,12 @@ public class CreateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateRole_WhenMissingClaimValueOfRoleClaim_ShouldReturnValidationException()
     {
-        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).Without(x => x.ClaimValue).CreateMany(2).ToList();
+        var roleClaims = fixture
+            .Build<RoleClaimModel>()
+            .Without(x => x.Id)
+            .Without(x => x.ClaimValue)
+            .CreateMany(2)
+            .ToList();
         var command = fixture
             .Build<CreateRoleCommand>()
             .With(x => x.Name)
@@ -139,5 +150,18 @@ public class CreateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
+    }
+
+    private async Task<CreateRoleResponse> CreateRoleAsync(string roleName)
+    {
+        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
+        CreateRoleCommand createRoleCommand = fixture
+            .Build<CreateRoleCommand>()
+            .With(x => x.Name, roleName)
+            .With(x => x.Description)
+            .With(x => x.RoleClaims, roleClaims)
+            .Create();
+
+        return await testingFixture.SendAsync(createRoleCommand);
     }
 }
