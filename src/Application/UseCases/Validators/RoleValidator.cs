@@ -74,7 +74,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
             );
 
         RuleFor(x => x.Description)
-            .MaximumLength(256)
+            .MaximumLength(1000)
             .When(x => x.Description != null, ApplyConditionTo.CurrentValidator)
             .WithState(x =>
                 Messager

@@ -82,6 +82,55 @@ public class CreateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
         reasons[0].Message.Should().Be("role_name_existence");
     }
 
+    [Fact]
+    public async Task CreateRole_WhenInvalidLengthDescription_ShouldReturnValidationException()
+    {
+        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
+        var command = fixture
+            .Build<CreateRoleCommand>()
+            .With(x => x.Name)
+            .With(x => x.RoleClaims, roleClaims)
+            .With(x => x.Description, new string(fixture.CreateMany<char>(10001).ToArray()))
+            .Create();
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateRole_WhenMissingClaimTypeOfRoleClaim_ShouldReturnValidationException()
+    {
+        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).Without(x => x.ClaimType).CreateMany(2).ToList();
+        var command = fixture
+            .Build<CreateRoleCommand>()
+            .With(x => x.Name)
+            .With(x => x.RoleClaims, roleClaims)
+            .Create();
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateRole_WhenMissingClaimValueOfRoleClaim_ShouldReturnValidationException()
+    {
+        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).Without(x => x.ClaimValue).CreateMany(2).ToList();
+        var command = fixture
+            .Build<CreateRoleCommand>()
+            .With(x => x.Name)
+            .With(x => x.RoleClaims, roleClaims)
+            .Create();
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
     public async Task DisposeAsync()
     {
         await Task.CompletedTask;

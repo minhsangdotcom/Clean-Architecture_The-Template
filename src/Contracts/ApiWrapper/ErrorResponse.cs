@@ -13,7 +13,7 @@ public class ErrorResponse : ApiBaseResponse
 
     public object? Exception { get; set; }
 
-    public ICollection<BadRequestError>? Errors { get; set; }
+    public ICollection<BadRequestError>? Errors { get; init; }
 
     public ErrorResponse() { }
 
