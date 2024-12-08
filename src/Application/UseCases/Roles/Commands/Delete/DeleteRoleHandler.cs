@@ -2,7 +2,6 @@ using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Roles;
-using Domain.Aggregates.Users;
 using Mediator;
 
 namespace Application.UseCases.Roles.Commands.Delete;
@@ -16,9 +15,9 @@ public class DeleteRoleHandler(IRoleManagerService roleManagerService)
     )
     {
         Role role =
-            await roleManagerService.FindByIdAsync(command.UserId)
+            await roleManagerService.FindByIdAsync(command.RoleId)
             ?? throw new NotFoundException(
-                [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
+                [Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage()]
             );
 
         await roleManagerService.DeleteRoleAsync(role);
