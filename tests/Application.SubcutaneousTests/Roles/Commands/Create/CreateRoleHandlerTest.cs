@@ -1,119 +1,79 @@
-using Application.Common.Interfaces.Services.Identity;
 using Application.UseCases.Projections.Roles;
 using Application.UseCases.Roles.Commands.Create;
 using AutoFixture;
-using AutoMapper;
+using CaseConverter;
 using Domain.Aggregates.Roles;
 using FluentAssertions;
-using Moq;
 
 namespace Application.SubcutaneousTests.Roles.Commands.Create;
 
-public class CreateRoleHandlerTest
+[Collection(nameof(TestingCollectionFixture))]
+public class CreateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
-    private readonly Mock<IRoleManagerService> roleManagerServiceMock;
-    private readonly Mock<IMapper> mapperMock;
-    private readonly IMapper mapper;
-
     private readonly Fixture fixture = new();
-
-    public CreateRoleHandlerTest()
-    {
-        roleManagerServiceMock = new Mock<IRoleManagerService>();
-        var mapperConfig = new MapperConfiguration(x =>
-        {
-            x.AddProfile<CreateRoleMapping>();
-        });
-
-        mapper = mapperConfig.CreateMapper();
-        mapperMock = new Mock<IMapper>();
-    }
 
     [Fact]
     public async Task CreateRole_WhenNoRoleClaims_ShouldCreateRole()
     {
-        var command = fixture
+        CreateRoleCommand command = fixture
             .Build<CreateRoleCommand>()
-            .With(x => x.Name)
-            .With(x => x.Description)
             .Without(x => x.RoleClaims)
             .Create();
+        CreateRoleResponse createRoleResponse = await testingFixture.SendAsync(command);
 
-        Role mappedRole = mapper.Map<Role>(command);
-        CreateRoleResponse createdRole = mapper.Map<CreateRoleResponse>(mappedRole);
-
-        mapperMock.Setup(x => x.Map<Role>(command)).Returns(mappedRole);
-        roleManagerServiceMock.Setup(x => x.CreateRoleAsync(mappedRole)).ReturnsAsync(mappedRole);
-        mapperMock.Setup(x => x.Map<CreateRoleResponse>(mappedRole)).Returns(createdRole);
-
-        var handler = new CreateRoleHandler(roleManagerServiceMock.Object, mapperMock.Object);
-        var response = await handler.Handle(command, CancellationToken.None);
-
-        response.Should().BeOfType<CreateRoleResponse>();
-        response.Name.Should().Be(createdRole.Name);
-        response.Id.Should().Be(createdRole.Id);
-
-        mapperMock.Verify(mapper => mapper.Map<Role>(command), Times.Once);
-        roleManagerServiceMock.Verify(service => service.CreateRoleAsync(mappedRole), Times.Once);
-        mapperMock.Verify(mapper => mapper.Map<CreateRoleResponse>(mappedRole), Times.Once);
+        Role? createdRole = await testingFixture.FindRoleByIdAsync(createRoleResponse.Id);
+        createdRole.Should().NotBeNull();
+        createdRole!.Name.Should().Be(command.Name.ToSnakeCase().ToUpper());
+        createdRole!.Description.Should().Be(command.Description);
     }
 
     [Fact]
     public async Task CreateRole_WhenNoDescription_ShouldCreateRole()
     {
         var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
-        var command = fixture
+        CreateRoleCommand command = fixture
             .Build<CreateRoleCommand>()
-            .With(x => x.Name)
+            .Without(x => x.Description)
             .With(x => x.RoleClaims, roleClaims)
             .Create();
 
-        Role mappedRole = mapper.Map<Role>(command);
-        CreateRoleResponse createdRole = mapper.Map<CreateRoleResponse>(mappedRole);
+        CreateRoleResponse createRoleResponse = await testingFixture.SendAsync(command);
 
-        mapperMock.Setup(x => x.Map<Role>(command)).Returns(mappedRole);
-        roleManagerServiceMock.Setup(x => x.CreateRoleAsync(mappedRole)).ReturnsAsync(mappedRole);
-        mapperMock.Setup(x => x.Map<CreateRoleResponse>(mappedRole)).Returns(createdRole);
-
-        var handler = new CreateRoleHandler(roleManagerServiceMock.Object, mapperMock.Object);
-        var response = await handler.Handle(command, CancellationToken.None);
-
-        response.Should().BeOfType<CreateRoleResponse>();
-        response.Name.Should().Be(createdRole.Name);
-        response.Id.Should().Be(createdRole.Id);
-
-        mapperMock.Verify(mapper => mapper.Map<Role>(command), Times.Once);
-        roleManagerServiceMock.Verify(service => service.CreateRoleAsync(mappedRole), Times.Once);
-        mapperMock.Verify(mapper => mapper.Map<CreateRoleResponse>(mappedRole), Times.Once);
+        Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
+            createRoleResponse.Id
+        );
+        createdRole.Should().NotBeNull();
+        createdRole!.Name.Should().Be(command.Name.ToSnakeCase().ToUpper());
+        createdRole.RoleClaims.Should().HaveCount(roleClaims.Count);
     }
 
     [Fact]
     public async Task CreateRole_ShouldCreateRole()
     {
         var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
-        var command = fixture
+        CreateRoleCommand command = fixture
             .Build<CreateRoleCommand>()
-            .With(x => x.Name)
             .With(x => x.RoleClaims, roleClaims)
-            .With(x => x.Description, fixture.Create<string>())
             .Create();
 
-        Role mappedRole = mapper.Map<Role>(command);
-        CreateRoleResponse createdRole = mapper.Map<CreateRoleResponse>(mappedRole);
+        CreateRoleResponse createRoleResponse = await testingFixture.SendAsync(command);
 
-        mapperMock.Setup(x => x.Map<Role>(command)).Returns(mappedRole);
-        roleManagerServiceMock.Setup(x => x.CreateRoleAsync(mappedRole)).ReturnsAsync(mappedRole);
-        mapperMock.Setup(x => x.Map<CreateRoleResponse>(mappedRole)).Returns(createdRole);
+        Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
+            createRoleResponse.Id
+        );
+        createdRole.Should().NotBeNull();
+        createdRole!.Name.Should().Be(command.Name.ToSnakeCase().ToUpper());
+        createdRole!.Description.Should().Be(command.Description);
+        createdRole.RoleClaims.Should().HaveCount(roleClaims.Count);
+    }
 
-        var handler = new CreateRoleHandler(roleManagerServiceMock.Object, mapperMock.Object);
-        var response = await handler.Handle(command, CancellationToken.None);
+    public async Task InitializeAsync()
+    {
+        await Task.CompletedTask;
+    }
 
-        response.Should().BeOfType<CreateRoleResponse>();
-        response.Name.Should().Be(createdRole.Name);
-        response.Id.Should().Be(createdRole.Id);
-
-        mapperMock.Verify(mapper => mapper.Map<Role>(command), Times.Once);
-        roleManagerServiceMock.Verify(service => service.CreateRoleAsync(mappedRole), Times.Once);
-        mapperMock.Verify(mapper => mapper.Map<CreateRoleResponse>(mappedRole), Times.Once);
+    public async Task DisposeAsync()
+    {
+        await testingFixture.ResetAsync();
     }
 }

@@ -1,4 +1,7 @@
+using Application.Common.Interfaces.UnitOfWorks;
+using Domain.Aggregates.Roles;
 using Mediator;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.SubcutaneousTests;
@@ -52,5 +55,33 @@ public class TestingFixture : IAsyncLifetime
             throw new NullReferenceException("factory is null");
         }
         return factory.CreateClient();
+    }
+
+    public async Task<Role?> FindRoleByIdAsync(Ulid id)
+    {
+        if (factory == null)
+        {
+            throw new NullReferenceException("factory is null");
+        }
+
+        using var scope = factory.Services.CreateScope();
+        IDbContext dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();
+        return await dbContext.Set<Role>().Where(x => x.Id == id).FirstOrDefaultAsync();
+    }
+
+    public async Task<Role?> FindRoleByIdIncludeRoleClaimsAsync(Ulid id)
+    {
+        if (factory == null)
+        {
+            throw new NullReferenceException("factory is null");
+        }
+
+        using var scope = factory.Services.CreateScope();
+        IDbContext dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();
+        return await dbContext
+            .Set<Role>()
+            .Where(x => x.Id == id)
+            .Include(x => x.RoleClaims)
+            .FirstOrDefaultAsync();
     }
 }
