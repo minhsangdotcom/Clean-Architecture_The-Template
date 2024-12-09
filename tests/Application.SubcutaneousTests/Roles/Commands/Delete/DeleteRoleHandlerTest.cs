@@ -1,46 +1,32 @@
 using Application.Common.Exceptions;
-using Application.Common.Interfaces.Services.Identity;
 using Application.UseCases.Roles.Commands.Delete;
+using Application.UseCases.Roles.Commands.Update;
 using AutoFixture;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Roles;
 using FluentAssertions;
-using Mediator;
-using Moq;
 
 namespace Application.SubcutaneousTests.Roles.Commands.Delete;
 
-public class DeleteRoleHandlerTest
+[Collection(nameof(TestingCollectionFixture))]
+public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
-    private readonly Mock<IRoleManagerService> roleManagerServiceMock;
-
     private readonly Fixture fixture = new();
 
-    public DeleteRoleHandlerTest()
-    {
-        roleManagerServiceMock = new();
-    }
+    private Ulid id;
 
     [Fact]
     public async Task DeleteRole_WhenInvalidId_ShouldReturnNotFoundException()
     {
-        Ulid id = Ulid.NewUlid();
-
         List<MessageResult> messageResults =
         [
             Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage(),
         ];
+        Ulid notFoundId = Ulid.NewUlid();
 
-        roleManagerServiceMock
-            .Setup(x => x.FindByIdAsync(id))
-            .ThrowsAsync(new NotFoundException(messageResults));
-
-        var handler = new DeleteRoleHandler(roleManagerServiceMock.Object);
-        Func<Task<Unit>> deleteRoleHandler = async () =>
-            await handler.Handle(new DeleteRoleCommand(id), CancellationToken.None);
-
-        var result = await deleteRoleHandler
+        var result = await FluentActions
+            .Invoking(() => testingFixture.SendAsync(new DeleteRoleCommand(notFoundId)))
             .Should()
             .ThrowAsync<NotFoundException>(becauseArgs: messageResults);
 
@@ -56,17 +42,21 @@ public class DeleteRoleHandlerTest
     [Fact]
     public async Task DeleteRole_WhenValidId_ShouldDeleteRole()
     {
-        Ulid id = Ulid.NewUlid();
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(new DeleteRoleCommand(id)))
+            .Should()
+            .NotThrowAsync();
+    }
 
-        Role currentRole = fixture.Build<Role>().With(x => x.Id, id).OmitAutoProperties().Create();
+    public async Task DisposeAsync()
+    {
+        await Task.CompletedTask;
+    }
 
-        roleManagerServiceMock.Setup(x => x.FindByIdAsync(id)).ReturnsAsync(currentRole);
-
-        roleManagerServiceMock.Setup(x => x.DeleteRoleAsync(currentRole)).Verifiable();
-
-        var handler = new DeleteRoleHandler(roleManagerServiceMock.Object);
-        await handler.Handle(new DeleteRoleCommand(id), CancellationToken.None);
-
-        roleManagerServiceMock.Verify(x => x.DeleteRoleAsync(currentRole), Times.Once);
+    public async Task InitializeAsync()
+    {
+        await testingFixture.ResetAsync();
+        UpdateRoleCommand response = await testingFixture.CreateRoleAsync("admin", fixture);
+        id = Ulid.Parse(response.RoleId);
     }
 }

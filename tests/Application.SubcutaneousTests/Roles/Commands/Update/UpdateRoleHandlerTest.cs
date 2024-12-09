@@ -1,6 +1,5 @@
 using Application.Common.Exceptions;
 using Application.UseCases.Projections.Roles;
-using Application.UseCases.Roles.Commands.Create;
 using Application.UseCases.Roles.Commands.Update;
 using AutoFixture;
 using CaseConverter;
