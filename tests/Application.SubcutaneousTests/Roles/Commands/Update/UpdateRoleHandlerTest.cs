@@ -1,48 +1,26 @@
 using Application.Common.Exceptions;
-using Application.Common.Interfaces.Services.Identity;
 using Application.UseCases.Projections.Roles;
 using Application.UseCases.Roles.Commands.Create;
 using Application.UseCases.Roles.Commands.Update;
 using AutoFixture;
-using AutoMapper;
+using CaseConverter;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Roles;
 using FluentAssertions;
-using Moq;
 
 namespace Application.SubcutaneousTests.Roles.Commands.Update;
 
-public class UpdateRoleHandlerTest
+[Collection(nameof(TestingCollectionFixture))]
+public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
-    private readonly Mock<IRoleManagerService> roleManagerServiceMock;
-    private readonly Mock<IMapper> mapperMock;
-    private readonly IMapper mapper;
-
     private readonly Fixture fixture = new();
-
-    public UpdateRoleHandlerTest()
-    {
-        roleManagerServiceMock = new Mock<IRoleManagerService>();
-        var mapperConfig = new MapperConfiguration(x =>
-        {
-            x.AddProfile<CreateRoleMapping>();
-            x.AddProfile<UpdateRoleMapping>();
-        });
-
-        mapper = mapperConfig.CreateMapper();
-        mapperMock = new Mock<IMapper>();
-    }
+    private UpdateRoleCommand updateRoleCommand = new();
 
     [Fact]
     public async Task UpdateRole_WhenIdNotFound_ShouldReturnNotFoundException()
     {
-        UpdateRole updatedRole = fixture
-            .Build<UpdateRole>()
-            .With(x => x.Name)
-            .With(x => x.Description)
-            .Without(x => x.RoleClaims)
-            .Create();
+        UpdateRole updatedRole = fixture.Build<UpdateRole>().Without(x => x.RoleClaims).Create();
 
         Ulid ulid = Ulid.NewUlid();
         UpdateRoleCommand updateRoleCommand = fixture
@@ -55,15 +33,9 @@ public class UpdateRoleHandlerTest
         [
             Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage(),
         ];
-        roleManagerServiceMock
-            .Setup(x => x.GetByIdAsync(ulid))
-            .Throws(new NotFoundException(messageResults));
 
-        var handler = new UpdateRoleHandler(roleManagerServiceMock.Object, mapperMock.Object);
-        Func<Task<UpdateRoleResponse>> updateRoleHandler = async () =>
-            await handler.Handle(updateRoleCommand, CancellationToken.None);
-
-        var result = await updateRoleHandler
+        var result = await FluentActions
+            .Invoking(() => testingFixture.SendAsync(updateRoleCommand))
             .Should()
             .ThrowAsync<NotFoundException>(becauseArgs: messageResults);
         ReasonTranslation error = result.And.Errors.First().Reasons.First();
@@ -78,153 +50,65 @@ public class UpdateRoleHandlerTest
     [Fact]
     public async Task UpdateRole_WhenNoRoleClaims_ShouldUpdateRole()
     {
-        UpdateRole updatedRole = fixture
-            .Build<UpdateRole>()
-            .With(x => x.Name)
-            .With(x => x.Description)
-            .OmitAutoProperties()
-            .Create();
+        updateRoleCommand.Role.RoleClaims = null;
+        var createRoleResponse = await testingFixture.SendAsync(updateRoleCommand);
 
-        Ulid ulid = Ulid.NewUlid();
-        UpdateRoleCommand updateRoleCommand = fixture
-            .Build<UpdateRoleCommand>()
-            .With(x => x.RoleId, ulid.ToString())
-            .With(x => x.Role, updatedRole)
-            .Create();
-
-        Role currentRole = fixture
-            .Build<Role>()
-            .With(x => x.Id, ulid)
-            .OmitAutoProperties()
-            .Create();
-
-        roleManagerServiceMock.Setup(x => x.GetByIdAsync(ulid)).ReturnsAsync(currentRole);
-        mapper.Map(updatedRole, currentRole);
-        mapperMock.Setup(x => x.Map(updatedRole, currentRole)).Returns(currentRole);
-        UpdateRoleResponse updateRoleResponse = mapper.Map<UpdateRoleResponse>(currentRole);
-        mapperMock.Setup(x => x.Map<UpdateRoleResponse>(currentRole)).Returns(updateRoleResponse);
-
-        var handler = new UpdateRoleHandler(roleManagerServiceMock.Object, mapperMock.Object);
-        var response = await handler.Handle(updateRoleCommand, CancellationToken.None);
-
-        response.Id.Should().Be(updateRoleResponse.Id);
-        response.Name.Should().Be(updateRoleResponse.Name);
+        Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
+            createRoleResponse.Id
+        );
+        createdRole.Should().NotBeNull();
+        UpdateRole updateRole = updateRoleCommand.Role;
+        createdRole!.Name.Should().Be(updateRole.Name!.ToSnakeCase().ToUpper());
+        createdRole!.Description.Should().Be(updateRole.Description);
+        createdRole.RoleClaims.Should().HaveCount(0);
     }
 
     [Fact]
     public async Task UpdateRole_WhenNoDescription_ShouldUpdateRole()
     {
-        Ulid ulid = Ulid.NewUlid();
-        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
-        UpdateRole updatedRole = fixture
-            .Build<UpdateRole>()
-            .With(x => x.Name)
-            .With(x => x.RoleClaims, roleClaims)
-            .OmitAutoProperties()
-            .Create();
-        UpdateRoleCommand updateRoleCommand = fixture
-            .Build<UpdateRoleCommand>()
-            .With(x => x.RoleId, ulid.ToString())
-            .With(x => x.Role, updatedRole)
-            .Create();
+        updateRoleCommand.Role.Description = null;
+        var createRoleResponse = await testingFixture.SendAsync(updateRoleCommand);
 
-        var currentRoleClaims = fixture
-            .Build<RoleClaim>()
-            .With(x => x.Id, Ulid.NewUlid())
-            .With(x => x.RoleId, ulid)
-            .Without(x => x.Role)
-            .Without(x => x.UserClaims)
-            .CreateMany(2)
-            .ToList();
-        Role currentRole = fixture
-            .Build<Role>()
-            .With(x => x.Id, ulid)
-            .With(x => x.RoleClaims, currentRoleClaims)
-            .Without(x => x.UserRoles)
-            .Create();
-
-        roleManagerServiceMock.Setup(x => x.GetByIdAsync(ulid)).ReturnsAsync(currentRole);
-        mapper.Map(updatedRole, currentRole);
-        mapperMock.Setup(x => x.Map(updatedRole, currentRole)).Returns(currentRole);
-
-        roleManagerServiceMock
-            .Setup(x => x.UpdateRoleAsync(currentRole, It.IsAny<List<RoleClaim>>()))
-            .ReturnsAsync(It.IsAny<Role>());
-
-        UpdateRoleResponse updateRoleResponse = mapper.Map<UpdateRoleResponse>(currentRole);
-        mapperMock.Setup(x => x.Map<UpdateRoleResponse>(currentRole)).Returns(updateRoleResponse);
-
-        var handler = new UpdateRoleHandler(roleManagerServiceMock.Object, mapperMock.Object);
-        var response = await handler.Handle(updateRoleCommand, CancellationToken.None);
-
-        response.Id.Should().Be(updateRoleResponse.Id);
-        response.Name.Should().Be(updateRoleResponse.Name);
-        roleManagerServiceMock.Verify(
-            x => x.UpdateRoleAsync(currentRole, It.IsAny<List<RoleClaim>>()),
-            Times.Once
+        Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
+            createRoleResponse.Id
         );
-        var expectedRoleClaims = updateRoleResponse.RoleClaims;
-        response
-            .RoleClaims.Should()
-            .HaveCount(updateRoleResponse.RoleClaims!.Count())
-            .And.ContainInOrder(expectedRoleClaims);
+        createdRole.Should().NotBeNull();
+        UpdateRole updateRole = updateRoleCommand.Role;
+        createdRole!.Name.Should().Be(updateRole.Name!.ToSnakeCase().ToUpper());
+        createdRole.RoleClaims.Should().HaveCount(updateRoleCommand.Role.RoleClaims!.Count);
+        createdRole!.Description.Should().BeNull();
     }
 
     [Fact]
     public async Task UpdateRole_ShouldUpdateRole()
     {
-        Ulid ulid = Ulid.NewUlid();
-        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
-        UpdateRole updatedRole = fixture
-            .Build<UpdateRole>()
-            .With(x => x.Name)
-            .With(x => x.RoleClaims, roleClaims)
-            .Create();
-        UpdateRoleCommand updateRoleCommand = fixture
-            .Build<UpdateRoleCommand>()
-            .With(x => x.RoleId, ulid.ToString())
-            .With(x => x.Role, updatedRole)
-            .Create();
+        UpdateRole updateRole = updateRoleCommand.Role;
+        List<RoleClaimModel> roleClaims = updateRole.RoleClaims!;
+        for (int i = 0; i < roleClaims!.Count; i++)
+        {
+            roleClaims[0].ClaimValue = $"ClaimValue{Guid.NewGuid()}";
+        }
+        updateRole.Name = $"name{Guid.NewGuid()}";
+        updateRole.Description = $"description{Guid.NewGuid()}";
+        var createRoleResponse = await testingFixture.SendAsync(updateRoleCommand);
 
-        var currentRoleClaims = fixture
-            .Build<RoleClaim>()
-            .With(x => x.Id, Ulid.NewUlid())
-            .With(x => x.RoleId, ulid)
-            .Without(x => x.Role)
-            .Without(x => x.UserClaims)
-            .CreateMany(2)
-            .ToList();
-        Role currentRole = fixture
-            .Build<Role>()
-            .With(x => x.Id, ulid)
-            .With(x => x.RoleClaims, currentRoleClaims)
-            .Without(x => x.UserRoles)
-            .Create();
-
-        roleManagerServiceMock.Setup(x => x.GetByIdAsync(ulid)).ReturnsAsync(currentRole);
-        mapper.Map(updatedRole, currentRole);
-        mapperMock.Setup(x => x.Map(updatedRole, currentRole)).Returns(currentRole);
-
-        roleManagerServiceMock
-            .Setup(x => x.UpdateRoleAsync(currentRole, It.IsAny<List<RoleClaim>>()))
-            .ReturnsAsync(It.IsAny<Role>());
-
-        UpdateRoleResponse updateRoleResponse = mapper.Map<UpdateRoleResponse>(currentRole);
-        mapperMock.Setup(x => x.Map<UpdateRoleResponse>(currentRole)).Returns(updateRoleResponse);
-
-        var handler = new UpdateRoleHandler(roleManagerServiceMock.Object, mapperMock.Object);
-        var response = await handler.Handle(updateRoleCommand, CancellationToken.None);
-
-        response.Id.Should().Be(updateRoleResponse.Id);
-        response.Name.Should().Be(updateRoleResponse.Name);
-        roleManagerServiceMock.Verify(
-            x => x.UpdateRoleAsync(currentRole, It.IsAny<List<RoleClaim>>()),
-            Times.Once
+        Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
+            createRoleResponse.Id
         );
-        var expectedRoleClaims = updateRoleResponse.RoleClaims;
-        response
-            .RoleClaims.Should()
-            .HaveCount(updateRoleResponse.RoleClaims!.Count())
-            .And.ContainInOrder(expectedRoleClaims);
+        createdRole.Should().NotBeNull();
+        createdRole!.Name.Should().Be(updateRole.Name!.ToSnakeCase().ToUpper());
+        createdRole.RoleClaims.Should().HaveCount(roleClaims.Count);
+        createdRole!.Description.Should().Be(updateRole.Description);
+    }
+
+    public async Task InitializeAsync()
+    {
+        await testingFixture.ResetAsync();
+        updateRoleCommand = await testingFixture.CreateRoleAsync("admin", fixture);
+    }
+
+    public async Task DisposeAsync()
+    {
+        await Task.CompletedTask;
     }
 }

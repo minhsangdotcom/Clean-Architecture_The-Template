@@ -1,4 +1,8 @@
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.UseCases.Projections.Roles;
+using Application.UseCases.Roles.Commands.Create;
+using Application.UseCases.Roles.Commands.Update;
+using AutoFixture;
 using Domain.Aggregates.Roles;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
@@ -83,5 +87,34 @@ public class TestingFixture : IAsyncLifetime
             .Where(x => x.Id == id)
             .Include(x => x.RoleClaims)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<UpdateRoleCommand> CreateRoleAsync(string roleName, Fixture fixture)
+    {
+        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
+        CreateRoleCommand createRoleCommand = fixture
+            .Build<CreateRoleCommand>()
+            .With(x => x.Name, roleName)
+            .With(x => x.RoleClaims, roleClaims)
+            .Create();
+
+        CreateRoleResponse createRoleResponse = await SendAsync(createRoleCommand);
+        return new()
+        {
+            RoleId = createRoleResponse.Id.ToString(),
+            Role = new UpdateRole()
+            {
+                Name = createRoleResponse.Name,
+                Description = createRoleResponse.Description,
+                RoleClaims = createRoleResponse
+                    .RoleClaims!.Select(x => new RoleClaimModel()
+                    {
+                        ClaimType = x.ClaimType,
+                        ClaimValue = x.ClaimValue,
+                        Id = x.Id,
+                    })
+                    .ToList(),
+            },
+        };
     }
 }

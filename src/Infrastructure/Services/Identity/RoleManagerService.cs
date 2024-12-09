@@ -55,6 +55,14 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             {
                 await UpdateRoleClaimAsync(roleClaims, role);
             }
+            else
+            {
+                List<RoleClaim> claimsToDelete = await roleClaimContext
+                    .Where(x => x.RoleId == role.Id)
+                    .ToListAsync();
+                roleClaimContext.RemoveRange(claimsToDelete);
+                await context.SaveChangesAsync();
+            }
 
             await context.DatabaseFacade.CommitTransactionAsync();
             return role;
