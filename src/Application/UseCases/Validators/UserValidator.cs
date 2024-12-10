@@ -90,7 +90,10 @@ public partial class UserValidator : AbstractValidator<UserModel>
             .MustAsync(
                 (email, cancellationToken) => IsEmailAvailableAsync(email!, id, cancellationToken)
             )
-            .When(_ => accessorService.GetHttpMethod() == HttpMethod.Put.ToString())
+            .When(
+                _ => accessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
+                ApplyConditionTo.CurrentValidator
+            )
             .WithState(x =>
                 Messager
                     .Create<User>()
@@ -102,7 +105,10 @@ public partial class UserValidator : AbstractValidator<UserModel>
                 (email, cancellationToken) =>
                     IsEmailAvailableAsync(email!, cancellationToken: cancellationToken)
             )
-            .When(_ => accessorService.GetHttpMethod() == HttpMethod.Post.ToString())
+            .When(
+                _ => accessorService.GetHttpMethod() == HttpMethod.Post.ToString(),
+                ApplyConditionTo.CurrentValidator
+            )
             .WithState(x =>
                 Messager
                     .Create<User>()

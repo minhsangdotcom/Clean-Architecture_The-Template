@@ -21,8 +21,8 @@ public class RegionDataSeeding
             return;
         }
 
-        string path = Directory.GetParent(Directory.GetCurrentDirectory())!.FullName!;
-        string fullPath = Path.Combine(path, "Infrastructure", "Data", "Seeds");
+        string path = Directory.GetCurrentDirectory();
+        string fullPath = Path.Combine(path, "Data", "Seeds");
 
         string provinceFilePath = Path.Combine(fullPath, "Provinces.json");
         IEnumerable<Province>? provinces = Read<Province>(provinceFilePath);

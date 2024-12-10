@@ -41,6 +41,18 @@
       <Link>Assets\Templates\ForgotPassword.cshtml</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\..\src\Infrastructure\Data\Seeds\Provinces.json">
+      <Link>Data\Seeds\Provinces.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\src\Infrastructure\Data\Seeds\Districts.json">
+      <Link>Data\Seeds\Districts.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\src\Infrastructure\Data\Seeds\Wards.json">
+      <Link>Data\Seeds\Wards.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

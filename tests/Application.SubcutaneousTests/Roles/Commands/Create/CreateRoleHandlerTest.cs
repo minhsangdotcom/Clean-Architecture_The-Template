@@ -21,7 +21,9 @@ public class CreateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .Create();
         CreateRoleResponse createRoleResponse = await testingFixture.SendAsync(command);
 
-        Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(createRoleResponse.Id);
+        Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
+            createRoleResponse.Id
+        );
         createdRole.Should().NotBeNull();
         createdRole!.Name.Should().Be(command.Name.ToSnakeCase().ToUpper());
         createdRole!.Description.Should().Be(command.Description);
@@ -71,11 +73,11 @@ public class CreateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
 
     public async Task InitializeAsync()
     {
-        await Task.CompletedTask;
+        await testingFixture.ResetAsync();
     }
 
     public async Task DisposeAsync()
     {
-        await testingFixture.ResetAsync();
+        await Task.CompletedTask;
     }
 }

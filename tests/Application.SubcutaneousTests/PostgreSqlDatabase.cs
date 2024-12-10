@@ -41,7 +41,8 @@ public class PostgreSqlDatabase : IDatabase
             new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Postgres,
-                TablesToIgnore = ["__EFMigrationsHistory"],
+                // don't remove these tables
+                TablesToIgnore = ["__EFMigrationsHistory", "province", "district", "commune"],
             }
         );
         await connection.CloseAsync();
