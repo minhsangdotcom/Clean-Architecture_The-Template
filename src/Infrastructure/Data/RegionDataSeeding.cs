@@ -21,7 +21,8 @@ public class RegionDataSeeding
             return;
         }
 
-        string path = Directory.GetCurrentDirectory();
+        // bin/Debug/{net_version}/
+        string path = AppContext.BaseDirectory;
         string fullPath = Path.Combine(path, "Data", "Seeds");
 
         string provinceFilePath = Path.Combine(fullPath, "Provinces.json");
