@@ -176,7 +176,10 @@ public partial class UserValidator : AbstractValidator<UserModel>
             );
 
         RuleFor(x => x.CommuneId)
-            .MustAsync((communeId, cancellationToken) => IsCommuneAvailableAsync(communeId!.Value, cancellationToken))
+            .MustAsync(
+                (communeId, cancellationToken) =>
+                    IsCommuneAvailableAsync(communeId!.Value, cancellationToken)
+            )
             .When(x => x.CommuneId != null, ApplyConditionTo.CurrentValidator)
             .WithState(x =>
                 Messager
@@ -232,10 +235,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
     private async Task<bool> IsCommuneAvailableAsync(
         Ulid communeId,
         CancellationToken cancellationToken
-    ) =>
-        await unitOfWork
-            .Repository<Commune>()
-            .AnyAsync(x => x.Id == communeId, cancellationToken);
+    ) => await unitOfWork.Repository<Commune>().AnyAsync(x => x.Id == communeId, cancellationToken);
 
     [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
     private static partial Regex EmailValidationRegex();
