@@ -70,7 +70,7 @@ public partial class TestingFixture : IAsyncLifetime
                     "admin",
                     "admin",
                     "$2a$10$d56gyiY.bfDIUMtlVzN.PeLCIct3gh3vkgz.eyc0Gx1YiC881/Yp6",
-                    "admin@admin.com.vn",
+                    "admin.admin@admin.com.vn",
                     "0925123123"
                 )
             );

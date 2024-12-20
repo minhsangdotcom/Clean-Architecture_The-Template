@@ -129,7 +129,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
             )
             .Must(x =>
             {
-                Regex regex = VietnamesePhoneValidationRegex();
+                Regex regex = PhoneValidationRegex();
                 return regex.IsMatch(x!);
             })
             .WithState(x =>
@@ -246,6 +246,6 @@ public partial class UserValidator : AbstractValidator<UserModel>
     [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
     private static partial Regex EmailValidationRegex();
 
-    [GeneratedRegex(@"^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$")]
-    private static partial Regex VietnamesePhoneValidationRegex();
+    [GeneratedRegex(@"^\+?\d{7,15}$")]
+    private static partial Regex PhoneValidationRegex();
 }

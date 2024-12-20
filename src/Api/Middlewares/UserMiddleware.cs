@@ -10,7 +10,7 @@ public class UserMiddleware(RequestDelegate next)
         {
             currentUser.SetClaimPrinciple(context.User);
         }
-        
+
         currentUser.SetClientIp(context);
 
         await next.Invoke(context);

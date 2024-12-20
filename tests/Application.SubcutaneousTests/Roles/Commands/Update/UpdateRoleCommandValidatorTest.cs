@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using Application.Common.Exceptions;
+using Application.SubcutaneousTests.Extensions;
 using Application.UseCases.Projections.Roles;
 using Application.UseCases.Roles.Commands.Update;
 using AutoFixture;
@@ -51,11 +52,12 @@ public class UpdateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
         var response = await testingFixture.MakeRequestAsync(
             "roles",
             HttpMethod.Post,
-            updateRoleCommand.Role
+            updateRoleCommand.Role,
+            "multipart/form-data"
         );
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        ErrorResponse? errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        ErrorResponse? errorResponse = await response.ToResponse<ErrorResponse>();
         errorResponse.Should().NotBeNull();
         List<BadRequestError> badRequestErrors = [.. errorResponse!.Errors!];
 
