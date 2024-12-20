@@ -3,6 +3,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -74,8 +75,19 @@ public partial class TestingFixture : IAsyncLifetime
                 )
             );
         await unitOfWork.SaveAsync();
-        // adding role claims later
-        Role role = new() { Name = "ADMIN", Description = "Admin role" };
+        Role role =
+            new()
+            {
+                Name = "ADMIN",
+                Description = "Admin role",
+                RoleClaims = Credential
+                    .ADMIN_CLAIMS.Select(x => new RoleClaim()
+                    {
+                        ClaimType = x.Key,
+                        ClaimValue = x.Value,
+                    })
+                    .ToArray(),
+            };
         await roleManagerService.CreateRoleAsync(role);
         await userManagerService.AddRoleToUserAsync(user, [role.Id]);
         return user;

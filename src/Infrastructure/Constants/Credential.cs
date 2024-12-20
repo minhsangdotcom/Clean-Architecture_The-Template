@@ -14,6 +14,11 @@ public static class Credential
         new("permission", "delete.user"),
         new("permission", "list.user"),
         new("permission", "detail.user"),
+        new("permission", "create.role"),
+        new("permission", "update.role"),
+        new("permission", "delete.role"),
+        new("permission", "list.role"),
+        new("permission", "detail.role"),
     ];
 
     public static readonly IReadOnlyCollection<KeyValuePair<string, string>> MANAGER_CLAIMS =
