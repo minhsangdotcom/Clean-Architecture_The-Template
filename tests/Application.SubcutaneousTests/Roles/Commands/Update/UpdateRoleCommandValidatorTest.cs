@@ -7,7 +7,9 @@ using Application.UseCases.Roles.Commands.Update;
 using AutoFixture;
 using Contracts.ApiWrapper;
 using Contracts.Extensions;
+using Domain.Aggregates.Roles;
 using FluentAssertions;
+using Wangkanai.Extensions;
 
 namespace Application.SubcutaneousTests.Roles.Commands.Update;
 
@@ -42,19 +44,15 @@ public class UpdateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     public async Task UpdateRole_WhenDuplicatedName_ShouldReturnDuplicatedMessage()
     {
         const string ROLE_NAME = "userTest";
-        _ = await testingFixture.CreateRoleAsync(ROLE_NAME, fixture);
+        Role role = await testingFixture.CreateRoleAsync(ROLE_NAME);
 
-        updateRoleCommand.Role.Name = ROLE_NAME;
+        updateRoleCommand.Role.Name = role.Name;
 
-        StringContent payload =
-            new(
-                SerializerExtension.Serialize(updateRoleCommand.Role).StringJson,
-                Encoding.UTF8,
-                "application/json"
-            );
-        var response = await testingFixture
-            .CreateClient()
-            .PutAsync($"http://localhost:8080/api/roles/{updateRoleCommand.RoleId}", payload);
+        var response = await testingFixture.MakeRequestAsync(
+            "roles",
+            HttpMethod.Post,
+            updateRoleCommand.Role
+        );
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         ErrorResponse? errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponse>();
@@ -63,7 +61,7 @@ public class UpdateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
 
         BadRequestError firstElement = badRequestErrors[0];
 
-        firstElement.PropertyName.Should().Be("Role.Name");
+        firstElement.PropertyName.Should().Be("Name");
         List<ReasonTranslation> reasons = [.. firstElement.Reasons];
 
         reasons[0].Message.Should().Be("role_name_existence");
@@ -108,6 +106,8 @@ public class UpdateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     {
         await testingFixture.ResetAsync();
 
-        updateRoleCommand = await testingFixture.CreateRoleAsync("managerTest", fixture);
+        Role role = await testingFixture.CreateRoleAsync("managerTest");
+        updateRoleCommand = testingFixture.ToUpdateRoleCommand(role);
+        await testingFixture.SeedingUserAsync();
     }
 }

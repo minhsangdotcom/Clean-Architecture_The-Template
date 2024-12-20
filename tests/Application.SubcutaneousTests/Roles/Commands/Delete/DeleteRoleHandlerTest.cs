@@ -56,7 +56,8 @@ public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        UpdateRoleCommand response = await testingFixture.CreateRoleAsync("admin", fixture);
+        Role role = await testingFixture.CreateRoleAsync("admin");
+        UpdateRoleCommand response = testingFixture.ToUpdateRoleCommand(role);
         id = Ulid.Parse(response.RoleId);
     }
 }

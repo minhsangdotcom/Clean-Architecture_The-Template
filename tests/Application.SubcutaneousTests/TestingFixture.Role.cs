@@ -1,10 +1,9 @@
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Services.Identity;
+using Application.SubcutaneousTests.Extensions;
 using Application.UseCases.Projections.Roles;
 using Application.UseCases.Roles.Commands.Create;
 using Application.UseCases.Roles.Commands.Update;
-using AutoFixture;
 using Domain.Aggregates.Roles;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.SubcutaneousTests;
@@ -13,51 +12,49 @@ public partial class TestingFixture
 {
     public async Task<Role?> FindRoleByIdAsync(Ulid id)
     {
-        if (factory == null)
-        {
-            throw new NullReferenceException("factory is null");
-        }
-
-        using var scope = factory.Services.CreateScope();
-        IDbContext dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();
-        return await dbContext.Set<Role>().Where(x => x.Id == id).FirstOrDefaultAsync();
+        factory.ThrowIfNull();
+        using var scope = factory!.Services.CreateScope();
+        var roleManagerService = scope.ServiceProvider.GetRequiredService<IRoleManagerService>();
+        return await roleManagerService.GetByIdAsync(id);
     }
 
     public async Task<Role?> FindRoleByIdIncludeRoleClaimsAsync(Ulid id)
     {
-        if (factory == null)
-        {
-            throw new NullReferenceException("factory is null");
-        }
-
-        using var scope = factory.Services.CreateScope();
-        IDbContext dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();
-        return await dbContext
-            .Set<Role>()
-            .Where(x => x.Id == id)
-            .Include(x => x.RoleClaims)
-            .FirstOrDefaultAsync();
+        factory.ThrowIfNull();
+        using var scope = factory!.Services.CreateScope();
+        var roleManagerService = scope.ServiceProvider.GetRequiredService<IRoleManagerService>();
+        return await roleManagerService.FindByIdAsync(id);
     }
 
-    public async Task<UpdateRoleCommand> CreateRoleAsync(string roleName, Fixture fixture)
+    public async Task<Role> CreateRoleAsync(string roleName)
     {
-        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
-        CreateRoleCommand createRoleCommand = fixture
-            .Build<CreateRoleCommand>()
-            .With(x => x.Name, roleName)
-            .With(x => x.RoleClaims, roleClaims)
-            .Create();
+        CreateRoleCommand role =
+            new()
+            {
+                Name = roleName,
+                RoleClaims =
+                [
+                    new RoleClaimModel() { ClaimType = "Permission", ClaimValue = "User.Create" },
+                    new RoleClaimModel() { ClaimType = "Permission", ClaimValue = "User.Get" },
+                ],
+            };
+        factory.ThrowIfNull();
+        var response = await SendAsync(role);
+        using var scope = factory!.Services.CreateScope();
+        var roleManagerService = scope.ServiceProvider.GetRequiredService<IRoleManagerService>();
+        return (await roleManagerService.FindByIdAsync(response.Id))!;
+    }
 
-        CreateRoleResponse createRoleResponse = await SendAsync(createRoleCommand);
+    public UpdateRoleCommand ToUpdateRoleCommand(Role role)
+    {
         return new()
         {
-            RoleId = createRoleResponse.Id.ToString(),
+            RoleId = role.Id.ToString(),
             Role = new UpdateRole()
             {
-                Name = createRoleResponse.Name,
-                Description = createRoleResponse.Description,
-                RoleClaims = createRoleResponse
-                    .RoleClaims!.Select(x => new RoleClaimModel()
+                Name = role.Name,
+                Description = role.Description,
+                RoleClaims = role.RoleClaims!.Select(x => new RoleClaimModel()
                     {
                         ClaimType = x.ClaimType,
                         ClaimValue = x.ClaimValue,

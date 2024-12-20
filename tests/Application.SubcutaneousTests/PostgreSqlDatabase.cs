@@ -1,4 +1,5 @@
 using System.Data.Common;
+using Domain.Aggregates.Users;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

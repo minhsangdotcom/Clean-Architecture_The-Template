@@ -101,7 +101,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     {
         await testingFixture.ResetAsync();
         await testingFixture.SeedingRegionsAsync();
-        var response = await testingFixture.CreateRoleAsync("admin", fixture);
-        roleId = Ulid.Parse(response.RoleId);
+        var response = await testingFixture.CreateRoleAsync("admin");
+        roleId = response.Id;
     }
 }

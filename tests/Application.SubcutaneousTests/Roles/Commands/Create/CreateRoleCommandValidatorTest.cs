@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using Application.Common.Exceptions;
+using Application.SubcutaneousTests.Extensions;
 using Application.UseCases.Projections.Roles;
 using Application.UseCases.Roles.Commands.Create;
 using AutoFixture;
@@ -53,25 +54,21 @@ public class CreateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateRole_WhenDuplicatedName_ShouldReturnDuplicatedMessage()
     {
-        _ = await CreateRoleAsync("admin");
         var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
         var command = fixture
             .Build<CreateRoleCommand>()
             .With(x => x.Name, "admin")
             .With(x => x.RoleClaims, roleClaims)
             .Create();
-        StringContent payload =
-            new(
-                SerializerExtension.Serialize(command).StringJson,
-                Encoding.UTF8,
-                "application/json"
-            );
-        var response = await testingFixture
-            .CreateClient()
-            .PostAsync("http://localhost:8080/api/roles", payload);
+
+        HttpResponseMessage response = await testingFixture.MakeRequestAsync(
+            "roles",
+            HttpMethod.Post,
+            command
+        );
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        ErrorResponse? errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        ErrorResponse? errorResponse = await response.ToResponse<ErrorResponse>();
         errorResponse.Should().NotBeNull();
         List<BadRequestError> badRequestErrors = [.. errorResponse!.Errors!];
 
@@ -150,18 +147,6 @@ public class CreateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-    }
-
-    private async Task<CreateRoleResponse> CreateRoleAsync(string roleName)
-    {
-        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
-        CreateRoleCommand createRoleCommand = fixture
-            .Build<CreateRoleCommand>()
-            .With(x => x.Name, roleName)
-            .With(x => x.Description)
-            .With(x => x.RoleClaims, roleClaims)
-            .Create();
-
-        return await testingFixture.SendAsync(createRoleCommand);
+        await testingFixture.SeedingUserAsync();
     }
 }

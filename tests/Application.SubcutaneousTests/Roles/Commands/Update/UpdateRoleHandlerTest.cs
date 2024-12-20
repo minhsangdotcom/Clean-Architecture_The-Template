@@ -103,7 +103,8 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        updateRoleCommand = await testingFixture.CreateRoleAsync("admin", fixture);
+        Role role = await testingFixture.CreateRoleAsync("admin");
+        updateRoleCommand = testingFixture.ToUpdateRoleCommand(role);
     }
 
     public async Task DisposeAsync()
