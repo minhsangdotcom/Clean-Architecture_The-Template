@@ -3,6 +3,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
+using Domain.Exceptions;
 using Infrastructure.Constants;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,7 @@ public partial class TestingFixture : IAsyncLifetime
     private readonly PostgreSqlDatabase database;
 
     private const string BASE_URL = "http://localhost:8080/api/";
+    private HttpClient? Client;
 
     public TestingFixture()
     {
@@ -28,6 +30,11 @@ public partial class TestingFixture : IAsyncLifetime
         {
             await factory!.DisposeAsync();
         }
+
+        if (Client != null)
+        {
+            Client!.Dispose();
+        }
     }
 
     public async Task InitializeAsync()
@@ -35,6 +42,7 @@ public partial class TestingFixture : IAsyncLifetime
         await database.InitialiseAsync();
         var connection = database.GetConnection();
         factory = new(connection);
+        CreateClient();
     }
 
     public async Task ResetAsync()
@@ -100,17 +108,20 @@ public partial class TestingFixture : IAsyncLifetime
         string? contentType = null
     )
     {
-        using HttpClient httpClient = CreateClient();
+        if (Client == null)
+        {
+            throw new Exception($"{nameof(Client)} is null");
+        }
+
         var loginPayload = new { Username = "admin", Password = "Admin@123" };
-        HttpResponseMessage httpResponse = await httpClient.CreateRequestAsync(
+        HttpResponseMessage httpResponse = await Client!.CreateRequestAsync(
             $"{BASE_URL}login",
             HttpMethod.Post,
             loginPayload
         );
         var response = await httpResponse.ToResponse<Response<LoginResponse>>();
 
-        using var client = CreateClient();
-        return await client.CreateRequestAsync(
+        return await Client!.CreateRequestAsync(
             $"{BASE_URL}{uriString}",
             method,
             payload,
@@ -119,10 +130,10 @@ public partial class TestingFixture : IAsyncLifetime
         );
     }
 
-    private HttpClient CreateClient()
+    private void CreateClient()
     {
         factory.ThrowIfNull();
-        return factory!.CreateClient();
+        Client = factory!.CreateClient();
     }
 }
 
