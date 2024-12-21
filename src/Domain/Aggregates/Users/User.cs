@@ -80,15 +80,10 @@ public class User : AggregateRoot
 
     public void UpdateAddress(Address address) => Address = address;
 
-    public void UpdateDefaultUserClaims()
-    {
+    public void UpdateDefaultUserClaims() =>
         Emit(new UpdateDefaultUserClaimEvent() { User = this });
-    }
 
-    public void CreateDefaultUserClaims()
-    {
-        ApplyCreateDefaultUserClaim();
-    }
+    public void CreateDefaultUserClaims() => ApplyCreateDefaultUserClaim();
 
     private List<UserClaim> GetUserClaims(bool isCreated = false) =>
         [

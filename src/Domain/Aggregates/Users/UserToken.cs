@@ -1,4 +1,5 @@
 using Domain.Common;
+
 namespace Domain.Aggregates.Users;
 
 public class UserToken : BaseEntity

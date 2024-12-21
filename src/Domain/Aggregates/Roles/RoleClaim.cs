@@ -14,7 +14,7 @@ public class RoleClaim : DefaultEntity
 
     public Ulid RoleId { get; set; }
 
-    public ICollection<UserClaim>? UserClaims { get; set; }
+    public ICollection<UserClaim>? UserClaims { get; set; } = [];
 
     public List<UserClaim> UpdateUserClaim()
     {
