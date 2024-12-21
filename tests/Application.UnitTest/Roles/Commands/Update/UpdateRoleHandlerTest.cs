@@ -1,7 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
+using Application.UseCases.Mapping.Roles;
 using Application.UseCases.Projections.Roles;
-using Application.UseCases.Roles.Commands.Create;
 using Application.UseCases.Roles.Commands.Update;
 using AutoFixture;
 using AutoMapper;
@@ -26,8 +26,8 @@ public class UpdateRoleHandlerTest
         roleManagerServiceMock = new Mock<IRoleManagerService>();
         var mapperConfig = new MapperConfiguration(x =>
         {
-            x.AddProfile<CreateRoleMapping>();
             x.AddProfile<UpdateRoleMapping>();
+            x.AddProfile<RoleMapping>();
         });
 
         mapper = mapperConfig.CreateMapper();

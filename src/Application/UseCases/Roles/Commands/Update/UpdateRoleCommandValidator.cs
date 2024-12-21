@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
-using Application.UseCases.Validators;
+using Application.UseCases.Validators.Roles;
 using Contracts.Common.Messages;
 using FluentValidation;
 
@@ -8,12 +8,16 @@ namespace Application.UseCases.Roles.Commands.Update;
 
 public class UpdateRoleCommandValidator : AbstractValidator<UpdateRoleCommand>
 {
-    public UpdateRoleCommandValidator(IRoleManagerService roleManagerService, IActionAccessorService actionAccessorService)
+    public UpdateRoleCommandValidator(
+        IRoleManagerService roleManagerService,
+        IActionAccessorService actionAccessorService
+    )
     {
         RuleFor(x => x.Role)
             .NotEmpty()
             .WithState(x =>
-                Messager.Create<UpdateRoleCommand>()
+                Messager
+                    .Create<UpdateRoleCommand>()
                     .Property(x => x.Role!)
                     .Message(MessageType.Null)
                     .Negative()
@@ -21,4 +25,4 @@ public class UpdateRoleCommandValidator : AbstractValidator<UpdateRoleCommand>
             )
             .SetValidator(new RoleValidator(roleManagerService, actionAccessorService));
     }
-} 
+}

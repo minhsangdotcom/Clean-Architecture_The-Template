@@ -7,7 +7,7 @@ using Domain.Aggregates.Roles;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.UseCases.Validators;
+namespace Application.UseCases.Validators.Roles;
 
 public class RoleValidator : AbstractValidator<RoleModel>
 {

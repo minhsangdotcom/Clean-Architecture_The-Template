@@ -1,3 +1,4 @@
+using Application.UseCases.Projections.Users;
 using AutoMapper;
 using Domain.Aggregates.Users;
 

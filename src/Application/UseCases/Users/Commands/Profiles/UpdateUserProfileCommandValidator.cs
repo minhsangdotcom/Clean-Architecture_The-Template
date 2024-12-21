@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.UseCases.Validators;
+using Application.UseCases.Validators.Users;
 using FluentValidation;
 
 namespace Application.UseCases.Users.Commands.Profiles;

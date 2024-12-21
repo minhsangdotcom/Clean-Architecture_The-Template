@@ -27,6 +27,8 @@ public class UserProjection : BaseResponse
 
     public CommuneProjection? Commune { get; set; }
 
+    public string? Street { get; set; }
+
     [File]
     public string? Avatar { get; set; }
 

@@ -1,20 +1,20 @@
-using Application.UseCases.Projections.Roles;
+using Application.UseCases.Projections.Users;
 using Contracts.Common.Messages;
-using Domain.Aggregates.Roles;
+using Domain.Aggregates.Users;
 using FluentValidation;
 
-namespace Application.UseCases.Validators;
+namespace Application.UseCases.Validators.Users;
 
-public class RoleClaimValidator : AbstractValidator<RoleClaimModel>
+public class UserClaimValidator : AbstractValidator<UserClaimModel>
 {
-    public RoleClaimValidator()
+    public UserClaimValidator()
     {
         RuleFor(x => x.ClaimType)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithState(x =>
                 Messager
-                    .Create<RoleClaim>(nameof(Role.RoleClaims))
+                    .Create<UserClaim>(nameof(User.UserClaims))
                     .Property(x => x.ClaimType!)
                     .Message(MessageType.Null)
                     .Negative()
@@ -26,7 +26,7 @@ public class RoleClaimValidator : AbstractValidator<RoleClaimModel>
             .NotEmpty()
             .WithState(x =>
                 Messager
-                    .Create<RoleClaim>(nameof(Role.RoleClaims))
+                    .Create<UserClaim>(nameof(User.UserClaims))
                     .Property(x => x.ClaimValue!)
                     .Message(MessageType.Null)
                     .Negative()

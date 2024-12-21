@@ -1,3 +1,4 @@
+using Application.UseCases.Projections.Roles;
 using AutoMapper;
 using CaseConverter;
 using Domain.Aggregates.Roles;
@@ -10,12 +11,7 @@ public class UpdateRoleMapping : Profile
     {
         CreateMap<UpdateRole, Role>()
             .ForMember(dest => dest.RoleClaims, opt => opt.Ignore())
-            .AfterMap(
-                (src, dest) =>
-                {
-                    dest.Name = src.Name.ToSnakeCase().ToUpper();
-                }
-            );
+            .IncludeBase<RoleModel, Role>();
 
         CreateMap<Role, UpdateRoleResponse>();
     }

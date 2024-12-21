@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.UseCases.Validators;
+using Application.UseCases.Validators.Users;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Users;
 using FluentValidation;

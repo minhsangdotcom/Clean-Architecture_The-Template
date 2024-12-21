@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Services.Identity;
+using Application.UseCases.Mapping.Roles;
 using Application.UseCases.Projections.Roles;
 using Application.UseCases.Roles.Commands.Create;
 using AutoFixture;
@@ -23,6 +24,7 @@ public class CreateRoleHandlerTest
         var mapperConfig = new MapperConfiguration(x =>
         {
             x.AddProfile<CreateRoleMapping>();
+            x.AddProfile<RoleMapping>();
         });
 
         mapper = mapperConfig.CreateMapper();

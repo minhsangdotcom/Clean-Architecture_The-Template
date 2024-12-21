@@ -9,5 +9,6 @@ public class ListProvinceMapping : Profile
     public ListProvinceMapping()
     {
         CreateMap<Province, ProvinceProjection>();
+        CreateMap<Province, ProvinceDetailProjection>();
     }
 }

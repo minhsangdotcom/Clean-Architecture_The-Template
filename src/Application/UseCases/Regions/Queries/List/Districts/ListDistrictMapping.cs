@@ -9,6 +9,6 @@ public class ListDistrictMapping : Profile
     public ListDistrictMapping()
     {
         CreateMap<District, DistrictProjection>();
-        CreateMap<District, DistrictDetailProjection>();        
+        CreateMap<District, DistrictDetailProjection>();
     }
 }

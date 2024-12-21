@@ -7,6 +7,4 @@ public class UserDetailProjection : UserProjection
     public ICollection<RoleDetailProjection>? Roles { get; set; }
 
     public ICollection<UserClaimDetailProjection>? UserClaims { get; set; }
-
-    public string? Street { get; set; }
 }

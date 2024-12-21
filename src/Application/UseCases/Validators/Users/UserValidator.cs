@@ -8,7 +8,7 @@ using Domain.Aggregates.Users;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.UseCases.Validators;
+namespace Application.UseCases.Validators.Users;
 
 public partial class UserValidator : AbstractValidator<UserModel>
 {
