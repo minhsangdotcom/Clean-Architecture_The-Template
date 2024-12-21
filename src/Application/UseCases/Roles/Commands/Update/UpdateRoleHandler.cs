@@ -1,6 +1,5 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
-using Application.UseCases.Projections.Roles;
 using AutoMapper;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Roles;
@@ -24,13 +23,8 @@ public class UpdateRoleHandler(IRoleManagerService roleManagerService, IMapper m
 
         mapper.Map(command.Role, role);
 
-        List<RoleClaimModel>? claims = command.Role.RoleClaims;
-        if (claims?.Count > 0)
-        {
-            List<RoleClaim> roleClaims = mapper.Map<List<RoleClaim>>(claims);
-            await roleManagerService.UpdateRoleAsync(role, roleClaims);
-        }
-
+        List<RoleClaim> roleClaims = mapper.Map<List<RoleClaim>>(command.Role.RoleClaims);
+        await roleManagerService.UpdateRoleAsync(role, roleClaims);
         return mapper.Map<UpdateRoleResponse>(role);
     }
 }

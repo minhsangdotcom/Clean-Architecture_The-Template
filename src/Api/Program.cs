@@ -37,11 +37,10 @@ try
     var app = builder.Build();
 
     bool isDevelopment = app.Environment.IsDevelopment();
-
-    var scope = app.Services.CreateScope();
-    var serviceProvider = scope.ServiceProvider;
     if (isDevelopment)
     {
+        var scope = app.Services.CreateScope();
+        var serviceProvider = scope.ServiceProvider;
         await RegionDataSeeding.SeedingAsync(serviceProvider);
         await DbInitializer.InitializeAsync(serviceProvider);
     }
@@ -83,3 +82,5 @@ finally
 {
     Log.CloseAndFlush();
 }
+
+public partial class Program { }

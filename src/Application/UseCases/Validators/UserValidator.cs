@@ -90,7 +90,10 @@ public partial class UserValidator : AbstractValidator<UserModel>
             .MustAsync(
                 (email, cancellationToken) => IsEmailAvailableAsync(email!, id, cancellationToken)
             )
-            .When(_ => accessorService.GetHttpMethod() == HttpMethod.Put.ToString())
+            .When(
+                _ => accessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
+                ApplyConditionTo.CurrentValidator
+            )
             .WithState(x =>
                 Messager
                     .Create<User>()
@@ -102,7 +105,10 @@ public partial class UserValidator : AbstractValidator<UserModel>
                 (email, cancellationToken) =>
                     IsEmailAvailableAsync(email!, cancellationToken: cancellationToken)
             )
-            .When(_ => accessorService.GetHttpMethod() == HttpMethod.Post.ToString())
+            .When(
+                _ => accessorService.GetHttpMethod() == HttpMethod.Post.ToString(),
+                ApplyConditionTo.CurrentValidator
+            )
             .WithState(x =>
                 Messager
                     .Create<User>()
@@ -123,7 +129,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
             )
             .Must(x =>
             {
-                Regex regex = VietnamesePhoneValidationRegex();
+                Regex regex = PhoneValidationRegex();
                 return regex.IsMatch(x!);
             })
             .WithState(x =>
@@ -176,7 +182,10 @@ public partial class UserValidator : AbstractValidator<UserModel>
             );
 
         RuleFor(x => x.CommuneId)
-            .MustAsync((communeId, cancellationToken) => IsCommuneAvailableAsync(communeId!.Value, cancellationToken))
+            .MustAsync(
+                (communeId, cancellationToken) =>
+                    IsCommuneAvailableAsync(communeId!.Value, cancellationToken)
+            )
             .When(x => x.CommuneId != null, ApplyConditionTo.CurrentValidator)
             .WithState(x =>
                 Messager
@@ -232,14 +241,11 @@ public partial class UserValidator : AbstractValidator<UserModel>
     private async Task<bool> IsCommuneAvailableAsync(
         Ulid communeId,
         CancellationToken cancellationToken
-    ) =>
-        await unitOfWork
-            .Repository<Commune>()
-            .AnyAsync(x => x.Id == communeId, cancellationToken);
+    ) => await unitOfWork.Repository<Commune>().AnyAsync(x => x.Id == communeId, cancellationToken);
 
     [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
     private static partial Regex EmailValidationRegex();
 
-    [GeneratedRegex(@"^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$")]
-    private static partial Regex VietnamesePhoneValidationRegex();
+    [GeneratedRegex(@"^\+?\d{7,15}$")]
+    private static partial Regex PhoneValidationRegex();
 }

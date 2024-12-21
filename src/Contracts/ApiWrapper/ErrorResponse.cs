@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Contracts.Extensions;
 using Microsoft.AspNetCore.Http;
+
 namespace Contracts.ApiWrapper;
 
 public class ErrorResponse : ApiBaseResponse
@@ -12,7 +13,9 @@ public class ErrorResponse : ApiBaseResponse
 
     public object? Exception { get; set; }
 
-    public ICollection<BadRequestError>? Errors { get; }
+    public ICollection<BadRequestError>? Errors { get; init; }
+
+    public ErrorResponse() { }
 
     public ErrorResponse(
         string message,
@@ -48,13 +51,10 @@ public class ErrorResponse : ApiBaseResponse
         Trace = trace;
     }
 
-    public override string ToString() => SerializerExtension.Serialize(
-            this,
-            ActionOptions
-        ).StringJson;
+    public override string ToString() =>
+        SerializerExtension.Serialize(this, ActionOptions).StringJson;
 
     public JsonSerializerOptions GetOptions() => SerializerExtension.Options(ActionOptions);
-    
 
     private readonly Action<JsonSerializerOptions> ActionOptions = options =>
         options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
