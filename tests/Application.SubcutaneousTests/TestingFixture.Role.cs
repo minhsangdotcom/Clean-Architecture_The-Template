@@ -34,8 +34,8 @@ public partial class TestingFixture
                 Name = roleName,
                 RoleClaims =
                 [
-                    new RoleClaimModel() { ClaimType = "Permission", ClaimValue = "User.Create" },
-                    new RoleClaimModel() { ClaimType = "Permission", ClaimValue = "User.Get" },
+                    new RoleClaimModel() { ClaimType = "permission", ClaimValue = "create.user" },
+                    new RoleClaimModel() { ClaimType = "permission", ClaimValue = "get.user" },
                 ],
             };
         factory.ThrowIfNull();

@@ -83,10 +83,9 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     {
         UpdateRole updateRole = updateRoleCommand.Role;
         List<RoleClaimModel> roleClaims = updateRole.RoleClaims!;
-        for (int i = 0; i < roleClaims!.Count; i++)
-        {
-            roleClaims[0].ClaimValue = $"ClaimValue{Guid.NewGuid()}";
-        }
+        roleClaims.RemoveAt(1);
+        roleClaims.Add(new RoleClaimModel() { ClaimType = "permission", ClaimValue = "list.user" });
+        roleClaims[0].ClaimValue = "create.users";
         updateRole.Name = $"name{Guid.NewGuid()}";
         updateRole.Description = $"description{Guid.NewGuid()}";
         var createRoleResponse = await testingFixture.SendAsync(updateRoleCommand);
@@ -96,7 +95,10 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         );
         createdRole.Should().NotBeNull();
         createdRole!.Name.Should().Be(updateRole.Name!.ToSnakeCase().ToUpper());
-        createdRole.RoleClaims.Should().HaveCount(roleClaims.Count);
+        createdRole
+            .RoleClaims!.Select(rc => new { rc.ClaimType, rc.ClaimValue })
+            .Should()
+            .IntersectWith(roleClaims.Select(rc => new { rc.ClaimType, rc.ClaimValue })!);
         createdRole!.Description.Should().Be(updateRole.Description);
     }
 

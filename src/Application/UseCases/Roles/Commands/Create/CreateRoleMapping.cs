@@ -17,7 +17,23 @@ public class CreateRoleMapping : Profile
                 }
             );
 
-        CreateMap<RoleClaimModel, RoleClaim>().ForMember(dest => dest.Id, opt => opt.Ignore());
+        CreateMap<RoleClaimModel, RoleClaim>()
+            .ForMember(
+                dest => dest.Id,
+                opt =>
+                {
+                    opt.Ignore();
+                }
+            )
+            .AfterMap(
+                (src, dest) =>
+                {
+                    if (src.Id != null)
+                    {
+                        dest.Id = src.Id.Value;
+                    }
+                }
+            );
 
         CreateMap<RoleClaim, RoleClaimDetailProjection>();
         CreateMap<Role, CreateRoleResponse>();
