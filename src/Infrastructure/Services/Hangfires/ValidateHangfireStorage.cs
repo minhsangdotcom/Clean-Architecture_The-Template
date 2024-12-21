@@ -6,7 +6,6 @@ public class ValidateHangfireStorage : IValidateOptions<HangfireStorageSettings>
 {
     public ValidateOptionsResult Validate(string? name, HangfireStorageSettings options)
     {
-        
         if (string.IsNullOrWhiteSpace(options.ConnectionString))
         {
             return ValidateOptionsResult.Fail(

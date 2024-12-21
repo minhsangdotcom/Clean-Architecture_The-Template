@@ -6,8 +6,7 @@ using Serilog;
 
 namespace Infrastructure.Services.Mail;
 
-public class FluentMailService(IFluentEmail fluentEmail, ILogger logger)
-    : IMailService
+public class FluentMailService(IFluentEmail fluentEmail, ILogger logger) : IMailService
 {
     public async Task<bool> SendAsync(MessageMailMetaData metaData)
     {

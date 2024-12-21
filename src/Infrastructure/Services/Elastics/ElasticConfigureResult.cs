@@ -1,3 +1,3 @@
 namespace Infrastructure.Services.Elastics;
-public record ElasticConfigureResult(object Configs, Type Type);
 
+public record ElasticConfigureResult(object Configs, Type Type);

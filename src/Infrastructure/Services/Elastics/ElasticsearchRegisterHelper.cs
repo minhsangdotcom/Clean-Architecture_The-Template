@@ -1,11 +1,9 @@
 using System.Reflection;
-using Contracts.Extensions;
 using Domain.Aggregates.AuditLogs;
 using Domain.Aggregates.AuditLogs.Enums;
 using Domain.Aggregates.Users.Enums;
 using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch;
-using Org.BouncyCastle.Math.EC.Rfc7748;
 using Serilog;
 
 namespace Infrastructure.Services.Elastics;
