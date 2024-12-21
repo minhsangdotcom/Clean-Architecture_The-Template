@@ -238,8 +238,8 @@ public class UserManagerService(
             await userContext
                 .Where(x => x.Id == user.Id)
                 .Include(x => x.UserRoles)!
-                .ThenInclude(x => x.Role)
-                .ThenInclude(x => x!.RoleClaims)
+                .ThenInclude(x => x.Role)!
+                .ThenInclude(x => x!.RoleClaims)!
                 .ThenInclude(x => x.UserClaims)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(),
@@ -270,7 +270,7 @@ public class UserManagerService(
 
         IEnumerable<UserClaim> userClaims = userRoles
             .Select(x => x.Role)
-            .SelectMany(x => x!.RoleClaims)
+            .SelectMany(x => x!.RoleClaims!)
             .SelectMany(x => x.UserClaims!);
 
         userRoleContext.RemoveRange(userRoles);

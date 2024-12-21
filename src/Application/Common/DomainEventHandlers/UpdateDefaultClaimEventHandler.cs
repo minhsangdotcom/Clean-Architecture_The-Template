@@ -5,7 +5,8 @@ using Mediator;
 
 namespace Application.Common.DomainEventHandlers;
 
-public class UpdateDefaultClaimEventHandler(IUserManagerService userManagerService) : INotificationHandler<UpdateDefaultUserClaimEvent>
+public class UpdateDefaultClaimEventHandler(IUserManagerService userManagerService)
+    : INotificationHandler<UpdateDefaultUserClaimEvent>
 {
     public async ValueTask Handle(
         UpdateDefaultUserClaimEvent notification,

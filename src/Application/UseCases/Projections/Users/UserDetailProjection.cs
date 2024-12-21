@@ -1,13 +1,12 @@
-using Application.UseCases.Projections.Regions;
 using Application.UseCases.Projections.Roles;
 
 namespace Application.UseCases.Projections.Users;
 
 public class UserDetailProjection : UserProjection
 {
-    public IEnumerable<RoleDetailProjection>? Roles { get; set; }
+    public ICollection<RoleDetailProjection>? Roles { get; set; }
 
-    public IEnumerable<UserClaimDetailProjection>? UserClaims { get; set; }
+    public ICollection<UserClaimDetailProjection>? UserClaims { get; set; }
 
     public string? Street { get; set; }
 }

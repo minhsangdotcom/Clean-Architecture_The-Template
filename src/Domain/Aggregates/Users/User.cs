@@ -148,25 +148,24 @@ public class User : AggregateRoot
         {
             return;
         }
-        UserClaim[] defaultClaims = UserClaims.Where(x => x.Type == KindaUserClaimType.Default).ToArray();
-        Span<UserClaim> currentUserClaims = new(defaultClaims);
 
-        // default claims with claim type are unique but it's difference with custom claims
-        IDictionary<string, string> userClaims = GetUserClaims()
-            .ToDictionary(x => x.ClaimType, x => x.ClaimValue);
+        UserClaim[] defaultClaims = UserClaims
+            .Where(x => x.Type == KindaUserClaimType.Default)
+            .ToArray();
+        Span<UserClaim> currentUserClaims = defaultClaims.AsSpan();
 
+        List<UserClaim> userClaims = GetUserClaims();
         for (int i = 0; i < currentUserClaims.Length; i++)
         {
             UserClaim currentUserClaim = currentUserClaims[i];
 
-            string? value = userClaims[currentUserClaim.ClaimType];
-
-            if (string.IsNullOrWhiteSpace(value))
+            UserClaim? userClaim = userClaims.Find(x => x.ClaimType == currentUserClaim.ClaimType);
+            if (userClaim == null)
             {
                 continue;
             }
 
-            currentUserClaim.ClaimValue = value;
+            currentUserClaim.ClaimValue = userClaim.ClaimValue;
         }
 
         DefaultUserClaimsToUpdates = defaultClaims;

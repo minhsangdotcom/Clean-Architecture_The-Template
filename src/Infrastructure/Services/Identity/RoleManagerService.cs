@@ -86,7 +86,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             $"{role.Id}",
             await roleContext
                 .Where(x => x.Id == role.Id)
-                .Include(x => x.RoleClaims)
+                .Include(x => x.RoleClaims)!
                 .ThenInclude(x => x.UserClaims)
                 .FirstOrDefaultAsync(),
             NOT_FOUND_MESSAGE
@@ -94,21 +94,20 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         Guard.Against.Null(roleClaims, nameof(roleClaims), $"{nameof(roleClaims)} is not null");
 
         IEnumerable<RoleClaim> rolesClaimsToProcess = roleClaims;
-        ICollection<RoleClaim> currentRoleClaims = currentRole.RoleClaims;
+        ICollection<RoleClaim> currentRoleClaims = currentRole.RoleClaims!;
 
         IEnumerable<RoleClaim> roleClaimsToInsert = rolesClaimsToProcess.Where(x =>
             !currentRoleClaims.Any(p => p.Id == x.Id)
         );
-        List<RoleClaim> roleClaimsToModify =
-        [
-            .. currentRoleClaims.Where(x => rolesClaimsToProcess.Any(p => p.Id == x.Id)),
-        ];
+        IEnumerable<RoleClaim> roleClaimsToModify = currentRoleClaims.Where(x =>
+            rolesClaimsToProcess.Any(p => p.Id == x.Id)
+        );
         IEnumerable<RoleClaim> roleClaimsToRemove = currentRoleClaims.Where(x =>
             !rolesClaimsToProcess.Any(p => p.Id == x.Id)
         );
 
-        List<UserClaim> userClaims = ProcessUserClaimUpdate(
-            ref roleClaimsToModify,
+        IEnumerable<UserClaim> userClaims = ProcessUserClaimUpdate(
+            roleClaimsToModify,
             rolesClaimsToProcess
         );
 
@@ -120,14 +119,12 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         userClaimContext.UpdateRange(userClaims);
         await context.SaveChangesAsync();
 
+        var keyValuePairClaims = roleClaimsToInsert.Select(x => new KeyValuePair<string, string>(
+            x.ClaimType,
+            x.ClaimValue
+        ));
         // insert
-        await AddClaimsToRoleAsync(
-            role,
-            roleClaimsToInsert.Select(x => new KeyValuePair<string, string>(
-                x.ClaimType,
-                x.ClaimValue
-            ))
-        );
+        await AddClaimsToRoleAsync(role, keyValuePairClaims);
     }
 
     public async Task AddClaimsToRoleAsync(
@@ -139,13 +136,13 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             $"{role.Id}",
             await roleContext
                 .Where(x => x.Id == role.Id)
-                .Include(x => x.RoleClaims)
+                .Include(x => x.RoleClaims)!
                 .ThenInclude(x => x.UserClaims)
                 .Include(x => x.UserRoles)
                 .FirstOrDefaultAsync(),
             NOT_FOUND_MESSAGE
         );
-        ICollection<RoleClaim> currentRoleClaims = currentRole.RoleClaims;
+        ICollection<RoleClaim> currentRoleClaims = currentRole.RoleClaims!;
         IEnumerable<KeyValuePair<string, string>> roleClaimsToProcess = claims;
 
         if (
@@ -168,7 +165,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         ];
 
         // update new user claims for users who are in role
-        ICollection<UserRole> users = currentRole.UserRoles;
+        ICollection<UserRole> users = currentRole.UserRoles!;
         List<UserClaim> userClaims = [];
         foreach (UserRole user in users)
         {
@@ -205,7 +202,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             NOT_FOUND_MESSAGE
         );
 
-        ICollection<RoleClaim> currentRoleClaims = currentRole.RoleClaims;
+        ICollection<RoleClaim> currentRoleClaims = currentRole.RoleClaims!;
         if (claimIds.Any(x => !currentRoleClaims.Any(p => p.Id == x)))
         {
             throw new Exception($"{nameof(claimIds)} is not existed in role {nameof(role.Id)}.");
@@ -224,17 +221,17 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         await roleClaimContext.Where(x => roleIds.Contains(x.RoleId)).ToListAsync();
 
     public async Task<bool> HasClaimInRoleAsync(Ulid roleId, Ulid claimId) =>
-        await roleContext.AnyAsync(x => x.Id == roleId && x.RoleClaims.Any(p => p.Id == claimId));
+        await roleContext.AnyAsync(x => x.Id == roleId && x.RoleClaims!.Any(p => p.Id == claimId));
 
     public async Task<bool> HasClaimInRoleAsync(Ulid roleId, string claimName) =>
         await roleContext.AnyAsync(x =>
-            x.Id == roleId && x.RoleClaims.Any(p => p.ClaimType == claimName)
+            x.Id == roleId && x.RoleClaims!.Any(p => p.ClaimType == claimName)
         );
 
     public async Task<bool> HasClaimInRoleAsync(Ulid roleId, string claimName, string claimValue) =>
         await roleContext.AnyAsync(x =>
             x.Id == roleId
-            && x.RoleClaims.Any(p => p.ClaimType == claimName && p.ClaimValue == claimValue)
+            && x.RoleClaims!.Any(p => p.ClaimType == claimName && p.ClaimValue == claimValue)
         );
 
     public async Task<bool> HasClaimInRoleAsync(
@@ -244,7 +241,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
     {
         var roleClaims = await roleContext
             .Where(x => x.Id == roleId)
-            .SelectMany(x => x.RoleClaims)
+            .SelectMany(x => x.RoleClaims!)
             .ToListAsync();
 
         return roleClaims.Any(x => claims.Contains(new(x.ClaimType, x.ClaimValue)));
@@ -253,16 +250,14 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
     private async Task<Role> GetAsync(Ulid id) =>
         Guard.Against.NotFound($"{id}", await GetByIdAsync(id), NOT_FOUND_MESSAGE);
 
-    private static List<UserClaim> ProcessUserClaimUpdate(
-        ref List<RoleClaim> roleClaimsToModify,
+    private static IEnumerable<UserClaim> ProcessUserClaimUpdate(
+        IEnumerable<RoleClaim> roleClaimsToModify,
         IEnumerable<RoleClaim> rolesClaimsToProcess
     )
     {
         List<UserClaim> userClaims = [];
-        Span<RoleClaim> spans = CollectionsMarshal.AsSpan(roleClaimsToModify);
-        for (int i = 0; i < spans.Length; i++)
+        foreach (RoleClaim claim in roleClaimsToModify)
         {
-            RoleClaim claim = spans[i];
             RoleClaim? correspondedClaim = rolesClaimsToProcess.FirstOrDefault(x =>
                 x.Id == claim.Id
             );
@@ -274,9 +269,11 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
 
             claim.ClaimValue = correspondedClaim.ClaimValue;
             List<UserClaim> updatedUserClaims = claim.UpdateUserClaim();
-            userClaims.AddRange(updatedUserClaims);
-        }
 
-        return userClaims;
+            for (int i = 0; i < updatedUserClaims.Count; i++)
+            {
+                yield return updatedUserClaims[i];
+            }
+        }
     }
 }
