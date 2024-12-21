@@ -255,7 +255,6 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         IEnumerable<RoleClaim> rolesClaimsToProcess
     )
     {
-        List<UserClaim> userClaims = [];
         foreach (RoleClaim claim in roleClaimsToModify)
         {
             RoleClaim? correspondedClaim = rolesClaimsToProcess.FirstOrDefault(x =>

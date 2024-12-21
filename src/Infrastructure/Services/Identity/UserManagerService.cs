@@ -321,16 +321,15 @@ public class UserManagerService(
         IEnumerable<UserClaim> claimsToInsert = claimsToProcess.Where(x =>
             !customUserClaims.Any(p => p.Id == x.Id)
         );
-        List<UserClaim> claimsToUpdate =
-        [
-            .. customUserClaims.Where(x => claimsToProcess.Any(p => p.Id == x.Id)),
-        ];
+        IEnumerable<UserClaim> claimsToUpdate = customUserClaims.Where(x =>
+            claimsToProcess.Any(p => p.Id == x.Id)
+        );
 
         IEnumerable<UserClaim> claimsToRemove = customUserClaims.Where(x =>
             x.RoleClaimId == null && !claimsToProcess.Any(p => p.Id == x.Id)
         );
 
-        ProcessUserClaimUpdate(ref claimsToUpdate, claimsToProcess);
+        ProcessUserClaimUpdate(claimsToUpdate, claimsToProcess);
 
         //await RemoveClaimsToUserAsync(currentUser, claimsToRemove);
         userClaimsContext.RemoveRange(claimsToRemove);
@@ -424,14 +423,12 @@ public class UserManagerService(
         );
 
     private static void ProcessUserClaimUpdate(
-        ref List<UserClaim> claimsToUpdate,
+        IEnumerable<UserClaim> claimsToUpdate,
         IEnumerable<UserClaim> claimsToProcess
     )
     {
-        Span<UserClaim> spans = CollectionsMarshal.AsSpan(claimsToUpdate);
-        for (int i = 0; i < spans.Length; i++)
+        foreach (UserClaim claim in claimsToUpdate)
         {
-            UserClaim claim = spans[i];
             var correspondenceClaim = claimsToProcess.FirstOrDefault(x => x.Id == claim.Id);
 
             if (correspondenceClaim == null)
