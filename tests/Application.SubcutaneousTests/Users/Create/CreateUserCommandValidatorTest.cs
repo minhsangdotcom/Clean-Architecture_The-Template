@@ -178,6 +178,111 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
             .ThrowAsync<ValidationException>();
     }
 
+    [Fact]
+    public async Task CreateUser_WhenNoProvince_ShouldReturnValidationException()
+    {
+        var command = fixture
+            .Build<CreateUserCommand>()
+            .Without(x => x.ProvinceId)
+            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
+            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
+            .Without(x => x.Avatar)
+            .Without(x => x.UserClaims)
+            .With(x => x.Roles, [roleId])
+            .With(x => x.Email, "admin@gmail.com")
+            .With(x => x.PhoneNumber, "0925123123")
+            .Create();
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateUser_WhenNotFoundProvince_ShouldReturnValidationException()
+    {
+        var command = fixture
+            .Build<CreateUserCommand>()
+            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NN"))
+            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
+            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
+            .Without(x => x.Avatar)
+            .Without(x => x.UserClaims)
+            .With(x => x.Roles, [roleId])
+            .With(x => x.Email, "admin@gmail.com")
+            .With(x => x.PhoneNumber, "0925123123")
+            .Create();
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateUser_WhenNoDistrict_ShouldReturnValidationException()
+    {
+        var command = fixture
+            .Build<CreateUserCommand>()
+            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
+            .Without(x => x.DistrictId)
+            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
+            .Without(x => x.Avatar)
+            .Without(x => x.UserClaims)
+            .With(x => x.Roles, [roleId])
+            .With(x => x.Email, "admin@gmail.com")
+            .With(x => x.PhoneNumber, "0925123123")
+            .Create();
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateUser_WhenNotFoundDistrict_ShouldReturnValidationException()
+    {
+        var command = fixture
+            .Build<CreateUserCommand>()
+            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
+            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QQ"))
+            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
+            .Without(x => x.Avatar)
+            .Without(x => x.UserClaims)
+            .With(x => x.Roles, [roleId])
+            .With(x => x.Email, "admin@gmail.com")
+            .With(x => x.PhoneNumber, "0925123123")
+            .Create();
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateUser_WhenNotFoundCommune_ShouldReturnValidationException()
+    {
+        var command = fixture
+            .Build<CreateUserCommand>()
+            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
+            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
+            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAVV"))
+            .Without(x => x.Avatar)
+            .Without(x => x.UserClaims)
+            .With(x => x.Roles, [roleId])
+            .With(x => x.Email, "admin@gmail.com")
+            .With(x => x.PhoneNumber, "0925123123")
+            .Create();
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
     public async Task DisposeAsync()
     {
         await Task.CompletedTask;
