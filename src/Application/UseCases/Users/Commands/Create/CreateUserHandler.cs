@@ -22,7 +22,7 @@ public class CreateUserHandler(
         CancellationToken cancellationToken
     )
     {
-        User userMapping = mapper.Map<User>(command);
+        User mappingUser = mapper.Map<User>(command);
 
         Province? province = await unitOfWork
             .Repository<Province>()
@@ -39,10 +39,10 @@ public class CreateUserHandler(
                 .FindByIdAsync(command.CommuneId.Value, cancellationToken);
         }
 
-        userMapping.UpdateAddress(new(province!, district!, commune, command.Street!));
+        mappingUser.UpdateAddress(new(province!, district!, commune, command.Street!));
 
         string? key = mediaUpdateService.GetKey(command.Avatar);
-        userMapping.Avatar = await mediaUpdateService.UploadAvatarAsync(command.Avatar, key);
+        mappingUser.Avatar = await mediaUpdateService.UploadAvatarAsync(command.Avatar, key);
 
         string? userAvatar = null;
         try
@@ -51,7 +51,7 @@ public class CreateUserHandler(
 
             User user = await unitOfWork
                 .Repository<User>()
-                .AddAsync(userMapping, cancellationToken);
+                .AddAsync(mappingUser, cancellationToken);
             userAvatar = user.Avatar;
 
             // add default claims
