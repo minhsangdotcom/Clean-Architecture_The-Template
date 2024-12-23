@@ -11,6 +11,6 @@ public class UpdateUserMapping : Profile
         CreateMap<UpdateUser, User>()
             .ForMember(dest => dest.UserClaims, opt => opt.Ignore())
             .ForMember(dest => dest.UserRoles, opt => opt.Ignore());
-        CreateMap<User, UpdateUserResponse>();
+        CreateMap<User, UpdateUserResponse>().IncludeBase<User, UserDetailProjection>();
     }
 }

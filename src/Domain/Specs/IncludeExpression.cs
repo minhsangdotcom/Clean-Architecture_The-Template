@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Domain.Specs.Models;
 using Microsoft.EntityFrameworkCore;
+
 namespace Domain.Specs;
 
 public static class IncludeExpression
@@ -13,9 +14,10 @@ public static class IncludeExpression
         {
             ParameterExpression parameter = Expression.Parameter(include.EntityType!, "x");
 
-            string command = include.InCludeType == InCludeType.Include ?
-                nameof(EntityFrameworkQueryableExtensions.Include) :
-                    nameof(EntityFrameworkQueryableExtensions.ThenInclude);
+            string command =
+                include.InCludeType == InCludeType.Include
+                    ? nameof(EntityFrameworkQueryableExtensions.Include)
+                    : nameof(EntityFrameworkQueryableExtensions.ThenInclude);
 
             List<Type> types = [include.EntityType!];
 
@@ -29,11 +31,12 @@ public static class IncludeExpression
             }
 
             queryExpression = Expression.Call(
-                    typeof(EntityFrameworkQueryableExtensions),
-                    command,
-                    [.. types],
-                    queryExpression,
-                    Expression.Quote(include.LamdaExpression!));
+                typeof(EntityFrameworkQueryableExtensions),
+                command,
+                [.. types],
+                queryExpression,
+                Expression.Quote(include.LamdaExpression!)
+            );
         }
 
         return query.Provider.CreateQuery<T>(queryExpression);

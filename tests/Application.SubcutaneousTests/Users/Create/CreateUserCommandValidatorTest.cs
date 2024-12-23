@@ -229,17 +229,6 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
             .ThrowAsync<ValidationException>();
     }
 
-    [Fact]
-    public async Task CreateUser_WhenNoGender_ShouldReturnValidationException()
-    {
-        command.Gender = null;
-
-        await FluentActions
-            .Invoking(() => testingFixture.SendAsync(command))
-            .Should()
-            .ThrowAsync<ValidationException>();
-    }
-
     [Theory]
     [InlineData(0)]
     [InlineData(4)]

@@ -53,6 +53,10 @@
       <Link>Data\Seeds\Wards.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Files\avatar_cute_2.jpg">
+      <Link>Files\avatar_cute_2.jpg</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

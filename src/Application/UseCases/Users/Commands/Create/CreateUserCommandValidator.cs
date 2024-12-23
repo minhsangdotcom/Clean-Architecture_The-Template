@@ -97,15 +97,6 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             );
 
         RuleFor(x => x.Gender)
-            .NotEmpty()
-            .WithState(x =>
-                Messager
-                    .Create<CreateUserCommand>(nameof(User))
-                    .Property(x => x.Gender!)
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            )
             .IsInEnum()
             .WithState(x =>
                 Messager

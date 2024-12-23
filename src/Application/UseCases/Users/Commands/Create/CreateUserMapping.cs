@@ -19,6 +19,6 @@ public class CreateUserMapping : Profile
                 }
             );
 
-        CreateMap<User, CreateUserResponse>();
+        CreateMap<User, CreateUserResponse>().IncludeBase<User, UserDetailProjection>();
     }
 }

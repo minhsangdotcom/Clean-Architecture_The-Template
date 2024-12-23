@@ -13,6 +13,6 @@ public class GetUserDetailMapping : Profile
 {
     public GetUserDetailMapping()
     {
-        CreateMap<User, GetUserDetailResponse>();
+        CreateMap<User, GetUserDetailResponse>().IncludeBase<User, UserDetailProjection>();
     }
 }
