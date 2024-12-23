@@ -1,4 +1,3 @@
-using Application.UseCases.Users.Queries.List;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Routers;
@@ -6,6 +5,7 @@ using Contracts.RouteResults;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Application.Features.Users.Queries.List;
 
 namespace Api.Endpoints.User;
 

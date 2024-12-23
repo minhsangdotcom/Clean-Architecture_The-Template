@@ -1,4 +1,4 @@
-using Application.UseCases.Roles.Queries.List;
+using Application.Features.Roles.Queries.List;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;

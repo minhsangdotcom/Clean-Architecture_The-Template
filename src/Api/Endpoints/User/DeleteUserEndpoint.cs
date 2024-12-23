@@ -1,21 +1,22 @@
-using Application.UseCases.Users.Commands.Delete;
+using Application.Features.Users.Commands.Delete;
 using Ardalis.ApiEndpoints;
-using Contracts.Routers;
 using Contracts.RouteResults;
+using Contracts.Routers;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.User;
 
-public class DeleteUserEndpoint(ISender sender) : EndpointBaseAsync.WithRequest<string>.WithActionResult
+public class DeleteUserEndpoint(ISender sender)
+    : EndpointBaseAsync.WithRequest<string>.WithActionResult
 {
     [HttpDelete(Router.UserRoute.GetUpdateDelete)]
-    [SwaggerOperation(
-            Tags = [Router.UserRoute.Tags],
-            Summary = "Delete User"
-        )]
-    public override async Task<ActionResult> HandleAsync([FromRoute(Name = Router.Id)]string userId, CancellationToken cancellationToken = default)
+    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Delete User")]
+    public override async Task<ActionResult> HandleAsync(
+        [FromRoute(Name = Router.Id)] string userId,
+        CancellationToken cancellationToken = default
+    )
     {
         await sender.Send(new DeleteUserCommand(Ulid.Parse(userId)), cancellationToken);
         return this.NoContent204();

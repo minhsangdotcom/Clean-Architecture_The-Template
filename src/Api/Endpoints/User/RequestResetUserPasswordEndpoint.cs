@@ -1,4 +1,4 @@
-using Application.UseCases.Users.Commands.RequestResetPassword;
+using Application.Features.Users.Commands.RequestResetPassword;
 using Ardalis.ApiEndpoints;
 using Contracts.RouteResults;
 using Contracts.Routers;

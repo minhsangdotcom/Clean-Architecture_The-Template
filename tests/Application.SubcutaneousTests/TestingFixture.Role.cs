@@ -1,8 +1,8 @@
 using Application.Common.Interfaces.Services.Identity;
+using Application.Features.Common.Projections.Roles;
+using Application.Features.Roles.Commands.Create;
+using Application.Features.Roles.Commands.Update;
 using Application.SubcutaneousTests.Extensions;
-using Application.UseCases.Projections.Roles;
-using Application.UseCases.Roles.Commands.Create;
-using Application.UseCases.Roles.Commands.Update;
 using Domain.Aggregates.Roles;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -1,6 +1,6 @@
 using Application.Common.Exceptions;
-using Application.UseCases.Projections.Roles;
-using Application.UseCases.Roles.Commands.Update;
+using Application.Features.Common.Projections.Roles;
+using Application.Features.Roles.Commands.Update;
 using AutoFixture;
 using CaseConverter;
 using Contracts.ApiWrapper;

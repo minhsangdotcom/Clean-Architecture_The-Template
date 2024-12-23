@@ -1,4 +1,4 @@
-using Application.UseCases.Regions.Queries.List.Communes;
+using Application.Features.Regions.Queries.List.Communes;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;

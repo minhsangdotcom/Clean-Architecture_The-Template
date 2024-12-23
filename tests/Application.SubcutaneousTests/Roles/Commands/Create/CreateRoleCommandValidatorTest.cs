@@ -1,8 +1,8 @@
 using System.Net;
 using Application.Common.Exceptions;
+using Application.Features.Common.Projections.Roles;
+using Application.Features.Roles.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
-using Application.UseCases.Projections.Roles;
-using Application.UseCases.Roles.Commands.Create;
 using AutoFixture;
 using Contracts.ApiWrapper;
 using FluentAssertions;

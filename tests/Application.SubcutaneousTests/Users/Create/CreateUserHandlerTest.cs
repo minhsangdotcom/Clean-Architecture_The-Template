@@ -1,6 +1,6 @@
+using Application.Features.Common.Projections.Users;
+using Application.Features.Users.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
-using Application.UseCases.Projections.Users;
-using Application.UseCases.Users.Commands.Create;
 using AutoFixture;
 using Domain.Aggregates.Users;
 using FluentAssertions;

@@ -1,7 +1,7 @@
 using Application.Common.Interfaces.Services.Identity;
-using Application.UseCases.Mapping.Roles;
-using Application.UseCases.Projections.Roles;
-using Application.UseCases.Roles.Commands.Create;
+using Application.Features.Common.Mapping.Roles;
+using Application.Features.Common.Projections.Roles;
+using Application.Features.Roles.Commands.Create;
 using AutoFixture;
 using AutoMapper;
 using Domain.Aggregates.Roles;

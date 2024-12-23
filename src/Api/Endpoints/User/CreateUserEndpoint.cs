@@ -1,5 +1,5 @@
 using Application.Common.Auth;
-using Application.UseCases.Users.Commands.Create;
+using Application.Features.Users.Commands.Create;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;

@@ -1,6 +1,6 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
-using Application.UseCases.Roles.Commands.Delete;
+using Application.Features.Roles.Commands.Delete;
 using AutoFixture;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;

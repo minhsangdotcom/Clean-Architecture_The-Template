@@ -1,5 +1,5 @@
 using Application.Common.Auth;
-using Application.UseCases.Users.Commands.ChangePassword;
+using Application.Features.Users.Commands.ChangePassword;
 using Ardalis.ApiEndpoints;
 using Contracts.RouteResults;
 using Contracts.Routers;

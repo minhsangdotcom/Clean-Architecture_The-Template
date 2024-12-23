@@ -1,8 +1,8 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
-using Application.UseCases.Mapping.Roles;
-using Application.UseCases.Projections.Roles;
-using Application.UseCases.Roles.Commands.Update;
+using Application.Features.Common.Mapping.Roles;
+using Application.Features.Common.Projections.Roles;
+using Application.Features.Roles.Commands.Update;
 using AutoFixture;
 using AutoMapper;
 using Contracts.ApiWrapper;

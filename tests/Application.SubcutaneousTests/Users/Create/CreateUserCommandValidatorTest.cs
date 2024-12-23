@@ -1,7 +1,7 @@
 using System.Net;
 using Application.Common.Exceptions;
+using Application.Features.Users.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
-using Application.UseCases.Users.Commands.Create;
 using AutoFixture;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users.Enums;

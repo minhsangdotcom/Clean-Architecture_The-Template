@@ -1,4 +1,3 @@
-using Application.UseCases.Roles.Commands.Update;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Routers;
@@ -6,6 +5,7 @@ using Contracts.RouteResults;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Application.Features.Roles.Commands.Update;
 
 namespace Api.Endpoints.Roles;
 
