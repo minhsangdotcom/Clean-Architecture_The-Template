@@ -48,7 +48,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
             )
             .MustAsync(
                 (name, cancellationToken) =>
-                    IsExistedNameAsync(name, cancellationToken: cancellationToken)
+                    IsNameAvailableAsync(name, cancellationToken: cancellationToken)
             )
             .When(
                 _ => actionAccessorService.GetHttpMethod() == HttpMethod.Post.ToString(),
@@ -61,7 +61,9 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     .Message(MessageType.Existence)
                     .Build()
             )
-            .MustAsync((name, cancellationToken) => IsExistedNameAsync(name, id, cancellationToken))
+            .MustAsync(
+                (name, cancellationToken) => IsNameAvailableAsync(name, id, cancellationToken)
+            )
             .When(
                 _ => actionAccessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
                 ApplyConditionTo.CurrentValidator
@@ -94,7 +96,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
         );
     }
 
-    private async Task<bool> IsExistedNameAsync(
+    private async Task<bool> IsNameAvailableAsync(
         string name,
         Ulid? id = null,
         CancellationToken cancellationToken = default

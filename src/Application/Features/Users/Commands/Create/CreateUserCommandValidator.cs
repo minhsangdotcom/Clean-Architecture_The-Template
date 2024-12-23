@@ -60,7 +60,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             )
             .MustAsync(
                 (username, cancellationToken) =>
-                    IsExistedUsername(username!, cancellationToken: cancellationToken)
+                    IsUsernameAvailableAsync(username!, cancellationToken: cancellationToken)
             )
             .WithState(x =>
                 Messager
@@ -144,7 +144,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     .Negative()
                     .Build()
             )
-            .MustAsync((roles, cancellationToken) => IsExistedRoles(roles!))
+            .MustAsync((roles, cancellationToken) => IsRolesAvailableAsync(roles!))
             .WithState(x =>
                 Messager
                     .Create<CreateUserCommand>(nameof(User))
@@ -179,7 +179,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
         );
     }
 
-    private async Task<bool> IsExistedUsername(
+    private async Task<bool> IsUsernameAvailableAsync(
         string username,
         Ulid? id = null,
         CancellationToken cancellationToken = default
@@ -195,7 +195,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             );
     }
 
-    private async Task<bool> IsExistedRoles(IEnumerable<Ulid> roles)
+    private async Task<bool> IsRolesAvailableAsync(IEnumerable<Ulid> roles)
     {
         return await roleManagerService.Roles.CountAsync(x => roles.Contains(x.Id))
             == roles.Count();
