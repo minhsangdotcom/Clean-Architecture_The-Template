@@ -28,12 +28,12 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
     private void ApplyRules()
     {
         Include(new UserValidator(unitOfWork, accessorService));
-        RuleFor(x => x.UserName)
+        RuleFor(x => x.Username)
             .NotEmpty()
             .WithState(x =>
                 Messager
                     .Create<CreateUserCommand>(nameof(User))
-                    .Property(x => x.UserName!)
+                    .Property(x => x.Username!)
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
@@ -48,19 +48,19 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             .WithState(x =>
                 Messager
                     .Create<CreateUserCommand>(nameof(User))
-                    .Property(x => x.UserName!)
+                    .Property(x => x.Username!)
                     .Message(MessageType.Valid)
                     .Negative()
                     .Build()
             )
             .MustAsync(
-                (userName, cancellationToken) =>
-                    IsExistedUsername(userName!, cancellationToken: cancellationToken)
+                (username, cancellationToken) =>
+                    IsExistedUsername(username!, cancellationToken: cancellationToken)
             )
             .WithState(x =>
                 Messager
                     .Create<User>()
-                    .Property(x => x.UserName)
+                    .Property(x => x.Username)
                     .Message(MessageType.Existence)
                     .Build()
             );
@@ -175,7 +175,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
     }
 
     private async Task<bool> IsExistedUsername(
-        string userName,
+        string username,
         Ulid? id = null,
         CancellationToken cancellationToken = default
     )
@@ -184,8 +184,8 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             .Repository<User>()
             .AnyAsync(
                 x =>
-                    (!id.HasValue && EF.Functions.ILike(x.UserName, userName))
-                    || (x.Id != id && EF.Functions.ILike(x.UserName, userName)),
+                    (!id.HasValue && EF.Functions.ILike(x.Username, username))
+                    || (x.Id != id && EF.Functions.ILike(x.Username, username)),
                 cancellationToken
             );
     }

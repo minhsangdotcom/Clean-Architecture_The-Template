@@ -16,7 +16,7 @@ public class User : AggregateRoot
 
     public string LastName { get; private set; }
 
-    public string UserName { get; private set; }
+    public string Username { get; private set; }
 
     public string Password { get; private set; }
 
@@ -49,7 +49,7 @@ public class User : AggregateRoot
     public User(
         string firstName,
         string lastName,
-        string userName,
+        string username,
         string password,
         string email,
         string phoneNumber,
@@ -58,7 +58,7 @@ public class User : AggregateRoot
     {
         FirstName = Guard.Against.NullOrEmpty(firstName, nameof(FirstName));
         LastName = Guard.Against.Null(lastName, nameof(LastName));
-        UserName = Guard.Against.Null(userName, nameof(UserName));
+        Username = Guard.Against.Null(username, nameof(Username));
         Password = Guard.Against.Null(password, nameof(Password));
         Email = Guard.Against.Null(email, nameof(Email));
         PhoneNumber = Guard.Against.Null(phoneNumber, nameof(PhoneNumber));
@@ -69,7 +69,7 @@ public class User : AggregateRoot
     {
         FirstName = string.Empty;
         LastName = string.Empty;
-        UserName = string.Empty;
+        Username = string.Empty;
         Password = string.Empty;
         Email = string.Empty;
         PhoneNumber = string.Empty;
@@ -102,7 +102,7 @@ public class User : AggregateRoot
             new()
             {
                 ClaimType = ClaimTypes.PreferredUsername,
-                ClaimValue = this.GetValue(x => x.UserName!),
+                ClaimValue = this.GetValue(x => x.Username!),
                 UserId = isCreated ? Ulid.Empty : Id,
             },
             new()
