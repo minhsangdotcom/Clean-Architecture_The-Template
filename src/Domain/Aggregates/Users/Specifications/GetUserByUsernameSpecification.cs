@@ -1,4 +1,4 @@
-using Domain.Specs;
+using Domain.Common.Specs;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Aggregates.Users.Specifications;

@@ -1,8 +1,8 @@
 using System.Linq.Expressions;
-using Domain.Specs.Interfaces;
-using Domain.Specs.Models;
+using Domain.Common.Specs.Interfaces;
+using Domain.Common.Specs.Models;
 
-namespace Domain.Specs;
+namespace Domain.Common.Specs;
 
 public static class SpecificationBuilderExtension
 {

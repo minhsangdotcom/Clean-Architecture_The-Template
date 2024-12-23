@@ -1,6 +1,6 @@
-using Domain.Specs.Interfaces;
+using Domain.Common.Specs.Interfaces;
 
-namespace Domain.Specs;
+namespace Domain.Common.Specs;
 
 public class SpecificationBuilder<T>(Specification<T>? Spec) : ISpecificationBuilder<T>
     where T : class

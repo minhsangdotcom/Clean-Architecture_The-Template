@@ -1,4 +1,4 @@
-using Domain.Specs;
+using Domain.Common.Specs;
 
 namespace Domain.Aggregates.Users.Specifications;
 

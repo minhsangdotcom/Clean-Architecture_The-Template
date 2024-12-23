@@ -1,4 +1,5 @@
-namespace Domain.Specs.Models;
+namespace Domain.Common.Specs.Models;
+
 public enum InCludeType
 {
     Include = 1,

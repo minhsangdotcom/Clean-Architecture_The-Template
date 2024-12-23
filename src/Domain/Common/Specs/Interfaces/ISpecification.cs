@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
-using Domain.Specs.Models;
+using Domain.Common.Specs.Models;
 
-namespace Domain.Specs.Interfaces;
+namespace Domain.Common.Specs.Interfaces;
 
 public interface ISpecification<T>
     where T : class

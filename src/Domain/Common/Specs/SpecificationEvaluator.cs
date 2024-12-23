@@ -1,7 +1,8 @@
-using Domain.Specs.Interfaces;
+using Domain.Common.Specs;
+using Domain.Common.Specs.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Domain.Specs;
+namespace Domain.Common.Specs;
 
 public class SpecificationEvaluator<T>
     where T : class

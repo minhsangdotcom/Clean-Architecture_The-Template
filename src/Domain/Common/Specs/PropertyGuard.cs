@@ -1,7 +1,7 @@
 using Ardalis.GuardClauses;
 using Domain.Exceptions;
 
-namespace Domain.Specs;
+namespace Domain.Common.Specs;
 
 public static class PropertyGuard
 {

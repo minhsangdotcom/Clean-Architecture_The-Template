@@ -2,11 +2,10 @@ using System.Linq.Expressions;
 using Ardalis.GuardClauses;
 using Contracts.Extensions;
 using Contracts.Extensions.Visitors;
-using Domain.Common;
-using Domain.Specs.Interfaces;
-using Domain.Specs.Models;
+using Domain.Common.Specs.Interfaces;
+using Domain.Common.Specs.Models;
 
-namespace Domain.Specs;
+namespace Domain.Common.Specs;
 
 public abstract class Specification<T> : ISpecification<T>
     where T : class

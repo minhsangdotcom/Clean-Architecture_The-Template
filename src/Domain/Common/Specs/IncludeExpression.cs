@@ -1,8 +1,8 @@
 using System.Linq.Expressions;
-using Domain.Specs.Models;
+using Domain.Common.Specs.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Domain.Specs;
+namespace Domain.Common.Specs;
 
 public static class IncludeExpression
 {

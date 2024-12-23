@@ -6,8 +6,8 @@ using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
 using Contracts.Extensions.QueryExtensions;
 using Domain.Common;
-using Domain.Specs;
-using Domain.Specs.Interfaces;
+using Domain.Common.Specs;
+using Domain.Common.Specs.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.UnitOfWorks.Repositories;

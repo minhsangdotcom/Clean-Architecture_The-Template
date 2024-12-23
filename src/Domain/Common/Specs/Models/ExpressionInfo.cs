@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace Domain.Specs.Models;
+namespace Domain.Common.Specs.Models;
 
 public class ExpressionInfo
 {
