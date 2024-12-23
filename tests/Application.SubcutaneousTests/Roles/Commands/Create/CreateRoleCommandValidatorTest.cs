@@ -1,33 +1,41 @@
 using System.Net;
-using System.Net.Http.Json;
-using System.Text;
 using Application.Common.Exceptions;
 using Application.SubcutaneousTests.Extensions;
 using Application.UseCases.Projections.Roles;
 using Application.UseCases.Roles.Commands.Create;
 using AutoFixture;
 using Contracts.ApiWrapper;
-using Contracts.Extensions;
-using Elastic.Clients.Elasticsearch;
 using FluentAssertions;
+using FluentEmail.Core;
 
 namespace Application.SubcutaneousTests.Roles.Commands.Create;
 
 [Collection(nameof(TestingCollectionFixture))]
-public class CreateRoleCommandValidatorTest(TestingFixture testingFixture) : IAsyncLifetime
+public class CreateRoleCommandValidatorTest : IAsyncLifetime
 {
     private readonly Fixture fixture = new();
+    private readonly TestingFixture testingFixture;
+
+    private CreateRoleCommand command;
+    private List<RoleClaimModel> roleClaims;
+
+    public CreateRoleCommandValidatorTest(TestingFixture testingFixture)
+    {
+        this.testingFixture = testingFixture;
+
+        roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
+        command = fixture
+            .Build<CreateRoleCommand>()
+            .With(x => x.Name)
+            .With(x => x.Description)
+            .With(x => x.RoleClaims, roleClaims)
+            .Create();
+    }
 
     [Fact]
     public async Task CreateRole_WhenMissingName_ShouldReturnValidationException()
     {
-        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
-        var command = fixture
-            .Build<CreateRoleCommand>()
-            .Without(x => x.Name)
-            .With(x => x.RoleClaims, roleClaims)
-            .Create();
-
+        command.Name = null;
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
             .Should()
@@ -37,13 +45,7 @@ public class CreateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateRole_WhenInvalidLengthName_ShouldReturnValidationException()
     {
-        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
-        var name = new string(fixture.CreateMany<char>(258).ToArray());
-        var command = fixture
-            .Build<CreateRoleCommand>()
-            .With(x => x.Name, name)
-            .With(x => x.RoleClaims, roleClaims)
-            .Create();
+        command.Name = new string(fixture.CreateMany<char>(258).ToArray());
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
@@ -54,13 +56,7 @@ public class CreateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateRole_WhenDuplicatedName_ShouldReturnDuplicatedMessage()
     {
-        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
-        var command = fixture
-            .Build<CreateRoleCommand>()
-            .With(x => x.Name, "admin")
-            .With(x => x.RoleClaims, roleClaims)
-            .Create();
-
+        command.Name = "admin";
         HttpResponseMessage response = await testingFixture.MakeRequestAsync(
             "roles",
             HttpMethod.Post,
@@ -83,13 +79,7 @@ public class CreateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateRole_WhenInvalidLengthDescription_ShouldReturnValidationException()
     {
-        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
-        var command = fixture
-            .Build<CreateRoleCommand>()
-            .With(x => x.Name)
-            .With(x => x.RoleClaims, roleClaims)
-            .With(x => x.Description, new string(fixture.CreateMany<char>(10001).ToArray()))
-            .Create();
+        command.Description = new string(fixture.CreateMany<char>(10001).ToArray());
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
@@ -100,17 +90,7 @@ public class CreateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateRole_WhenMissingClaimTypeOfRoleClaim_ShouldReturnValidationException()
     {
-        var roleClaims = fixture
-            .Build<RoleClaimModel>()
-            .Without(x => x.Id)
-            .Without(x => x.ClaimType)
-            .CreateMany(2)
-            .ToList();
-        var command = fixture
-            .Build<CreateRoleCommand>()
-            .With(x => x.Name)
-            .With(x => x.RoleClaims, roleClaims)
-            .Create();
+        roleClaims.ForEach(claim => claim.ClaimType = null);
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
@@ -121,18 +101,7 @@ public class CreateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateRole_WhenMissingClaimValueOfRoleClaim_ShouldReturnValidationException()
     {
-        var roleClaims = fixture
-            .Build<RoleClaimModel>()
-            .Without(x => x.Id)
-            .Without(x => x.ClaimValue)
-            .CreateMany(2)
-            .ToList();
-        var command = fixture
-            .Build<CreateRoleCommand>()
-            .With(x => x.Name)
-            .With(x => x.RoleClaims, roleClaims)
-            .Create();
-
+        roleClaims.ForEach(claim => claim.ClaimValue = null);
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
             .Should()

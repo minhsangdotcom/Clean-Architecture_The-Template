@@ -4,6 +4,7 @@ using Application.SubcutaneousTests.Extensions;
 using Application.UseCases.Users.Commands.Create;
 using AutoFixture;
 using Contracts.ApiWrapper;
+using Domain.Aggregates.Users.Enums;
 using FluentAssertions;
 
 namespace Application.SubcutaneousTests.Users.Create;
@@ -11,24 +12,14 @@ namespace Application.SubcutaneousTests.Users.Create;
 [Collection(nameof(TestingCollectionFixture))]
 public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAsyncLifetime
 {
-    private readonly Fixture fixture = new();
-
     private Ulid roleId;
+    private readonly Fixture fixture = new();
+    private CreateUserCommand command = new();
 
     [Fact]
     public async Task CreateUser_WhenNoFirstName_ShouldReturnValidationException()
     {
-        var command = fixture
-            .Build<CreateUserCommand>()
-            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
-            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
-            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
-            .Without(x => x.Avatar)
-            .Without(x => x.FirstName)
-            .Without(x => x.UserClaims)
-            .With(x => x.Roles, [roleId])
-            .Create();
-
+        command.FirstName = null;
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
             .Should()
@@ -38,17 +29,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenInvalidLengthOfFirstName_ShouldReturnValidationException()
     {
-        var command = fixture
-            .Build<CreateUserCommand>()
-            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
-            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
-            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
-            .Without(x => x.Avatar)
-            .Without(x => x.UserClaims)
-            .With(x => x.Roles, [roleId])
-            .With(x => x.FirstName, new string(fixture.CreateMany<char>(257).ToArray()))
-            .Create();
-
+        command.FirstName = new string(fixture.CreateMany<char>(257).ToArray());
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
             .Should()
@@ -58,17 +39,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenNoLastName_ShouldReturnValidationException()
     {
-        var command = fixture
-            .Build<CreateUserCommand>()
-            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
-            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
-            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
-            .Without(x => x.Avatar)
-            .Without(x => x.UserClaims)
-            .With(x => x.Roles, [roleId])
-            .Without(x => x.LastName)
-            .Create();
-
+        command.LastName = null;
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
             .Should()
@@ -78,17 +49,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenInvalidLengthOfLastName_ShouldReturnValidationException()
     {
-        var command = fixture
-            .Build<CreateUserCommand>()
-            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
-            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
-            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
-            .Without(x => x.Avatar)
-            .Without(x => x.UserClaims)
-            .With(x => x.Roles, [roleId])
-            .With(x => x.LastName, new string(fixture.CreateMany<char>(257).ToArray()))
-            .Create();
-
+        command.LastName = new string(fixture.CreateMany<char>(257).ToArray());
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
             .Should()
@@ -98,16 +59,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenDuplicatedEmail_ShouldReturnValidationException()
     {
-        var command = fixture
-            .Build<CreateUserCommand>()
-            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
-            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
-            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
-            .Without(x => x.Avatar)
-            .Without(x => x.UserClaims)
-            .With(x => x.Roles, [roleId])
-            .With(x => x.Email, "admin.admin@admin.com.vn")
-            .Create();
+        command.Email = "admin.admin@admin.com.vn";
 
         var response = await testingFixture.MakeRequestAsync(
             "users",
@@ -115,6 +67,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
             command,
             "multipart/form-data"
         );
+
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         ErrorResponse? errorResponse = await response.ToResponse<ErrorResponse>();
         errorResponse.Should().NotBeNull();
@@ -136,16 +89,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
         string email
     )
     {
-        var command = fixture
-            .Build<CreateUserCommand>()
-            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
-            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
-            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
-            .Without(x => x.Avatar)
-            .Without(x => x.UserClaims)
-            .With(x => x.Roles, [roleId])
-            .With(x => x.Email, email)
-            .Create();
+        command.Email = email;
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
@@ -160,18 +104,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
         string phoneNumber
     )
     {
-        var command = fixture
-            .Build<CreateUserCommand>()
-            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
-            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
-            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
-            .Without(x => x.Avatar)
-            .Without(x => x.UserClaims)
-            .With(x => x.Roles, [roleId])
-            .With(x => x.Email, "admin@gmail.com")
-            .With(x => x.PhoneNumber, phoneNumber)
-            .Create();
-
+        command.PhoneNumber = phoneNumber;
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
             .Should()
@@ -181,17 +114,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenNoProvince_ShouldReturnValidationException()
     {
-        var command = fixture
-            .Build<CreateUserCommand>()
-            .Without(x => x.ProvinceId)
-            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
-            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
-            .Without(x => x.Avatar)
-            .Without(x => x.UserClaims)
-            .With(x => x.Roles, [roleId])
-            .With(x => x.Email, "admin@gmail.com")
-            .With(x => x.PhoneNumber, "0925123123")
-            .Create();
+        command.ProvinceId = Ulid.Empty;
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
@@ -202,18 +125,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenNotFoundProvince_ShouldReturnValidationException()
     {
-        var command = fixture
-            .Build<CreateUserCommand>()
-            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NN"))
-            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
-            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
-            .Without(x => x.Avatar)
-            .Without(x => x.UserClaims)
-            .With(x => x.Roles, [roleId])
-            .With(x => x.Email, "admin@gmail.com")
-            .With(x => x.PhoneNumber, "0925123123")
-            .Create();
-
+        command.ProvinceId = Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NN");
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
             .Should()
@@ -223,18 +135,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenNoDistrict_ShouldReturnValidationException()
     {
-        var command = fixture
-            .Build<CreateUserCommand>()
-            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
-            .Without(x => x.DistrictId)
-            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
-            .Without(x => x.Avatar)
-            .Without(x => x.UserClaims)
-            .With(x => x.Roles, [roleId])
-            .With(x => x.Email, "admin@gmail.com")
-            .With(x => x.PhoneNumber, "0925123123")
-            .Create();
-
+        command.DistrictId = Ulid.Empty;
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
             .Should()
@@ -244,17 +145,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenNotFoundDistrict_ShouldReturnValidationException()
     {
-        var command = fixture
-            .Build<CreateUserCommand>()
-            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
-            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QQ"))
-            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
-            .Without(x => x.Avatar)
-            .Without(x => x.UserClaims)
-            .With(x => x.Roles, [roleId])
-            .With(x => x.Email, "admin@gmail.com")
-            .With(x => x.PhoneNumber, "0925123123")
-            .Create();
+        command.DistrictId = Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QQ");
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
@@ -265,17 +156,153 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenNotFoundCommune_ShouldReturnValidationException()
     {
-        var command = fixture
-            .Build<CreateUserCommand>()
-            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
-            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
-            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAVV"))
-            .Without(x => x.Avatar)
-            .Without(x => x.UserClaims)
-            .With(x => x.Roles, [roleId])
-            .With(x => x.Email, "admin@gmail.com")
-            .With(x => x.PhoneNumber, "0925123123")
-            .Create();
+        command.CommuneId = Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAVV");
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateUser_WhenNoUsername_ShouldReturnValidationException()
+    {
+        command.Username = null;
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Theory]
+    [InlineData("admin-super")]
+    [InlineData("admin@super")]
+    [InlineData("admin123!")]
+    public async Task CreateUser_WhenInvalidUsername_ShouldReturnValidationException(
+        string username
+    )
+    {
+        command.Username = username;
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateUser_WhenDuplicatedUsername_ShouldReturnValidationException()
+    {
+        command.Username = "admin";
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateUser_WhenNoPassword_ShouldReturnValidationException()
+    {
+        command.Password = null;
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Theory]
+    [InlineData("admin@123")]
+    [InlineData("adminadmin")]
+    [InlineData("admin")]
+    public async Task CreateUser_WhenInvalidPassword_ShouldReturnValidationException(
+        string password
+    )
+    {
+        command.Password = password;
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateUser_WhenNoGender_ShouldReturnValidationException()
+    {
+        command.Gender = null;
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(4)]
+    public async Task CreateUser_WhenInvalidGender_ShouldReturnValidationException(int gender)
+    {
+        command.Gender = (Gender)gender;
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateUser_WhenNoStatus_ShouldReturnValidationException()
+    {
+        command.Status = 0;
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(3)]
+    public async Task CreateUser_WhenInvalidStatus_ShouldReturnValidationException(int status)
+    {
+        command.Status = (UserStatus)status;
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateUser_WhenNoRoles_ShouldReturnValidationException()
+    {
+        command.Roles = null;
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateUser_WhenDuplicatedRole_ShouldReturnValidationException()
+    {
+        command.Roles!.Add(roleId);
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateUser_WhenNotFoundRole_ShouldReturnValidationException()
+    {
+        command.Roles!.Add(Ulid.NewUlid());
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
@@ -295,5 +322,17 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
         var response = await testingFixture.CreateRoleAsync("adminTest");
         roleId = response.Id;
         await testingFixture.SeedingUserAsync();
+        command = fixture
+            .Build<CreateUserCommand>()
+            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
+            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
+            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
+            .Without(x => x.Avatar)
+            .Without(x => x.UserClaims)
+            .With(x => x.Roles, [roleId])
+            .With(x => x.Email, "super.admin@gmail.com")
+            .With(x => x.PhoneNumber, "0925123123")
+            .With(x => x.Username, "super.admin")
+            .Create();
     }
 }

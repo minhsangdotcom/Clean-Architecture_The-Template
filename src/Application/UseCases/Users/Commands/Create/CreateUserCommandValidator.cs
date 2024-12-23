@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.UseCases.Validators.Users;
 using Contracts.Common.Messages;
@@ -14,13 +15,17 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
     private readonly IUnitOfWork unitOfWork;
     private readonly IActionAccessorService accessorService;
 
+    private readonly IRoleManagerService roleManagerService;
+
     public CreateUserCommandValidator(
         IUnitOfWork unitOfWork,
-        IActionAccessorService accessorService
+        IActionAccessorService accessorService,
+        IRoleManagerService roleManagerService
     )
     {
         this.unitOfWork = unitOfWork;
         this.accessorService = accessorService;
+        this.roleManagerService = roleManagerService;
 
         ApplyRules();
     }
@@ -147,6 +152,15 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     .Message(MessageType.Unique)
                     .Negative()
                     .Build()
+            )
+            .MustAsync((roles, cancellationToken) => IsExistedRoles(roles!))
+            .WithState(x =>
+                Messager
+                    .Create<CreateUserCommand>(nameof(User))
+                    .Property(x => x.Roles!)
+                    .Message(MessageType.Found)
+                    .Negative()
+                    .Build()
             );
 
         When(
@@ -190,9 +204,15 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             );
     }
 
+    private async Task<bool> IsExistedRoles(IEnumerable<Ulid> roles)
+    {
+        return await roleManagerService.Roles.CountAsync(x => roles.Contains(x.Id))
+            == roles.Count();
+    }
+
     [GeneratedRegex(@"^[a-zA-Z0-9_.]+$")]
     private static partial Regex UsernameValidationRegex();
 
-    [GeneratedRegex(@"^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{7,})\S$")]
+    [GeneratedRegex(@"^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{8,})\S$")]
     private static partial Regex PassowordValidationRegex();
 }
