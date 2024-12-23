@@ -15,15 +15,6 @@ public class GetProfileHandler(IUnitOfWork unitOfWork, ICurrentUser currentUser)
         GetUserProfileQuery query,
         CancellationToken cancellationToken
     ) =>
-        // mapper.Map<GetUserProfileResponse>(
-        //     await sender.Send(
-        //         new GetUserDetailQuery(currentUser.Id ?? Ulid.Empty),
-        //         cancellationToken
-        //     )
-        //         ?? throw new NotFoundException(
-        //             [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
-        //         )
-        // );
         await unitOfWork
             .Repository<User>()
             .FindByConditionAsync<GetUserProfileResponse>(
