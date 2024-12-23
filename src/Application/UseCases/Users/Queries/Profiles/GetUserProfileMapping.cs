@@ -7,6 +7,6 @@ public class GetUserProfileMapping : Profile
 {
     public GetUserProfileMapping()
     {
-        CreateMap<GetUserProfileResponse, GetUserDetailResponse>();
+        CreateMap<GetUserDetailResponse, GetUserProfileResponse>();
     }
 }
