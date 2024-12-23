@@ -1,5 +1,4 @@
 using Application.UseCases.Projections.Users;
-using Application.UseCases.Users.Queries.Detail;
 using AutoMapper;
 using Domain.Aggregates.Users;
 
