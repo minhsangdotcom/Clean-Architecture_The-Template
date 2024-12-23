@@ -41,7 +41,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             .Must(
                 (_, x) =>
                 {
-                    Regex regex = UserNamValidationRegex();
+                    Regex regex = UsernameValidationRegex();
                     return regex.IsMatch(x!);
                 }
             )
@@ -78,7 +78,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             .Must(
                 (_, x) =>
                 {
-                    Regex regex = PassowrdValidationRegex();
+                    Regex regex = PassowordValidationRegex();
                     return regex.IsMatch(x!);
                 }
             )
@@ -191,8 +191,8 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
     }
 
     [GeneratedRegex(@"^[a-zA-Z0-9_.]+$")]
-    private static partial Regex UserNamValidationRegex();
+    private static partial Regex UsernameValidationRegex();
 
     [GeneratedRegex(@"^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{7,})\S$")]
-    private static partial Regex PassowrdValidationRegex();
+    private static partial Regex PassowordValidationRegex();
 }
