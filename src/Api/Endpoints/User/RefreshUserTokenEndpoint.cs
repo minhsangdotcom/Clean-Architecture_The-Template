@@ -9,13 +9,13 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.User;
 
-public class RefreshTokenUserEndpoint(ISender sender)
+public class RefreshUserTokenEndpoint(ISender sender)
     : EndpointBaseAsync.WithRequest<RefreshUserTokenCommand>.WithActionResult<ApiResponse>
 {
     private readonly ISender sender = sender;
 
-    [HttpPost(Router.LoginRoute.Token)]
-    [SwaggerOperation(Tags = [Router.LoginRoute.Tags], Summary = "refresh token")]
+    [HttpPost(Router.UserRoute.RefreshToken)]
+    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "refresh token")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         RefreshUserTokenCommand request,
         CancellationToken cancellationToken = default

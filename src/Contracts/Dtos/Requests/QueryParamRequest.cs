@@ -14,7 +14,7 @@ public class QueryParamRequest
     /// <summary>
     /// Maximum items that display per page
     /// </summary>
-    public int PageSize { get; set; } = 10;
+    public int PageSize { get; set; } = 100;
 
     /// <summary>
     /// Cursor pagination

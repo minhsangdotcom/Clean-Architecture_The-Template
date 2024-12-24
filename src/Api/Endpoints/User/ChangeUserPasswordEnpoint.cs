@@ -14,7 +14,7 @@ public class ChangeUserPasswordEnpoint(ISender sender)
 {
     [HttpPut(Router.UserRoute.ChangePassword)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "reset User password")]
-    [Restrict()]
+    [AuthorizeBy]
     public override async Task<ActionResult> HandleAsync(
         ChangeUserPasswordCommand request,
         CancellationToken cancellationToken = default

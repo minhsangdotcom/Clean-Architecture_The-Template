@@ -36,15 +36,14 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
 
         if (
             authorizeModel == null
-            || authorizeModel!.Permissions?.Count == 0
-            || authorizeModel!.Roles?.Count == 0
+            || (authorizeModel!.Permissions?.Count == 0 && authorizeModel!.Roles?.Count == 0)
         )
         {
             context.Succeed(requirement);
             return;
         }
 
-        if (authorizeModel.Roles!.Count > 0 && authorizeModel.Permissions!.Count > 0)
+        if (authorizeModel.Roles?.Count > 0 && authorizeModel.Permissions?.Count > 0)
         {
             SuccessOrFailiureHandler(
                 context,
@@ -61,7 +60,7 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
             return;
         }
 
-        if (authorizeModel.Roles!.Count > 0)
+        if (authorizeModel.Roles?.Count > 0)
         {
             SuccessOrFailiureHandler(
                 context,
@@ -72,7 +71,7 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
             return;
         }
 
-        if (authorizeModel.Permissions!.Count > 0)
+        if (authorizeModel.Permissions?.Count > 0)
         {
             SuccessOrFailiureHandler(
                 context,

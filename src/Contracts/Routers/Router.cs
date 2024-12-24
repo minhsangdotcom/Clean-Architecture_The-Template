@@ -17,19 +17,10 @@ public static class Router
         public const string RequestResetPassowrd =
             $"{prefix}{nameof(Users)}/{nameof(RequestResetPassowrd)}";
         public const string ResetPassowrd = $"{prefix}{nameof(Users)}/{nameof(ResetPassowrd)}";
+
+        public const string Login = $"{prefix}{nameof(Users)}/{nameof(Login)}";
+        public const string RefreshToken = $"{prefix}{nameof(Users)}/{nameof(RefreshToken)}";
         public const string Tags = $"{nameof(Users)} endpoint";
-    }
-
-    public static class LoginRoute
-    {
-        public const string Login = $"{prefix}{nameof(Login)}";
-
-        /// <summary>
-        /// Refresh token
-        /// </summary>
-        public const string Token = $"{prefix}{nameof(Token)}";
-
-        public const string Tags = $"{nameof(Login)} endpoint";
     }
 
     public static class RoleRoute

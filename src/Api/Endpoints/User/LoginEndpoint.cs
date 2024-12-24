@@ -12,8 +12,8 @@ namespace Api.Endpoints.User;
 public class LoginEndpoint(ISender sender)
     : EndpointBaseAsync.WithRequest<LoginUserCommand>.WithActionResult<ApiResponse>
 {
-    [HttpPost(Router.LoginRoute.Login)]
-    [SwaggerOperation(Tags = [Router.LoginRoute.Tags], Summary = "Auth User")]
+    [HttpPost(Router.UserRoute.Login)]
+    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Logging in User")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         LoginUserCommand request,
         CancellationToken cancellationToken = default

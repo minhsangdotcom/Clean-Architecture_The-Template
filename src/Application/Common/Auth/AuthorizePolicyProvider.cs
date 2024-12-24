@@ -11,13 +11,13 @@ public class AuthorizePolicyProvider(IOptions<AuthorizationOptions> options)
     public DefaultAuthorizationPolicyProvider FallbackPolicyProvider { get; } =
         new DefaultAuthorizationPolicyProvider(options);
 
-    public async Task<AuthorizationPolicy> GetDefaultPolicyAsync() =>
-        await FallbackPolicyProvider.GetDefaultPolicyAsync();
+    public Task<AuthorizationPolicy> GetDefaultPolicyAsync() =>
+        FallbackPolicyProvider.GetDefaultPolicyAsync();
 
-    public async Task<AuthorizationPolicy?> GetFallbackPolicyAsync() =>
-        await FallbackPolicyProvider.GetDefaultPolicyAsync();
+    public Task<AuthorizationPolicy?> GetFallbackPolicyAsync() =>
+        FallbackPolicyProvider.GetFallbackPolicyAsync();
 
-    public async Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
+    public Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
     {
         if (
             policyName.StartsWith(AuthorizePolicy.POLICY_PREFIX, StringComparison.OrdinalIgnoreCase)
@@ -26,9 +26,9 @@ public class AuthorizePolicyProvider(IOptions<AuthorizationOptions> options)
             var policy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme);
             policy.AddRequirements(new AuthorizationRequirement(policyName));
 
-            return await Task.FromResult(policy.Build());
+            return Task.FromResult(policy.Build())!;
         }
 
-        return await FallbackPolicyProvider.GetPolicyAsync(policyName);
+        return FallbackPolicyProvider.GetPolicyAsync(policyName);
     }
 }
