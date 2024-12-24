@@ -1,8 +1,10 @@
+using Application.Common.Auth;
 using Application.Features.Roles.Queries.Detail;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;
 using Contracts.Routers;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -14,6 +16,9 @@ public class GetRoleDetailEndpoint(ISender sender)
 {
     [HttpGet(Router.RoleRoute.GetUpdateDelete, Name = Router.RoleRoute.GetRouteName)]
     [SwaggerOperation(Tags = [Router.RoleRoute.Tags], Summary = "Get detail Role")]
+    [AuthorizeBy(
+        permissions: $"{Credential.ActionPermission.detail}:{Credential.ObjectPermission.role}"
+    )]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         [FromRoute] string id,
         CancellationToken cancellationToken = default

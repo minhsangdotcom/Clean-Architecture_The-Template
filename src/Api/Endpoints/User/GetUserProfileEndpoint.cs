@@ -1,3 +1,4 @@
+using Application.Common.Auth;
 using Application.Features.Users.Queries.Profiles;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
@@ -14,6 +15,7 @@ public class GetUserProfileEndpoint(ISender sender)
 {
     [HttpGet(Router.UserRoute.Profile)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Profile User")]
+    [AuthorizeBy]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         CancellationToken cancellationToken = default
     ) => this.Ok200(await sender.Send(new GetUserProfileQuery(), cancellationToken));

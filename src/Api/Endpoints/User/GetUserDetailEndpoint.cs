@@ -1,8 +1,10 @@
+using Application.Common.Auth;
 using Application.Features.Users.Queries.Detail;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Contracts.Routers;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -14,6 +16,9 @@ public class GetUserDetailEndpoint(ISender sender)
 {
     [HttpGet(Router.UserRoute.GetUpdateDelete, Name = Router.UserRoute.GetRouteName)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Detail User")]
+    [AuthorizeBy(
+        permissions: $"{Credential.ActionPermission.create}:{Credential.ObjectPermission.user}"
+    )]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         [FromRoute(Name = Router.Id)] string userId,
         CancellationToken cancellationToken = default

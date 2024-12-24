@@ -1,8 +1,10 @@
+using Application.Common.Auth;
 using Application.Features.Roles.Commands.Create;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Contracts.Routers;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -14,6 +16,9 @@ public class CreateRoleEndpoint(ISender sender)
 {
     [HttpPost(Router.RoleRoute.Roles)]
     [SwaggerOperation(Tags = [Router.RoleRoute.Tags], Summary = "create Role")]
+    [AuthorizeBy(
+        permissions: $"{Credential.ActionPermission.create}:{Credential.ObjectPermission.role}"
+    )]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         CreateRoleCommand request,
         CancellationToken cancellationToken = default

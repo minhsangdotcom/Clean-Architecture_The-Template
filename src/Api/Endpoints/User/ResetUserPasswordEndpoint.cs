@@ -8,7 +8,8 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.User;
 
-public class ResetUserPasswordEndpoint(ISender sender ): EndpointBaseAsync.WithRequest<ResetUserPasswordCommand>.WithActionResult
+public class ResetUserPasswordEndpoint(ISender sender)
+    : EndpointBaseAsync.WithRequest<ResetUserPasswordCommand>.WithActionResult
 {
     [HttpPut(Router.UserRoute.ResetPassowrd)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "reset User password")]
@@ -17,7 +18,7 @@ public class ResetUserPasswordEndpoint(ISender sender ): EndpointBaseAsync.WithR
         CancellationToken cancellationToken = default
     )
     {
-        await sender.Send(request,cancellationToken);
+        await sender.Send(request, cancellationToken);
         return this.NoContent204();
     }
 }

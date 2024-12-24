@@ -18,7 +18,7 @@ public class RequestResetUserPasswordEndpoint(ISender sender)
         CancellationToken cancellationToken = default
     )
     {
-        await sender.Send(request,cancellationToken);
+        await sender.Send(request, cancellationToken);
         return this.NoContent204();
     }
 }

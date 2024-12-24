@@ -15,7 +15,7 @@ public class UpdateUserProfileEndpoint(ISender sender)
 {
     [HttpPut(Router.UserRoute.Profile)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Update Profile User")]
-    [Restrict]
+    [AuthorizeBy]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         [FromForm] UpdateUserProfileCommand request,
         CancellationToken cancellationToken = default
