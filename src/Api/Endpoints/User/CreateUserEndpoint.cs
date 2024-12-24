@@ -1,9 +1,11 @@
 using Application.Common.Auth;
 using Application.Features.Users.Commands.Create;
 using Ardalis.ApiEndpoints;
+using CaseConverter;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Contracts.Routers;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -15,7 +17,9 @@ public class CreateUserEndpoint(ISender sender)
 {
     [HttpPost(Router.UserRoute.Users)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "create User")]
-    [Restrict(claims: "permission:create.user")]
+    [AuthorizeBy(
+        permissions: $"{Credential.ActionPermission.create}:{Credential.ObjectPermission.user}"
+    )]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         [FromForm] CreateUserCommand request,
         CancellationToken cancellationToken = default

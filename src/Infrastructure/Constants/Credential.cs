@@ -1,3 +1,5 @@
+using Contracts.Constants;
+
 namespace Infrastructure.Constants;
 
 public static class Credential
@@ -9,23 +11,23 @@ public static class Credential
 
     public static readonly IReadOnlyCollection<KeyValuePair<string, string>> ADMIN_CLAIMS =
     [
-        new("permission", "create.user"),
-        new("permission", "update.user"),
-        new("permission", "delete.user"),
-        new("permission", "list.user"),
-        new("permission", "detail.user"),
-        new("permission", "create.role"),
-        new("permission", "update.role"),
-        new("permission", "delete.role"),
-        new("permission", "list.role"),
-        new("permission", "detail.role"),
+        new(ClaimTypes.Permission, $"{ActionPermission.create}:{ObjectPermission.user}"),
+        new(ClaimTypes.Permission, $"{ActionPermission.update}:{ObjectPermission.user}"),
+        new(ClaimTypes.Permission, $"{ActionPermission.delete}:{ObjectPermission.user}"),
+        new(ClaimTypes.Permission, $"{ActionPermission.list}:{ObjectPermission.user}"),
+        new(ClaimTypes.Permission, $"{ActionPermission.detail}:{ObjectPermission.user}"),
+        new(ClaimTypes.Permission, $"{ActionPermission.create}:{ObjectPermission.role}"),
+        new(ClaimTypes.Permission, $"{ActionPermission.update}:{ObjectPermission.role}"),
+        new(ClaimTypes.Permission, $"{ActionPermission.delete}:{ObjectPermission.role}"),
+        new(ClaimTypes.Permission, $"{ActionPermission.list}:{ObjectPermission.role}"),
+        new(ClaimTypes.Permission, $"{ActionPermission.detail}:{ObjectPermission.role}"),
     ];
 
     public static readonly IReadOnlyCollection<KeyValuePair<string, string>> MANAGER_CLAIMS =
     [
-        new("permission", "create.user"),
-        new("permission", "list.user"),
-        new("permission", "detail.user"),
+        new(ClaimTypes.Permission, $"{ActionPermission.create}:{ObjectPermission.user}"),
+        new(ClaimTypes.Permission, $"{ActionPermission.list}:{ObjectPermission.user}"),
+        new(ClaimTypes.Permission, $"{ActionPermission.detail}:{ObjectPermission.user}"),
     ];
 
     public const string ADMIN_ROLE_ID = "01J79JQZRWAKCTCQV64VYKMZ56";
@@ -53,5 +55,20 @@ public static class Credential
         public static readonly Ulid ETHAN_KING_ID = Ulid.Parse("01JD936AXWFM847M47AZK1ARGV");
         public static readonly Ulid ABIGAIL_SCOTT_ID = Ulid.Parse("01JD936AXWJ9B8SEJC98P0P01P");
         public static readonly Ulid LIAM_PEREZ_ID = Ulid.Parse("01JD936AXWY0JMVNZW3KXXS5ZK");
+    }
+
+    public class ActionPermission
+    {
+        public const string create = nameof(create);
+        public const string update = nameof(update);
+        public const string delete = nameof(delete);
+        public const string detail = nameof(detail);
+        public const string list = nameof(list);
+    }
+
+    public class ObjectPermission
+    {
+        public const string user = nameof(user);
+        public const string role = nameof(role);
     }
 }

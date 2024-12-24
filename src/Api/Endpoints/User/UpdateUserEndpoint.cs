@@ -4,6 +4,7 @@ using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Contracts.Routers;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -15,7 +16,9 @@ public class UpdateUserEndpoint(ISender sender)
 {
     [HttpPut(Router.UserRoute.GetUpdateDelete)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Update User")]
-    [Restrict(claims: "permission:update.user")]
+    [AuthorizeBy(
+        permissions: $"{Credential.ActionPermission.update}:{Credential.ObjectPermission.user}"
+    )]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         UpdateUserCommand command,
         CancellationToken cancellationToken = default

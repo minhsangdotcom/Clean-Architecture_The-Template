@@ -43,4 +43,6 @@ public static class ClaimTypes
     public const string Address = "address";
 
     public const string UpdatedAt = "updated_at";
+
+    public const string Permission = "permission";
 }
