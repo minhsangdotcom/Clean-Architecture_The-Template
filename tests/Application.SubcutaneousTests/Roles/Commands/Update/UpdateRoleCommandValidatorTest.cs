@@ -47,8 +47,7 @@ public class UpdateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
         var response = await testingFixture.MakeRequestAsync(
             "roles",
             HttpMethod.Post,
-            updateRoleCommand.Role,
-            "multipart/form-data"
+            updateRoleCommand.Role
         );
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

@@ -3,6 +3,7 @@ using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Create;
 using Application.Features.Roles.Commands.Update;
 using Application.SubcutaneousTests.Extensions;
+using Contracts.Constants;
 using Domain.Aggregates.Roles;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -34,8 +35,16 @@ public partial class TestingFixture
                 Name = roleName,
                 RoleClaims =
                 [
-                    new RoleClaimModel() { ClaimType = "permission", ClaimValue = "create.user" },
-                    new RoleClaimModel() { ClaimType = "permission", ClaimValue = "get.user" },
+                    new RoleClaimModel()
+                    {
+                        ClaimType = ClaimTypes.Permission,
+                        ClaimValue = "create:user",
+                    },
+                    new RoleClaimModel()
+                    {
+                        ClaimType = ClaimTypes.Permission,
+                        ClaimValue = "detail:user",
+                    },
                 ],
             };
         factory.ThrowIfNull();
