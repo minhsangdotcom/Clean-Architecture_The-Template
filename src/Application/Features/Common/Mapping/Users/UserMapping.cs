@@ -15,12 +15,13 @@ public class UserMapping : Profile
         CreateMap<User, UserProjection>().IncludeMembers(x => x.Address);
 
         CreateMap<User, UserDetailProjection>()
-            .IncludeBase<User, UserProjection>()
+            .IncludeMembers(x => x.Address)
             .ForMember(
                 dest => dest.Roles,
                 opt => opt.MapFrom(src => src.UserRoles!.Select(x => x.Role))
             );
         CreateMap<Address, UserProjection>();
+        CreateMap<Address, UserDetailProjection>();
 
         CreateMap<Role, RoleDetailProjection>();
         CreateMap<RoleClaim, RoleClaimDetailProjection>();

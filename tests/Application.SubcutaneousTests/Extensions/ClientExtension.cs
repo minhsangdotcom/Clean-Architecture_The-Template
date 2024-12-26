@@ -95,14 +95,18 @@ public static class ClientExtension
                             var prop = properties[i];
                             string name = prop.Name;
                             object? value = prop.GetValue(item);
-                            multipartContent.Add(
-                                new StringContent(
-                                    value?.ToString()!,
-                                    Encoding.UTF8,
-                                    MediaTypeNames.Text.Plain
-                                ),
-                                $"{propertyName}[{i}].{name}"
-                            );
+
+                            if (value != null)
+                            {
+                                multipartContent.Add(
+                                    new StringContent(
+                                        value.ToString()!,
+                                        Encoding.UTF8,
+                                        MediaTypeNames.Text.Plain
+                                    ),
+                                    $"{propertyName}[{i}].{name}"
+                                );
+                            }
                         }
                     }
                 }
@@ -111,14 +115,18 @@ public static class ClientExtension
                     for (int i = 0; i < list.Count; i++)
                     {
                         object? value = list[i];
-                        multipartContent.Add(
-                            new StringContent(
-                                value?.ToString()!,
-                                Encoding.UTF8,
-                                MediaTypeNames.Text.Plain
-                            ),
-                            $"{propertyName}[{i}]"
-                        );
+
+                        if (value != null)
+                        {
+                            multipartContent.Add(
+                                new StringContent(
+                                    value?.ToString()!,
+                                    Encoding.UTF8,
+                                    MediaTypeNames.Text.Plain
+                                ),
+                                $"{propertyName}[{i}]"
+                            );
+                        }
                     }
                 }
                 continue;

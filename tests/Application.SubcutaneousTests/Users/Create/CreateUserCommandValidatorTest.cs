@@ -1,5 +1,6 @@
 using System.Net;
 using Application.Common.Exceptions;
+using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
@@ -299,6 +300,41 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
             .ThrowAsync<ValidationException>();
     }
 
+    [Fact]
+    public async Task CreateUser_WhenNoClaimType_ShouldReturnValidationException()
+    {
+        command.UserClaims!.ForEach(x => x.ClaimType = null);
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateUser_WhenNoClaimValue_ShouldReturnValidationException()
+    {
+        command.UserClaims!.ForEach(x => x.ClaimValue = null);
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task CreateUser_WhenDuplicateClaim_ShouldReturnValidationException()
+    {
+        command.UserClaims!.Add(
+            new UserClaimModel() { ClaimType = "test", ClaimValue = "test.value" }
+        );
+
+        await FluentActions
+            .Invoking(() => testingFixture.SendAsync(command))
+            .Should()
+            .ThrowAsync<ValidationException>();
+    }
+
     public async Task DisposeAsync()
     {
         await Task.CompletedTask;
@@ -317,7 +353,10 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
             .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
             .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
             .Without(x => x.Avatar)
-            .Without(x => x.UserClaims)
+            .With(
+                x => x.UserClaims,
+                [new UserClaimModel() { ClaimType = "test", ClaimValue = "test.value" }]
+            )
             .With(x => x.Roles, [roleId])
             .With(x => x.Email, "super.admin@gmail.com")
             .With(x => x.PhoneNumber, "0925123123")
