@@ -67,11 +67,13 @@ public partial class TestingFixture
                 Roles = [.. createUserResponse.Roles!.Select(x => x.Id)],
                 UserClaims =
                 [
-                    .. createUserResponse.UserClaims!.Select(x => new UserClaimModel()
-                    {
-                        ClaimType = x.ClaimType,
-                        ClaimValue = x.ClaimValue,
-                    }),
+                    .. createUserResponse
+                        .UserClaims!.Where(x => x.Type == KindaUserClaimType.Custom)
+                        .Select(x => new UserClaimModel()
+                        {
+                            ClaimType = x.ClaimType,
+                            ClaimValue = x.ClaimValue,
+                        }),
                 ],
             },
         };
