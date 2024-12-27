@@ -14,7 +14,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private UpdateUserCommand updateUserCommand = new();
 
     [Fact]
-    private async Task UpdateUser_WhenIdNotfound_ShouldCreateSuccess()
+    private async Task UpdateUser_WhenIdNotfound_ShouldThrowNotfoundException()
     {
         updateUserCommand.UserId = Ulid.NewUlid().ToString();
         await FluentActions
@@ -24,7 +24,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     }
 
     [Fact]
-    private async Task UpdateUser_WhenNoCustomClaim_ShouldCreateSuccess()
+    private async Task UpdateUser_WhenNoCustomClaim_ShouldUpdateSuccess()
     {
         updateUserCommand.User!.UserClaims = null;
 
@@ -35,7 +35,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     }
 
     [Fact]
-    private async Task UpdateUser_WhenNoAvatar_ShouldCreateSuccess()
+    private async Task UpdateUser_WhenNoAvatar_ShouldUpdateSuccess()
     {
         updateUserCommand.User!.Avatar = null;
         UpdateUserResponse response = await testingFixture.SendAsync(updateUserCommand);
@@ -45,7 +45,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     }
 
     [Fact]
-    private async Task UpdateUser_WhenNoDayOfBirth_ShouldCreateSuccess()
+    private async Task UpdateUser_WhenNoDayOfBirth_ShouldUpdateSuccess()
     {
         updateUserCommand.User!.DayOfBirth = null;
         UpdateUserResponse response = await testingFixture.SendAsync(updateUserCommand);
@@ -55,7 +55,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     }
 
     [Fact]
-    private async Task UpdateUser_ShouldCreateSuccess()
+    private async Task UpdateUser_ShouldUpdateSuccess()
     {
         UpdateUserResponse response = await testingFixture.SendAsync(updateUserCommand);
         User? user = await testingFixture.FindUserByIdAsync(response.Id);

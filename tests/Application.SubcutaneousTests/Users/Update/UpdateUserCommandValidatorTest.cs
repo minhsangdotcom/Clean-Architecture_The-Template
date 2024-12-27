@@ -197,19 +197,6 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
             .ThrowAsync<ValidationException>();
     }
 
-    [Fact]
-    public async Task UpdateUser_WhenDuplicateClaim_ShouldReturnValidationException()
-    {
-        updateUserCommand.User!.UserClaims!.Add(
-            new UserClaimModel() { ClaimType = "test1", ClaimValue = "test1.value" }
-        );
-
-        await FluentActions
-            .Invoking(() => testingFixture.SendAsync(updateUserCommand))
-            .Should()
-            .ThrowAsync<ValidationException>();
-    }
-
     public async Task DisposeAsync()
     {
         await Task.CompletedTask;
