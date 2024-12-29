@@ -1,5 +1,6 @@
+using Contracts.Dtos.Requests;
 using Mediator;
 
 namespace Application.Features.Permissions;
 
-public class ListPermissionQuery : IRequest<IEnumerable<ListPermissionResponse>>;
+public class ListPermissionQuery : QueryParamRequest, IRequest<IEnumerable<ListPermissionResponse>>;
