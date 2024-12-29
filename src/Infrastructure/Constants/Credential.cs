@@ -50,12 +50,24 @@ public static class Credential
 
     public static readonly IReadOnlyCollection<KeyValuePair<string, string>> MANAGER_CLAIMS =
     [
-        new(ClaimTypes.Permission, $"{ActionPermission.create}:{ObjectPermission.user}"),
-        new(ClaimTypes.Permission, $"{ActionPermission.list}:{ObjectPermission.user}"),
-        new(ClaimTypes.Permission, $"{ActionPermission.detail}:{ObjectPermission.user}"),
-        new(ClaimTypes.Permission, $"{ActionPermission.create}:{ObjectPermission.role}"),
-        new(ClaimTypes.Permission, $"{ActionPermission.list}:{ObjectPermission.role}"),
-        new(ClaimTypes.Permission, $"{ActionPermission.detail}:{ObjectPermission.role}"),
+        new(
+            ClaimTypes.Permission,
+            CreatePermission(ActionPermission.create, ObjectPermission.user)
+        ),
+        new(ClaimTypes.Permission, CreatePermission(ActionPermission.list, ObjectPermission.user)),
+        new(
+            ClaimTypes.Permission,
+            CreatePermission(ActionPermission.detail, ObjectPermission.user)
+        ),
+        new(
+            ClaimTypes.Permission,
+            CreatePermission(ActionPermission.create, ObjectPermission.role)
+        ),
+        new(ClaimTypes.Permission, CreatePermission(ActionPermission.list, ObjectPermission.role)),
+        new(
+            ClaimTypes.Permission,
+            CreatePermission(ActionPermission.detail, ObjectPermission.role)
+        ),
     ];
 
     public const string ADMIN_ROLE_ID = "01J79JQZRWAKCTCQV64VYKMZ56";
