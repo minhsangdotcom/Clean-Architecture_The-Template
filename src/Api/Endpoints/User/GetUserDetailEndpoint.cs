@@ -16,9 +16,7 @@ public class GetUserDetailEndpoint(ISender sender)
 {
     [HttpGet(Router.UserRoute.GetUpdateDelete, Name = Router.UserRoute.GetRouteName)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Detail User")]
-    [AuthorizeBy(
-        permissions: $"{Credential.ActionPermission.create}:{Credential.ObjectPermission.user}"
-    )]
+    [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         [FromRoute(Name = Router.Id)] string userId,
         CancellationToken cancellationToken = default

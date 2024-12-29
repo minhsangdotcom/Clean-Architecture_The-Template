@@ -34,6 +34,13 @@ public static class Router
         public const string Tags = $"{nameof(Roles)} endpoint";
     }
 
+    public static class PermissionRoute
+    {
+        public const string Permissions = $"{prefix}{nameof(Permissions)}";
+
+        public const string Tags = $"{nameof(Permissions)} endpoint";
+    }
+
     public static class AuditLogRoute
     {
         public const string AuditLog = $"{prefix}{nameof(AuditLog)}";

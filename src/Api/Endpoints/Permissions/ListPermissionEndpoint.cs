@@ -1,4 +1,4 @@
-using Application.UseCases.AuditLogs.Queries;
+using Application.Features.Permissions;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -7,15 +7,15 @@ using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace Api.Endpoints.AuditLogs;
+namespace Api.Endpoints.Permissions;
 
-public class ListAuditLog(ISender sender)
-    : EndpointBaseAsync.WithRequest<ListAuditlogQuery>.WithActionResult<ApiResponse>
+public class ListPermissionEndpoint(ISender sender)
+    : EndpointBaseAsync.WithRequest<ListPermissionQuery>.WithActionResult<ApiResponse>
 {
-    [HttpGet(Router.AuditLogRoute.AuditLog)]
-    [SwaggerOperation(Tags = [Router.AuditLogRoute.Tags], Summary = "List audit log")]
+    [HttpGet(Router.PermissionRoute.Permissions)]
+    [SwaggerOperation(Tags = [Router.PermissionRoute.Tags], Summary = "List permissions")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
-        [FromQuery] ListAuditlogQuery request,
+        [FromQuery] ListPermissionQuery request,
         CancellationToken cancellationToken = default
     )
     {

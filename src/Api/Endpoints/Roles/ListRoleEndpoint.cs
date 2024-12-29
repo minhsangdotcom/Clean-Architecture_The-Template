@@ -16,9 +16,7 @@ public class ListRoleEndpoint(ISender sender)
 {
     [HttpGet(Router.RoleRoute.Roles)]
     [SwaggerOperation(Tags = [Router.RoleRoute.Tags], Summary = "List Role")]
-    [AuthorizeBy(
-        permissions: $"{Credential.ActionPermission.list}:{Credential.ObjectPermission.role}"
-    )]
+    [AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.role}")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         [FromQuery] ListRoleQuery request,
         CancellationToken cancellationToken = default

@@ -1,4 +1,6 @@
 using Contracts.Constants;
+using Domain.Aggregates.Roles;
+using Domain.Aggregates.Users;
 
 namespace Infrastructure.Constants;
 
@@ -7,27 +9,53 @@ public static class Credential
     public const string USER_DEFAULT_PASSWORD = "123456";
 
     public const string ADMIN_ROLE = "ADMIN";
+
     public const string MANAGER_ROLE = "MANAGER";
 
+    public static readonly Dictionary<string, string[]> PermissionGroups =
+        new()
+        {
+            {
+                nameof(User) + "s",
+
+                [
+                    CreatePermission(ActionPermission.create, ObjectPermission.user),
+                    CreatePermission(ActionPermission.update, ObjectPermission.user),
+                    CreatePermission(ActionPermission.delete, ObjectPermission.user),
+                    CreatePermission(ActionPermission.list, ObjectPermission.user),
+                    CreatePermission(ActionPermission.detail, ObjectPermission.user),
+                ]
+            },
+            {
+                nameof(Role) + "s",
+
+                [
+                    CreatePermission(ActionPermission.create, ObjectPermission.role),
+                    CreatePermission(ActionPermission.update, ObjectPermission.role),
+                    CreatePermission(ActionPermission.delete, ObjectPermission.role),
+                    CreatePermission(ActionPermission.list, ObjectPermission.role),
+                    CreatePermission(ActionPermission.detail, ObjectPermission.role),
+                ]
+            },
+        };
+
     public static readonly IReadOnlyCollection<KeyValuePair<string, string>> ADMIN_CLAIMS =
-    [
-        new(ClaimTypes.Permission, $"{ActionPermission.create}:{ObjectPermission.user}"),
-        new(ClaimTypes.Permission, $"{ActionPermission.update}:{ObjectPermission.user}"),
-        new(ClaimTypes.Permission, $"{ActionPermission.delete}:{ObjectPermission.user}"),
-        new(ClaimTypes.Permission, $"{ActionPermission.list}:{ObjectPermission.user}"),
-        new(ClaimTypes.Permission, $"{ActionPermission.detail}:{ObjectPermission.user}"),
-        new(ClaimTypes.Permission, $"{ActionPermission.create}:{ObjectPermission.role}"),
-        new(ClaimTypes.Permission, $"{ActionPermission.update}:{ObjectPermission.role}"),
-        new(ClaimTypes.Permission, $"{ActionPermission.delete}:{ObjectPermission.role}"),
-        new(ClaimTypes.Permission, $"{ActionPermission.list}:{ObjectPermission.role}"),
-        new(ClaimTypes.Permission, $"{ActionPermission.detail}:{ObjectPermission.role}"),
-    ];
+        PermissionGroups
+            .SelectMany(x => x.Value)
+            .Select(permission => new KeyValuePair<string, string>(
+                ClaimTypes.Permission,
+                permission
+            ))
+            .ToList();
 
     public static readonly IReadOnlyCollection<KeyValuePair<string, string>> MANAGER_CLAIMS =
     [
         new(ClaimTypes.Permission, $"{ActionPermission.create}:{ObjectPermission.user}"),
         new(ClaimTypes.Permission, $"{ActionPermission.list}:{ObjectPermission.user}"),
         new(ClaimTypes.Permission, $"{ActionPermission.detail}:{ObjectPermission.user}"),
+        new(ClaimTypes.Permission, $"{ActionPermission.create}:{ObjectPermission.role}"),
+        new(ClaimTypes.Permission, $"{ActionPermission.list}:{ObjectPermission.role}"),
+        new(ClaimTypes.Permission, $"{ActionPermission.detail}:{ObjectPermission.role}"),
     ];
 
     public const string ADMIN_ROLE_ID = "01J79JQZRWAKCTCQV64VYKMZ56";
@@ -57,18 +85,20 @@ public static class Credential
         public static readonly Ulid LIAM_PEREZ_ID = Ulid.Parse("01JD936AXWY0JMVNZW3KXXS5ZK");
     }
 
-    public class ActionPermission
-    {
-        public const string create = nameof(create);
-        public const string update = nameof(update);
-        public const string delete = nameof(delete);
-        public const string detail = nameof(detail);
-        public const string list = nameof(list);
-    }
+    public static string CreatePermission(string action, string obj) => $"{action}:{obj}";
+}
 
-    public class ObjectPermission
-    {
-        public const string user = nameof(user);
-        public const string role = nameof(role);
-    }
+public static class ActionPermission
+{
+    public const string create = nameof(create);
+    public const string update = nameof(update);
+    public const string delete = nameof(delete);
+    public const string detail = nameof(detail);
+    public const string list = nameof(list);
+}
+
+public static class ObjectPermission
+{
+    public const string user = nameof(user);
+    public const string role = nameof(role);
 }

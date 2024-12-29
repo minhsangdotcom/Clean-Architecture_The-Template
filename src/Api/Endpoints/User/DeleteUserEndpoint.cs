@@ -15,9 +15,7 @@ public class DeleteUserEndpoint(ISender sender)
 {
     [HttpDelete(Router.UserRoute.GetUpdateDelete)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Delete User")]
-    [AuthorizeBy(
-        permissions: $"{Credential.ActionPermission.delete}:{Credential.ObjectPermission.user}"
-    )]
+    [AuthorizeBy(permissions: $"{ActionPermission.delete}:{ObjectPermission.user}")]
     public override async Task<ActionResult> HandleAsync(
         [FromRoute(Name = Router.Id)] string userId,
         CancellationToken cancellationToken = default

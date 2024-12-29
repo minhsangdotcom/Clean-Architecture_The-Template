@@ -630,7 +630,7 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
                 {
-                    b.OwnsOne("Domain.Aggregates.Users.ValueObjects.Address", "Address", b1 =>
+                    b.OwnsOne("Domain.Aggregates.Users.User.Address#Domain.Aggregates.Users.ValueObjects.Address", "Address", b1 =>
                         {
                             b1.Property<string>("UserId")
                                 .HasColumnType("character varying(26)")
@@ -664,7 +664,7 @@ namespace Infrastructure.Data.Migrations
                             b1.HasIndex("ProvinceId")
                                 .HasDatabaseName("ix_user_address_province_id");
 
-                            b1.ToTable("user");
+                            b1.ToTable("user", (string)null);
 
                             b1.HasOne("Domain.Aggregates.Regions.Commune", "Commune")
                                 .WithMany()

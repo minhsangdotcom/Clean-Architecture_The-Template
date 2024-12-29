@@ -16,9 +16,7 @@ public class GetRoleDetailEndpoint(ISender sender)
 {
     [HttpGet(Router.RoleRoute.GetUpdateDelete, Name = Router.RoleRoute.GetRouteName)]
     [SwaggerOperation(Tags = [Router.RoleRoute.Tags], Summary = "Get detail Role")]
-    [AuthorizeBy(
-        permissions: $"{Credential.ActionPermission.detail}:{Credential.ObjectPermission.role}"
-    )]
+    [AuthorizeBy(permissions: $"{ActionPermission.detail}:{ObjectPermission.role}")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         [FromRoute] string id,
         CancellationToken cancellationToken = default

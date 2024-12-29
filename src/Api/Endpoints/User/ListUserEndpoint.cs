@@ -16,9 +16,7 @@ public class ListUserEndpoint(ISender sender)
 {
     [HttpGet(Router.UserRoute.Users)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "list User")]
-    [AuthorizeBy(
-        permissions: $"{Credential.ActionPermission.list}:{Credential.ObjectPermission.user}"
-    )]
+    [AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.user}")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         [FromQuery] ListUserQuery request,
         CancellationToken cancellationToken = default

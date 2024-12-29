@@ -16,9 +16,7 @@ public class CreateRoleEndpoint(ISender sender)
 {
     [HttpPost(Router.RoleRoute.Roles)]
     [SwaggerOperation(Tags = [Router.RoleRoute.Tags], Summary = "create Role")]
-    [AuthorizeBy(
-        permissions: $"{Credential.ActionPermission.create}:{Credential.ObjectPermission.role}"
-    )]
+    [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.role}")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         CreateRoleCommand request,
         CancellationToken cancellationToken = default

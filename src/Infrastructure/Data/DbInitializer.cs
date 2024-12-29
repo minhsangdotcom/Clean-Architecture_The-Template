@@ -39,7 +39,7 @@ public class DbInitializer
                     Id = Ulid.Parse(Credential.ADMIN_ROLE_ID),
                     Name = Credential.ADMIN_ROLE,
                     RoleClaims = Credential
-                        .ADMIN_CLAIMS.Select(x => new RoleClaim
+                        .ADMIN_CLAIMS.Select(x => new RoleClaim()
                         {
                             ClaimType = x.Key,
                             ClaimValue = x.Value,
@@ -51,7 +51,7 @@ public class DbInitializer
                     Id = Ulid.Parse(Credential.MANAGER_ROLE_ID),
                     Name = Credential.MANAGER_ROLE,
                     RoleClaims = Credential
-                        .MANAGER_CLAIMS.Select(x => new RoleClaim
+                        .MANAGER_CLAIMS.Select(x => new RoleClaim()
                         {
                             ClaimType = x.Key,
                             ClaimValue = x.Value,
@@ -87,7 +87,7 @@ public class DbInitializer
         }
     }
 
-    private static async Task<RandomRegionResult> RandomRegion(
+    private static async Task<GetRegionResult> GetRegionAsync(
         IUnitOfWork unitOfWork,
         string provinceCode,
         string districtCode,
@@ -111,36 +111,10 @@ public class DbInitializer
 
     private static async Task<List<User>> UserData(IUnitOfWork unitOfWork)
     {
-        string[] addresses =
-        [
-            "1823 Maple Avenue",
-            "735 Park Lane",
-            "4207 Oak Street",
-            "5914 Elmwood Drive",
-            "1068 Cedar Street",
-            "2435 Willow Avenue",
-            "3871 Birchwood Court",
-            "1502 Walnut Street",
-            "2704 Pine Street",
-            "1328 Maplewood Avenue",
-            "5172 Aspen Drive",
-            "6809 Chestnut Lane",
-            "4258 Magnolia Court",
-            "9123 Oak Hill Road",
-            "3810 Redwood Street",
-            "7445 Pinecrest Avenue",
-            "1680 Valley View Road",
-            "2995 Brookside Drive",
-            "5901 Country Lane",
-            "4387 Maple Hill Drive",
-            "1046 River Road",
-            "8725 Hillcrest Drive",
-        ];
-
         string sg = "79";
         string hn = "01";
         string dn = "48";
-        RandomRegionResult region = await RandomRegion(unitOfWork, sg, "783", "27541");
+        GetRegionResult region = await GetRegionAsync(unitOfWork, sg, "783", "27543");
 
         User user =
             new(
@@ -150,12 +124,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "chloe.kim@gmail.com",
                 "0925123123",
-                new Address(
-                    region.Province!,
-                    region.District!,
-                    region.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
-                )
+                new Address(region.Province!, region.District!, region.Commune, "132 Ham Nghi")
             )
             {
                 DayOfBirth = new DateTime(1990, 10, 1),
@@ -164,7 +133,7 @@ public class DbInitializer
                 Id = Credential.UserIds.CHLOE_KIM_ID,
             };
 
-        RandomRegionResult johnDoeRegion = await RandomRegion(unitOfWork, sg, "760", "26743");
+        GetRegionResult johnDoeRegion = await GetRegionAsync(unitOfWork, sg, "760", "26743");
         User johnDoe =
             new(
                 "John",
@@ -177,7 +146,7 @@ public class DbInitializer
                     johnDoeRegion.Province!,
                     johnDoeRegion.District!,
                     johnDoeRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "136/9 Le Thanh Ton"
                 )
             )
             {
@@ -187,7 +156,7 @@ public class DbInitializer
                 Id = Credential.UserIds.JOHN_DOE_ID,
             };
 
-        RandomRegionResult aliceSmithRegion = await RandomRegion(unitOfWork, sg, "760", "26737");
+        GetRegionResult aliceSmithRegion = await GetRegionAsync(unitOfWork, sg, "760", "26737");
         User aliceSmith =
             new(
                 "Alice",
@@ -200,7 +169,7 @@ public class DbInitializer
                     aliceSmithRegion.Province!,
                     aliceSmithRegion.District!,
                     aliceSmithRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "95B Nguyen Van Thu"
                 )
             )
             {
@@ -210,7 +179,7 @@ public class DbInitializer
                 Id = Credential.UserIds.ALICE_SMITH_ID,
             };
 
-        RandomRegionResult bobJohnsonRegion = await RandomRegion(unitOfWork, sg, "760", "26758");
+        GetRegionResult bobJohnsonRegion = await GetRegionAsync(unitOfWork, sg, "760", "26758");
         User bobJohnson =
             new(
                 "Bob",
@@ -223,7 +192,7 @@ public class DbInitializer
                     bobJohnsonRegion.Province!,
                     bobJohnsonRegion.District!,
                     bobJohnsonRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "18 Truong Son"
                 )
             )
             {
@@ -233,7 +202,7 @@ public class DbInitializer
                 Id = Credential.UserIds.BOB_JOHNSON_ID,
             };
 
-        RandomRegionResult emilyBrownRegion = await RandomRegion(unitOfWork, sg, "760", "26746");
+        GetRegionResult emilyBrownRegion = await GetRegionAsync(unitOfWork, sg, "760", "26746");
         User emilyBrown =
             new(
                 "Emily",
@@ -246,7 +215,7 @@ public class DbInitializer
                     emilyBrownRegion.Province!,
                     emilyBrownRegion.District!,
                     emilyBrownRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "46 Nam Ky Khoi Nghia"
                 )
             )
             {
@@ -256,7 +225,7 @@ public class DbInitializer
                 Id = Credential.UserIds.EMILY_BROWN_ID,
             };
 
-        RandomRegionResult jamesWilliamsRegion = await RandomRegion(unitOfWork, sg, "771", "27163");
+        GetRegionResult jamesWilliamsRegion = await GetRegionAsync(unitOfWork, sg, "771", "27163");
         User jamesWilliams =
             new(
                 "James",
@@ -269,7 +238,7 @@ public class DbInitializer
                     jamesWilliamsRegion.Province!,
                     jamesWilliamsRegion.District!,
                     jamesWilliamsRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "595/29A3 Cach Mang Thang 8"
                 )
             )
             {
@@ -279,7 +248,7 @@ public class DbInitializer
                 Id = Credential.UserIds.JAMES_WILLIAMS_ID,
             };
 
-        RandomRegionResult oliviaTaylorRegion = await RandomRegion(unitOfWork, sg, "771", "27172");
+        GetRegionResult oliviaTaylorRegion = await GetRegionAsync(unitOfWork, sg, "771", "27172");
         User oliviaTaylor =
             new(
                 "Olivia",
@@ -292,7 +261,7 @@ public class DbInitializer
                     oliviaTaylorRegion.Province!,
                     oliviaTaylorRegion.District!,
                     oliviaTaylorRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "175B Cao Thang"
                 )
             )
             {
@@ -302,7 +271,7 @@ public class DbInitializer
                 Id = Credential.UserIds.OLIVIA_TAYLOR_ID,
             };
 
-        RandomRegionResult danielLeeRegion = await RandomRegion(unitOfWork, sg, "771", "27196");
+        GetRegionResult danielLeeRegion = await GetRegionAsync(unitOfWork, sg, "771", "27196");
         User danielLee =
             new(
                 "Daniel",
@@ -315,7 +284,7 @@ public class DbInitializer
                     danielLeeRegion.Province!,
                     danielLeeRegion.District!,
                     danielLeeRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "102 Ly Thuong Kiet"
                 )
             )
             {
@@ -325,7 +294,7 @@ public class DbInitializer
                 Id = Credential.UserIds.DANIEL_LEE_ID,
             };
 
-        RandomRegionResult sophiaGarciaRegion = await RandomRegion(unitOfWork, sg, "771", "27166");
+        GetRegionResult sophiaGarciaRegion = await GetRegionAsync(unitOfWork, sg, "771", "27166");
         User sophiaGarcia =
             new(
                 "Sophia",
@@ -338,7 +307,7 @@ public class DbInitializer
                     sophiaGarciaRegion.Province!,
                     sophiaGarciaRegion.District!,
                     sophiaGarciaRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "51 To Hien Thanh"
                 )
             )
             {
@@ -348,7 +317,7 @@ public class DbInitializer
                 Id = Credential.UserIds.SHOPHIA_GARCIA_ID,
             };
 
-        RandomRegionResult michaelMartinezRegion = await RandomRegion(
+        GetRegionResult michaelMartinezRegion = await GetRegionAsync(
             unitOfWork,
             sg,
             "766",
@@ -366,7 +335,7 @@ public class DbInitializer
                     michaelMartinezRegion.Province!,
                     michaelMartinezRegion.District!,
                     michaelMartinezRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "78 Au Co"
                 )
             )
             {
@@ -376,12 +345,7 @@ public class DbInitializer
                 Id = Credential.UserIds.MICHAEL_MARTINEZ_ID,
             };
 
-        RandomRegionResult isabellaHarrisRegion = await RandomRegion(
-            unitOfWork,
-            sg,
-            "766",
-            "27004"
-        );
+        GetRegionResult isabellaHarrisRegion = await GetRegionAsync(unitOfWork, sg, "766", "27004");
         User isabellaHarris =
             new(
                 "Isabella",
@@ -394,7 +358,7 @@ public class DbInitializer
                     isabellaHarrisRegion.Province!,
                     isabellaHarrisRegion.District!,
                     isabellaHarrisRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "40 Nguyen Hong Dao"
                 )
             )
             {
@@ -404,7 +368,7 @@ public class DbInitializer
                 Id = Credential.UserIds.ISABELLA_HARRIS_ID,
             };
 
-        RandomRegionResult davidClarkRegion = await RandomRegion(unitOfWork, sg, "766", "26986");
+        GetRegionResult davidClarkRegion = await GetRegionAsync(unitOfWork, sg, "766", "26986");
         User davidClark =
             new(
                 "David",
@@ -417,7 +381,7 @@ public class DbInitializer
                     davidClarkRegion.Province!,
                     davidClarkRegion.District!,
                     davidClarkRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "66 Van Coi"
                 )
             )
             {
@@ -427,7 +391,7 @@ public class DbInitializer
                 Id = Credential.UserIds.DAVID_CLARK_ID,
             };
 
-        RandomRegionResult emmaRodriguezRegion = await RandomRegion(unitOfWork, hn, "001", "00007");
+        GetRegionResult emmaRodriguezRegion = await GetRegionAsync(unitOfWork, hn, "001", "00007");
         User emmaRodriguez =
             new(
                 "Emma",
@@ -440,7 +404,7 @@ public class DbInitializer
                     emmaRodriguezRegion.Province!,
                     emmaRodriguezRegion.District!,
                     emmaRodriguezRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "178 Phan Ke Binh"
                 )
             )
             {
@@ -450,7 +414,7 @@ public class DbInitializer
                 Id = Credential.UserIds.EMMA_RODRIGUEZ_ID,
             };
 
-        RandomRegionResult andrewMooreRegion = await RandomRegion(unitOfWork, hn, "001", "00006");
+        GetRegionResult andrewMooreRegion = await GetRegionAsync(unitOfWork, hn, "001", "00006");
         User andrewMoore =
             new(
                 "Andrew",
@@ -463,7 +427,7 @@ public class DbInitializer
                     andrewMooreRegion.Province!,
                     andrewMooreRegion.District!,
                     andrewMooreRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "6 Doi Nhan"
                 )
             )
             {
@@ -473,7 +437,7 @@ public class DbInitializer
                 Id = Credential.UserIds.ANDREW_MOORE_ID,
             };
 
-        RandomRegionResult avaJacksonRegion = await RandomRegion(unitOfWork, hn, "001", "00025");
+        GetRegionResult avaJacksonRegion = await GetRegionAsync(unitOfWork, hn, "001", "00025");
         User avaJackson =
             new(
                 "Ava",
@@ -486,7 +450,7 @@ public class DbInitializer
                     avaJacksonRegion.Province!,
                     avaJacksonRegion.District!,
                     avaJacksonRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "545 kim Ma"
                 )
             )
             {
@@ -496,7 +460,7 @@ public class DbInitializer
                 Id = Credential.UserIds.AVA_JACKSON_ID,
             };
 
-        RandomRegionResult joshuaWhiteRegion = await RandomRegion(unitOfWork, hn, "002", "00076");
+        GetRegionResult joshuaWhiteRegion = await GetRegionAsync(unitOfWork, hn, "002", "00076");
         User joshuaWhite =
             new(
                 "Joshua",
@@ -509,7 +473,7 @@ public class DbInitializer
                     joshuaWhiteRegion.Province!,
                     joshuaWhiteRegion.District!,
                     joshuaWhiteRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "9 Tong Duy Tan"
                 )
             )
             {
@@ -519,7 +483,7 @@ public class DbInitializer
                 Id = Credential.UserIds.JOSHUA_WHITE_ID,
             };
 
-        RandomRegionResult charlotteThomasRegion = await RandomRegion(
+        GetRegionResult charlotteThomasRegion = await GetRegionAsync(
             unitOfWork,
             hn,
             "002",
@@ -537,7 +501,7 @@ public class DbInitializer
                     charlotteThomasRegion.Province!,
                     charlotteThomasRegion.District!,
                     charlotteThomasRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "10 Ly Quoc Su"
                 )
             )
             {
@@ -547,7 +511,7 @@ public class DbInitializer
                 Id = Credential.UserIds.CHARLOTTE_THOMAS_ID,
             };
 
-        RandomRegionResult ethanKingRegion = await RandomRegion(unitOfWork, dn, "495", "20306");
+        GetRegionResult ethanKingRegion = await GetRegionAsync(unitOfWork, dn, "495", "20306");
         User ethanKing =
             new(
                 "Ethan",
@@ -560,7 +524,7 @@ public class DbInitializer
                     ethanKingRegion.Province!,
                     ethanKingRegion.District!,
                     ethanKingRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "35 Dinh Liet, Hoa An"
                 )
             )
             {
@@ -570,7 +534,7 @@ public class DbInitializer
                 Id = Credential.UserIds.ETHAN_KING_ID,
             };
 
-        RandomRegionResult abigailScottRegion = await RandomRegion(unitOfWork, dn, "495", "20314");
+        GetRegionResult abigailScottRegion = await GetRegionAsync(unitOfWork, dn, "495", "20314");
         User abigailScott =
             new(
                 "Abigail",
@@ -583,7 +547,7 @@ public class DbInitializer
                     abigailScottRegion.Province!,
                     abigailScottRegion.District!,
                     abigailScottRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "55 Mac Dang Doanh"
                 )
             )
             {
@@ -593,7 +557,7 @@ public class DbInitializer
                 Id = Credential.UserIds.ABIGAIL_SCOTT_ID,
             };
 
-        RandomRegionResult liamPerezRegion = await RandomRegion(unitOfWork, dn, "495", "20305");
+        GetRegionResult liamPerezRegion = await GetRegionAsync(unitOfWork, dn, "495", "20305");
         User liamPerez =
             new(
                 "Liam",
@@ -606,7 +570,7 @@ public class DbInitializer
                     liamPerezRegion.Province!,
                     liamPerezRegion.District!,
                     liamPerezRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "131/7 Le Trong Tan"
                 )
             )
             {
@@ -642,4 +606,4 @@ public class DbInitializer
     }
 }
 
-internal record RandomRegionResult(Province? Province, District? District, Commune? Commune);
+internal record GetRegionResult(Province? Province, District? District, Commune? Commune);

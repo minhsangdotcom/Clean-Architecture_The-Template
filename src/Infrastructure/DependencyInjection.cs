@@ -21,8 +21,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Npgsql;
-using Serilog;
-using Serilog.Core;
 
 namespace Infrastructure;
 
@@ -45,9 +43,8 @@ public static class DependencyInjection
         services.AddSingleton(sp =>
         {
             var databaseSettings = sp.GetRequiredService<IOptions<DatabaseSettings>>().Value;
-            return new NpgsqlDataSourceBuilder(databaseSettings.DatabaseConnection)
-                .EnableDynamicJson()
-                .Build();
+            string connectionString = databaseSettings.DatabaseConnection!;
+            return new NpgsqlDataSourceBuilder(connectionString).EnableDynamicJson().Build();
         });
 
         services

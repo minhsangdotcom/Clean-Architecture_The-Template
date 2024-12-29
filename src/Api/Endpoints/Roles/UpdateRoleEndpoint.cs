@@ -16,9 +16,7 @@ public class UpdateRoleEndpoint(ISender sender)
 {
     [HttpPut(Router.RoleRoute.GetUpdateDelete)]
     [SwaggerOperation(Tags = [Router.RoleRoute.Tags], Summary = "update Role")]
-    [AuthorizeBy(
-        permissions: $"{Credential.ActionPermission.update}:{Credential.ObjectPermission.role}"
-    )]
+    [AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.role}")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         UpdateRoleCommand request,
         CancellationToken cancellationToken = default

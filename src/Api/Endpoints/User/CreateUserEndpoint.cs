@@ -17,9 +17,7 @@ public class CreateUserEndpoint(ISender sender)
 {
     [HttpPost(Router.UserRoute.Users)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "create User")]
-    [AuthorizeBy(
-        permissions: $"{Credential.ActionPermission.create}:{Credential.ObjectPermission.user}"
-    )]
+    [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         [FromForm] CreateUserCommand request,
         CancellationToken cancellationToken = default

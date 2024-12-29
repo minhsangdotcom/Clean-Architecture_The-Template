@@ -16,9 +16,7 @@ public class DeleteRoleEndpoint(ISender sender)
 {
     [HttpDelete(Router.RoleRoute.GetUpdateDelete)]
     [SwaggerOperation(Tags = [Router.RoleRoute.Tags], Summary = "Delete Role")]
-    [AuthorizeBy(
-        permissions: $"{Credential.ActionPermission.delete}:{Credential.ObjectPermission.role}"
-    )]
+    [AuthorizeBy(permissions: $"{ActionPermission.delete}:{ObjectPermission.role}")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         [FromRoute(Name = Router.Id)] string roleId,
         CancellationToken cancellationToken = default
