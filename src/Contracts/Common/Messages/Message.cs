@@ -322,11 +322,11 @@ public class Message<T>(string? entityName = null)
 
     private string Translate(LanguageType languageType)
     {
-        string rootPath = Path.Join(Directory.GetCurrentDirectory(), "Assets");
+        string rootPath = Path.Join(Directory.GetCurrentDirectory(), "Resources");
         string path = languageType switch
         {
-            LanguageType.Vi => Path.Join(rootPath, "Resources", "Message.vi.resx"),
-            LanguageType.En => Path.Join(rootPath, "Resources", "Message.en.resx"),
+            LanguageType.Vi => Path.Join(rootPath, "Translations", "Message.vi.resx"),
+            LanguageType.En => Path.Join(rootPath, "Translations", "Message.en.resx"),
             _ => string.Empty,
         };
 

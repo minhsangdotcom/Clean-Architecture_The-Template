@@ -29,16 +29,16 @@
     <ProjectReference Include="..\..\src\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Contracts\Contracts.csproj" />
 
-    <None Include="..\..\src\Api\Assets\Resources\Message.en.resx">
-      <Link>Assets\Resources\Message.en.resx</Link>
+    <None Include="..\..\src\Api\Resources\Translations\Message.en.resx">
+      <Link>Resources\Translations\Message.en.resx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\..\src\Api\Assets\Resources\Message.vi.resx">
-      <Link>Assets\Resources\Message.vi.resx</Link>
+    <None Include="..\..\src\Api\Resources\Translations\Message.vi.resx">
+      <Link>Resources\Translations\Message.vi.resx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\..\src\Api\Assets\Templates\ForgotPassword.cshtml">
-      <Link>Assets\Templates\ForgotPassword.cshtml</Link>
+    <None Include="..\..\src\Api\wwwroot\Templates\ForgotPassword.cshtml">
+      <Link>Templates\ForgotPassword.cshtml</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\..\src\Infrastructure\Data\Seeds\Provinces.json">
