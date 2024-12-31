@@ -2,7 +2,6 @@ using System.Data.Common;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
 using Domain.Common;
-using Infrastructure.Data;
 using Infrastructure.UnitOfWorks.CachedRepositories;
 using Infrastructure.UnitOfWorks.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -15,8 +14,8 @@ namespace Infrastructure.UnitOfWorks;
 public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache, ILogger logger)
     : IUnitOfWork
 {
-    public DbTransaction? Transaction { get; set; } =
-        dbContext.DatabaseFacade.CurrentTransaction?.GetDbTransaction();
+    public DbTransaction? CurrentTransaction { get; set; }
+
     private readonly Dictionary<string, object?> repositories = [];
     private bool disposed = false;
 
@@ -67,43 +66,36 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
         return (IRepository<TEntity>)value!;
     }
 
-    public async Task<DbTransaction> CreateTransactionAsync()
+    public async Task<DbTransaction> CreateTransactionAsync(
+        CancellationToken cancellationToken = default
+    )
     {
-        if (Transaction != null)
+        if (CurrentTransaction != null)
         {
             throw new InvalidOperationException("A transaction is already in progress.");
         }
 
         IDbContextTransaction currentTransaction =
-            await dbContext.DatabaseFacade.BeginTransactionAsync();
+            await dbContext.DatabaseFacade.BeginTransactionAsync(cancellationToken);
 
-        Transaction = currentTransaction.GetDbTransaction();
-        return Transaction;
+        CurrentTransaction = currentTransaction.GetDbTransaction();
+        return CurrentTransaction;
     }
 
-    public async Task UseTransactionAsync(DbTransaction transaction)
+    public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
-        await dbContext.UseTransactionAsync(transaction);
-        if (Transaction == null || Transaction != transaction)
-        {
-            Transaction = transaction;
-        }
-    }
-
-    public async Task CommitAsync()
-    {
-        if (Transaction == null)
+        if (CurrentTransaction == null)
         {
             throw new InvalidOperationException("No transaction started.");
         }
 
         try
         {
-            await Transaction.CommitAsync();
+            await CurrentTransaction.CommitAsync(cancellationToken);
         }
         catch (Exception ex)
         {
-            await RollbackAsync();
+            await RollbackAsync(cancellationToken);
             throw new Exception("Transaction commit failed. Rolled back.", ex);
         }
         finally
@@ -112,9 +104,9 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
         }
     }
 
-    public async Task RollbackAsync()
+    public async Task RollbackAsync(CancellationToken cancellationToken = default)
     {
-        if (Transaction == null)
+        if (CurrentTransaction == null)
         {
             logger.Warning("Thre is no transaction started.");
             return;
@@ -122,7 +114,7 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
 
         try
         {
-            await Transaction.RollbackAsync();
+            await CurrentTransaction.RollbackAsync(cancellationToken);
         }
         catch (Exception ex)
         {
@@ -160,10 +152,10 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
 
     private async Task DisposeTransactionAsync()
     {
-        if (Transaction != null)
+        if (CurrentTransaction != null)
         {
-            await Transaction.DisposeAsync();
-            Transaction = null;
+            await CurrentTransaction.DisposeAsync();
+            CurrentTransaction = null;
         }
     }
 }

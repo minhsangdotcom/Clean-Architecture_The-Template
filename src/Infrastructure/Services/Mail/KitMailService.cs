@@ -9,11 +9,8 @@ using Serilog;
 
 namespace Infrastructure.Services.Mail;
 
-public class KitMailService(
-    IOptions<EmailSettings> options,
-    ILogger logger,
-    IMapper mapper
-) : IMailService
+public class KitMailService(IOptions<EmailSettings> options, ILogger logger, IMapper mapper)
+    : IMailService
 {
     private readonly EmailSettings emailSettings = options.Value;
 

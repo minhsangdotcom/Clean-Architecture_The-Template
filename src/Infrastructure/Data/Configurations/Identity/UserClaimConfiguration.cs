@@ -10,8 +10,11 @@ public class UserClaimConfiguration : IEntityTypeConfiguration<UserClaim>
     {
         builder.HasKey(x => x.Id);
 
-        builder.HasOne(x => x.User)
+        builder.HasOne(x => x.User).WithMany(x => x.UserClaims).HasForeignKey(x => x.UserId);
+        builder
+            .HasOne(x => x.RoleClaim)
             .WithMany(x => x.UserClaims)
-            .HasForeignKey(x => x.UserId);
+            .HasForeignKey(x => x.RoleClaimId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -65,9 +65,7 @@ public static class PaginationExtension
         CursorPaginationRequest request
     )
     {
-        string sort = string.IsNullOrWhiteSpace(request.Sort)
-            ? $"{request.UniqueSort}"
-            : $"{request.Sort},{request.UniqueSort}";
+        string sort = $"{request.Sort},{request.UniqueSort}";
 
         int totalPage = await query.CountAsync();
         if (totalPage == 0)

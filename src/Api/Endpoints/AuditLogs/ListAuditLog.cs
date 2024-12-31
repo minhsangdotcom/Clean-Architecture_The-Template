@@ -15,7 +15,7 @@ public class ListAuditLog(ISender sender)
     [HttpGet(Router.AuditLogRoute.AuditLog)]
     [SwaggerOperation(Tags = [Router.AuditLogRoute.Tags], Summary = "List audit log")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
-        [FromQuery]ListAuditlogQuery request,
+        [FromQuery] ListAuditlogQuery request,
         CancellationToken cancellationToken = default
     )
     {

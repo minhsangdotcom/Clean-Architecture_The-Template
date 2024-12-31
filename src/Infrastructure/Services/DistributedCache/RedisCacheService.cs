@@ -14,7 +14,7 @@ public class RedisCacheService(IOptions<RedisDatabaseSettings> options) : IRedis
         ConfigurationOptions options =
             new()
             {
-                EndPoints = { { redisDatabaseSettings.Host!, redisDatabaseSettings.Port! } },
+                EndPoints = { { redisDatabaseSettings.Host!, redisDatabaseSettings.Port!.Value } },
                 Password = redisDatabaseSettings.Password,
             };
         ConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect(options);

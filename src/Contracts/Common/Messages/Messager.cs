@@ -11,48 +11,45 @@ public static class Messager
     public static Message<T> Property<T>(this Message<T> message, Expression<Func<T, object>> prop)
         where T : class
     {
-        message.SetPropertyName(prop.ToStringProperty());
+        message.PropertyName = prop.ToStringProperty();
         return message;
     }
 
     public static Message<T> Property<T>(this Message<T> message, string propertyName)
         where T : class
     {
-        message.SetPropertyName(propertyName);
+        message.PropertyName = propertyName;
         return message;
     }
 
     public static Message<T> Negative<T>(this Message<T> message, bool isNegative = true)
         where T : class
     {
-        message.SetNegative(isNegative);
+        message.IsNegative = isNegative;
         return message;
     }
 
     public static Message<T> ObjectName<T>(this Message<T> message, string name)
         where T : class
     {
-        message.SetObjectName(name);
+        message.ObjectName = name;
         return message;
     }
 
     public static Message<T> Message<T>(this Message<T> message, CustomMessage customMessage)
         where T : class
     {
-        message.SetCustomMessage(customMessage);
+        message.CustomMessage = customMessage;
         return message;
     }
 
     public static Message<T> Message<T>(this Message<T> message, MessageType mess)
         where T : class
     {
-        message.SetMessage(mess);
+        message.Type = mess;
         return message;
     }
 
     public static MessageResult Build<T>(this Message<T> message)
-        where T : class
-    {
-        return message.BuildMessage();
-    }
+        where T : class => message.BuildMessage();
 }

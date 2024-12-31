@@ -10,7 +10,7 @@ public class ApplicationMappingProfile : Profile
         CreateMap<MessageMailMetaData, MailData>()
             .ForMember(dest => dest.Body, opt => opt.MapFrom(src => src.Message));
 
-        CreateMap<TemplateMailMetaData,  MailData>()
+        CreateMap<TemplateMailMetaData, MailData>()
             .ForMember(
                 dest => dest.Body,
                 opt => opt.MapFrom((src, dest, member, context) => context.Items["body"])

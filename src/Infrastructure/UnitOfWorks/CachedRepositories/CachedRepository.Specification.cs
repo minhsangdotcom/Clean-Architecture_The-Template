@@ -4,7 +4,7 @@ using System.Text;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
-using Domain.Specs.Interfaces;
+using Domain.Common.Specs.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 

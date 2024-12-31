@@ -166,6 +166,7 @@ public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSet
             Expires = DateTime.UtcNow.AddMinutes(
                 double.Parse(s3AwsSettings.PreSignedUrlExpirationInMinutes!)
             ),
+            Protocol = s3AwsSettings.Protocol,
         };
 
         string url = amazonS3.GetPreSignedURL(request);

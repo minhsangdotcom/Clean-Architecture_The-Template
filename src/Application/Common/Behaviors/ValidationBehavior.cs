@@ -2,6 +2,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
+
 namespace Application.Common.Behaviors;
 
 public sealed class ValidationBehavior<TMessage, TResponse>(

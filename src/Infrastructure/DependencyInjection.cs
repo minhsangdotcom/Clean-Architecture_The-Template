@@ -9,6 +9,7 @@ using Infrastructure.Services;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.DistributedCache;
 using Infrastructure.Services.Elastics;
+using Infrastructure.Services.Hangfires;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Mail;
 using Infrastructure.Services.Token;
@@ -17,6 +18,8 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace Infrastructure;
@@ -25,32 +28,63 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services,
-        IConfiguration configuration
+        IConfiguration configuration,
+        string? environmentName = "Development"
     )
     {
         services.AddDetection();
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
+        services.Configure<DatabaseSettings>(options =>
+            configuration.GetSection(nameof(DatabaseSettings)).Bind(options)
+        );
+        services.TryAddSingleton<IValidateOptions<DatabaseSettings>, ValidateDatabaseSetting>();
+
+        services.AddSingleton(sp =>
+        {
+            var databaseSettings = sp.GetRequiredService<IOptions<DatabaseSettings>>().Value;
+            string connectionString = databaseSettings.DatabaseConnection!;
+            return new NpgsqlDataSourceBuilder(connectionString).EnableDynamicJson().Build();
+        });
+
         services
             .AddScoped<IDbContext, TheDbContext>()
             .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddSingleton<UpdateAuditableEntityInterceptor>()
-            .AddSingleton<DispatchDomainEventInterceptor>()
-            .AddDbContext<TheDbContext>(
+            .AddSingleton<DispatchDomainEventInterceptor>();
+
+        if (environmentName!.CompareTo("Testing") == 0)
+        {
+            services.AddDbContext<TheDbContext>(
                 (sp, options) =>
+                {
+                    NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
                     options
-                        .UseNpgsql(
-                            new NpgsqlDataSourceBuilder(
-                                configuration.GetConnectionString("default")
-                            )
-                                .EnableDynamicJson()
-                                .Build()
-                        )
+                        .UseNpgsql(npgsqlDataSource)
                         .AddInterceptors(
                             sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
                             sp.GetRequiredService<DispatchDomainEventInterceptor>()
-                        )
-            )
+                        );
+                }
+            );
+        }
+        else
+        {
+            services.AddDbContextPool<TheDbContext>(
+                (sp, options) =>
+                {
+                    NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
+                    options
+                        .UseNpgsql(npgsqlDataSource)
+                        .AddInterceptors(
+                            sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
+                            sp.GetRequiredService<DispatchDomainEventInterceptor>()
+                        );
+                }
+            );
+        }
+
+        services
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentUser, CurrentUserService>()
             .AddSingleton(typeof(IMediaUpdateService<>), typeof(MediaUpdateService<>))
@@ -77,10 +111,10 @@ public static class DependencyInjection
             )
             .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
             .AddJwtAuth(configuration)
-            .AddElasticSearch(configuration)
-            .AddHostedService<ElasticsearchIndexBackgoundService>()
             .AddMemoryCache()
-            .AddRedis(configuration);
+            .AddRedis(configuration)
+            .AddHangfireConfiguration(configuration)
+            .AddElasticSearch(configuration);
 
         return services;
     }

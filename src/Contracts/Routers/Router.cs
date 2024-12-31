@@ -17,19 +17,10 @@ public static class Router
         public const string RequestResetPassowrd =
             $"{prefix}{nameof(Users)}/{nameof(RequestResetPassowrd)}";
         public const string ResetPassowrd = $"{prefix}{nameof(Users)}/{nameof(ResetPassowrd)}";
+
+        public const string Login = $"{prefix}{nameof(Users)}/{nameof(Login)}";
+        public const string RefreshToken = $"{prefix}{nameof(Users)}/{nameof(RefreshToken)}";
         public const string Tags = $"{nameof(Users)} endpoint";
-    }
-
-    public static class AuthRoute
-    {
-        public const string Auths = $"{prefix}{nameof(Auths)}";
-
-        /// <summary>
-        /// Refresh token
-        /// </summary>
-        public const string Token = $"{prefix}{nameof(Token)}";
-
-        public const string Tags = $"{nameof(Auths)} endpoint";
     }
 
     public static class RoleRoute
@@ -41,6 +32,13 @@ public static class Router
         public const string GetRouteName = $"{Roles}DetailEndpoint";
 
         public const string Tags = $"{nameof(Roles)} endpoint";
+    }
+
+    public static class PermissionRoute
+    {
+        public const string Permissions = $"{prefix}{nameof(Permissions)}";
+
+        public const string Tags = $"{nameof(Permissions)} endpoint";
     }
 
     public static class AuditLogRoute

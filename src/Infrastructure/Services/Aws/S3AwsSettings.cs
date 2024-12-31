@@ -1,3 +1,5 @@
+using Amazon.S3;
+
 namespace Infrastructure.Services.Aws;
 
 public class S3AwsSettings
@@ -13,4 +15,6 @@ public class S3AwsSettings
     public string? PublicUrl { get; set; }
 
     public string? PreSignedUrlExpirationInMinutes { get; set; }
+
+    public Protocol Protocol { get; set; }
 }

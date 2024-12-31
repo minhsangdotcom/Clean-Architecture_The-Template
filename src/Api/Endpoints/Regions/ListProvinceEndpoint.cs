@@ -1,4 +1,4 @@
-using Application.UseCases.Regions.Queries.List.Provinces;
+using Application.Features.Regions.Queries.List.Provinces;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -13,10 +13,7 @@ public class ListProvinceEndpoint(ISender sender)
     : EndpointBaseAsync.WithRequest<ListProvinceQuery>.WithActionResult<ApiResponse>
 {
     [HttpGet(Router.RegionRoute.Provinces)]
-    [SwaggerOperation(
-           Tags = [Router.RegionRoute.Tags],
-           Summary = "list Province"
-       )]
+    [SwaggerOperation(Tags = [Router.RegionRoute.Tags], Summary = "list Province")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         ListProvinceQuery request,
         CancellationToken cancellationToken = default

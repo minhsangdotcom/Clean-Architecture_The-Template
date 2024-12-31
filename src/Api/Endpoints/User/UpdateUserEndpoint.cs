@@ -1,23 +1,24 @@
 using Application.Common.Auth;
-using Application.UseCases.Users.Commands.Update;
+using Application.Features.Users.Commands.Update;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
-using Contracts.Routers;
 using Contracts.RouteResults;
+using Contracts.Routers;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.User;
 
-public class UpdateUserEndpoint(ISender sender) : EndpointBaseAsync.WithRequest<UpdateUserCommand>.WithActionResult<ApiResponse>
+public class UpdateUserEndpoint(ISender sender)
+    : EndpointBaseAsync.WithRequest<UpdateUserCommand>.WithActionResult<ApiResponse>
 {
     [HttpPut(Router.UserRoute.GetUpdateDelete)]
-    [SwaggerOperation(
-            Tags = [Router.UserRoute.Tags],
-            Summary = "Update User"
-        )]
-        [Restrict(claims: "permission:update.user")]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(UpdateUserCommand command, CancellationToken cancellationToken = default) =>
-        this.Ok200(await sender.Send(command, cancellationToken));
+    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Update User")]
+    [AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.user}")]
+    public override async Task<ActionResult<ApiResponse>> HandleAsync(
+        UpdateUserCommand command,
+        CancellationToken cancellationToken = default
+    ) => this.Ok200(await sender.Send(command, cancellationToken));
 }

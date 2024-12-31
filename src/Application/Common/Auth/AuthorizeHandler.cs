@@ -1,5 +1,7 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
+using Contracts.Constants;
+using Contracts.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,28 +11,6 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
     : AuthorizationHandler<AuthorizationRequirement>
 {
     private readonly IServiceProvider serviceProvider = serviceProvider;
-
-    private static RequireTypeResponse GetRequireType(string requirement)
-    {
-        if (string.IsNullOrWhiteSpace(requirement))
-        {
-            return new(RequireType.None);
-        }
-
-        string[] require = requirement.Trim().Split("-", StringSplitOptions.RemoveEmptyEntries);
-
-        if (requirement.StartsWith('-'))
-        {
-            return new(RequireType.Claim, require);
-        }
-
-        if (requirement.EndsWith('-'))
-        {
-            return new(RequireType.Role, require);
-        }
-
-        return new(RequireType.Both, require);
-    }
 
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
@@ -46,56 +26,63 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
 
         if (userId == null)
         {
-            context.Fail(new AuthorizationFailureReason(this, "User UnAuthenticated"));
+            context.Fail(new AuthorizationFailureReason(this, "User is UnAuthenticated"));
             return;
         }
 
-        (RequireType type, string[]? require) = GetRequireType(requirement.Requirement());
+        AuthorizeModel? authorizeModel = SerializerExtension
+            .Deserialize<AuthorizeModel>(requirement.Requirement())
+            .Object;
 
-        if (type == RequireType.None && require == null)
+        if (
+            authorizeModel == null
+            || (authorizeModel!.Permissions?.Count == 0 && authorizeModel!.Roles?.Count == 0)
+        )
         {
             context.Succeed(requirement);
             return;
         }
 
-        IEnumerable<string> requireData = require![0].Trim().Split(",").Select(x => x.Trim());
-
-        if (type == RequireType.Both && require.Length == 2)
+        if (authorizeModel.Roles?.Count > 0 && authorizeModel.Permissions?.Count > 0)
         {
-            IEnumerable<string> claims = require[1].Trim().Split(",").Select(x => x.Trim());
             SuccessOrFailiureHandler(
                 context,
                 requirement,
-                claims.Any(x => x.Contains(':'))
-                    && await userManagerService.HasClaimsAndRoleInUserAsync(
-                        userId.Value,
-                        requireData,
-                        GetClaimKeyValues(claims)
-                    )
+                await userManagerService.HasClaimsAndRoleInUserAsync(
+                    userId.Value,
+                    authorizeModel.Roles,
+                    authorizeModel.Permissions.Select(permission => new KeyValuePair<
+                        string,
+                        string
+                    >(ClaimTypes.Permission, permission))
+                )
             );
+            return;
         }
 
-        if (type == RequireType.Role)
+        if (authorizeModel.Roles?.Count > 0)
         {
             SuccessOrFailiureHandler(
                 context,
                 requirement,
-                await userManagerService.HasRolesInUserAsync(userId.Value, requireData)
+                await userManagerService.HasRolesInUserAsync(userId.Value, authorizeModel.Roles)
             );
 
             return;
         }
 
-        if (type == RequireType.Claim)
+        if (authorizeModel.Permissions?.Count > 0)
         {
             SuccessOrFailiureHandler(
                 context,
                 requirement,
-                requireData.Any(x => x.Contains(':'))
-                    && await userManagerService.HasClaimsInUserAsync(
-                        userId.Value,
-                        GetClaimKeyValues(requireData)
-                    )
+                await userManagerService.HasClaimsInUserAsync(
+                    userId.Value,
+                    authorizeModel.Permissions.Select(permission => new KeyValuePair<
+                        string,
+                        string
+                    >(ClaimTypes.Permission, permission))
+                )
             );
 
             return;
@@ -118,25 +105,4 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
 
         context.Succeed(requirement);
     }
-
-    private static Dictionary<string, string> GetClaimKeyValues(IEnumerable<string> claims)
-    {
-        return claims
-            .Select(claim =>
-            {
-                var claimArr = claim.Split(":");
-                return new { Key = claimArr.First(), Value = claimArr.Last() };
-            })
-            .ToDictionary(x => x.Key, x => x.Value);
-    }
-
-    private enum RequireType
-    {
-        None = 0,
-        Role = 1,
-        Claim = 2,
-        Both = 3,
-    }
-
-    private record RequireTypeResponse(RequireType Type, string[]? Requirement = null);
 }

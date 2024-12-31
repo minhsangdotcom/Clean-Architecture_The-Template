@@ -1,14 +1,10 @@
 using System.Reflection;
-using System.Text.RegularExpressions;
 using Application.Common.Exceptions;
 using Contracts.Common.Messages;
 using Contracts.Dtos.Requests;
 using Contracts.Extensions;
 using Contracts.Extensions.Reflections;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Primitives;
 using Serilog;
-using Wangkanai.Extensions;
 
 namespace Application.Common.QueryStringProcessing;
 

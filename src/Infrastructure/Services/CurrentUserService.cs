@@ -1,7 +1,7 @@
-
 using System.Security.Claims;
 using Application.Common.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
+
 namespace Infrastructure.Services;
 
 public class CurrentUserService : ICurrentUser
@@ -18,14 +18,14 @@ public class CurrentUserService : ICurrentUser
 
         string? id = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if(!string.IsNullOrWhiteSpace(id))
+        if (!string.IsNullOrWhiteSpace(id))
         {
             Id = Ulid.Parse(id);
         }
     }
 
     public void SetClientIp(HttpContext httpContext)
-    {        
+    {
         ClientIp = httpContext.Connection.RemoteIpAddress?.ToString();
     }
 }

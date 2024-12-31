@@ -1,9 +1,9 @@
 using Api.Converters;
 using Api.Extensions;
 using Application;
-using Contracts.Binds;
 using Infrastructure;
 using Infrastructure.Data;
+using Infrastructure.Services.Hangfires;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +11,7 @@ var services = builder.Services;
 var configuration = builder.Configuration;
 
 // ---------------------------------------------
+builder.AddConfiguration();
 builder
     .Services.AddControllers()
     .AddJsonOptions(option =>
@@ -27,7 +28,7 @@ builder.AddSerialogs();
 
 //-----------------------------
 
-services.AddInfrastructureServices(configuration);
+services.AddInfrastructureServices(configuration, builder.Environment.EnvironmentName);
 services.AddApplicationServices();
 
 try
@@ -35,13 +36,18 @@ try
     Log.Logger.Information("Application is starting....");
     var app = builder.Build();
 
-    var scope = app.Services.CreateScope();
-    var serviceProvider = scope.ServiceProvider;
-    await RegionDataSeeding.SeedingAsync(serviceProvider);
-    await DbInitializer.InitializeAsync(serviceProvider);
-    await TicketSeeding.SeedingAsync(serviceProvider);
+    bool isDevelopment = app.Environment.IsDevelopment();
+    if (isDevelopment)
+    {
+        var scope = app.Services.CreateScope();
+        var serviceProvider = scope.ServiceProvider;
+        await RegionDataSeeding.SeedingAsync(serviceProvider);
+        await DbInitializer.InitializeAsync(serviceProvider);
+    }
 
-    if (app.Environment.IsDevelopment())
+    app.UseHangfireDashboard(configuration);
+
+    if (isDevelopment)
     {
         app.UseSwagger();
         app.UseSwaggerUI(x =>
@@ -62,7 +68,10 @@ try
     app.ExceptionHandler();
     app.MapControllers();
 
-    Log.Logger.Information("Application is launching");
+    Log.Logger.Information(
+        "Application is launching with {environment}",
+        app.Environment.EnvironmentName
+    );
     app.Run();
 }
 catch (Exception ex)
@@ -73,3 +82,5 @@ finally
 {
     Log.CloseAndFlush();
 }
+
+public partial class Program { }

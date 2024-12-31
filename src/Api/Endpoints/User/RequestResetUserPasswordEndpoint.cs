@@ -1,4 +1,4 @@
-using Application.UseCases.Users.Commands.RequestResetPassword;
+using Application.Features.Users.Commands.RequestResetPassword;
 using Ardalis.ApiEndpoints;
 using Contracts.RouteResults;
 using Contracts.Routers;
@@ -18,7 +18,7 @@ public class RequestResetUserPasswordEndpoint(ISender sender)
         CancellationToken cancellationToken = default
     )
     {
-        await sender.Send(request,cancellationToken);
+        await sender.Send(request, cancellationToken);
         return this.NoContent204();
     }
 }

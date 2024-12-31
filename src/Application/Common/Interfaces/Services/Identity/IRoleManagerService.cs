@@ -12,27 +12,31 @@ public interface IRoleManagerService : IScope
 
     Task<Role> CreateRoleAsync(Role role);
 
-    Task<IEnumerable<Role>> CreateRangeRoleAsync(IEnumerable<Role> roles);
+    Task<IList<Role>> CreateRangeRoleAsync(IEnumerable<Role> roles);
 
     Task<Role> UpdateRoleAsync(Role role, IEnumerable<RoleClaim>? roleClaims);
 
     Task DeleteRoleAsync(Role role);
 
-    Task<IEnumerable<Role>> ListAsync();
+    Task<List<Role>> ListAsync();
 
+    // get role only
+    Task<Role?> GetByIdAsync(Ulid id);
+
+    // ger role with claims
     Task<Role?> FindByIdAsync(Ulid id);
 
     Task<Role?> FindByNameAsync(string name);
 
-    Task UpdateRoleClaimAsync(Role role, IEnumerable<RoleClaim> roleClaims);
+    Task UpdateRoleClaimAsync(IEnumerable<RoleClaim> roleClaims, Role role);
 
     Task AddClaimsToRoleAsync(Role role, IEnumerable<KeyValuePair<string, string>> claims);
 
-    Task RemoveClaimsFromRoleAsync(Role role, IEnumerable<Ulid> claimIds);
+    Task RemoveClaimsFromRoleAsync(Role role, IEnumerable<KeyValuePair<string, string>> roleClaims);
 
-    Task<IEnumerable<RoleClaim>> GetClaimsByRoleAsync(Ulid roleId);
+    Task<List<RoleClaim>> GetClaimsByRoleAsync(Ulid roleId);
 
-    Task<IEnumerable<RoleClaim>> GetClaimsByRolesAsync(IEnumerable<Ulid> roleIds);
+    Task<List<RoleClaim>> GetClaimsByRolesAsync(IEnumerable<Ulid> roleIds);
 
     Task<bool> HasClaimInRoleAsync(Ulid roleId, Ulid claimId);
 

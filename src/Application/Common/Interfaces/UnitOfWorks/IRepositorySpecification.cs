@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
-using Domain.Specs.Interfaces;
+using Domain.Common.Specs.Interfaces;
 
 namespace Application.Common.Interfaces.UnitOfWorks;
 

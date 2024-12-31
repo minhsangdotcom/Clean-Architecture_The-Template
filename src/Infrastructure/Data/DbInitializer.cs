@@ -1,5 +1,7 @@
+using System.Data.Common;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.Constants;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
@@ -21,61 +23,77 @@ public class DbInitializer
         var userManagerService = provider.GetRequiredService<IUserManagerService>();
         var logger = provider.GetRequiredService<ILogger>();
 
-        if (await unitOfWork.Repository<User>().AnyAsync())
-        {
-            return;
-        }
+        Role adminRole =
+            new()
+            {
+                Id = Ulid.Parse(Credential.ADMIN_ROLE_ID),
+                Name = Credential.ADMIN_ROLE,
+                RoleClaims = Credential
+                    .ADMIN_CLAIMS.Select(x => new RoleClaim()
+                    {
+                        ClaimType = x.Key,
+                        ClaimValue = x.Value,
+                    })
+                    .ToList(),
+            };
 
-        logger.Information("Seeding data is starting.............");
+        Role managerRole =
+            new()
+            {
+                Id = Ulid.Parse(Credential.MANAGER_ROLE_ID),
+                Name = Credential.MANAGER_ROLE,
+                RoleClaims = Credential
+                    .MANAGER_CLAIMS.Select(x => new RoleClaim()
+                    {
+                        ClaimType = x.Key,
+                        ClaimValue = x.Value,
+                    })
+                    .ToList(),
+            };
+
+        Role[] roles = [adminRole, managerRole];
         try
         {
-            await unitOfWork.CreateTransactionAsync();
+            DbTransaction dbTransaction = await unitOfWork.CreateTransactionAsync();
 
-            Role[] roles =
-            [
-                new()
-                {
-                    Id = Ulid.Parse(Credential.ADMIN_ROLE_ID),
-                    Name = Credential.ADMIN_ROLE,
-                    RoleClaims = Credential
-                        .ADMIN_CLAIMS.Select(x => new RoleClaim
-                        {
-                            ClaimType = x.Key,
-                            ClaimValue = x.Value,
-                        })
-                        .ToList(),
-                },
-                new()
-                {
-                    Id = Ulid.Parse(Credential.MANAGER_ROLE_ID),
-                    Name = Credential.MANAGER_ROLE,
-                    RoleClaims = Credential
-                        .MANAGER_CLAIMS.Select(x => new RoleClaim
-                        {
-                            ClaimType = x.Key,
-                            ClaimValue = x.Value,
-                        })
-                        .ToList(),
-                },
-            ];
-
-            await roleManagerService.CreateRangeRoleAsync(roles);
-
-            User[] users = await UserData(unitOfWork);
-            await unitOfWork.Repository<User>().AddRangeAsync(users);
-            await unitOfWork.SaveAsync();
-
-            foreach (var user in users)
+            if (!await roleManagerService.Roles.AnyAsync())
             {
-                await userManagerService.CreateUserAsync(
-                    user,
-                    [roles[new Random().Next(0, 2)].Id],
-                    user.GetUserClaims(),
-                    unitOfWork.Transaction
-                );
+                logger.Information("Inserting roles is starting.............");
+                await roleManagerService.CreateRangeRoleAsync(roles);
+                logger.Information("Inserting roles has finished.............");
             }
 
-            logger.Information("Seeding data has finished.............");
+            List<string> permissions = [.. Credential.PermissionGroups.SelectMany(x => x.Value)];
+            List<string> managerPermissions = [.. Credential.MANAGER_CLAIMS.Select(x => x.Value)];
+
+            await UpdatePermissionAsync(permissions, adminRole, roleManagerService, logger);
+            await UpdatePermissionAsync(
+                managerPermissions,
+                managerRole,
+                roleManagerService,
+                logger
+            );
+
+            if (!await unitOfWork.Repository<User>().AnyAsync())
+            {
+                logger.Information("Seeding user data is starting.............");
+
+                List<User> users = await InitializeUserDataAsync(unitOfWork);
+                //users.ForEach(x => x.CreateDefaultUserClaims());
+                await unitOfWork.Repository<User>().AddRangeAsync(users);
+                await unitOfWork.SaveAsync();
+
+                foreach (var user in users)
+                {
+                    await userManagerService.CreateUserAsync(
+                        user,
+                        [roles[new Random().Next(0, 2)].Id],
+                        transaction: dbTransaction
+                    );
+                }
+
+                logger.Information("Seeding user data has finished.............");
+            }
             await unitOfWork.CommitAsync();
         }
         catch (Exception ex)
@@ -86,60 +104,73 @@ public class DbInitializer
         }
     }
 
-    private static async Task<RandomRegionResult> RandomRegion(
-        IUnitOfWork unitOfWork,
-        string provinceCode,
-        string districtCode,
-        string communeCode
+    private static async Task UpdatePermissionAsync(
+        List<string> permissions,
+        Role role,
+        IRoleManagerService roleManagerService,
+        ILogger logger
     )
     {
-        Province? province = await unitOfWork
-            .Repository<Province>()
-            .ApplyQuery(x => x.Code == provinceCode)
+        Role? processingRole = await roleManagerService
+            .Roles.Where(x => x.Id == role.Id)
+            .Include(x => x.RoleClaims!.Where(p => p.ClaimType == ClaimTypes.Permission))
             .FirstOrDefaultAsync();
-        District? district = await unitOfWork
-            .Repository<District>()
-            .ApplyQuery(x => x.Code == districtCode)
-            .FirstOrDefaultAsync();
-        Commune? commune = await unitOfWork
-            .Repository<Commune>()
-            .ApplyQuery(x => x.Code == communeCode)
-            .FirstOrDefaultAsync();
-        return new(province, district, commune);
+
+        if (role == null)
+        {
+            return;
+        }
+
+        List<RoleClaim> roleClaims = (List<RoleClaim>)processingRole!.RoleClaims!;
+
+        var claimsToDelete = roleClaims.FindAll(x => !permissions.Contains(x.ClaimValue));
+        var claimsToInsert = permissions.FindAll(x => !roleClaims.Exists(p => p.ClaimValue == x));
+
+        if (claimsToDelete.Count > 0)
+        {
+            await roleManagerService.RemoveClaimsFromRoleAsync(
+                role,
+                [
+                    .. claimsToDelete.Select(x => new KeyValuePair<string, string>(
+                        x.ClaimType,
+                        x.ClaimValue
+                    )),
+                ]
+            );
+            logger.Information(
+                "deleting {count} claims of {roleName} inclde {data}",
+                claimsToDelete.Count,
+                role.Name,
+                string.Join(',', claimsToDelete.Select(x => x.ClaimValue))
+            );
+        }
+
+        if (claimsToInsert.Count > 0)
+        {
+            await roleManagerService.AddClaimsToRoleAsync(
+                role,
+                [
+                    .. claimsToInsert.Select(x => new KeyValuePair<string, string>(
+                        ClaimTypes.Permission,
+                        x
+                    )),
+                ]
+            );
+            logger.Information(
+                "inserting {count} claims of {roleName} inclde {data}",
+                claimsToInsert.Count,
+                role.Name,
+                string.Join(',', claimsToInsert)
+            );
+        }
     }
 
-    private static async Task<User[]> UserData(IUnitOfWork unitOfWork)
+    private static async Task<List<User>> InitializeUserDataAsync(IUnitOfWork unitOfWork)
     {
-        string[] addresses =
-        [
-            "1823 Maple Avenue",
-            "735 Park Lane",
-            "4207 Oak Street",
-            "5914 Elmwood Drive",
-            "1068 Cedar Street",
-            "2435 Willow Avenue",
-            "3871 Birchwood Court",
-            "1502 Walnut Street",
-            "2704 Pine Street",
-            "1328 Maplewood Avenue",
-            "5172 Aspen Drive",
-            "6809 Chestnut Lane",
-            "4258 Magnolia Court",
-            "9123 Oak Hill Road",
-            "3810 Redwood Street",
-            "7445 Pinecrest Avenue",
-            "1680 Valley View Road",
-            "2995 Brookside Drive",
-            "5901 Country Lane",
-            "4387 Maple Hill Drive",
-            "1046 River Road",
-            "8725 Hillcrest Drive",
-        ];
-
         string sg = "79";
         string hn = "01";
         string dn = "48";
-        RandomRegionResult region = await RandomRegion(unitOfWork, sg, "783", "27541");
+        GetRegionResult region = await GetRegionAsync(unitOfWork, sg, "783", "27543");
 
         User user =
             new(
@@ -149,19 +180,17 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "chloe.kim@gmail.com",
                 "0925123123",
-                new Address(
-                    region.Province!,
-                    region.District!,
-                    region.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
-                )
+                new Address(region.Province!, region.District!, region.Commune, "132 Ham Nghi")
             )
             {
                 DayOfBirth = new DateTime(1990, 10, 1),
                 Status = UserStatus.Active,
+                Gender = Gender.Female,
+                Id = Credential.UserIds.CHLOE_KIM_ID,
             };
+        user.CreateDefaultUserClaims();
 
-        RandomRegionResult johnDoeRegion = await RandomRegion(unitOfWork, sg, "760", "26743");
+        GetRegionResult johnDoeRegion = await GetRegionAsync(unitOfWork, sg, "760", "26743");
         User johnDoe =
             new(
                 "John",
@@ -174,16 +203,18 @@ public class DbInitializer
                     johnDoeRegion.Province!,
                     johnDoeRegion.District!,
                     johnDoeRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "136/9 Le Thanh Ton"
                 )
             )
             {
                 DayOfBirth = new DateTime(1985, 4, 23),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.JOHN_DOE_ID,
             };
+        johnDoe.CreateDefaultUserClaims();
 
-        RandomRegionResult aliceSmithRegion = await RandomRegion(unitOfWork, sg, "760", "26737");
+        GetRegionResult aliceSmithRegion = await GetRegionAsync(unitOfWork, sg, "760", "26737");
         User aliceSmith =
             new(
                 "Alice",
@@ -196,16 +227,18 @@ public class DbInitializer
                     aliceSmithRegion.Province!,
                     aliceSmithRegion.District!,
                     aliceSmithRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "95B Nguyen Van Thu"
                 )
             )
             {
                 DayOfBirth = new DateTime(1992, 7, 19),
                 Status = UserStatus.Inactive,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.ALICE_SMITH_ID,
             };
+        aliceSmith.CreateDefaultUserClaims();
 
-        RandomRegionResult bobJohnsonRegion = await RandomRegion(unitOfWork, sg, "760", "26758");
+        GetRegionResult bobJohnsonRegion = await GetRegionAsync(unitOfWork, sg, "760", "26758");
         User bobJohnson =
             new(
                 "Bob",
@@ -218,16 +251,18 @@ public class DbInitializer
                     bobJohnsonRegion.Province!,
                     bobJohnsonRegion.District!,
                     bobJohnsonRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "18 Truong Son"
                 )
             )
             {
                 DayOfBirth = new DateTime(1980, 3, 15),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.BOB_JOHNSON_ID,
             };
+        bobJohnson.CreateDefaultUserClaims();
 
-        RandomRegionResult emilyBrownRegion = await RandomRegion(unitOfWork, sg, "760", "26746");
+        GetRegionResult emilyBrownRegion = await GetRegionAsync(unitOfWork, sg, "760", "26746");
         User emilyBrown =
             new(
                 "Emily",
@@ -240,16 +275,18 @@ public class DbInitializer
                     emilyBrownRegion.Province!,
                     emilyBrownRegion.District!,
                     emilyBrownRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "46 Nam Ky Khoi Nghia"
                 )
             )
             {
                 DayOfBirth = new DateTime(1995, 5, 5),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.EMILY_BROWN_ID,
             };
+        emilyBrown.CreateDefaultUserClaims();
 
-        RandomRegionResult jamesWilliamsRegion = await RandomRegion(unitOfWork, sg, "771", "27163");
+        GetRegionResult jamesWilliamsRegion = await GetRegionAsync(unitOfWork, sg, "771", "27163");
         User jamesWilliams =
             new(
                 "James",
@@ -262,16 +299,18 @@ public class DbInitializer
                     jamesWilliamsRegion.Province!,
                     jamesWilliamsRegion.District!,
                     jamesWilliamsRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "595/29A3 Cach Mang Thang 8"
                 )
             )
             {
                 DayOfBirth = new DateTime(1983, 11, 9),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.JAMES_WILLIAMS_ID,
             };
+        jamesWilliams.CreateDefaultUserClaims();
 
-        RandomRegionResult oliviaTaylorRegion = await RandomRegion(unitOfWork, sg, "771", "27172");
+        GetRegionResult oliviaTaylorRegion = await GetRegionAsync(unitOfWork, sg, "771", "27172");
         User oliviaTaylor =
             new(
                 "Olivia",
@@ -284,16 +323,18 @@ public class DbInitializer
                     oliviaTaylorRegion.Province!,
                     oliviaTaylorRegion.District!,
                     oliviaTaylorRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "175B Cao Thang"
                 )
             )
             {
                 DayOfBirth = new DateTime(1998, 2, 18),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.OLIVIA_TAYLOR_ID,
             };
+        oliviaTaylor.CreateDefaultUserClaims();
 
-        RandomRegionResult danielLeeRegion = await RandomRegion(unitOfWork, sg, "771", "27196");
+        GetRegionResult danielLeeRegion = await GetRegionAsync(unitOfWork, sg, "771", "27196");
         User danielLee =
             new(
                 "Daniel",
@@ -306,16 +347,18 @@ public class DbInitializer
                     danielLeeRegion.Province!,
                     danielLeeRegion.District!,
                     danielLeeRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "102 Ly Thuong Kiet"
                 )
             )
             {
                 DayOfBirth = new DateTime(1987, 9, 21),
                 Status = UserStatus.Inactive,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.DANIEL_LEE_ID,
             };
+        danielLee.CreateDefaultUserClaims();
 
-        RandomRegionResult sophiaGarciaRegion = await RandomRegion(unitOfWork, sg, "771", "27166");
+        GetRegionResult sophiaGarciaRegion = await GetRegionAsync(unitOfWork, sg, "771", "27166");
         User sophiaGarcia =
             new(
                 "Sophia",
@@ -328,16 +371,18 @@ public class DbInitializer
                     sophiaGarciaRegion.Province!,
                     sophiaGarciaRegion.District!,
                     sophiaGarciaRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "51 To Hien Thanh"
                 )
             )
             {
                 DayOfBirth = new DateTime(1994, 12, 12),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.SHOPHIA_GARCIA_ID,
             };
+        sophiaGarcia.CreateDefaultUserClaims();
 
-        RandomRegionResult michaelMartinezRegion = await RandomRegion(
+        GetRegionResult michaelMartinezRegion = await GetRegionAsync(
             unitOfWork,
             sg,
             "766",
@@ -355,21 +400,18 @@ public class DbInitializer
                     michaelMartinezRegion.Province!,
                     michaelMartinezRegion.District!,
                     michaelMartinezRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "78 Au Co"
                 )
             )
             {
                 DayOfBirth = new DateTime(1978, 8, 8),
                 Status = UserStatus.Inactive,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.MICHAEL_MARTINEZ_ID,
             };
+        michaelMartinez.CreateDefaultUserClaims();
 
-        RandomRegionResult isabellaHarrisRegion = await RandomRegion(
-            unitOfWork,
-            sg,
-            "766",
-            "27004"
-        );
+        GetRegionResult isabellaHarrisRegion = await GetRegionAsync(unitOfWork, sg, "766", "27004");
         User isabellaHarris =
             new(
                 "Isabella",
@@ -382,16 +424,18 @@ public class DbInitializer
                     isabellaHarrisRegion.Province!,
                     isabellaHarrisRegion.District!,
                     isabellaHarrisRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "40 Nguyen Hong Dao"
                 )
             )
             {
                 DayOfBirth = new DateTime(1991, 1, 1),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.ISABELLA_HARRIS_ID,
             };
+        isabellaHarris.CreateDefaultUserClaims();
 
-        RandomRegionResult davidClarkRegion = await RandomRegion(unitOfWork, sg, "766", "26986");
+        GetRegionResult davidClarkRegion = await GetRegionAsync(unitOfWork, sg, "766", "26986");
         User davidClark =
             new(
                 "David",
@@ -404,16 +448,18 @@ public class DbInitializer
                     davidClarkRegion.Province!,
                     davidClarkRegion.District!,
                     davidClarkRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "66 Van Coi"
                 )
             )
             {
                 DayOfBirth = new DateTime(1984, 6, 6),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.DAVID_CLARK_ID,
             };
+        davidClark.CreateDefaultUserClaims();
 
-        RandomRegionResult emmaRodriguezRegion = await RandomRegion(unitOfWork, hn, "001", "00007");
+        GetRegionResult emmaRodriguezRegion = await GetRegionAsync(unitOfWork, hn, "001", "00007");
         User emmaRodriguez =
             new(
                 "Emma",
@@ -426,16 +472,18 @@ public class DbInitializer
                     emmaRodriguezRegion.Province!,
                     emmaRodriguezRegion.District!,
                     emmaRodriguezRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "178 Phan Ke Binh"
                 )
             )
             {
                 DayOfBirth = new DateTime(1993, 3, 3),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.EMMA_RODRIGUEZ_ID,
             };
+        emmaRodriguez.CreateDefaultUserClaims();
 
-        RandomRegionResult andrewMooreRegion = await RandomRegion(unitOfWork, hn, "001", "00006");
+        GetRegionResult andrewMooreRegion = await GetRegionAsync(unitOfWork, hn, "001", "00006");
         User andrewMoore =
             new(
                 "Andrew",
@@ -448,16 +496,18 @@ public class DbInitializer
                     andrewMooreRegion.Province!,
                     andrewMooreRegion.District!,
                     andrewMooreRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "6 Doi Nhan"
                 )
             )
             {
                 DayOfBirth = new DateTime(1981, 10, 30),
                 Status = UserStatus.Inactive,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.ANDREW_MOORE_ID,
             };
+        andrewMoore.CreateDefaultUserClaims();
 
-        RandomRegionResult avaJacksonRegion = await RandomRegion(unitOfWork, hn, "001", "00025");
+        GetRegionResult avaJacksonRegion = await GetRegionAsync(unitOfWork, hn, "001", "00025");
         User avaJackson =
             new(
                 "Ava",
@@ -470,16 +520,18 @@ public class DbInitializer
                     avaJacksonRegion.Province!,
                     avaJacksonRegion.District!,
                     avaJacksonRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "545 kim Ma"
                 )
             )
             {
                 DayOfBirth = new DateTime(2000, 4, 14),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.AVA_JACKSON_ID,
             };
+        avaJackson.CreateDefaultUserClaims();
 
-        RandomRegionResult joshuaWhiteRegion = await RandomRegion(unitOfWork, hn, "002", "00076");
+        GetRegionResult joshuaWhiteRegion = await GetRegionAsync(unitOfWork, hn, "002", "00076");
         User joshuaWhite =
             new(
                 "Joshua",
@@ -492,16 +544,18 @@ public class DbInitializer
                     joshuaWhiteRegion.Province!,
                     joshuaWhiteRegion.District!,
                     joshuaWhiteRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "9 Tong Duy Tan"
                 )
             )
             {
                 DayOfBirth = new DateTime(1986, 11, 17),
                 Status = UserStatus.Inactive,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.JOSHUA_WHITE_ID,
             };
+        joshuaWhite.CreateDefaultUserClaims();
 
-        RandomRegionResult charlotteThomasRegion = await RandomRegion(
+        GetRegionResult charlotteThomasRegion = await GetRegionAsync(
             unitOfWork,
             hn,
             "002",
@@ -519,16 +573,18 @@ public class DbInitializer
                     charlotteThomasRegion.Province!,
                     charlotteThomasRegion.District!,
                     charlotteThomasRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "10 Ly Quoc Su"
                 )
             )
             {
                 DayOfBirth = new DateTime(1997, 7, 7),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.CHARLOTTE_THOMAS_ID,
             };
+        charlotteThomas.CreateDefaultUserClaims();
 
-        RandomRegionResult ethanKingRegion = await RandomRegion(unitOfWork, dn, "495", "20306");
+        GetRegionResult ethanKingRegion = await GetRegionAsync(unitOfWork, dn, "495", "20306");
         User ethanKing =
             new(
                 "Ethan",
@@ -541,16 +597,18 @@ public class DbInitializer
                     ethanKingRegion.Province!,
                     ethanKingRegion.District!,
                     ethanKingRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "35 Dinh Liet, Hoa An"
                 )
             )
             {
                 DayOfBirth = new DateTime(1999, 9, 9),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.ETHAN_KING_ID,
             };
+        ethanKing.CreateDefaultUserClaims();
 
-        RandomRegionResult abigailScottRegion = await RandomRegion(unitOfWork, dn, "495", "20314");
+        GetRegionResult abigailScottRegion = await GetRegionAsync(unitOfWork, dn, "495", "20314");
         User abigailScott =
             new(
                 "Abigail",
@@ -563,16 +621,18 @@ public class DbInitializer
                     abigailScottRegion.Province!,
                     abigailScottRegion.District!,
                     abigailScottRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "55 Mac Dang Doanh"
                 )
             )
             {
                 DayOfBirth = new DateTime(1989, 2, 2),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.ABIGAIL_SCOTT_ID,
             };
+        abigailScott.CreateDefaultUserClaims();
 
-        RandomRegionResult liamPerezRegion = await RandomRegion(unitOfWork, dn, "495", "20305");
+        GetRegionResult liamPerezRegion = await GetRegionAsync(unitOfWork, dn, "495", "20305");
         User liamPerez =
             new(
                 "Liam",
@@ -585,14 +645,16 @@ public class DbInitializer
                     liamPerezRegion.Province!,
                     liamPerezRegion.District!,
                     liamPerezRegion.Commune,
-                    addresses[new Random().Next(0, addresses.Length)]
+                    "131/7 Le Trong Tan"
                 )
             )
             {
                 DayOfBirth = new DateTime(1988, 12, 25),
                 Status = UserStatus.Inactive,
                 Gender = (Gender)new Random().Next(1, 3),
+                Id = Credential.UserIds.LIAM_PEREZ_ID,
             };
+        liamPerez.CreateDefaultUserClaims();
 
         return
         [
@@ -618,6 +680,28 @@ public class DbInitializer
             liamPerez,
         ];
     }
+
+    private static async Task<GetRegionResult> GetRegionAsync(
+        IUnitOfWork unitOfWork,
+        string provinceCode,
+        string districtCode,
+        string communeCode
+    )
+    {
+        Province? province = await unitOfWork
+            .Repository<Province>()
+            .ApplyQuery(x => x.Code == provinceCode)
+            .FirstOrDefaultAsync();
+        District? district = await unitOfWork
+            .Repository<District>()
+            .ApplyQuery(x => x.Code == districtCode)
+            .FirstOrDefaultAsync();
+        Commune? commune = await unitOfWork
+            .Repository<Commune>()
+            .ApplyQuery(x => x.Code == communeCode)
+            .FirstOrDefaultAsync();
+        return new(province, district, commune);
+    }
 }
 
-internal record RandomRegionResult(Province? Province, District? District, Commune? Commune);
+internal record GetRegionResult(Province? Province, District? District, Commune? Commune);

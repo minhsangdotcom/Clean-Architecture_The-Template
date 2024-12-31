@@ -57,7 +57,7 @@ public class Address : ValueObject
     {
         return string.Join(
             ",",
-            [Street, Province!.Name, District!.Name, Commune?.Name ?? string.Empty]
+            [Street, Commune?.Name ?? string.Empty, District!.Name, Province!.Name]
         );
     }
 }

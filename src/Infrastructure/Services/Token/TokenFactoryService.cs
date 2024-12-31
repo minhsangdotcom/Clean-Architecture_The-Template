@@ -19,26 +19,26 @@ public class TokenFactoryService(IOptions<JwtSettings> jwtSettings) : ITokenFact
 
     public string CreateToken(IEnumerable<Claim> claims, DateTime expirationTime)
     {
-        return JwtBuilder.Create()
-                .WithAlgorithm(new HMACSHA256Algorithm())
-                .AddClaims(claims.Select(x => new KeyValuePair<string, object>(x.Type, x.Value)))
-                .WithSecret(settings.SecretKey)
-                .ExpirationTime(expirationTime)
-                .WithValidationParameters(new ValidationParameters()
-                {
-                    ValidateExpirationTime = true,
-                    TimeMargin = 0
-                })
-                .Encode();
+        return JwtBuilder
+            .Create()
+            .WithAlgorithm(new HMACSHA256Algorithm())
+            .AddClaims(claims.Select(x => new KeyValuePair<string, object>(x.Type, x.Value)))
+            .WithSecret(settings.SecretKey)
+            .ExpirationTime(expirationTime)
+            .WithValidationParameters(
+                new ValidationParameters() { ValidateExpirationTime = true, TimeMargin = 0 }
+            )
+            .Encode();
     }
 
     public DecodeTokenResponse DecodeToken(string token)
     {
-        var json = JwtBuilder.Create()
-                .WithAlgorithm(new HMACSHA256Algorithm())
-                .WithSecret(settings.SecretKey)
-                .MustVerifySignature()
-                .Decode(token);
+        var json = JwtBuilder
+            .Create()
+            .WithAlgorithm(new HMACSHA256Algorithm())
+            .WithSecret(settings.SecretKey)
+            .MustVerifySignature()
+            .Decode(token);
 
         return SerializerExtension.Deserialize<DecodeTokenResponse>(json).Object!;
     }

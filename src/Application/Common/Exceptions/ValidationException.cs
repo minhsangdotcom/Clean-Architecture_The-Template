@@ -12,7 +12,8 @@ public class ValidationException() : CustomException("One or more validation err
 
     public IEnumerable<BadRequestError> ValidationErrors { get; } = [];
 
-    public ValidationException(IEnumerable<ValidationFailure> failures) : this()
+    public ValidationException(IEnumerable<ValidationFailure> failures)
+        : this()
     {
         ValidationErrors = failures
             .GroupBy(x => x.PropertyName)

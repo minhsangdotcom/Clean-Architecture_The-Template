@@ -1,8 +1,6 @@
-using Application.Common.Interfaces.Registers;
-
 namespace Application.Common.Interfaces.Services.DistributedCache;
 
-public interface IQueueService : ISingleton
+public interface IQueueService
 {
     public long Size { get; }
 

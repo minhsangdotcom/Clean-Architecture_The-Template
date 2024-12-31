@@ -732,10 +732,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.Property<string>("UserName")
+                    b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("citext")
-                        .HasColumnName("user_name");
+                        .HasColumnName("username");
 
                     b.Property<long>("Version")
                         .HasColumnType("bigint")
@@ -751,9 +751,9 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("Id")
                         .HasDatabaseName("ix_user_id");
 
-                    b.HasIndex("UserName")
+                    b.HasIndex("Username")
                         .IsUnique()
-                        .HasDatabaseName("ix_user_user_name");
+                        .HasDatabaseName("ix_user_username");
 
                     b.ToTable("user", (string)null);
                 });
@@ -1101,6 +1101,7 @@ namespace Infrastructure.Data.Migrations
                     b.HasOne("Domain.Aggregates.Roles.RoleClaim", "RoleClaim")
                         .WithMany("UserClaims")
                         .HasForeignKey("RoleClaimId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_user_claim_role_claim_role_claim_id");
 
                     b.HasOne("Domain.Aggregates.Users.User", "User")

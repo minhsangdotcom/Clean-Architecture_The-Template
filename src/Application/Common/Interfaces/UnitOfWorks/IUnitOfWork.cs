@@ -1,9 +1,10 @@
 using System.Data.Common;
+
 namespace Application.Common.Interfaces.UnitOfWorks;
 
 public interface IUnitOfWork : IDisposable
 {
-    public DbTransaction? Transaction { get; protected set; }
+    public DbTransaction? CurrentTransaction { get; protected set; }
 
     IRepository<TEntity> Repository<TEntity>()
         where TEntity : class;
@@ -11,13 +12,11 @@ public interface IUnitOfWork : IDisposable
     IRepository<TEntity> CachedRepository<TEntity>()
         where TEntity : class;
 
-    Task<DbTransaction> CreateTransactionAsync();
+    Task<DbTransaction> CreateTransactionAsync(CancellationToken cancellationToken = default);
 
-    Task UseTransactionAsync(DbTransaction transaction);
+    Task CommitAsync(CancellationToken cancellationToken = default);
 
-    Task CommitAsync();
-
-    Task RollbackAsync();
+    Task RollbackAsync(CancellationToken cancellationToken = default);
 
     int ExecuteSqlCommand(string sql, params object[] parameters);
 
