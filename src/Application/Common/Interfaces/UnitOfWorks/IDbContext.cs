@@ -8,8 +8,9 @@ namespace Application.Common.Interfaces.UnitOfWorks;
 public interface IDbContext : IDisposable
 {
     EntityEntry Entry(object entity);
-    
-    public DbSet<TEntity> Set<TEntity>() where TEntity : class;
+
+    public DbSet<TEntity> Set<TEntity>()
+        where TEntity : class;
 
     public DatabaseFacade DatabaseFacade { get; }
 

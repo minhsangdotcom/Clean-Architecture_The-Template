@@ -1,7 +1,6 @@
 using Application.Common.Interfaces.Registers;
 using Domain.Aggregates.Roles;
 using Microsoft.EntityFrameworkCore;
-using NRedisStack.Json.DataTypes;
 
 namespace Application.Common.Interfaces.Services.Identity;
 

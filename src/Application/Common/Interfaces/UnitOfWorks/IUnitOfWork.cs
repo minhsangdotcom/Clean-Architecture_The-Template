@@ -1,4 +1,5 @@
 using System.Data.Common;
+
 namespace Application.Common.Interfaces.UnitOfWorks;
 
 public interface IUnitOfWork : IDisposable

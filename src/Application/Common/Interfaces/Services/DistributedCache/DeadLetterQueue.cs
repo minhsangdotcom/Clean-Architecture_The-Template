@@ -1,4 +1,5 @@
 using Domain.Common;
+
 namespace Application.Common.Interfaces.Services.DistributedCache;
 
 public class DeadLetterQueue : BaseEntity

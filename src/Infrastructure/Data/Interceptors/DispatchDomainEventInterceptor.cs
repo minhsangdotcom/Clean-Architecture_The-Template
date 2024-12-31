@@ -6,7 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Data.Interceptors;
 
-public class DispatchDomainEventInterceptor(IServiceScopeFactory serviceScopeFactory) : SaveChangesInterceptor
+public class DispatchDomainEventInterceptor(IServiceScopeFactory serviceScopeFactory)
+    : SaveChangesInterceptor
 {
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,

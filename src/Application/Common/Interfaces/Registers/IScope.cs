@@ -1,5 +1,3 @@
 namespace Application.Common.Interfaces.Registers;
 
-public interface IScope
-{
-}
+public interface IScope;

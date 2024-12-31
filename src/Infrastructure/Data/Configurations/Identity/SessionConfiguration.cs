@@ -10,8 +10,6 @@ public class SessionConfiguration : IEntityTypeConfiguration<UserToken>
     {
         builder.HasKey(x => x.Id);
 
-        builder.HasOne(x => x.User)
-            .WithMany(x => x.UserTokens)
-            .HasForeignKey(x => x.UserId);
+        builder.HasOne(x => x.User).WithMany(x => x.UserTokens).HasForeignKey(x => x.UserId);
     }
 }
