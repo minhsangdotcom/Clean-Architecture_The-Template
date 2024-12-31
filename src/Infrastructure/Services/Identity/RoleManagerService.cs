@@ -119,7 +119,15 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         );
 
         // remove
-        await RemoveClaimsFromRoleAsync(role, roleClaimsToRemove.Select(x => x.Id).ToArray());
+        await RemoveClaimsFromRoleAsync(
+            role,
+            [
+                .. roleClaimsToRemove.Select(x => new KeyValuePair<string, string>(
+                    x.ClaimType,
+                    x.ClaimValue
+                )),
+            ]
+        );
 
         //update
         roleClaimContext.UpdateRange(roleClaimsToModify);
@@ -146,6 +154,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
                 .Include(x => x.RoleClaims)!
                 .ThenInclude(x => x.UserClaims)
                 .Include(x => x.UserRoles)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(),
             NOT_FOUND_MESSAGE
         );
@@ -196,9 +205,12 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         await context.SaveChangesAsync();
     }
 
-    public async Task RemoveClaimsFromRoleAsync(Role role, IEnumerable<Ulid> claimIds)
+    public async Task RemoveClaimsFromRoleAsync(
+        Role role,
+        IEnumerable<KeyValuePair<string, string>> roleClaims
+    )
     {
-        if (!claimIds.Any())
+        if (!roleClaims.Any())
         {
             return;
         }
@@ -210,14 +222,20 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         );
 
         ICollection<RoleClaim> currentRoleClaims = currentRole.RoleClaims!;
-        if (claimIds.Any(x => !currentRoleClaims.Any(p => p.Id == x)))
+        if (
+            roleClaims.Any(x =>
+                !currentRoleClaims.Any(p => p.ClaimType == x.Key && p.ClaimValue == x.Value)
+            )
+        )
         {
-            throw new Exception($"{nameof(claimIds)} is not existed in role {nameof(role.Id)}.");
+            throw new Exception("One or many claims is not existed in role.");
         }
 
-        IEnumerable<RoleClaim> roleClaims = currentRoleClaims.Where(x => claimIds.Contains(x.Id));
+        IEnumerable<RoleClaim> claimsToDelete = currentRoleClaims.Where(x =>
+            roleClaims.Any(p => p.Key == x.ClaimType && p.Value == x.ClaimValue)
+        );
 
-        roleClaimContext.RemoveRange(roleClaims);
+        roleClaimContext.RemoveRange(claimsToDelete);
         await context.SaveChangesAsync();
     }
 

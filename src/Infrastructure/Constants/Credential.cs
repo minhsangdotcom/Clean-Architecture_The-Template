@@ -107,6 +107,7 @@ public static class ActionPermission
     public const string delete = nameof(delete);
     public const string detail = nameof(detail);
     public const string list = nameof(list);
+    public const string testa = nameof(testa);
 }
 
 public static class ObjectPermission

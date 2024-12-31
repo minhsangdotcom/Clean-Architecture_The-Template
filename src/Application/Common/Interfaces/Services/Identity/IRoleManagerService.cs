@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.Registers;
 using Domain.Aggregates.Roles;
 using Microsoft.EntityFrameworkCore;
+using NRedisStack.Json.DataTypes;
 
 namespace Application.Common.Interfaces.Services.Identity;
 
@@ -32,7 +33,7 @@ public interface IRoleManagerService : IScope
 
     Task AddClaimsToRoleAsync(Role role, IEnumerable<KeyValuePair<string, string>> claims);
 
-    Task RemoveClaimsFromRoleAsync(Role role, IEnumerable<Ulid> claimIds);
+    Task RemoveClaimsFromRoleAsync(Role role, IEnumerable<KeyValuePair<string, string>> roleClaims);
 
     Task<List<RoleClaim>> GetClaimsByRoleAsync(Ulid roleId);
 
