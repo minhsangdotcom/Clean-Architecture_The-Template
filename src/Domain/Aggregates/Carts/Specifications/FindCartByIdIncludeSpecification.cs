@@ -1,6 +1,5 @@
 using Domain.Aggregates.Carts.Enums;
-using Domain.Specs;
-using MassTransit.NewIdFormatters;
+using Domain.Common.Specs;
 
 namespace Domain.Aggregates.Carts.Specifications;
 
