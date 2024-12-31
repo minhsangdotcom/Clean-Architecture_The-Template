@@ -1,4 +1,4 @@
-namespace Application.UseCases.Projections.Customers;
+namespace Application.Features.Common.Projections.Customers;
 
 public class CustomerProjection
 {

@@ -1,7 +1,7 @@
-using Application.UseCases.Projections.Customers;
+using Application.Features.Common.Projections.Customers;
 using Domain.Aggregates.Carts.Enums;
 
-namespace Application.UseCases.Projections.Tickets.Carts;
+namespace Application.Features.Common.Projections.Tickets.Carts;
 
 public class CartDetailProjection
 {

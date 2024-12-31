@@ -1,12 +1,10 @@
 using Application.Common.Interfaces.Services.DistributedCache;
-using Application.UseCases.Tickets.Carts.Pays;
+using Application.Features.Tickets.Carts.Pays;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
-using Contracts.Dtos.Requests;
 using Contracts.RouteResults;
 using Contracts.Routers;
 using Microsoft.AspNetCore.Mvc;
-using Org.BouncyCastle.Ocsp;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.Tickets.Carts;

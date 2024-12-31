@@ -1,4 +1,4 @@
-namespace Application.UseCases.Projections.Tickets;
+namespace Application.Features.Common.Projections.Tickets;
 
 public class TicketProjection
 {

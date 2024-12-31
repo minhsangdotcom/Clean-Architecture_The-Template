@@ -7,7 +7,7 @@ using Domain.Aggregates.Orders;
 using Domain.Aggregates.Tickets;
 using Mediator;
 
-namespace Application.UseCases.Tickets.Carts.Pays;
+namespace Application.Features.Tickets.Carts.Pays;
 
 public class PayCartHandler(IUnitOfWork unitOfWork, IMapper mapper)
     : IRequestHandler<PayCartPayload, QueueResponse<PayCartResponse>>

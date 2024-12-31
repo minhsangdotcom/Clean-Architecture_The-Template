@@ -11,7 +11,10 @@ public class TicketSeeding
     {
         IUnitOfWork unitOfWork = provider.GetRequiredService<IUnitOfWork>();
 
-        if (await unitOfWork.Repository<Customer>().AnyAsync() && await unitOfWork.Repository<Ticket>().AnyAsync())
+        if (
+            await unitOfWork.Repository<Customer>().AnyAsync()
+            && await unitOfWork.Repository<Ticket>().AnyAsync()
+        )
         {
             return;
         }

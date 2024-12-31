@@ -4,7 +4,7 @@ using Contracts.Routers;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Application.UseCases.Tickets.Carts.Pays;
+namespace Application.Features.Tickets.Carts.Pays;
 
 public class PayCartCommand
 {

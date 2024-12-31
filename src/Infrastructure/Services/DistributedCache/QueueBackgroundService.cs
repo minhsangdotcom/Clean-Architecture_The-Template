@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Services.DistributedCache;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.UseCases.Tickets.Carts.Pays;
+using Application.Features.Tickets.Carts.Pays;
 using Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;

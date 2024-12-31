@@ -1,4 +1,4 @@
-using Application.UseCases.Tickets.Carts.Create;
+using Application.Features.Tickets.Carts.Create;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;

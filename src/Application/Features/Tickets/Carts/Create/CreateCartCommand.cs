@@ -1,7 +1,6 @@
-using Domain.Aggregates.Carts;
 using Mediator;
 
-namespace Application.UseCases.Tickets.Carts.Create;
+namespace Application.Features.Tickets.Carts.Create;
 
 public class CreateCartCommand : IRequest<CreateCartResponse>
 {
