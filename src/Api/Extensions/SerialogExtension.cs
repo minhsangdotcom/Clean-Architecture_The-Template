@@ -7,11 +7,13 @@ public static class SerialogExtension
 {
     public static void AddSerialogs(this WebApplicationBuilder builder)
     {
-        LoggerConfiguration loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration);
+        LoggerConfiguration loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(
+            builder.Configuration
+        );
 
-        SerilogSettings? serilogSettings = builder
-            .Configuration.GetSection(nameof(SerilogSettings))
-            .Get<SerilogSettings>();
+        SerilogSettings serilogSettings =
+            builder.Configuration.GetSection(nameof(SerilogSettings)).Get<SerilogSettings>()
+            ?? new();
 
         if (serilogSettings!.IsDistributeLog)
         {
