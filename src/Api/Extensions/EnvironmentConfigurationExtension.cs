@@ -5,7 +5,10 @@ public static class EnvironmentConfigurationExtension
     public static void AddConfiguration(this WebApplicationBuilder builder)
     {
         string environmentName = builder.Environment.EnvironmentName;
-        builder.Configuration.AddJsonFiles(environmentName, "appsettings");
+        builder
+            .Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .AddJsonFiles(environmentName, "appsettings")
+            .AddEnvironmentVariables();
     }
 
     private static IConfigurationBuilder AddJsonFiles(

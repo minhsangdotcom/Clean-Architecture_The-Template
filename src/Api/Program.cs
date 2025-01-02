@@ -37,13 +37,12 @@ try
     var app = builder.Build();
 
     bool isDevelopment = app.Environment.IsDevelopment();
-    if (isDevelopment)
-    {
-        var scope = app.Services.CreateScope();
-        var serviceProvider = scope.ServiceProvider;
-        await RegionDataSeeding.SeedingAsync(serviceProvider);
-        await DbInitializer.InitializeAsync(serviceProvider);
-    }
+
+    //*seeding area
+    var scope = app.Services.CreateScope();
+    var serviceProvider = scope.ServiceProvider;
+    await RegionDataSeeding.SeedingAsync(serviceProvider);
+    await DbInitializer.InitializeAsync(serviceProvider);
 
     app.UseHangfireDashboard(configuration);
 

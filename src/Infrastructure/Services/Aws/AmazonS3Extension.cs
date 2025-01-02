@@ -8,19 +8,29 @@ namespace Infrastructure.Services.Aws;
 
 public static class AmazonS3Extension
 {
-    public static IServiceCollection AddAmazonS3(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddAmazonS3(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
-        services.Configure<S3AwsSettings>(options => configuration.GetSection(nameof(S3AwsSettings)).Bind(options));
+        services.Configure<S3AwsSettings>(options =>
+            configuration.GetSection(nameof(S3AwsSettings)).Bind(options)
+        );
         services.TryAddSingleton<IValidateOptions<S3AwsSettings>, ValidateS3AwsSettings>();
 
-        S3AwsSettings s3AwsSettings = configuration.GetSection(nameof(S3AwsSettings)).Get<S3AwsSettings>() ?? new();
+        S3AwsSettings s3AwsSettings =
+            configuration.GetSection(nameof(S3AwsSettings)).Get<S3AwsSettings>() ?? new();
         var clientConfig = new AmazonS3Config
         {
             ServiceURL = s3AwsSettings.ServiceUrl ?? string.Empty,
             ForcePathStyle = true,
         };
 
-        var s3Client = new AmazonS3Client(s3AwsSettings.AccessKey, s3AwsSettings.SecretKey, clientConfig);
+        var s3Client = new AmazonS3Client(
+            s3AwsSettings.AccessKey,
+            s3AwsSettings.SecretKey,
+            clientConfig
+        );
         services.AddSingleton<IAmazonS3>(s3Client);
 
         return services;
