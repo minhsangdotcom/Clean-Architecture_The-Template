@@ -16,9 +16,6 @@
       <Link>Data\Seeds\Wards.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="appsettings.Development.json" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="appsettings.Testing.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
