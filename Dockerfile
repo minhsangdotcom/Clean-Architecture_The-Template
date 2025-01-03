@@ -13,6 +13,11 @@ COPY template.sln ./
 RUN dotnet restore
 
 COPY . .
+
+# testing
+RUN dotnet test ./tests/Application.SubcutaneousTests/Application.SubcutaneousTests.csproj
+RUN dotnet test ./tests/Application.UnitTest/Application.UnitTest.csproj
+
 RUN dotnet publish ./src/Api/Api.csproj -c Release -o /app/publish/ --no-restore
 
 # stage 2 Runtime environment
