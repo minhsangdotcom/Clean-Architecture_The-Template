@@ -68,9 +68,9 @@ jobs:
             echo 'Docker image pulled successfully.'
 
             echo 'Starting services with Docker Compose...'
-	    cd ~/app-deployment
+	          cd ~/app-deployment
             docker compose down
-	    docker compose up -d --build && \
+	          docker compose up -d --build && \
             echo 'Docker Compose services started successfully.'
           "
 
