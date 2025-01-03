@@ -67,12 +67,10 @@ jobs:
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest && \
             echo 'Docker image pulled successfully.'
 
-            echo 'Pulling services with Docker Compose...'
-            docker compose pull && \
-            echo 'Docker Compose services pulled successfully.'
-
             echo 'Starting services with Docker Compose...'
-            docker compose up -d --build && \
+	    cd ~/app-deployment
+            docker compose down
+	    docker compose up -d --build && \
             echo 'Docker Compose services started successfully.'
           "
 
