@@ -47,7 +47,6 @@ jobs:
           SSH_HOST: ${{ vars.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
           SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
-          IMAGE_TAG: ${{ steps.meta.outputs.tags }}
           IMAGE_NAME: ${{ vars.IMAGE_NAME }}
           REGISTRY: ${{ vars.REGISTRY }}
           REGISTRY_PAT: ${{ secrets.MY_PERSONAL_PAT }}
