@@ -487,4 +487,5 @@ $RECYCLE.BIN/
 src/Api/appsettings.Development.json
 src/Api/appsettings.Production.json
 src/Api/appsettings.Testing.json
+src/Api/appsettings.Testing-production.json
 src/Api/appsettings.json
