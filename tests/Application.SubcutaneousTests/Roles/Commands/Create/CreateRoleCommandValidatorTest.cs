@@ -6,7 +6,6 @@ using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
 using Contracts.ApiWrapper;
 using FluentAssertions;
-using FluentEmail.Core;
 
 namespace Application.SubcutaneousTests.Roles.Commands.Create;
 

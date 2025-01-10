@@ -1,5 +1,4 @@
 using System.Data.Common;
-using Domain.Aggregates.Users;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,11 +14,21 @@ public class PostgreSqlDatabase : IDatabase
     private readonly string? connectionString;
     private Respawner? respawner;
 
+    private readonly string? environmentName;
+
     public PostgreSqlDatabase()
     {
+        environmentName =
+            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+
         var configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.Testing.json")
-            .AddEnvironmentVariables()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .AddJsonFile(
+                $"appsettings.Testing-{environmentName}.json",
+                optional: true,
+                reloadOnChange: true
+            )
             .Build();
 
         connectionString = configuration["DatabaseSettings:DatabaseConnection"];
@@ -52,6 +61,8 @@ public class PostgreSqlDatabase : IDatabase
     public DbConnection GetConnection() => connection!;
 
     public string GetConnectionString() => connectionString!;
+
+    public string GetEnvironmentVariable() => $"Testing-{environmentName}"!;
 
     public async Task ResetAsync()
     {
