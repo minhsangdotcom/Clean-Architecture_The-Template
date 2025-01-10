@@ -39,10 +39,16 @@ try
     bool isDevelopment = app.Environment.IsDevelopment();
 
     //*seeding area
-    var scope = app.Services.CreateScope();
-    var serviceProvider = scope.ServiceProvider;
-    await RegionDataSeeding.SeedingAsync(serviceProvider);
-    await DbInitializer.InitializeAsync(serviceProvider);
+    if (
+        app.Environment.EnvironmentName != "Testing-Production"
+        && app.Environment.EnvironmentName != "Testing-Development"
+    )
+    {
+        var scope = app.Services.CreateScope();
+        var serviceProvider = scope.ServiceProvider;
+        await RegionDataSeeding.SeedingAsync(serviceProvider);
+        await DbInitializer.InitializeAsync(serviceProvider);
+    }
 
     app.UseHangfireDashboard(configuration);
 

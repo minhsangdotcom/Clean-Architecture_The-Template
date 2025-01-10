@@ -3,7 +3,6 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
-using Domain.Exceptions;
 using Infrastructure.Constants;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,7 +40,8 @@ public partial class TestingFixture : IAsyncLifetime
     {
         await database.InitialiseAsync();
         var connection = database.GetConnection();
-        factory = new(connection);
+        string environmentName = database.GetEnvironmentVariable();
+        factory = new(connection, environmentName);
         CreateClient();
     }
 

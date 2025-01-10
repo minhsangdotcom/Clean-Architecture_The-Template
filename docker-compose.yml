@@ -1,0 +1,9 @@
+services:
+  todo_api_app_dev:
+    container_name: the_template
+    image: ghcr.io/${IMAGE_NAME}:latest
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production

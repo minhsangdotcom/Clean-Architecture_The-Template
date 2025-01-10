@@ -1,0 +1,78 @@
+name: Clean Architecture the template CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy to GHCR
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and tag Docker image
+        run: |
+          docker build . -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Push Docker image to GHCR
+        run: |
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Install SSH client
+        run: sudo apt-get update && sudo apt-get install -y openssh-client
+
+      - name: Deploy
+        env:
+          SSH_HOST: ${{ vars.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+          REGISTRY: ${{ vars.REGISTRY }}
+          REGISTRY_PAT: ${{ secrets.MY_PERSONAL_PAT }}
+        run: |
+          echo "Preparing SSH key..."
+          echo "${{ env.SERVER_SSH_KEY }}" > key.pem
+          chmod 600 key.pem
+          echo "SSH key setup complete."
+
+          echo "Starting deployment to ${{ env.SSH_HOST }}..."
+          ssh -i key.pem -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
+            echo 'Logging into Docker registry...'
+            docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ env.REGISTRY_PAT }} && \
+            echo 'Successfully logged into Docker registry.'
+
+            echo 'Pulling latest Docker image...'
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest && \
+            echo 'Docker image pulled successfully.'
+
+            echo 'Starting services with Docker Compose...'
+	          cd ~/app-deployment
+            docker compose down
+	          docker compose up -d --build && \
+            echo 'Docker Compose services started successfully.'
+          "
+
+          echo "Cleaning up local SSH key..."
+          rm -f key.pem
+          echo "Deployment to ${{ env.SSH_HOST }} completed successfully."
