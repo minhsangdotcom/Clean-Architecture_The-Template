@@ -15,8 +15,8 @@ RUN dotnet restore
 COPY . .
 
 # testing
-RUN dotnet test ./tests/Application.SubcutaneousTests/Application.SubcutaneousTests.csproj
-RUN dotnet test ./tests/Application.UnitTest/Application.UnitTest.csproj
+RUN dotnet test ./tests/Application.SubcutaneousTests/Application.SubcutaneousTests.csproj -e ASPNETCORE_ENVIRONMENT=Production
+RUN dotnet test ./tests/Application.UnitTest/Application.UnitTest.csproj -e ASPNETCORE_ENVIRONMENT=Production
 
 RUN dotnet publish ./src/Api/Api.csproj -c Release -o /app/publish/ --no-restore
 
