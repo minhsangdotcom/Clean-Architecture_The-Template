@@ -26,9 +26,9 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
       - name: Test
-        run: |
-          export ASPNETCORE_ENVIRONMENT=Production
-          dotnet test --no-build --verbosity normal
+        run: >
+          dotnet test --environment ASPNETCORE_ENVIRONMENT=Production --no-restore
+          --verbosity normal
       - name: Create Docker Image
         run: dotnet publish ./src/Api/Api.csproj -c Release -o /app/publish/
           --no-restore
