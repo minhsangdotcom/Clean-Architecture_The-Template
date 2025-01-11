@@ -25,15 +25,15 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and tag Docker image
         run: >
-          docker build . -t ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ github.sha
+          docker build . -t ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:${{ github.sha
           }}
 
-          docker tag ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ github.sha }} ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:latest
+          docker tag ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:${{ github.sha }} ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:latest
       - name: Push Docker image to GHCR
         run: >
-          docker push ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:${{ github.sha }}
 
-          docker push ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:latest
+          docker push ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:latest
       - name: Install SSH client
         run: sudo apt-get update && sudo apt-get install -y openssh-client
       - name: Deploy
@@ -48,5 +48,5 @@ jobs:
 
           ssh -i key.pem -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_HOST }}  << 'EOF'
             docker login ${{ vars.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.MY_PERSONAL_PAT }}
-            docker pull ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:latest cd ~/app-deployment docker compose down docker compose up -d --build EOF
+            docker pull ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:latest cd ~/app-deployment docker compose down docker compose up -d --build EOF
           rm -f key.pem
