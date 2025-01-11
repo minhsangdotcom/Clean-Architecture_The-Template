@@ -6,6 +6,9 @@ on:
   pull_request:
     branches:
       - main
+defaults:
+  run:
+    working-directory: ./app
 jobs:
   build-and-deploy:
     name: Build and Deploy to GHCR
