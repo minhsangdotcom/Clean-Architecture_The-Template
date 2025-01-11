@@ -59,18 +59,14 @@ jobs:
           SSH_HOST: ${{ vars.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
           SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
-          IMAGE_NAME: ${{ vars.IMAGE_NAME }}
-          REGISTRY: ${{ vars.REGISTRY }}
-          REGISTRY_PAT: ${{ secrets.MY_PERSONAL_PAT }}
         run: |
           echo "${{ env.SERVER_SSH_KEY }}" > key.pem
           chmod 600 key.pem
-          ssh -i key.pem -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_HOST }}
-            docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ env.REGISTRY_PAT }}
+          ssh -i key.pem -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_HOST }}  << 'EOF'
+            docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.MY_PERSONAL_PAT }}
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          
-	          cd ~/app-deployment
+	    cd ~/app-deployment
             docker compose down
-	          docker compose up -d --build
-
+	    docker compose up -d --build
+	  EOF
           rm -f key.pem
