@@ -22,6 +22,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+      - name: Test
+        run: dotnet test -e ASPNETCORE_ENVIRONMENT=Production --no-build --verbosity normal
+      - name: Create Docker Image
+        run: dotnet publish ./src/Api/Api.csproj -c Release -o /app/publish/ --no-restore
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -51,28 +63,14 @@ jobs:
           REGISTRY: ${{ vars.REGISTRY }}
           REGISTRY_PAT: ${{ secrets.MY_PERSONAL_PAT }}
         run: |
-          echo "Preparing SSH key..."
           echo "${{ env.SERVER_SSH_KEY }}" > key.pem
           chmod 600 key.pem
-          echo "SSH key setup complete."
-
-          echo "Starting deployment to ${{ env.SSH_HOST }}..."
-          ssh -i key.pem -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
-            echo 'Logging into Docker registry...'
-            docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ env.REGISTRY_PAT }} && \
-            echo 'Successfully logged into Docker registry.'
-
-            echo 'Pulling latest Docker image...'
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest && \
-            echo 'Docker image pulled successfully.'
-
-            echo 'Starting services with Docker Compose...'
+          ssh -i key.pem -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_HOST }}
+            docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ env.REGISTRY_PAT }}
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          
 	          cd ~/app-deployment
             docker compose down
-	          docker compose up -d --build && \
-            echo 'Docker Compose services started successfully.'
-          "
+	          docker compose up -d --build
 
-          echo "Cleaning up local SSH key..."
           rm -f key.pem
-          echo "Deployment to ${{ env.SSH_HOST }} completed successfully."
