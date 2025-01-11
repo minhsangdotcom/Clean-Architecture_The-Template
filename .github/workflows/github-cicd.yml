@@ -1,5 +1,4 @@
 name: Clean Architecture the template CI/CD
-
 on:
   push:
     branches:
@@ -7,21 +6,17 @@ on:
   pull_request:
     branches:
       - main
-
 jobs:
   build-and-deploy:
     name: Build and Deploy to GHCR
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       packages: write
       id-token: write
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -31,42 +26,41 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
       - name: Test
-        run: dotnet test -e ASPNETCORE_ENVIRONMENT=Production --no-build --verbosity normal
+        run: dotnet test -e ASPNETCORE_ENVIRONMENT=Production --no-build --verbosity
+          normal
       - name: Create Docker Image
-        run: dotnet publish ./src/Api/Api.csproj -c Release -o /app/publish/ --no-restore
+        run: dotnet publish ./src/Api/Api.csproj -c Release -o /app/publish/
+          --no-restore
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build and tag Docker image
-        run: |
-          docker build . -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        run: >
+          docker build . -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha
+          }}
+
           docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-
       - name: Push Docker image to GHCR
-        run: |
+        run: >
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
       - name: Install SSH client
         run: sudo apt-get update && sudo apt-get install -y openssh-client
-
       - name: Deploy
         env:
           SSH_HOST: ${{ vars.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
           SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
-        run: |
+        run: >
           echo "${{ env.SERVER_SSH_KEY }}" > key.pem
+
           chmod 600 key.pem
+
           ssh -i key.pem -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_HOST }}  << 'EOF'
             docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.MY_PERSONAL_PAT }}
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-	    cd ~/app-deployment
-            docker compose down
-	    docker compose up -d --build
-	  EOF
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest cd ~/app-deployment docker compose down docker compose up -d --build EOF
           rm -f key.pem
