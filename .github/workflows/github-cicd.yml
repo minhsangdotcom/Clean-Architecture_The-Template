@@ -6,9 +6,6 @@ on:
   pull_request:
     branches:
       - main
-defaults:
-  run:
-    working-directory: ./app
 jobs:
   build-and-deploy:
     name: Build and Deploy to GHCR
@@ -20,17 +17,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.x
-      - name: Restore dependencies
-        run: dotnet restore
-      - name: Build
-        run: dotnet build --no-restore --configuration Release
-      - name: Create Docker Image
-        run: dotnet publish ./src/Api/Api.csproj -c Release -o /app/publish/
-          --no-restore
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
