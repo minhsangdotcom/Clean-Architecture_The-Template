@@ -1,3 +1,4 @@
+---
 name: Clean Architecture the template CI/CD
 on:
   push:
@@ -25,28 +26,35 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and tag Docker image
         run: >
-          docker build . -t ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:${{ github.sha
-          }}
+          docker build . -t ${{ vars.REGISTRY }}/${{ github.actor }}/${{
+          vars.IMAGE_NAME }}:${{ github.sha }}
 
           docker tag ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:${{ github.sha }} ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:latest
       - name: Push Docker image to GHCR
         run: >
-          docker push ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME
+          }}:${{ github.sha }}
 
           docker push ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:latest
-      - name: Install SSH client
-        run: sudo apt-get update && sudo apt-get install -y openssh-client
+      - name: Set up SSH key
+        run: |
+          env
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p 22 ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          sudo apt-get update && sudo apt-get install -y sshpass
       - name: Deploy
         env:
           SSH_HOST: ${{ vars.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
           SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
         run: >
-          echo "${{ env.SERVER_SSH_KEY }}" > key.pem
-
-          chmod 600 key.pem
-
-          ssh -i key.pem -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_HOST }}  << 'EOF'
+          ssh -v -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_HOST }}
+          << 'ENDSSH'
             docker login ${{ vars.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.MY_PERSONAL_PAT }}
-            docker pull ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:latest cd ~/app-deployment docker compose down docker compose up -d --build EOF
-          rm -f key.pem
+            docker pull ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:latest
+            cd ${{ secrets.APP_PATH }}
+            docker compose down
+            docker compose up -d --build
+          ENDSSH
