@@ -56,8 +56,8 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
           SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
         run: >
-          ssh -v -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_HOST }}
-          << 'ENDSSH'
+          sshpass -p ${{ secrets.SPWD }} ssh -v -o StrictHostKeyChecking=no ${{
+          env.SSH_USER }}@${{ env.SSH_HOST }} << 'ENDSSH'
             docker login ${{ vars.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.MY_PERSONAL_PAT }}
             docker pull ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:latest
             cd ${{ secrets.APP_PATH }}
