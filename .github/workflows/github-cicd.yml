@@ -38,7 +38,6 @@ jobs:
           docker push ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:latest
       - name: Set up SSH key
         run: |
-          env
           mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
