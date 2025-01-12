@@ -42,7 +42,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p 22 ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p 22 ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts
           sudo apt-get update && sudo apt-get install -y sshpass
       - name: Deploy
         env:
