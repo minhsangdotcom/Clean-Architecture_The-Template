@@ -37,12 +37,19 @@ jobs:
 
           docker push ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:latest
       - name: Set up SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+        run: >
+          set -e << 'EOF' mkdir -p ~/.ssh || { echo "Failed to create .ssh
+          directory"; exit 1; }
+
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa || { echo "Failed to write SSH key"; exit 1; }
+
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p 22 ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts
-          sudo apt-get update && sudo apt-get install -y sshpass
+
+          ssh-keyscan -p 22 ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts EOF
+      - name: Install sshpass
+        run: |
+          sudo apt-get update
+          sudo apt-get install sshpass
       - name: Deploy
         env:
           SSH_HOST: ${{ vars.SSH_HOST }}
