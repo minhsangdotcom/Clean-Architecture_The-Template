@@ -1,46 +1,47 @@
-[Vietnamese version (Clean Architecture)](README-VIETNAMESE.md)
 
-# Clean Architecture The Template
+[Bảng tiếng anh](README.md)
 
-This template is designed for backend developer working with ASP.NET Core. It provides you an efficient way to build enterprise applications effortlessly by leveraging advantages of clean architecture structre and .NET Core framework.
+# Mô Hình Kiến Trúc Sạch (Clean Architecture)
 
-With this template, You'll benefit from zero configuration, and don't need to worry about struture, settings,environments or best practices for web APIs,because everything is already set up :smiley:.
+Template này được thiết kế dành cho các bạn backend làm việc với ASP.NET Core. Nó cung cấp một cách hiệu quả để xây dựng các ứng dụng enterprise một cách đơn giản bằng cách tận dụng lợi thế từ kiến trúc Clean Architecture và .NET Core framework.
 
-If you find this template helpful and learn something from it, please consider giving it a :star:. Your support motivates me to deliver even better features and improvements in future versions.
+Với template này, bạn sẽ có được zero configuration, không cần quan tâm đến cấu trúc, cài đặt, môi trường hoặc các thông lệ tốt nhất cho web API, vì tất cả đã được thiết lập :smiley:.
 
-# Definition
+Nếu bạn thấy template này hữu ích và học được điều gì đó từ nó, hãy cân nhắc cho mình một :star:. Sự hỗ trợ của bạn là động lực giúp mình mang đến những tính năng mới và cải tiến tốt hơn trong các phiên bản sắp tới.
 
-Clean Architecture is a software design philosophy introduced by Robert C. Martin (Uncle Bob). It emphasizes the separation of concerns and promotes the organization of code into layers, each with distinct responsibilities. The architecture's primary goal is to create systems that are independent of frameworks, UI, databases, and external agencies, allowing flexibility, scalability, and testability.
+# Định Nghĩa
 
-At its core, Clean Architecture organizes code into concentric circles, with each layer having a specific purpose.
+Clean Architecture là một triết lý thiết kế phần mềm được giới thiệu bởi Robert C. Martin (Uncle Bob). Nó nhấn mạnh việc tách biệt các mối quan tâm và khuyến khích việc tổ chức mã thành các lớp, mỗi lớp có trách nhiệm riêng biệt. Mục tiêu chính của kiến trúc là tạo ra các hệ thống không phụ thuộc vào framework, giao diện người dùng, cơ sở dữ liệu và các cơ quan bên ngoài, đảm bảo tính linh hoạt, khả năng mở rộng và dễ dàng kiểm thử.
 
-![Alt text](Screenshots/clean-architecture.png "clean architecture common structure")
+Tại phần trung tâm, Clean Architecture tổ chức mã thành các vòng tròn đồng tâm, với mỗi lớp đều có mục đích cụ thể.
 
-The dependency rule states that code dependencies should only point inward, ensuring that inner layers remain isolated from external layers.
+![Alt text](Screenshots/clean-architecture.png "Cấu trúc chung của Clean Architecture")
 
-### Advandtage
+Quy tắc phụ thuộc nói rằng các thành phần phụ thuộc hướng từ ngoài vào trong, đảm bảo rằng các tầng bên trong vẫn tách biệt với các tầng bên ngoài.
 
-- **_Seperation of Concerns_**: Each layer is responsible for a specific aspect of the application, making the code easier to understand and maintain.
-- **_Testability_**: Since business logic is decoupled from frameworks and UI, unit testing becomes simpler and more reliable.
-- **_Flexibility and Adaptability_**: Changes to the framework, database, or external systems have minimal impact on the core logic.
-- **_Reusability_**: Business rules can be reused across different applications or systems with minimal changes.
-- **_Scalability_**: The clear structure supports growth and the addition of new features without significant refactoring.
-- **_Framework Independence_**: Avoids being locked into a specific framework, making it easier to migrate to newer technologies.
+### Lợi ích
 
-### Disadvandtage
+- **_Các thành phần tách biệt_**: Mỗi một tầng chịu trách nhiệm cho một khía cạnh của ứng dụng, giúp mã dễ hiểu và bảo trì.
+- **_Dễ dàng kiểm thử_**: Các business logic được tách biệt khỏi framework và UI, việc kiểm thử đơn vị trở nên đơn giản và đáng tin cậy hơn.
+- **_Linh hoạt và Thích nghi_**: Khi thay đổi framework, cơ sở dữ liệu hoặc các hệ thống bên ngoài ít ảnh hưởng đến logic của phần core.
+- **_Tái sử dụng_**: Các Business rules có thể được tái sử dụng trong các ứng dụng hoặc hệ thống khác mà không phải thay đổi quá nhiều code.
+- **_Khả năng mở rộng_**: Cấu trúc rõ ràng hỗ trợ việc phát triển và thêm tính năng mới mà không cần tái cơ cấu lại.
+- **_Không phụ thuộc vào framework_**: Không bị phụ thuộc nhiều vào framework, rất dễ dàng để thanh đổi công nghệ mới.
 
-- **_Complexity_**: The layered structure can add complexity, especially for smaller projects where simpler architectures might suffice.
-- **_Initial Overhead_**: Setting up Clean Architecture requires additional effort to organize layers and follow strict design principles.
-- **_Learning Curve_**: Developers unfamiliar with the principles may take time to grasp the structure and its benefits.
-- **_Over-Engineering Risk_**: For small-scale applications, the additional layers might be unnecessary and lead to over-complication.
-- **_Performance Overhead_**: The abstraction and indirection between layers can introduce slight performance trade-offs, though typically negligible.
+### Nhược điểm
 
-# Structure
+- **_Phức tạp_**: Cấu trúc các tầng có thể tăng tính phức tạp, đặc biệt đối với các dự án nhỏ nơi các kiến trúc đơn giản hơn có thể phù hợp hơn
+- **_Chi phí khởi đầu cao_**: Thiết lập Kiến Trúc Sạch yêu cầu thêm nỗ lực để tổ chức các tầng và tuân theo các nguyên tắc thiết kế nghiêm ngặt.
+- **_Khó khăn khi học tập_**: Các developer không quen thuộc với nguyên tắc này có thể mất thời gian để hiểu rõ cấu trúc và lợi ích của nó.
+- **_Nguy cơ về cấu trúc quá phức tạp_**: Đối với các ứng dụng nhỏ, các tầng bổ sung có thể không cần thiết và dẫn đến sự phức tạp hóa.
+- **_Hiệu năng bị suy giảm_**: Sự trích dẫn và trừa tượng(interface) giữa các tầng có thể giảm hiệu năng, tuy nhiên thường là không đáng kể.
 
-**_Domain_**: Domain layer serves as the core of clean architecture application and contains key elements such as:
+# Cấu trúc
 
-- Aggregates : It's a way to group together related entities, value objects, enums, repository interfaces and Specfication (optional) you can learn about it at [https://github.com/ardalis/Specification](https://github.com/ardalis/Specification). With principles are established to govern the interactions between the aggregate root and its relationship and more.
-- Exceptions : Create custom exceptions for Domain layer.
+**_Domain_**: Tầng Domain đóng vai trò như phần trung tâm trong Clean Architecture, các thành phần bao gồm:
+
+- Aggregates : Là nhóm các entity có mối liên quan với nhau, các value object, enum, interface và Specification pattern (tùy chọn) các bạn có thể đọc thêm ở [https://github.com/ardalis/Specification](https://github.com/ardalis/Specification). Nó có một số nguyên tắc bắt buộc trong quá trình tương tác giữa các root và các thành phần quan hệ của nó và còn nhiều thức khác.
+- Exceptions : Tạo ra custom exception cho tầng Domain
 
     📁 Domain\
        ├── 📁 Aggregates\
@@ -53,19 +54,19 @@ The dependency rule states that code dependencies should only point inward, ensu
        &emsp;&emsp;&emsp;├── 📁 Specs\
        ├── 📁 Exceptions
 
-_it is independent of any external dependencies_
+_Nó không hề phụ thuộc vào bất kể layer nào_
 
-**_Application_**: Application layer play a important role in clean architecture, it contains business logics and rules for your application and consist of key elements such as:
+**_Application_**: Tầng ứng dụng đóng vai trò quang trọng trong clean architecture, Nó chứa các business logic, business rule cho ứng dụng và có các thành phần cấu thành như sau:
 
-- <ins>Common folder</ins>:
-  - Behaviors : Create cross-cutting concerns such as : error logging, validation, performance logging...
-  - DomainEventHandler: the implementations of sending domain events.
-  - Exceptions: Contain exceptions for use case.
-  - Interfaces: Define interfaces for repositories and external services.
-  - Mapping: Create mapping objects.
-- <ins>Features folder</ins>: where I group command and query handlers together for using CQRS pattern and MediaR.
+- <ins>Thư mục Common</ins>:
+  - Behaviors : Nơi chứa các cross-cutting concern có thể kể đến như : error logging, validation, performance logging...
+  - DomainEventHandler: Nơi implemnet các logic cho gửi event nội bộ.
+  - Exceptions: Chứa các exception cho tầng Application.
+  - Interfaces: Tạo ra các interfaces cho repositories và các services bên ngoài.
+  - Mapping: Chứa các mapping object.
+- <ins>Thư mục Features</ins>: Gom nhóm các modules với command/queries sử dụng CQRS pattern và MediaR
 
-  - Common : It's my own style, I place common things of those modules such as Mapping, validations, requests and responses and reuse it across modules.
+  - Common : Đây là nơi mà mình đặt những thứ chung của tất cả các module lại với nhau để dễ dàng cho việc tái sử dụng như là Mapping với Automapper, Request, Response
 
     📁 Application\
        ├── 📁 Common\
@@ -101,16 +102,16 @@ _it is independent of any external dependencies_
        &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Commands\
        &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Queries\
 
-_It only depends on Domain leyer_
+_Chỉ phụ thuộc vào tầng Domain_
 
-**_Infrastucture_** : The Infrastucture layer is responsible for handling data from external sources, such as databases and web services and Consists of some key elements such as:
+**_Infrastucture_** : Tầng Infrastucture là nơi chứa các kết nối với database và các server bên thứ 3, nó có chứa một số thành phần sau đây:
 
-- <ins>Data folder</ins>:
-  - Configurations : contain configurations for entity at Domain layer.
-  - Interceptors : Where I do logic before and after entity framework apply changes, it's an awesome feature that EF Core bring to us.
-  - Migrations: contain migration files for code first approach in EF.
-- Services : Implement external services
-- UnitOfWorks: Do implementations for unit of work and repository at Application layer.
+- <ins>Thư mục Data</ins>:
+  - Configurations : Chứa các tùy chỉnh cho các entity ở tầng Domain.
+  - Interceptors : Nơi chứa các hành động trước và sau khi EF Core thực hiện lưu các thay đổi
+  - Migrations: Chứa các file migration cho các tiếp cận bằng code first trong EF. 
+- Services : Nơi implement các interface ở tầng Application.
+- UnitOfWorks: Nơi implement các repository interface ở tầng Application.
 
     📁 Infrastructure\
        ├── 📁 Constants\
@@ -132,9 +133,9 @@ _It only depends on Domain leyer_
        ├── 📁 Services\
        ├── 📁 UnitofWork\
 
-_It depends on Application and Domain layer_
+_Phụ thuộc vào tầng Application và Domain_
 
-**_Api_**: contains api endpoints and represents for main running project in application.
+**_Api_**: Chứa các Api endpoint.
 
     📁 Api\
         ├── 📁 Converters\
@@ -145,22 +146,22 @@ _It depends on Application and Domain layer_
         ├── 📁 Settings\
         ├── 📁 wwwroot\
 
-_It depends on Application and Infrastructure layer_
+_Phụ thuộc vào tầng Application and Infrastructure_
 
-**_Contract_** : Contains shared components across all layers
+**_Contract_** : Chứa shared components qua các tầng
 
-# How to run it
+# Cách để chạy ứng dụng
 
-The following prerequisites are required to build and run the solution:
+Các thứ cần để chạy ứng dụng:
 
 - [Net 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 - [Docker](https://www.docker.com/)
 
-The first step :point_up: :
+Bước thứ 1 :point_up: :
 
-we're going to copy content of appsettings.example.json to your own appsettings.json.
+Copy nội dung trong appsettings.example.json vào appsettings.json.
 
-Modify PostgreSQL connection string (this template is using PostgreSQL currently).
+Chỉnh sửa connection string của PostgreSQL (Bởi vì template này đang sử dụng PostgreSQL).
 
 ```json
 "DatabaseSettings": {
@@ -168,7 +169,7 @@ Modify PostgreSQL connection string (this template is using PostgreSQL currently
 },
 ```
 
-If you want to use difference database then just customize a few things at DependencyInjection.cs in Infrastructure layer
+Nếu các bạn muốn sử dụng các database khác thì chỉ cần chỉnh lại một số đoạn code nhỏ ở DependencyInjection.cs trong Infrastructure.
 
 ```csharp
     services.AddDbContextPool<TheDbContext>(
@@ -185,43 +186,42 @@ If you want to use difference database then just customize a few things at Depen
     );
 ```
 
-Simply Replace UseNpgsql with whatever database you want :smile:.
+Chỉ cần thay thế UseNpgsql với bất kể database nào mà bạn muốn :smile:.
 
-Navigate to Data folder, and then open DesignTimeDbContextFactory file
+Sau đó đi tới Data, vào file DesignTimeDbContextFactory
 
 ```
 builder.UseNpgsql(connectionString);
 ```
 
-Replace it as you did above :point_up_2:.
+Thay thế như file DependencyInjection.cs ở trên :point_up_2:.
 
-The next step :point_right::
+Bước tiếp theo nha :point_right::
 
 ```
 cd Dockers/Minio_S3
 
 ```
 
-change mino username and password at .env if needed and you're gonna use it for logging in Web UI Manager
+Đổi tên username và password ở file .env nếu cần thiết, lát nữa các bạn sẽ dùng nó để đăng nhập vào web manager đó.
 
 ```
 MINIO_ROOT_USER=the_template_storage
 MINIO_ROOT_PASSWORD=storage@the_template1`
 
 ```
-
-To Run Amazon S3 service for media file storage.
+Dùng lệnh sau đây để chạy Amazon S3 service
 
 ```
 docker-compose up -d
 
 ```
 
-This is a really good trick for using AWS for free :dollar: that I learned from my previous company :pray:
+Đây là một cách khá hay để sử dụng AWS miễn phí với máy tính của bạn :dollar: Tui đã học được cách này lúc còn ở công ty cũ :pray:
 
-_Note that If you already have similar one You can skip this step._
+_Mà nè nếu mấy fen đã có sẳn con AWS rồi thì khỏi cần làm mấy cái này nha_
 
-Modify this json setting at your appsettings.json
+Chỉnh lại setting ở your appsettings.json
 
 ```json
 "S3AwsSettings": {
@@ -234,24 +234,23 @@ Modify this json setting at your appsettings.json
       "Protocol": 1
     },
 ```
+Các bạn có thể tạo ra cặp access và Secret key bằng giao diện ở [http://localhost:9001](http://localhost:9001)
 
-You can create access and secret key pair with Web UI manager at [http://localhost:9001](http://localhost:9001)
-
-The final step
+Bước cuối nha
 
 ```
 cd src/Api
 dotnet run
+
 ```
+vào swagger ui ở "localhost:8080/docs"
 
-"localhost:8080/docs" is swagger UI path
+Xong rồi đó :tada: :tada: :tada: :clap:
 
-Congrat! you are all set up :tada: :tada: :tada: :clap:
-
-# Basic Usage
-
+# Hướng dẫn sử dụng
 **_Authorize_**
-To Achieve this, let's add AuthorizeBy attribute on controller
+
+Để phân quyền cho nó sử dụng AuthorizeBy nha gắn nó vô trên đầu Endpoint (Controller)
 
 ```csharp
     [HttpPost(Router.UserRoute.Users)]
@@ -267,9 +266,8 @@ To Achieve this, let's add AuthorizeBy attribute on controller
     }
 ```
 
-***Create role inlcude permission***
+***Tạo ra role kèm theo permission***
 
-Json payload is like
 ```json
 {
   "description": "this is super admin role",
@@ -286,9 +284,10 @@ Json payload is like
   ]
 }
 ```
-***How to add new permissions***
 
-To get this, let's navigate to constants folder in Infrastructure layer, then open Credential.cs file and Pay your attention on PermissionGroups Dictionary
+***Thêm một quyền mới vào ứng dụng***
+
+Vô thư mục Constants trong Infrastructure mở file Credential.cs và chú ý tới PermissionGroups
 
 ```csharp
     public static readonly Dictionary<string, string[]> PermissionGroups =
@@ -316,19 +315,19 @@ To get this, let's navigate to constants folder in Infrastructure layer, then op
                     CreatePermission(ActionPermission.detail, ObjectPermission.role),
                 ]
             },
-        };
 ```
 
-Notice that, the key is your entity name plus "s" and the value is list of permission for that entity.
+Chú ý rằng, key là tên của entity cộng thêm "s" và value là danh sách các permission cho entity đó.
 
-Permission combibes from action and entity name.
-For example:
+Permission được gộp từ hành động và tên entity.
+VD:
 
 ```
 create:user
 ```
 
-Look at ActionPermission and ObjectPermission class
+Đây là nơi để tạo ra các permission từ lớp ActionPermission và ObjectPermission.
+
 
 ```csharp
 public static class ActionPermission
@@ -347,7 +346,8 @@ public static class ObjectPermission
     public const string role = nameof(role);
 }
 ```
-Define your new one and push it into PermissionGroups dictionary.
+
+Tạo ra permission mới và thêm nó vào PermissionGroups dictionary.
 
 # Technology
 
@@ -362,13 +362,14 @@ Define your new one and push it into PermissionGroups dictionary.
 - ElasticSearch
 - Serilog
 
-# Support
 
-If you are having problems, please let me know by
+# Hỗ trợ
 
-# Acknowledgements
+Nếu như có bất kì vấn đề nào thì cho mình biết qua phần issue nhé.
 
-Thank you guys so much :pray:.
+# Lời cảm ơn
+
+Cảm ơn mọi người rất nhiều :pray:.
 
 - [Clean architecture by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture)\
 A fantastic guide to structuring projects with clean architecture principles, which helped shape the design of this template.
