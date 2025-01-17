@@ -2,7 +2,7 @@
 
 This template is designed for backend developer working with ASP.NET Core. It provides you an efficient way to build enterprise applications effortlessly by leveraging advantages of clean architecture structre and .NET Core framework.
 
-With this template You'll benefit from zero configuration—no need to worry about struture, settings,environments or best practices for web APIs, because everything is already set up :smiley:.
+With this template, You'll benefit from zero configuration, and don't need to worry about struture, settings,environments or best practices for web APIs,because everything is already set up :smiley:.
 
 If you find this template helpful and learn something from it, please consider giving it a :star:. Your support motivates me to deliver even better features and improvements in future versions.
 
@@ -99,7 +99,6 @@ _it is independent of any external dependencies_
    &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Commands\
    &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Queries\
 
-
 _It only depends on domain leyer_
 
 **_Infrastucture_** : The infrastucture layer is responsible for handling data from external sources, such as databases and web services and Consists of some key elements such as:
@@ -110,7 +109,6 @@ _It only depends on domain leyer_
   - Migrations: contain migration files for code first
 - Services : Implement external services
 - UnitOfWorks: Do implementations for unit of work and repository at application layer.
-
 
   📁 Infrastructure\
    ├── 📁 Constants\
@@ -145,7 +143,7 @@ _It depends on Application and Domain layer_
         ├── 📁 Settings\
         ├── 📁 wwwroot\
 
-*It depends on Application and Infrastructure layer*
+_It depends on Application and Infrastructure layer_
 
 **_Contract_** : contains shared components across all layers
 
@@ -170,19 +168,19 @@ Modify postgresql connection string (this template is using postgresql currently
 
 If you want to use difference database then just customize a few things at DependencyInjection.cs in Infrastructure layer
 
-```
-services.AddDbContextPool<TheDbContext>(
-        (sp, options) =>
-        {
-            NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
-            options
-                .UseNpgsql(npgsqlDataSource)
-                .AddInterceptors(
-                    sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
-                    sp.GetRequiredService<DispatchDomainEventInterceptor>()
-                );
-        }
-);
+```csharp
+    services.AddDbContextPool<TheDbContext>(
+            (sp, options) =>
+            {
+                NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
+                options
+                    .UseNpgsql(npgsqlDataSource)
+                    .AddInterceptors(
+                        sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
+                        sp.GetRequiredService<DispatchDomainEventInterceptor>()
+                    );
+            }
+    );
 ```
 
 Simply Replace UseNpgsql with whatever database you want :smile:.
@@ -192,26 +190,26 @@ Navigate to Data folder, and then open DesignTimeDbContextFactory file
 ```
 builder.UseNpgsql(connectionString);
 ```
+
 Replace it as you did above :point_up_2:.
 
 The next step :point_right::
 
 change mino username and password at .env if needed and you're gonna use it for logging in Web UI Manager
 
-`
-MINIO_ROOT_USER=the_template_storage
-MINIO_ROOT_PASSWORD=storage@the_template1
-`
+`MINIO_ROOT_USER=the_template_storage
+MINIO_ROOT_PASSWORD=storage@the_template1`
 
 ```
 cd Dockers/Minio_S3
 docker-compose up -d
 ```
+
 To Run Amazon S3 service for media file storage.
 
-This is a really good trick for using AWS for free :dollar: that I learned from my previous  company :pray:
+This is a really good trick for using AWS for free :dollar: that I learned from my previous company :pray:
 
-*Note that If you already have similar one You can skip this step.*
+_Note that If you already have similar one You can skip this step._
 
 Modify this json setting at your appsettings.json
 
@@ -226,6 +224,7 @@ Modify this json setting at your appsettings.json
       "Protocol": 1
     },
 ```
+
 You can create access and secret key pair with Web UI manager at [http://localhost:9001](http://localhost:9001)
 
 The final step
@@ -234,8 +233,147 @@ The final step
 cd src/Api
 dotnet run
 ```
+
 "localhost:8080/docs" is swagger UI path
 
 Congrat! you are all set up :tada: :tada: :tada: :clap:
 
 # Basic Usage
+
+**_Authorize_**
+To Achieve this, let's add AuthorizeBy attribute on controller
+
+```csharp
+    [HttpPost(Router.UserRoute.Users)]
+    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "create User")]
+    [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
+    public override async Task<ActionResult<ApiResponse>> HandleAsync(
+        [FromForm] CreateUserCommand request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        CreateUserResponse user = await sender.Send(request, cancellationToken);
+        return this.Created201(Router.UserRoute.GetRouteName, user.Id, user);
+    }
+```
+
+***Create role inlcude permission***
+
+Json payload is like
+```json
+{
+  "description": "this is super admin role",
+  "name": "superAdmin",
+  "roleClaims": [
+    {
+      "claimType": "permission",
+      "claimValue": "create:customer"
+    },
+    {
+      "claimType": "permission",
+      "claimValue": "update:customer"
+    }
+  ]
+}
+```
+***How to add new permissions***
+
+To get this, let's navigate to constants folder in Infrastructure layer, then open Credential.cs file and look at PermissionGroups Dictionary
+
+```csharp
+    public static readonly Dictionary<string, string[]> PermissionGroups =
+        new()
+        {
+            {
+                nameof(User) + "s",
+
+                [
+                    CreatePermission(ActionPermission.create, ObjectPermission.user),
+                    CreatePermission(ActionPermission.update, ObjectPermission.user),
+                    CreatePermission(ActionPermission.delete, ObjectPermission.user),
+                    CreatePermission(ActionPermission.list, ObjectPermission.user),
+                    CreatePermission(ActionPermission.detail, ObjectPermission.user),
+                ]
+            },
+            {
+                nameof(Role) + "s",
+
+                [
+                    CreatePermission(ActionPermission.create, ObjectPermission.role),
+                    CreatePermission(ActionPermission.update, ObjectPermission.role),
+                    CreatePermission(ActionPermission.delete, ObjectPermission.role),
+                    CreatePermission(ActionPermission.list, ObjectPermission.role),
+                    CreatePermission(ActionPermission.detail, ObjectPermission.role),
+                ]
+            },
+        };
+```
+
+Notice that, the key is your entity name plus "s" and the value is list of permission for that entity.
+
+Permission combibes from action and entity name.
+For example:
+
+```
+create:user
+```
+Look at ActionPermission and ObjectPermission class
+
+```csharp
+public static class ActionPermission
+{
+    public const string create = nameof(create);
+    public const string update = nameof(update);
+    public const string delete = nameof(delete);
+    public const string detail = nameof(detail);
+    public const string list = nameof(list);
+    public const string testa = nameof(testa);
+}
+
+public static class ObjectPermission
+{
+    public const string user = nameof(user);
+    public const string role = nameof(role);
+}
+```
+Define your new one and push it into PermissionGroups dictionary.
+
+# Technology
+
+- .NET 8
+- EntityFramework core 8
+- AutoMapper
+- Fluent validation
+- Medator
+- XUnit, FluentAssertion, Respawn
+- OpenTelemetry
+- Redis
+- ElasticSearch
+- Serilog
+
+
+# Support
+
+If you are having problems, please let me know by
+
+# Acknowledgements
+
+Thank you guys so much :pray:.
+
+- [Clean architecture by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture)\
+A fantastic guide to structuring projects with clean architecture principles, which helped shape the design of this template.
+
+- [Clean architecture by amantinband](https://github.com/amantinband/clean-architecture)\
+A concise and practical implementation of clean architecture that provided fresh perspectives and further deepened my understanding of this powerful approach.
+
+- [Clean architecture by Ardalis](https://github.com/ardalis/CleanArchitecture)\
+A thoughtful and thorough take on clean architecture that helped refine the modular structure and scalability of this template.
+
+- [Specification pattern](https://github.com/ardalis/Specification)\
+A brilliant implementation of the Specification pattern, simplifying complex query logic and promoting cleaner, more maintainable code.
+
+- [REPR Pattern](https://github.com/ardalis/ApiEndpoints)\
+A practical implementation of the Request-Endpoint-Response (REPR) pattern, which provided a clear and structured approach to organizing API endpoints. It emphasizes simplicity and single-responsibility for each endpoint, ensuring clarity and maintainability.
+
+- [Clean testing by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture/tree/main/tests)\
+An inspiring repository of testing best practices, showcasing how to write robust and meaningful tests to ensure the reliability of clean architecture-based projects.
