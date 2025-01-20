@@ -7,3 +7,9 @@ services:
       - "8081:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+    networks:
+      - the-teplate-network
+
+networks: 
+  the-teplate-network:
+    external: true
