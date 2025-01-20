@@ -24,7 +24,7 @@ jobs:
         with:
           registry: ${{ vars.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.MY_PERSONAL_PAT }}
       - name: Build and tag Docker image
         run: >
           docker build . -t ${{ vars.REGISTRY }}/${{ github.actor }}/${{
