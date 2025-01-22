@@ -1,4 +1,6 @@
-[Vietnamese version (Clean Architecture)](README-VIETNAMESE.md)
+#
+[English](README.md) | [Vietnamese](README-VIETNAMESE.md)
+#
 
 # Clean Architecture The Template
 
@@ -198,7 +200,7 @@ Replace it as you did above :point_up_2:.
 The next step :point_right::
 
 ```
-cd Dockers/Minio_S3
+cd Dockers/MinioS3
 
 ```
 
@@ -288,7 +290,7 @@ Json payload is like
 ```
 ***How to add new permissions***
 
-To get this, let's navigate to constants folder in Infrastructure layer, then open Credential.cs file and Pay your attention on PermissionGroups Dictionary
+To get this, let's navigate to constants folder in Infrastructure layer, then open Credential.cs file and pay your attention on PermissionGroups Dictionary
 
 ```csharp
     public static readonly Dictionary<string, string[]> PermissionGroups =
@@ -328,7 +330,7 @@ For example:
 create:user
 ```
 
-Look at ActionPermission and ObjectPermission class
+Let's take a look at ActionPermission and ObjectPermission class
 
 ```csharp
 public static class ActionPermission
@@ -347,7 +349,7 @@ public static class ObjectPermission
     public const string role = nameof(role);
 }
 ```
-Define your new one and push it into PermissionGroups dictionary.
+Define your new one, then push it into PermissionGroups dictionary, and restart application.
 
 # Technology
 
@@ -364,11 +366,11 @@ Define your new one and push it into PermissionGroups dictionary.
 
 # Support
 
-If you are having problems, please let me know by
+If you are having problems, please let me know by issue section.
 
 # Acknowledgements
 
-Thank you guys so much :pray:.
+:heart: Thank you guys so much :heart: :pray:.
 
 - [Clean architecture by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture)\
 A fantastic guide to structuring projects with clean architecture principles, which helped shape the design of this template.

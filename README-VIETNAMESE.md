@@ -1,5 +1,6 @@
-
-[Bảng tiếng anh](README.md)
+#
+[English](README.md) | [Vietnamese](README-VIETNAMESE.md)
+#
 
 # Mô Hình Kiến Trúc Sạch (Clean Architecture)
 
@@ -199,7 +200,7 @@ Thay thế như file DependencyInjection.cs ở trên :point_up_2:.
 Bước tiếp theo nha :point_right::
 
 ```
-cd Dockers/Minio_S3
+cd Dockers/MinioS3
 
 ```
 
@@ -347,7 +348,7 @@ public static class ObjectPermission
 }
 ```
 
-Tạo ra permission mới và thêm nó vào PermissionGroups dictionary.
+Tạo ra permission mới sau đó thêm nó vào PermissionGroups dictionary và chạy lại ứng dụng.
 
 # Technology
 
@@ -369,7 +370,7 @@ Nếu như có bất kì vấn đề nào thì cho mình biết qua phần issue
 
 # Lời cảm ơn
 
-Cảm ơn mọi người rất nhiều :pray:.
+:heart: Cảm ơn mọi người rất nhiều :heart: :pray:.
 
 - [Clean architecture by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture)\
 A fantastic guide to structuring projects with clean architecture principles, which helped shape the design of this template.
