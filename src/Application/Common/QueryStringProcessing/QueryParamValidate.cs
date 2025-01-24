@@ -309,6 +309,11 @@ public static partial class QueryParamValidate
         });
     }
 
+    /// <summary>
+    /// check if array operator has invalid index like $and[1][firstName], index must start with 0.
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
     private static bool ValidateArrayOperatorInvalidIndex(List<string> input)
     {
         List<string> arrayOperators = ["$and", "$or", "$in", "$between"];
