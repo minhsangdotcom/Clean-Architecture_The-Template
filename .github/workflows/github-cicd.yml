@@ -29,6 +29,7 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
           cache: true
+          cache-dependency-path: '**/packages.lock.json'
       - name: Install dependencies
         run: dotnet restore --locked-mode
       - name: Build
