@@ -7,6 +7,10 @@ on:
   pull_request:
     branches:
       - main
+
+env:
+  DOTNET_VERSION: '8.0.405'
+
 jobs:
   build-and-deploy:
     name: Build and Deploy to GHCR
