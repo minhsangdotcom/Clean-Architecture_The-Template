@@ -55,7 +55,7 @@ Nào hãy cùng mình khám phá nha :
 
 1. [Authentication với JWT](src/Infrastructure/Services/Identity/)
 1. [Authorization bằng Vai trò và quyền](#authorize)
-1. [Dynamic Search](src/Contracts/Extensions/QueryExtensions/SearchExtensions.cs), [Dynamic Sort](src/Contracts/Extensions/QueryExtensions/SortExtension.cs), [Dynamic Filter](#filtering),[Offset and Cursor Pagination](src/Contracts/Extensions/QueryExtensions/PaginationExtension.cs)
+1. [Dynamic Search](src/Contracts/Extensions/QueryExtensions/SearchExtensions.cs), [Dynamic Sort](src/Contracts/Extensions/QueryExtensions/SortExtension.cs), [Dynamic Filter](#filtering),[Offset and Cursor Pagination](#pagination)
 1. [Lưu trữ media bằng AWS S3](src/Infrastructure/Services/Aws/)
 1. [Tích hợp sẳn Elastic Search](src/Infrastructure/Services/Elastics/)
 1. [Tích Hợp Domain Event](src/Application//Common/DomainEventHandlers/)
