@@ -38,12 +38,32 @@ public static partial class QueryParamValidate
             return request;
         }
 
-        List<QueryResult> queries = StringExtension
-            .TransformStringQuery(request.OriginFilters!)
-            .ToList();
+        List<QueryResult> queries =
+        [
+            .. StringExtension.TransformStringQuery(request.OriginFilters!),
+        ];
 
-        foreach (QueryResult query in queries)
+        int length = queries.Count;
+
+        if (length == 1 && !ValidateArrayOperatorInvalidIndex(queries[0].CleanKey))
         {
+            throw new BadRequestException(
+                [
+                    Messager
+                        .Create<QueryParamRequest>("QueryParam")
+                        .Property(x => x.Filter!)
+                        .Message(MessageType.Valid)
+                        .Negative()
+                        .ObjectName("ArrayIndex")
+                        .Build(),
+                ]
+            );
+        }
+
+        for (int i = 0; i < length; i++)
+        {
+            QueryResult query = queries[i];
+
             //if it's $and,$or,$in and $between then they must have a index after
             if (ValidateArrayOperator(query.CleanKey))
             {
@@ -286,6 +306,35 @@ public static partial class QueryParamValidate
             string afterArrayOperator = input[index + 1];
 
             return !afterArrayOperator.IsDigit();
+        });
+    }
+
+    /// <summary>
+    /// check if array operator has invalid index like $and[1][firstName], index must start with 0.
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    private static bool ValidateArrayOperatorInvalidIndex(List<string> input)
+    {
+        List<string> arrayOperators = ["$and", "$or", "$in", "$between"];
+
+        return arrayOperators.Any(arrayOperator =>
+        {
+            int index = input.IndexOf(arrayOperator);
+
+            if (index < 0)
+            {
+                return false;
+            }
+
+            if (index >= input.Count - 1)
+            {
+                return true;
+            }
+
+            string afterArrayOperator = input[index + 1];
+
+            return afterArrayOperator.IsDigit() && int.Parse(afterArrayOperator) == 0;
         });
     }
 

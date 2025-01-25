@@ -15,7 +15,18 @@ public class OpenTelemetrySettings
 
 public enum OtelpOption
 {
+    /// <summary>
+    /// Add log to distributed server
+    /// </summary>
     DistributedServer = 1,
+
+    /// <summary>
+    /// Add log to console
+    /// </summary>
     Console = 2,
+
+    /// <summary>
+    /// Do not thing
+    /// </summary>
     Non = 3,
 }
