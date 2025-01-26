@@ -10,7 +10,7 @@ namespace Application;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    public static IServiceCollection AddApplicationDependencies(this IServiceCollection services)
     {
         Assembly currentAssembly = Assembly.GetExecutingAssembly();
 
