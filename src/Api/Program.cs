@@ -25,6 +25,7 @@ builder
 services.AddSwagger(configuration);
 services.AddOpenTelemetryTracing(configuration);
 builder.AddSerialogs();
+builder.Services.AddHealthChecks();
 
 //-----------------------------
 
@@ -35,6 +36,7 @@ try
 {
     Log.Logger.Information("Application is starting....");
     var app = builder.Build();
+    app.MapHealthChecks("/api/health");
 
     bool isDevelopment = app.Environment.IsDevelopment();
 
