@@ -1,5 +1,5 @@
 services:
-  todo_api_app_dev:
+  webapi:
     container_name: the_template
     image: ghcr.io/${GITHUB_USER_NAME}/${IMAGE_NAME}:latest
     ports:
@@ -7,6 +7,18 @@ services:
       - "8081:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+    networks:
+      - the-teplate-network
+  
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - webapi
     networks:
       - the-teplate-network
 
