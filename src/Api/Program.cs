@@ -40,7 +40,7 @@ try
 
     //*seeding area
     if (
-        app.Environment.EnvironmentName != "Testing-Production"
+        app.Environment.EnvironmentName != "Testing-Deployment"
         && app.Environment.EnvironmentName != "Testing-Development"
     )
     {
