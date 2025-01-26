@@ -1,4 +1,5 @@
 using Api.Middlewares;
+
 namespace Api.Extensions;
 
 public static class MiddlewareRegisterExtension

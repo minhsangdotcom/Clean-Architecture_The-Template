@@ -1,16 +1,18 @@
 using Api.Converters;
 using Api.Extensions;
 using Application;
+using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.Data;
 using Infrastructure.Services.Hangfires;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
 
-// ---------------------------------------------
+#region main dependencies
 builder.AddConfiguration();
 builder
     .Services.AddControllers()
@@ -25,20 +27,27 @@ builder
 services.AddSwagger(configuration);
 services.AddOpenTelemetryTracing(configuration);
 builder.AddSerialogs();
+services.AddHealthChecks();
+services.AddDatabaseHealthCheck(configuration);
+#endregion
 
-//-----------------------------
-
-services.AddInfrastructureServices(configuration, builder.Environment.EnvironmentName);
-services.AddApplicationServices();
+#region layers dependencies
+services.AddInfrastructureDependencies(configuration, builder.Environment.EnvironmentName);
+services.AddApplicationDependencies();
+#endregion
 
 try
 {
     Log.Logger.Information("Application is starting....");
     var app = builder.Build();
+    app.MapHealthChecks(
+        "/api/health",
+        new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }
+    );
 
     bool isDevelopment = app.Environment.IsDevelopment();
 
-    //*seeding area
+    #region seeding area
     if (
         app.Environment.EnvironmentName != "Testing-Deployment"
         && app.Environment.EnvironmentName != "Testing-Development"
@@ -49,6 +58,7 @@ try
         await RegionDataSeeding.SeedingAsync(serviceProvider);
         await DbInitializer.InitializeAsync(serviceProvider);
     }
+    #endregion
 
     app.UseHangfireDashboard(configuration);
 
