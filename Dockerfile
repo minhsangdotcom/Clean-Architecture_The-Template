@@ -7,4 +7,5 @@ EXPOSE 8080
 FROM base AS final
 WORKDIR /app
 COPY app/publish .
+RUN sudo apt-get update && sudo apt-get install -y curl && sudo rm -rf /var/lib/apt/lists/*
 ENTRYPOINT ["dotnet", "Api.dll"]
