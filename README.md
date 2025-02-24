@@ -55,7 +55,7 @@ Let's explore the features:
 
 1. [Authentication with JWT for .NET Core](src/Infrastructure/Services/Identity/)
 1. [Authorization by Roles and Permissions](#authorize)
-1. [Dynamic Search](src/Contracts/Extensions/QueryExtensions/SearchExtensions.cs), [Dynamic Sort](src/Contracts/Extensions/QueryExtensions/SortExtension.cs) , [Dynamic Filter](#filtering),[Offset and Cursor Pagination](src/Contracts/Extensions/QueryExtensions/PaginationExtension.cs)
+1. [Dynamic Search](src/Contracts/Extensions/QueryExtensions/SearchExtensions.cs), [Dynamic Sort](src/Contracts/Extensions/QueryExtensions/SortExtension.cs) , [Dynamic Filter](#filtering),[Offset and Cursor Pagination](#pagination)
 1. [AWS S3 Storage](src/Infrastructure/Services/Aws/)
 1. [Elastic Search](src/Infrastructure/Services/Elastics/)
 1. [Domain Event](src/Application//Common/DomainEventHandlers/)

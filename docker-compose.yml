@@ -1,12 +1,37 @@
 services:
-  todo_api_app_dev:
-    container_name: the_template
+  webapi: &webapi_defaults
     image: ghcr.io/${GITHUB_USER_NAME}/${IMAGE_NAME}:latest
-    ports:
-      - "8080:8080"
-      - "8081:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+    expose:
+      - "8080"
+    networks:
+      - the-teplate-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  
+  webapi1:
+    <<: *webapi_defaults  # Reuse defaults
+    container_name: the_template1
+
+  webapi2:
+    <<: *webapi_defaults  # Reuse defaults
+    container_name: the_template2
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./logs:/var/log/nginx
+    depends_on:
+      - webapi1
+      - webapi2
     networks:
       - the-teplate-network
 

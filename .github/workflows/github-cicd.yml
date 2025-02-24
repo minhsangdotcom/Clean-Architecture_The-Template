@@ -7,6 +7,10 @@ on:
   pull_request:
     branches:
       - main
+
+env:
+  DOTNET_INSTALL_DIR: "./.dotnet"
+
 jobs:
   build-and-deploy:
     name: Build and Deploy to GHCR
@@ -19,6 +23,25 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.405'
+          cache: true
+      - name: Install dependencies
+        run: dotnet restore --locked-mode
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+      - name: Test
+        run: dotnet dotnet test --no-restore --verbosity normal -e ASPNETCORE_ENVIRONMENT=Deployment
+      - name: Publish Application
+        run: dotnet publish -c Release -o app/publish
+      - uses: actions/upload-artifact@v4
+        with:
+          name: my-artifact
+          path: |
+            app/publish
+            app/output/test-results
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -44,9 +67,14 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
-          script: |
-            docker login ${{ vars.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.MY_PERSONAL_PAT }}
+          script: >
+            docker login ${{ vars.REGISTRY }} -u ${{ github.actor }} -p ${{
+            secrets.MY_PERSONAL_PAT }}
+
             docker pull ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:latest
+
             cd ${{ secrets.APP_PATH }}
+
             docker compose down
+
             docker compose up -d --build
