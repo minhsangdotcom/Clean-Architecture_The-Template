@@ -16,19 +16,17 @@ public class DeadLetterQueueService(IRedisCacheService redisCache, IOptions<Queu
 
     private long size;
 
-    public async Task<T?> DequeueAsync<T>()
+    public async Task<TResponse?> DequeueAsync<TResponse, TRequest>()
     {
-        Tuple<RedisKey, RedisValue>? value = await redisCache.Database.BRPopAsync(
-            [queueSettings.DeadLetterQueueName],
-            1
-        );
+        string queueName = $"{queueSettings.DeadLetterQueueName}:{typeof(TRequest).Name}";
+        Tuple<RedisKey, RedisValue>? value = await redisCache.Database.BRPopAsync([queueName], 1);
 
         if (value == null)
         {
             return default;
         }
 
-        var result = SerializerExtension.Deserialize<T>(value.Item2.ToString());
+        var result = SerializerExtension.Deserialize<TResponse>(value.Item2.ToString());
         size = Length();
         return result.Object!;
     }
@@ -37,10 +35,8 @@ public class DeadLetterQueueService(IRedisCacheService redisCache, IOptions<Queu
     {
         QueueRequest<T> request = new() { PayloadId = Guid.NewGuid(), Payload = payload };
         var result = SerializerExtension.Serialize(request);
-        long length = await redisCache.Database.ListLeftPushAsync(
-            queueSettings.DeadLetterQueueName,
-            result.StringJson
-        );
+        string queueName = $"{queueSettings.DeadLetterQueueName}:{typeof(T).Name}";
+        long length = await redisCache.Database.ListLeftPushAsync(queueName, result.StringJson);
         size = length;
 
         return length > 0;

@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Services.DistributedCache;
 using Contracts.Dtos.Responses;
+using Domain.Aggregates.QueueLogs;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -61,7 +62,11 @@ public class DeadletterQueueBackgroundService(
             // 500 or 400 error
             if (queueResponse.ErrorType == QueueErrorType.Persistent)
             {
-                await queueLogService.CreateAsync(queueResponse, request);
+                await queueLogService.CreateAsync(
+                    queueResponse,
+                    request,
+                    QueueType.DeadLetterQueue
+                );
                 break;
             }
 
@@ -86,7 +91,7 @@ public class DeadletterQueueBackgroundService(
         if (!queueResponse.IsSuccess && queueResponse.ErrorType == QueueErrorType.Transient)
         {
             // if it still fail after many attempts then logging into db
-            await queueLogService.CreateAsync(queueResponse, request);
+            await queueLogService.CreateAsync(queueResponse, request, QueueType.DeadLetterQueue);
         }
     }
 }
