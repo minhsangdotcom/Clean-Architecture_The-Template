@@ -10,20 +10,26 @@ public class QueueLogService(ILogger logger, IUnitOfWork unitOfWork) : IQueueLog
 {
     public async Task CreateAsync<TRequest, TResponse>(
         QueueResponse<TResponse> response,
-        TRequest request
+        TRequest request,
+        QueueType? type = null
     )
         where TRequest : class
         where TResponse : class
     {
         logger.Information("Pushing request {payloadId} to logging queue.", response.PayloadId);
-        var deadLetterQueue = new QueueLog()
+        var log = new QueueLog()
         {
             RequestId = response.PayloadId!.Value,
             ErrorDetail = response.Error,
             RetryCount = response.RetryCount,
             Request = request,
         };
-        await unitOfWork.Repository<QueueLog>().AddAsync(deadLetterQueue);
+
+        if (type != null)
+        {
+            log.ProcessedBy = type!.Value;
+        }
+        await unitOfWork.Repository<QueueLog>().AddAsync(log);
         await unitOfWork.SaveAsync();
     }
 }
