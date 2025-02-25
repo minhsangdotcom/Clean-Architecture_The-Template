@@ -1,10 +1,11 @@
 using Domain.Common;
 
-namespace Application.Common.Interfaces.Services.DistributedCache;
+namespace Domain.Aggregates.QueueLogs;
 
-public class DeadLetterQueue : BaseEntity
+public class QueueLog : BaseEntity
 {
     public Guid RequestId { get; set; }
+    public object? Request { get; set; }
     public object? ErrorDetail { get; set; }
     public int RetryCount { get; set; }
 }

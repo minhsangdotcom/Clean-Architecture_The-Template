@@ -7,7 +7,7 @@ using StackExchange.Redis;
 
 namespace Infrastructure.Services.DistributedCache;
 
-public class QueueService(IRedisCacheService redisCache, IOptions<QueueSettings> options)
+public class DeadLetterQueueService(IRedisCacheService redisCache, IOptions<QueueSettings> options)
     : IQueueService
 {
     private readonly QueueSettings queueSettings = options.Value;
@@ -19,7 +19,7 @@ public class QueueService(IRedisCacheService redisCache, IOptions<QueueSettings>
     public async Task<T?> DequeueAsync<T>()
     {
         Tuple<RedisKey, RedisValue>? value = await redisCache.Database.BRPopAsync(
-            [queueSettings.OriginQueueName],
+            [queueSettings.DeadLetterQueueName],
             1
         );
 
@@ -38,7 +38,7 @@ public class QueueService(IRedisCacheService redisCache, IOptions<QueueSettings>
         QueueRequest<T> request = new() { PayloadId = Guid.NewGuid(), Payload = payload };
         var result = SerializerExtension.Serialize(request);
         long length = await redisCache.Database.ListLeftPushAsync(
-            queueSettings.OriginQueueName,
+            queueSettings.DeadLetterQueueName,
             result.StringJson
         );
         size = length;
@@ -46,5 +46,5 @@ public class QueueService(IRedisCacheService redisCache, IOptions<QueueSettings>
         return length > 0;
     }
 
-    public long Length() => redisCache.Database.ListLength(queueSettings.OriginQueueName);
+    public long Length() => redisCache.Database.ListLength(queueSettings.DeadLetterQueueName);
 }
