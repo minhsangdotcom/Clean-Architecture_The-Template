@@ -1,7 +1,5 @@
 using Application.Common.Interfaces.Services.DistributedCache;
-using Application.Features.Tickets.Carts.Pays;
 using Contracts.Dtos.Responses;
-using Domain.Aggregates.QueueLogs;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,8 +8,8 @@ using Serilog;
 
 namespace Infrastructure.Services.DistributedCache;
 
-public class QueueBackgroundService(
-    IQueueFactory queueFactory,
+public class DeadletterQueueBackgroundService(
+    IQueueFactory factory,
     IServiceProvider serviceProvider,
     IOptions<QueueSettings> options
 ) : BackgroundService
@@ -27,21 +25,6 @@ public class QueueBackgroundService(
             scope.ServiceProvider.GetRequiredService<IQueueLogService>();
         while (!stoppingToken.IsCancellationRequested)
         {
-            PayCartPayload? request = await queueFactory
-                .GetQueue(QueueType.OriginQueue)
-                .DequeueAsync<PayCartPayload, PayCartRequest>();
-
-            if (request != null)
-            {
-                await ProcessWithRetryAsync(
-                    sender.Send(request, stoppingToken),
-                    request,
-                    logger,
-                    queueLogService,
-                    stoppingToken
-                );
-            }
-
             await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
         }
     }
@@ -58,7 +41,7 @@ public class QueueBackgroundService(
     {
         QueueResponse<TResponse> queueResponse = new();
         int attempt = 0;
-        int maximumRetryAttempt = queueSettings.MaxRetryAttempts;
+        int maximumRetryAttempt = queueSettings.DeadLetterMaxRetryAttempts;
         double maximumDelay = queueSettings.MaximumDelayInSec;
 
         while (attempt < maximumRetryAttempt)

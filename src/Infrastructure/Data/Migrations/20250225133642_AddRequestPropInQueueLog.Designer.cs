@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250225133642_AddRequestPropInQueueLog")]
+    partial class AddRequestPropInQueueLog
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,291 +69,6 @@ namespace Infrastructure.Data.Migrations
                         .HasName("pk_queue_log");
 
                     b.ToTable("queue_log", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Carts.Cart", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("id");
-
-                    b.Property<int>("CartStatus")
-                        .HasColumnType("integer")
-                        .HasColumnName("cart_status");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("CustomerId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("customer_id");
-
-                    b.Property<bool>("IsPaid")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_paid");
-
-                    b.Property<string>("PaymentResult")
-                        .HasColumnType("text")
-                        .HasColumnName("payment_result");
-
-                    b.Property<string>("PersistentError")
-                        .HasColumnType("text")
-                        .HasColumnName("persistent_error");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text")
-                        .HasColumnName("phone_number");
-
-                    b.Property<string>("ShippingAddress")
-                        .HasColumnType("text")
-                        .HasColumnName("shipping_address");
-
-                    b.Property<int>("ShippingFee")
-                        .HasColumnType("integer")
-                        .HasColumnName("shipping_fee");
-
-                    b.Property<int>("Total")
-                        .HasColumnType("integer")
-                        .HasColumnName("total");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by");
-
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
-
-                    b.HasKey("Id")
-                        .HasName("pk_cart");
-
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_cart_customer_id");
-
-                    b.ToTable("cart", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Carts.CartItem", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("id");
-
-                    b.Property<string>("CartId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("cart_id");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("quantity");
-
-                    b.Property<string>("TiketId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("tiket_id");
-
-                    b.Property<int>("TotalPrice")
-                        .HasColumnType("integer")
-                        .HasColumnName("total_price");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by");
-
-                    b.HasKey("Id")
-                        .HasName("pk_cart_item");
-
-                    b.HasIndex("CartId")
-                        .HasDatabaseName("ix_cart_item_cart_id");
-
-                    b.HasIndex("TiketId")
-                        .HasDatabaseName("ix_cart_item_tiket_id");
-
-                    b.ToTable("cart_item", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Customers.Customer", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Address")
-                        .HasColumnType("text")
-                        .HasColumnName("address");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("text")
-                        .HasColumnName("email");
-
-                    b.Property<string>("FullName")
-                        .HasColumnType("text")
-                        .HasColumnName("full_name");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text")
-                        .HasColumnName("phone_number");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by");
-
-                    b.HasKey("Id")
-                        .HasName("pk_customer");
-
-                    b.ToTable("customer", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Orders.Order", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("id");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("CustomerId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("customer_id");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text")
-                        .HasColumnName("phone_number");
-
-                    b.Property<string>("ShippingAddress")
-                        .HasColumnType("text")
-                        .HasColumnName("shipping_address");
-
-                    b.Property<int>("ShippingFee")
-                        .HasColumnType("integer")
-                        .HasColumnName("shipping_fee");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
-
-                    b.Property<int>("TotalAmount")
-                        .HasColumnType("integer")
-                        .HasColumnName("total_amount");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by");
-
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
-
-                    b.HasKey("Id")
-                        .HasName("pk_order");
-
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_order_customer_id");
-
-                    b.ToTable("order", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Orders.OrderItem", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("id");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("OrderId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("order_id");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("quantity");
-
-                    b.Property<string>("TiketId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("tiket_id");
-
-                    b.Property<int>("TotalPrice")
-                        .HasColumnType("integer")
-                        .HasColumnName("total_price");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by");
-
-                    b.HasKey("Id")
-                        .HasName("pk_order_item");
-
-                    b.HasIndex("OrderId")
-                        .HasDatabaseName("ix_order_item_order_id");
-
-                    b.HasIndex("TiketId")
-                        .HasDatabaseName("ix_order_item_tiket_id");
-
-                    b.ToTable("order_item", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Regions.Commune", b =>
@@ -622,56 +340,6 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("role_claim", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Tickets.Ticket", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("id");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
-
-                    b.Property<DateTime>("EventDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("event_date");
-
-                    b.Property<string>("EventName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("event_name");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric")
-                        .HasColumnName("price");
-
-                    b.Property<int>("TotalQuantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("total_quantity");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by");
-
-                    b.Property<int>("UsedQuantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("used_quantity");
-
-                    b.HasKey("Id")
-                        .HasName("pk_ticket");
-
-                    b.ToTable("ticket", (string)null);
-                });
-
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
                 {
                     b.Property<string>("Id")
@@ -933,72 +601,6 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("user_token", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Carts.Cart", b =>
-                {
-                    b.HasOne("Domain.Aggregates.Customers.Customer", "Customer")
-                        .WithMany("Carts")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_cart_customer_customer_id");
-
-                    b.Navigation("Customer");
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Carts.CartItem", b =>
-                {
-                    b.HasOne("Domain.Aggregates.Carts.Cart", "Cart")
-                        .WithMany("CartItems")
-                        .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_cart_item_cart_cart_id");
-
-                    b.HasOne("Domain.Aggregates.Tickets.Ticket", "Ticket")
-                        .WithMany("CartItems")
-                        .HasForeignKey("TiketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_cart_item_ticket_tiket_id");
-
-                    b.Navigation("Cart");
-
-                    b.Navigation("Ticket");
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Orders.Order", b =>
-                {
-                    b.HasOne("Domain.Aggregates.Customers.Customer", "Customer")
-                        .WithMany("Orders")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_order_customer_customer_id");
-
-                    b.Navigation("Customer");
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Orders.OrderItem", b =>
-                {
-                    b.HasOne("Domain.Aggregates.Orders.Order", "Order")
-                        .WithMany("OrderItems")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_order_item_order_order_id");
-
-                    b.HasOne("Domain.Aggregates.Tickets.Ticket", "Ticket")
-                        .WithMany("OrderItems")
-                        .HasForeignKey("TiketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_order_item_ticket_tiket_id");
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Ticket");
-                });
-
             modelBuilder.Entity("Domain.Aggregates.Regions.Commune", b =>
                 {
                     b.HasOne("Domain.Aggregates.Regions.District", "District")
@@ -1165,23 +767,6 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Carts.Cart", b =>
-                {
-                    b.Navigation("CartItems");
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Customers.Customer", b =>
-                {
-                    b.Navigation("Carts");
-
-                    b.Navigation("Orders");
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Orders.Order", b =>
-                {
-                    b.Navigation("OrderItems");
-                });
-
             modelBuilder.Entity("Domain.Aggregates.Regions.District", b =>
                 {
                     b.Navigation("Communes");
@@ -1202,13 +787,6 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Roles.RoleClaim", b =>
                 {
                     b.Navigation("UserClaims");
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Tickets.Ticket", b =>
-                {
-                    b.Navigation("CartItems");
-
-                    b.Navigation("OrderItems");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
