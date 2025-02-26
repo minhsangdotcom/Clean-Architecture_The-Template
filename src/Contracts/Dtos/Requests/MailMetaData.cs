@@ -2,26 +2,32 @@ namespace Contracts.Dtos.Requests;
 
 public class MailMetaData
 {
-    public string? Subject { get; set; }
+    public required string? Subject { get; set; }
 
-    public string? DisplayName { get; set; }
+    public required string? DisplayName { get; set; }
 
-    public List<string> To { get; set; } = [];
+    public required List<string> To { get; set; } = [];
 }
 
 public class MessageMailMetaData : MailMetaData
 {
-    public string? Message { get; set; }
+    public required string? Message { get; set; }
 }
 
 public class TemplateMailMetaData : MailMetaData
 {
-    public MailTemplate? Template { get; set; }
+    public required MailTemplate? Template { get; set; }
 }
 
 public class MailData : MailMetaData
 {
-    public string? Body { get; set; }
+    public required string? Body { get; set; }
+}
+
+public enum MailType
+{
+    Kit = 1,
+    Fluent = 2,
 }
 
 public record MailTemplate(string ViewName, object Template);

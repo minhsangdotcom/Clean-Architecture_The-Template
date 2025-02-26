@@ -1,19 +1,37 @@
 using System.Linq.Expressions;
 using Application.Common.Interfaces.UnitOfWorks;
+using Infrastructure.Common;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Infrastructure.UnitOfWorks.CachedRepositories;
 
-public partial class CachedRepository<T>(
-    IRepository<T> repository,
-    IMemoryCache cache,
-    ILogger logger
-) : IRepository<T>
+public partial class CachedRepository<T> : IRepository<T>
     where T : class
 {
-    private readonly MemoryCacheEntryOptions cacheOptions =
-        new MemoryCacheEntryOptions().SetAbsoluteExpiration(relative: TimeSpan.FromMinutes(5));
+    private readonly IRepository<T> repository;
+    private readonly IMemoryCache cache;
+    private readonly ILogger logger;
+    private readonly CacheSettings cacheSettings;
+    private readonly MemoryCacheEntryOptions cacheOptions;
+
+    public CachedRepository(
+        IRepository<T> repository,
+        IMemoryCache cache,
+        ILogger logger,
+        IOptions<CacheSettings> options
+    )
+    {
+        this.repository = repository;
+        this.cache = cache;
+        this.logger = logger;
+        cacheSettings = options.Value;
+        cacheSettings ??= new();
+        cacheOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(
+            relative: TimeSpan.FromMinutes(cacheSettings.RepositoryCachingTimeInMinute)
+        );
+    }
 
     public async Task<IEnumerable<T>> ListAsync(CancellationToken cancellationToken = default) =>
         await repository.ListAsync(cancellationToken);

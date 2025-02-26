@@ -1,3 +1,5 @@
+using Contracts.Dtos.Requests;
+
 namespace Infrastructure.Services.Mail;
 
 public class EmailSettings

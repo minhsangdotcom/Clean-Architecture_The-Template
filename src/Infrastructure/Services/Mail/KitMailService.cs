@@ -14,25 +14,13 @@ public class KitMailService(IOptions<EmailSettings> options, ILogger logger, IMa
 {
     private readonly EmailSettings emailSettings = options.Value;
 
-    public async Task<bool> SendAsync(MessageMailMetaData metaData)
-    {
-        return await EmailAsync(mapper.Map<MailData>(metaData));
-    }
+    public async Task<bool> SendAsync(MessageMailMetaData metaData) =>
+        await EmailAsync(mapper.Map<MailData>(metaData));
 
     public async Task<bool> SendWithTemplateAsync(TemplateMailMetaData metaData)
     {
         string body = await RazorViewToStringRenderer.RenderViewToStringAsync(metaData.Template!);
-
-        return await EmailAsync(
-            // new()
-            // {
-            //     Body = body,
-            //     DisplayName = metaData.DisplayName,
-            //     Subject = metaData.Subject,
-            //     To = metaData.To,
-            // }
-            mapper.Map<MailData>(metaData, opt => opt.Items["body"] = body)
-        );
+        return await EmailAsync(metaData.MapToMailData(body));
     }
 
     private async Task<bool> EmailAsync(MailData mailData)
