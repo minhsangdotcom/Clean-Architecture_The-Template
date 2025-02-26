@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Services.DistributedCache;
+using Application.Features.QueueLogs;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.QueueLogs;
 using Mediator;
@@ -22,8 +23,7 @@ public class DeadletterQueueBackgroundService(
         using IServiceScope scope = serviceProvider.CreateScope();
         ISender sender = scope.ServiceProvider.GetRequiredService<ISender>();
         ILogger logger = scope.ServiceProvider.GetRequiredService<ILogger>();
-        IQueueLogService queueLogService =
-            scope.ServiceProvider.GetRequiredService<IQueueLogService>();
+
         while (!stoppingToken.IsCancellationRequested)
         {
             await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
@@ -34,7 +34,7 @@ public class DeadletterQueueBackgroundService(
         ValueTask<QueueResponse<TResponse>> task,
         TRequest request,
         ILogger logger,
-        IQueueLogService queueLogService,
+        ISender sender,
         CancellationToken cancellationToken
     )
         where TRequest : class
@@ -62,11 +62,11 @@ public class DeadletterQueueBackgroundService(
             // 500 or 400 error
             if (queueResponse.ErrorType == QueueErrorType.Persistent)
             {
-                await queueLogService.CreateAsync(
+                CreateQueueLogCommand createQueueLogCommand = MaptoCreateQueueLogCommand(
                     queueResponse,
-                    request,
-                    QueueType.DeadLetterQueue
+                    request
                 );
+                await sender.Send(createQueueLogCommand, cancellationToken);
                 break;
             }
 
@@ -91,7 +91,28 @@ public class DeadletterQueueBackgroundService(
         if (!queueResponse.IsSuccess && queueResponse.ErrorType == QueueErrorType.Transient)
         {
             // if it still fail after many attempts then logging into db
-            await queueLogService.CreateAsync(queueResponse, request, QueueType.DeadLetterQueue);
+            CreateQueueLogCommand createQueueLogCommand = MaptoCreateQueueLogCommand(
+                queueResponse,
+                request
+            );
+            await sender.Send(createQueueLogCommand, cancellationToken);
         }
+    }
+
+    private static CreateQueueLogCommand MaptoCreateQueueLogCommand<TResponse, TRequest>(
+        QueueResponse<TResponse> response,
+        TRequest request
+    )
+        where TRequest : class
+        where TResponse : class
+    {
+        return new CreateQueueLogCommand()
+        {
+            RequestId = response.PayloadId!.Value,
+            ErrorDetail = response.Error,
+            Request = request,
+            RetryCount = response.RetryCount,
+            ProcessedBy = QueueType.DeadLetterQueue,
+        };
     }
 }
