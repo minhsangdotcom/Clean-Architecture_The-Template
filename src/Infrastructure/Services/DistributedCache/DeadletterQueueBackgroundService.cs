@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Services.DistributedCache;
 using Application.Features.QueueLogs;
+using Application.Features.Tickets.Carts.Pays;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.QueueLogs;
 using Mediator;
@@ -26,6 +27,20 @@ public class DeadletterQueueBackgroundService(
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            var request = await factory
+                .GetQueue(QueueType.DeadLetterQueue)
+                .DequeueAsync<PayCartPayload, PayCartRequest>();
+
+            if (request != null)
+            {
+                await ProcessWithRetryAsync(
+                    sender.Send(request, stoppingToken),
+                    request,
+                    logger,
+                    sender,
+                    stoppingToken
+                );
+            }
             await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
         }
     }
