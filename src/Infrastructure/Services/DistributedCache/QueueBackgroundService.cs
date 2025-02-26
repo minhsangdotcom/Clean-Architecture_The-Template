@@ -27,11 +27,10 @@ public class QueueBackgroundService(
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            IQueueService queueService = queueFactory.GetQueue(QueueType.OriginQueue);
-            PayCartPayload? request = await queueService.DequeueAsync<
-                PayCartPayload,
-                PayCartRequest
-            >();
+            IQueueService deadLetterQueue = queueFactory.GetQueue(QueueType.DeadLetterQueue);
+            PayCartPayload? request = await queueFactory
+                .GetQueue(QueueType.OriginQueue)
+                .DequeueAsync<PayCartPayload, PayCartRequest>();
 
             if (request != null)
             {
@@ -40,7 +39,7 @@ public class QueueBackgroundService(
                     request,
                     logger,
                     sender,
-                    queueService,
+                    deadLetterQueue,
                     stoppingToken
                 );
             }
