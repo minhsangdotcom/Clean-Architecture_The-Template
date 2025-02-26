@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Services.DistributedCache;
+using Application.Features.QueueLogs;
 using Application.Features.Tickets.Carts.Pays;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.QueueLogs;
@@ -23,13 +24,14 @@ public class QueueBackgroundService(
         using IServiceScope scope = serviceProvider.CreateScope();
         ISender sender = scope.ServiceProvider.GetRequiredService<ISender>();
         ILogger logger = scope.ServiceProvider.GetRequiredService<ILogger>();
-        IQueueLogService queueLogService =
-            scope.ServiceProvider.GetRequiredService<IQueueLogService>();
+
         while (!stoppingToken.IsCancellationRequested)
         {
-            PayCartPayload? request = await queueFactory
-                .GetQueue(QueueType.OriginQueue)
-                .DequeueAsync<PayCartPayload, PayCartRequest>();
+            IQueueService queueService = queueFactory.GetQueue(QueueType.OriginQueue);
+            PayCartPayload? request = await queueService.DequeueAsync<
+                PayCartPayload,
+                PayCartRequest
+            >();
 
             if (request != null)
             {
@@ -37,7 +39,8 @@ public class QueueBackgroundService(
                     sender.Send(request, stoppingToken),
                     request,
                     logger,
-                    queueLogService,
+                    sender,
+                    queueService,
                     stoppingToken
                 );
             }
@@ -50,7 +53,8 @@ public class QueueBackgroundService(
         ValueTask<QueueResponse<TResponse>> task,
         TRequest request,
         ILogger logger,
-        IQueueLogService queueLogService,
+        ISender sender,
+        IQueueService queueService,
         CancellationToken cancellationToken
     )
         where TRequest : class
@@ -78,7 +82,14 @@ public class QueueBackgroundService(
             // 500 or 400 error
             if (queueResponse.ErrorType == QueueErrorType.Persistent)
             {
-                await queueLogService.CreateAsync(queueResponse, request);
+                CreateQueueLogCommand createQueueLogCommand =
+                    new()
+                    {
+                        RequestId = queueResponse.PayloadId!.Value,
+                        ErrorDetail = queueResponse.Error,
+                        Request = request,
+                    };
+                await sender.Send(createQueueLogCommand, cancellationToken);
                 break;
             }
 
@@ -102,8 +113,27 @@ public class QueueBackgroundService(
 
         if (!queueResponse.IsSuccess && queueResponse.ErrorType == QueueErrorType.Transient)
         {
-            // if it still fail after many attempts then logging into db
-            await queueLogService.CreateAsync(queueResponse, request);
+            // if it still fail after many attempts then push it into dead letter queue
+            logger.Warning(
+                "Push request {payloadId} into dead letter queue for maximum attempts",
+                queueResponse.PayloadId
+            );
+            await queueService.EnqueueAsync(request);
+            await sender.Send(
+                new CreateQueueLogCommand()
+                {
+                    RequestId = queueResponse.PayloadId!.Value,
+                    ErrorDetail = new
+                    {
+                        queueResponse.ErrorType,
+                        queueResponse.Error,
+                        Message = $"Push request {queueResponse.PayloadId} into dead letter queue for maximum attempts",
+                    },
+                    Request = request,
+                    RetryCount = queueResponse.RetryCount,
+                },
+                cancellationToken
+            );
         }
     }
 }
