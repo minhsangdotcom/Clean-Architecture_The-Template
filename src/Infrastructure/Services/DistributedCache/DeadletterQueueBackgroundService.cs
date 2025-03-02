@@ -26,7 +26,7 @@ public class DeadletterQueueBackgroundService(
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
         }
     }
 
