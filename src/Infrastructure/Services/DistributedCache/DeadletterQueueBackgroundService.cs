@@ -41,7 +41,7 @@ public class DeadletterQueueBackgroundService(
                     stoppingToken
                 );
             }
-            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
         }
     }
 
