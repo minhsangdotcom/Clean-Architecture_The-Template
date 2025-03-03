@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250225133642_AddRequestPropInQueueLog")]
+    partial class AddRequestPropInQueueLog
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,10 +44,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<object>("ErrorDetail")
                         .HasColumnType("jsonb")
                         .HasColumnName("error_detail");
-
-                    b.Property<int>("ProcessedBy")
-                        .HasColumnType("integer")
-                        .HasColumnName("processed_by");
 
                     b.Property<object>("Request")
                         .HasColumnType("jsonb")
@@ -420,6 +419,9 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasDatabaseName("ix_user_email");
+
+                    b.HasIndex("Id")
+                        .HasDatabaseName("ix_user_id");
 
                     b.HasIndex("Username")
                         .IsUnique()

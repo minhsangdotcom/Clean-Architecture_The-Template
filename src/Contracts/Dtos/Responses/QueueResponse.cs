@@ -19,13 +19,13 @@ public class QueueResponse<T>
 
 public enum QueueErrorType
 {
-     /// <summary>
+    /// <summary>
     /// 3-party service error
     /// </summary>
-    Transient  = 1,
+    Transient = 1,
 
     /// <summary>
     /// server error itself
     /// </summary>
-    Persistent = 2
+    Persistent = 2,
 }
