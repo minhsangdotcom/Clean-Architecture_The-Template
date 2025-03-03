@@ -8,7 +8,7 @@ public class FindCartByIdIncludeSpecification : Specification<Cart>
     public FindCartByIdIncludeSpecification(Ulid id)
     {
         Query
-            .Where(x => x.Id == id && !x.IsPaid && x.CartStatus == CartStatus.Pending)
+            .Where(x => x.Id == id)
             .Include(x => x.Customer)
             .Include(x => x.CartItems)!
             .ThenInclude(x => x.Ticket)

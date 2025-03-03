@@ -12,5 +12,5 @@ public enum PurchaseStatus
     Pending,
     Processing,
     Completed,
-    Failed
+    Failed,
 }

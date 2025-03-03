@@ -2,6 +2,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Carts;
+using Domain.Aggregates.Carts.Enums;
 using Domain.Aggregates.Carts.Specifications;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Tickets;
@@ -39,6 +40,23 @@ public class PayCartHandler(IUnitOfWork unitOfWork, IMapper mapper)
                 },
             };
         }
+
+        if (cart.IsPaid || cart.CartStatus == CartStatus.Expired)
+        {
+            return new QueueResponse<PayCartResponse>()
+            {
+                ErrorType = QueueErrorType.Persistent,
+                IsSuccess = false,
+                PayloadId = request.PayloadId,
+                Error = new
+                {
+                    Message = "Car is invalid",
+                    Type = QueueErrorType.Persistent,
+                    request.Payload!.CartId,
+                },
+            };
+        }
+
         List<CartItem> cartItems = [.. cart.CartItems!];
         if (cartItems.Any(x => x.Ticket!.UsedQuantity + x.Quantity > x.Ticket.TotalQuantity))
         {
@@ -60,9 +78,29 @@ public class PayCartHandler(IUnitOfWork unitOfWork, IMapper mapper)
         int fakeTime = random.Next(1, 6);
         await Task.Delay(fakeTime * 1000, cancellationToken);
 
+        if (fakeTime % 2 != 0)
+        {
+            string error = "Payment service is unavailable.";
+            cart.CartStatus = CartStatus.Failed;
+
+            cart.PaymentResult = error;
+            return new QueueResponse<PayCartResponse>()
+            {
+                ErrorType = QueueErrorType.Transient,
+                IsSuccess = false,
+                PayloadId = request.PayloadId,
+                Error = new
+                {
+                    Message = error,
+                    Type = QueueErrorType.Transient,
+                    request.Payload!.CartId,
+                },
+            };
+        }
+
         cart.IsPaid = true;
         cart.PaymentResult = "paying has been success";
-        cart.CartStatus = Domain.Aggregates.Carts.Enums.CartStatus.Completed;
+        cart.CartStatus = CartStatus.Paid;
         await unitOfWork.Repository<Cart>().UpdateAsync(cart);
 
         List<Ticket> tickets = [];
@@ -77,7 +115,7 @@ public class PayCartHandler(IUnitOfWork unitOfWork, IMapper mapper)
         Order order =
             new()
             {
-                CustomerId = request.Payload.Payload!.CustomerId,
+                CustomerId = request.Payload.Body!.CustomerId,
                 PhoneNumber = cart.PhoneNumber,
                 ShippingAddress = cart.ShippingAddress,
                 ShippingFee = cart.ShippingFee,

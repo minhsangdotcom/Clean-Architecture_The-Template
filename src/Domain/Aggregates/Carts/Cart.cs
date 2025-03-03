@@ -8,7 +8,7 @@ namespace Domain.Aggregates.Carts;
 public class Cart : AggregateRoot
 {
     public Ulid CustomerId { get; set; }
-    
+
     public Customer? Customer { get; set; }
 
     public string? ShippingAddress { get; set; }
@@ -19,7 +19,7 @@ public class Cart : AggregateRoot
 
     public int Total { get; set; }
 
-    public CartStatus CartStatus { get; set; }
+    public CartStatus CartStatus { get; set; } = CartStatus.Active;
 
     /// <summary>
     /// record bad request error reason

@@ -4,12 +4,13 @@ using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Contracts.Routers;
+using Domain.Aggregates.QueueLogs;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.Tickets.Carts;
 
-public class PayCartEndpoint(IQueueService queueService)
+public class PayCartEndpoint(IQueueFactory queueFactory)
     : EndpointBaseAsync.WithRequest<PayCartRequest>.WithActionResult<ApiResponse>
 {
     [HttpPost(Router.CartRoute.Pay)]
@@ -19,8 +20,7 @@ public class PayCartEndpoint(IQueueService queueService)
         CancellationToken cancellationToken = default
     )
     {
-        bool result = await queueService.EnqueueAsync(request);
-
+        bool result = await queueFactory.GetQueue(QueueType.OriginQueue).EnqueueAsync(request);
         return this.Ok200(result);
     }
 }

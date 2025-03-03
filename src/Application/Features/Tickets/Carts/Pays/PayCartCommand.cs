@@ -17,7 +17,7 @@ public class PayCartRequest
     public string? CartId { get; set; }
 
     [FromBody]
-    public PayCartCommand? Payload { get; set; }
+    public PayCartCommand? Body { get; set; }
 }
 
 public class PayCartPayload
