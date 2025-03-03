@@ -23,7 +23,7 @@ public static class RedisRegisterExtension
                     configuration.GetSection(nameof(RedisDatabaseSettings)).Bind(options)
                 )
                 .Configure<QueueSettings>(options =>
-                    configuration.GetSection(nameof(RedisDatabaseSettings)).Bind(options)
+                    configuration.GetSection(nameof(QueueSettings)).Bind(options)
                 )
                 .AddSingleton<QueueService>()
                 .AddSingleton<IQueueService, QueueService>(provider =>
@@ -41,6 +41,7 @@ public static class RedisRegisterExtension
                     options.ServicesStopConcurrently = true;
                 })
                 .AddHostedService<QueueBackgroundService>()
+                .AddHostedService<DeadletterQueueBackgroundService>()
                 .AddSingleton<IRedisCacheService, RedisCacheService>()
                 .AddSingleton<IQueueService, QueueService>()
                 .AddSingleton<IQueueService, DeadLetterQueueService>();

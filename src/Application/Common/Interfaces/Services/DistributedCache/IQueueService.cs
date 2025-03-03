@@ -9,4 +9,6 @@ public interface IQueueService
     public Task<bool> EnqueueAsync<T>(T payload);
 
     public Task<TResponse?> DequeueAsync<TResponse, TRequest>();
+
+    public Task<bool> PingAsync();
 }
