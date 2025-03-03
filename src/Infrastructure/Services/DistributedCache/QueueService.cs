@@ -43,4 +43,18 @@ public class QueueService(IRedisCacheService redisCache, IOptions<QueueSettings>
     }
 
     public long Length() => redisCache.Database.ListLength(queueSettings.OriginQueueName);
+
+    public async Task<bool> PingAsync()
+    {
+        try
+        {
+            var result = await redisCache.Database.PingAsync();
+
+            return result.TotalMilliseconds > 0;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
 }

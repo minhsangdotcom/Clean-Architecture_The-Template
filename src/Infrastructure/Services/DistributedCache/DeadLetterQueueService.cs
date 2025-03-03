@@ -33,8 +33,7 @@ public class DeadLetterQueueService(IRedisCacheService redisCache, IOptions<Queu
 
     public async Task<bool> EnqueueAsync<T>(T payload)
     {
-        QueueRequest<T> request = new() { PayloadId = Guid.NewGuid(), Payload = payload };
-        var result = SerializerExtension.Serialize(request);
+        var result = SerializerExtension.Serialize(payload!);
         string queueName = $"{queueSettings.DeadLetterQueueName}:{typeof(T).Name}";
         long length = await redisCache.Database.ListLeftPushAsync(queueName, result.StringJson);
         size = length;
@@ -43,4 +42,18 @@ public class DeadLetterQueueService(IRedisCacheService redisCache, IOptions<Queu
     }
 
     public long Length() => redisCache.Database.ListLength(queueSettings.DeadLetterQueueName);
+
+    public async Task<bool> PingAsync()
+    {
+        try
+        {
+            var result = await redisCache.Database.PingAsync();
+
+            return result.TotalMilliseconds > 0;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
 }

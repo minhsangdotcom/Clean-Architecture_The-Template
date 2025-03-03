@@ -25,32 +25,55 @@ public class QueueBackgroundService(
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            // IQueueService deadLetterQueue = queueFactory.GetQueue(QueueType.DeadLetterQueue);
+
+            // if (!await deadLetterQueue.PingAsync())
+            // {
+            //     logger.Warning("Redis server has shut down");
+            //     continue;
+            // }
+
+            // PayCartPayload? request = await queueFactory
+            //     .GetQueue(QueueType.OriginQueue)
+            //     .DequeueAsync<PayCartPayload, PayCartRequest>();
+
+            // if (request != null)
+            // {
+            //     await ProcessWithRetryAsync<PayCartPayload, PayCartResponse>(
+            //         request,
+            //         sender,
+            //         logger,
+            //         deadLetterQueue,
+            //         stoppingToken
+            //     );
+            // }
+
             await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
         }
     }
 
     private async Task ProcessWithRetryAsync<TRequest, TResponse>(
-        ValueTask<QueueResponse<TResponse>> task,
         TRequest request,
-        ILogger logger,
         ISender sender,
+        ILogger logger,
         IQueueService queueService,
         CancellationToken cancellationToken
     )
         where TRequest : class
         where TResponse : class
     {
-        QueueResponse<TResponse> queueResponse = new();
+        QueueResponse<TResponse>? queueResponse = new();
         int attempt = 0;
         int maximumRetryAttempt = queueSettings.MaxRetryAttempts;
         double maximumDelay = queueSettings.MaximumDelayInSec;
 
-        while (attempt < maximumRetryAttempt)
+        while (attempt <= maximumRetryAttempt)
         {
-            queueResponse = await task;
+            queueResponse =
+                await sender.Send(request, cancellationToken) as QueueResponse<TResponse>;
 
             // sucess case
-            if (queueResponse.IsSuccess)
+            if (queueResponse!.IsSuccess)
             {
                 logger.Information(
                     "excuting request {payloadId} has been success!",
@@ -68,6 +91,7 @@ public class QueueBackgroundService(
                         RequestId = queueResponse.PayloadId!.Value,
                         ErrorDetail = queueResponse.Error,
                         Request = request,
+                        RetryCount = attempt,
                     };
                 await sender.Send(createQueueLogCommand, cancellationToken);
                 break;
@@ -77,6 +101,11 @@ public class QueueBackgroundService(
             if (queueResponse.ErrorType == QueueErrorType.Transient)
             {
                 attempt++;
+                if (attempt > maximumRetryAttempt)
+                {
+                    break;
+                }
+
                 queueResponse.RetryCount = attempt;
 
                 // Calculate delay time with exponential jitter backoff method

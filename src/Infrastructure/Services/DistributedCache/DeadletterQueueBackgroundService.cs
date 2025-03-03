@@ -26,31 +26,49 @@ public class DeadletterQueueBackgroundService(
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            // IQueueService deadLetterQueue = factory.GetQueue(QueueType.DeadLetterQueue);
+
+            // if (!await deadLetterQueue.PingAsync())
+            // {
+            //     logger.Warning("Redis server has shut down");
+            //     continue;
+            // }
+            // var request = await deadLetterQueue.DequeueAsync<PayCartPayload, PayCartPayload>();
+
+            // if (request != null)
+            // {
+            //     await ProcessWithRetryAsync<PayCartPayload, PayCartResponse>(
+            //         request,
+            //         sender,
+            //         logger,
+            //         stoppingToken
+            //     );
+            // }
             await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
         }
     }
 
     private async Task ProcessWithRetryAsync<TRequest, TResponse>(
-        ValueTask<QueueResponse<TResponse>> task,
         TRequest request,
-        ILogger logger,
         ISender sender,
+        ILogger logger,
         CancellationToken cancellationToken
     )
         where TRequest : class
         where TResponse : class
     {
-        QueueResponse<TResponse> queueResponse = new();
+        QueueResponse<TResponse>? queueResponse = new();
         int attempt = 0;
         int maximumRetryAttempt = queueSettings.DeadLetterMaxRetryAttempts;
         double maximumDelay = queueSettings.MaximumDelayInSec;
 
-        while (attempt < maximumRetryAttempt)
+        while (attempt <= maximumRetryAttempt)
         {
-            queueResponse = await task;
+            queueResponse =
+                await sender.Send(request, cancellationToken) as QueueResponse<TResponse>;
 
             // sucess case
-            if (queueResponse.IsSuccess)
+            if (queueResponse!.IsSuccess)
             {
                 logger.Information(
                     "excuting request {payloadId} has been success!",
@@ -74,6 +92,10 @@ public class DeadletterQueueBackgroundService(
             if (queueResponse.ErrorType == QueueErrorType.Transient)
             {
                 attempt++;
+                if (attempt > maximumRetryAttempt)
+                {
+                    break;
+                }
                 queueResponse.RetryCount = attempt;
 
                 // Calculate delay time with exponential jitter backoff method
@@ -83,7 +105,9 @@ public class DeadletterQueueBackgroundService(
                 double delay = Math.Min(backoff + jitter, maximumDelay);
 
                 TimeSpan delayTime = TimeSpan.FromSeconds(delay);
-                logger.Warning($"Retry {attempt} in {delayTime.TotalSeconds:F2} seconds...");
+                logger.Warning(
+                    $"Dead letter queue Retry {attempt} in {delayTime.TotalSeconds:F2} seconds..."
+                );
                 await Task.Delay(delayTime, cancellationToken);
             }
         }
