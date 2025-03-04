@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Api.Converters;
 using Api.Extensions;
 using Application;
@@ -87,6 +88,7 @@ try
         "Application is launching with {environment}",
         app.Environment.EnvironmentName
     );
+    Log.Logger.Information("Application is running on {os}", RuntimeInformation.OSDescription);
     app.Run();
 }
 catch (Exception ex)
