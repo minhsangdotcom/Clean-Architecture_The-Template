@@ -27,8 +27,7 @@ public class RefreshUserTokenHandler(
         CancellationToken cancellationToken
     )
     {
-        DecodeTokenResponse decodeToken = tokenFactory.DecodeToken(command.RefreshToken!);
-
+        DecodeTokenResponse decodeToken = ValidateRefreshToken(command.RefreshToken!);
         UserToken? refresh = await unitOfWork
             .Repository<UserToken>()
             .FindByConditionAsync(
@@ -110,5 +109,26 @@ public class RefreshUserTokenHandler(
         await unitOfWork.SaveAsync(cancellationToken);
 
         return new() { Token = accessToken, RefreshToken = refreshToken };
+    }
+
+    private DecodeTokenResponse ValidateRefreshToken(string token)
+    {
+        try
+        {
+            return tokenFactory.DecodeToken(token);
+        }
+        catch (Exception)
+        {
+            throw new BadRequestException(
+                [
+                    Messager
+                        .Create<UserToken>(nameof(User))
+                        .Property(x => x.RefreshToken!)
+                        .Message(MessageType.Valid)
+                        .Negative()
+                        .BuildMessage(),
+                ]
+            );
+        }
     }
 }

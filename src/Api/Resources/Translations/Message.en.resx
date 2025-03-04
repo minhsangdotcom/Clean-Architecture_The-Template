@@ -285,4 +285,8 @@
     <value>Claims</value>
     <comment>isPlural=true</comment>
   </data>
+  <data name="RefreshToken" xml:space="preserve">
+    <value>Refresh token</value>
+    <comment> </comment>
+  </data>
 </root>

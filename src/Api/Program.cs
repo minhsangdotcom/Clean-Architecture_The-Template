@@ -7,6 +7,8 @@ using Infrastructure;
 using Infrastructure.Data;
 using Infrastructure.Services.Hangfires;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,8 +43,11 @@ try
 {
     Log.Logger.Information("Application is starting....");
     var app = builder.Build();
+
+    string healthCheckPath =
+        configuration.GetSection("HealthCheckPath").Get<string>() ?? "/api/health";
     app.MapHealthChecks(
-        "/api/health",
+        healthCheckPath,
         new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }
     );
 
@@ -72,6 +77,21 @@ try
             x.RoutePrefix = "docs";
             x.ConfigObject.PersistAuthorization = true;
         });
+        app.Lifetime.ApplicationStarted.Register(() =>
+        {
+            var server = app.Services.GetRequiredService<IServer>();
+            var addresses = server.Features.Get<IServerAddressesFeature>()?.Addresses.ToArray();
+
+            if (addresses != null && addresses.Length > 0)
+            {
+                string? url = addresses?[0];
+                Log.Logger.Information("Application is running at: {Url}", url);
+                Log.Logger.Information(
+                    "Application health check is running at: {Url}",
+                    $"{url}{healthCheckPath}"
+                );
+            }
+        });
     }
 
     app.UseAuthentication();
@@ -85,10 +105,10 @@ try
     app.MapControllers();
 
     Log.Logger.Information(
-        "Application is launching with {environment}",
+        "Application is in {environment} environment",
         app.Environment.EnvironmentName
     );
-    Log.Logger.Information("Application is running on {os}", RuntimeInformation.OSDescription);
+    Log.Logger.Information("Application is hosted on {os}", RuntimeInformation.OSDescription);
     app.Run();
 }
 catch (Exception ex)
