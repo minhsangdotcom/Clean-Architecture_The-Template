@@ -30,9 +30,12 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
             return;
         }
 
-        AuthorizeModel? authorizeModel = SerializerExtension
-            .Deserialize<AuthorizeModel>(requirement.Requirement())
-            .Object;
+        string? authorize = requirement.Requirement();
+        AuthorizeModel? authorizeModel = null;
+        if (!string.IsNullOrWhiteSpace(authorize))
+        {
+            authorizeModel = SerializerExtension.Deserialize<AuthorizeModel>(authorize).Object;
+        }
 
         if (
             authorizeModel == null
