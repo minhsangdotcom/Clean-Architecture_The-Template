@@ -1,9 +1,9 @@
+using Api.common.RouteResults;
+using Api.common.Routers;
 using Application.Common.Auth;
 using Application.Features.Users.Queries.List;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
-using Contracts.RouteResults;
-using Contracts.Routers;
 using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;

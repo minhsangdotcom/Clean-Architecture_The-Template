@@ -1,8 +1,8 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Features.Common.Validators.Roles;
-using Contracts.Common.Messages;
 using FluentValidation;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Roles.Commands.Update;
 

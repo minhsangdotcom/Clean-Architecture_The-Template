@@ -1,5 +1,5 @@
 using Ardalis.GuardClauses;
-using CSharpFunctionalExtensions;
+using Ardalis.SharedKernel;
 using Domain.Aggregates.Regions;
 
 namespace Domain.Aggregates.Users.ValueObjects;
@@ -36,7 +36,7 @@ public class Address : ValueObject
         }
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is Address other)
         {

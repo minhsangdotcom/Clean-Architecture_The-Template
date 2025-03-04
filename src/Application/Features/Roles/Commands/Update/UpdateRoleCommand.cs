@@ -1,5 +1,5 @@
 using Application.Features.Common.Projections.Roles;
-using Contracts.Routers;
+using Contracts.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,7 +7,7 @@ namespace Application.Features.Roles.Commands.Update;
 
 public class UpdateRoleCommand : IRequest<UpdateRoleResponse>
 {
-    [FromRoute(Name = Router.Id)]
+    [FromRoute(Name = RoutePath.Id)]
     public string RoleId { get; set; } = string.Empty;
 
     [FromBody]

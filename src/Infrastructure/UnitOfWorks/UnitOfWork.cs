@@ -1,7 +1,6 @@
 using System.Data.Common;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
-using Domain.Common;
 using Infrastructure.Common;
 using Infrastructure.UnitOfWorks.CachedRepositories;
 using Infrastructure.UnitOfWorks.Repositories;
@@ -10,6 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Serilog;
+using SharedKernel.Common;
 
 namespace Infrastructure.UnitOfWorks;
 

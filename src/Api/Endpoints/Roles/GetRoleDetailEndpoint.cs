@@ -1,12 +1,12 @@
+using Api.common.Routers;
 using Application.Common.Auth;
 using Application.Features.Roles.Queries.Detail;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
-using Contracts.Common.Messages;
-using Contracts.Routers;
 using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
+using SharedKernel.Common.Messages;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.Roles;

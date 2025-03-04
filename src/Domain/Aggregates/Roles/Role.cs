@@ -1,5 +1,5 @@
 using Domain.Aggregates.Users;
-using Domain.Common;
+using SharedKernel.Common;
 
 namespace Domain.Aggregates.Roles;
 

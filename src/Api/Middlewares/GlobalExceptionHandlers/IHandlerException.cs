@@ -1,12 +1,9 @@
-using Domain.Exceptions;
-using Microsoft.AspNetCore.Http;
+using SharedKernel.Exceptions;
 
 namespace Api.Middlewares.GlobalExceptionHandlers;
 
 public interface IHandlerException<T> : IHandlerException
-    where T : CustomException
-{
-}
+    where T : CustomException { }
 
 public interface IHandlerException
 {

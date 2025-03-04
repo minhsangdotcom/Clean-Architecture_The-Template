@@ -2,11 +2,11 @@ using System.Text.RegularExpressions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Projections.Users;
-using Contracts.Common.Messages;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Common.Validators.Users;
 
@@ -217,8 +217,8 @@ public partial class UserValidator : AbstractValidator<UserModel>
             .Repository<User>()
             .AnyAsync(
                 x =>
-                    (!id.HasValue && EF.Functions.ILike(x.Email, email))
-                    || (x.Id != id && EF.Functions.ILike(x.Email, email)),
+                    (!id.HasValue && EF.Functions.Like(x.Email, email))
+                    || (x.Id != id && EF.Functions.Like(x.Email, email)),
                 cancellationToken
             );
 

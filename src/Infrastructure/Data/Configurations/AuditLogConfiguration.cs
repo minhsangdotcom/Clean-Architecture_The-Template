@@ -1,6 +1,6 @@
 using Domain.Aggregates.AuditLogs;
-using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch.Analysis;
+using SharedKernel.Common.ElasticConfigurations;
 
 namespace Infrastructure.Data.Configurations;
 

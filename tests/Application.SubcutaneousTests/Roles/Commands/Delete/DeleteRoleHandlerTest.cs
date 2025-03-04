@@ -3,9 +3,9 @@ using Application.Features.Roles.Commands.Delete;
 using Application.Features.Roles.Commands.Update;
 using AutoFixture;
 using Contracts.ApiWrapper;
-using Contracts.Common.Messages;
 using Domain.Aggregates.Roles;
 using FluentAssertions;
+using SharedKernel.Common.Messages;
 
 namespace Application.SubcutaneousTests.Roles.Commands.Delete;
 

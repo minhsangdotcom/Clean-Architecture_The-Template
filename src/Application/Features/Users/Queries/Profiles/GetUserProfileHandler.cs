@@ -1,10 +1,10 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Common.Messages;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Queries.Profiles;
 

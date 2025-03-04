@@ -1,7 +1,10 @@
-using Contracts.Dtos.Requests;
-using Contracts.Dtos.Responses;
+using Application.UseCases.AuditLogs.Queries;
 using Mediator;
+using SharedKernel.Requests;
+using SharedKernel.Responses;
 
-namespace Application.UseCases.AuditLogs.Queries;
+namespace Application.Features.AuditLogs.Queries;
 
-public class ListAuditlogQuery() : QueryParamRequest, IRequest<PaginationResponse<ListAuditlogResponse>>;
+public class ListAuditlogQuery
+    : QueryParamRequest,
+        IRequest<PaginationResponse<ListAuditlogResponse>>;

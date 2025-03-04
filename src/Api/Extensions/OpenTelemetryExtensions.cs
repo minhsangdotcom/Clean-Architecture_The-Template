@@ -1,6 +1,7 @@
 using System.Diagnostics;
+using Api.common.Routers;
 using Api.Settings;
-using Contracts.Routers;
+using Contracts.Constants;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -46,7 +47,7 @@ public static class OpenTelemetryExtensions
                         options.Filter = (context) =>
                             !string.IsNullOrEmpty(context.Request.Path.Value)
                             && context.Request.Path.Value.Contains(
-                                Router.prefix.Replace("/", string.Empty),
+                                RoutePath.prefix.Replace("/", string.Empty),
                                 StringComparison.InvariantCulture
                             );
 

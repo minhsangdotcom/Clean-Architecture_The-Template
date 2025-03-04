@@ -1,10 +1,10 @@
 using System.Reflection;
 using Application.Common.Exceptions;
-using Contracts.Common.Messages;
-using Contracts.Dtos.Requests;
-using Contracts.Extensions;
-using Contracts.Extensions.Reflections;
 using Serilog;
+using SharedKernel.Common.Messages;
+using SharedKernel.Extensions;
+using SharedKernel.Extensions.Reflections;
+using SharedKernel.Requests;
 
 namespace Application.Common.QueryStringProcessing;
 

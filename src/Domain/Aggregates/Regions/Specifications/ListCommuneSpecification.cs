@@ -1,4 +1,4 @@
-using Domain.Common.Specs;
+using SharedKernel.Common.Specs;
 
 namespace Domain.Aggregates.Regions.Specifications;
 

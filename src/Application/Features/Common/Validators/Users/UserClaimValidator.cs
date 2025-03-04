@@ -1,7 +1,7 @@
 using Application.Features.Common.Projections.Users;
-using Contracts.Common.Messages;
 using Domain.Aggregates.Users;
 using FluentValidation;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Common.Validators.Users;
 

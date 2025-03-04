@@ -1,6 +1,6 @@
-using Contracts.Constants;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
+using SharedKernel.Constants;
 
 namespace Infrastructure.Constants;
 

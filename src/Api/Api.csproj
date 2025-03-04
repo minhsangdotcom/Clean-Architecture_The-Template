@@ -3,7 +3,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
-    <ProjectReference Include="..\Contracts\Contracts.csproj" />
     <None Include="..\Infrastructure\Data\Seeds\Provinces.json">
       <Link>Data\Seeds\Provinces.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

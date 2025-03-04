@@ -1,6 +1,4 @@
 namespace Application.Common.Security;
 
 [AttributeUsage(AttributeTargets.Property)]
-public class FileAttribute : Attribute
-{
-}
+public class FileAttribute : Attribute { }

@@ -1,9 +1,9 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
-using Contracts.Constants;
-using Contracts.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using SharedKernel.Constants;
+using SharedKernel.Extensions;
 
 namespace Application.Common.Auth;
 

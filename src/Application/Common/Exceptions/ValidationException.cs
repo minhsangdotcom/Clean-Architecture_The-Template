@@ -1,8 +1,8 @@
 using Contracts.ApiWrapper;
-using Contracts.Common.Messages;
-using Domain.Exceptions;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
+using SharedKernel.Common.Messages;
+using SharedKernel.Exceptions;
 
 namespace Application.Common.Exceptions;
 

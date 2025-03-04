@@ -1,10 +1,10 @@
 using System.Reflection;
 using CaseConverter;
-using Contracts.Dtos.Models;
-using Contracts.Extensions.Reflections;
-using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
+using SharedKernel.Common.ElasticConfigurations;
+using SharedKernel.Extensions.Reflections;
+using SharedKernel.Models;
 
 namespace Infrastructure.Services.Elastics;
 
@@ -112,15 +112,17 @@ public static class ElasticFunctionalityHelper
 
         //* search nested properties
         //todo: [{"A" ,["A.A1","A.A2"]}, {"A.B", ["A.B.B1","A.B.B2"]}]
-        List<KeyValuePair<string, string>> nestedProperties = stringProperties
-            .Except(properties)
-            .Select(x =>
-            {
-                string value = x.Value;
-                int lastDot = value.LastIndexOf('.');
-                return new KeyValuePair<string, string>(value[..lastDot], value);
-            })
-            .ToList();
+        List<KeyValuePair<string, string>> nestedProperties =
+        [
+            .. stringProperties
+                .Except(properties)
+                .Select(x =>
+                {
+                    string value = x.Value;
+                    int lastDot = value.LastIndexOf('.');
+                    return new KeyValuePair<string, string>(value[..lastDot], value);
+                }),
+        ];
 
         // * group and sort with the deeper and deeper of nesting
         var nestedsearch = nestedProperties
@@ -195,15 +197,17 @@ public static class ElasticFunctionalityHelper
 
         //* search nested properties
         //todo: [{"A" ,["A.A1","A.A2"]}, {"A.B", ["A.B.B1","A.B.B2"]}]
-        List<KeyValuePair<string, string>> nestedProperties = stringProperties
-            .Except(properties)
-            .Select(x =>
-            {
-                string value = x.Value;
-                int lastDot = value.LastIndexOf('.');
-                return new KeyValuePair<string, string>(value[..lastDot], value);
-            })
-            .ToList();
+        List<KeyValuePair<string, string>> nestedProperties =
+        [
+            .. stringProperties
+                .Except(properties)
+                .Select(x =>
+                {
+                    string value = x.Value;
+                    int lastDot = value.LastIndexOf('.');
+                    return new KeyValuePair<string, string>(value[..lastDot], value);
+                }),
+        ];
 
         // * group and sort with the deeper and deeper of nesting
         var nestedsearch = nestedProperties
@@ -262,23 +266,26 @@ public static class ElasticFunctionalityHelper
 
         IEnumerable<PropertyInfo> properties = type.GetProperties();
 
-        List<KeyValuePair<PropertyType, string>> stringProperties = properties
-            .Where(x => x.PropertyType == typeof(string))
-            .Select(x =>
-            {
-                string propertyName = x.Name.ToCamelCase();
-                return new KeyValuePair<PropertyType, string>(
-                    propertyType ?? PropertyType.Property,
-                    parrentName != null ? $"{parrentName}.{propertyName}" : propertyName
-                );
-            })
-            .ToList();
+        List<KeyValuePair<PropertyType, string>> stringProperties =
+        [
+            .. properties
+                .Where(x => x.PropertyType == typeof(string))
+                .Select(x =>
+                {
+                    string propertyName = x.Name.ToCamelCase();
+                    return new KeyValuePair<PropertyType, string>(
+                        propertyType ?? PropertyType.Property,
+                        parrentName != null ? $"{parrentName}.{propertyName}" : propertyName
+                    );
+                }),
+        ];
 
-        List<PropertyInfo> collectionObjectProperties = properties
-            .Where(x =>
+        List<PropertyInfo> collectionObjectProperties =
+        [
+            .. properties.Where(x =>
                 (x.IsUserDefineType() || x.IsArrayGenericType()) && x.PropertyType != typeof(string)
-            )
-            .ToList();
+            ),
+        ];
 
         foreach (var propertyInfo in collectionObjectProperties)
         {
@@ -349,8 +356,8 @@ public static class ElasticFunctionalityHelper
 
     private static List<SortItemResult> GetSortItems<T>(string[] sortItems)
         where T : class =>
-        sortItems
-            .Select(sortItem =>
+        [
+            .. sortItems.Select(sortItem =>
             {
                 string[] items = sortItem.Split(OrderTerm.DELIMITER);
                 string propertyName = items[0];
@@ -362,8 +369,8 @@ public static class ElasticFunctionalityHelper
                 }
 
                 return new SortItemResult(propertyName, propertyInfo, items[1].Trim());
-            })
-            .ToList();
+            }),
+        ];
 
     internal record SortItemResult(string PropertyName, PropertyInfo PropertyInfo, string Order);
 }
