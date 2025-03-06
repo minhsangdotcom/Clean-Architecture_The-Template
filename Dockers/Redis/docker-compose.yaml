@@ -7,7 +7,7 @@ services:
     ports:
       - "6379:6379"  # Map Redis default port to host
     networks:
-      - the-teplate-network
+      - the-template-network
     volumes:
       - redis_data:/data  # Persist Redis data using a named volume
     environment:
@@ -20,5 +20,5 @@ volumes:
     driver: local  # Use local storage for the Redis data volume
 
 networks: 
-  the-teplate-network:
+  the-template-network:
     external: true

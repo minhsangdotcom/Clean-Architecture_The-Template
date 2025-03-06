@@ -259,7 +259,7 @@ _It depends on Application and Domain layer_
 
 _It depends on Application and Infrastructure layer_
 
-**_Contract_** : Contains shared components across all layers
+**_Contract_** : Contains shared components for Application, Infrastructure and API layer.
 
 # Getting started
 

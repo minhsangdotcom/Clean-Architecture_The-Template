@@ -2,15 +2,16 @@ version: "3"
 
 services:
   collector:
-      image: otel/opentelemetry-collector-contrib:latest
+      image: otel/opentelemetry-collector:latest
       command: ["--config=/etc/otel-collector-config.yaml"]
       volumes:
         - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
       networks:
-        - the-teplate-network
+        - the-template-network
       ports:
         - "4317:4317"     # OTLP over gRPC receiver
         - "4318:4318"     # OTLP over HTTP receiver
+        - "13133:13133" # health_check extension
       depends_on:
         - jaeger
 
@@ -24,8 +25,8 @@ services:
       - "14268:14268"   # Jaeger collector HTTP port
       - "14250:14250"   # gRPC for Jaeger
     networks:
-      - the-teplate-network
+      - the-template-network
 
 networks: 
-  the-teplate-network:
+  the-template-network:
     external: true
