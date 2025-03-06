@@ -3,14 +3,14 @@ using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Common.Messages;
-using Contracts.Constants;
-using Contracts.Dtos.Models;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
+using SharedKernel.Common.Messages;
+using SharedKernel.Constants;
+using SharedKernel.Models;
 using Wangkanai.Detection.Services;
 
 namespace Application.Features.Users.Commands.Token;
@@ -27,8 +27,7 @@ public class RefreshUserTokenHandler(
         CancellationToken cancellationToken
     )
     {
-        DecodeTokenResponse decodeToken = tokenFactory.DecodeToken(command.RefreshToken!);
-
+        DecodeTokenResponse decodeToken = ValidateRefreshToken(command.RefreshToken!);
         UserToken? refresh = await unitOfWork
             .Repository<UserToken>()
             .FindByConditionAsync(
@@ -110,5 +109,26 @@ public class RefreshUserTokenHandler(
         await unitOfWork.SaveAsync(cancellationToken);
 
         return new() { Token = accessToken, RefreshToken = refreshToken };
+    }
+
+    private DecodeTokenResponse ValidateRefreshToken(string token)
+    {
+        try
+        {
+            return tokenFactory.DecodeToken(token);
+        }
+        catch (Exception)
+        {
+            throw new BadRequestException(
+                [
+                    Messager
+                        .Create<UserToken>(nameof(User))
+                        .Property(x => x.RefreshToken!)
+                        .Message(MessageType.Valid)
+                        .Negative()
+                        .BuildMessage(),
+                ]
+            );
+        }
     }
 }

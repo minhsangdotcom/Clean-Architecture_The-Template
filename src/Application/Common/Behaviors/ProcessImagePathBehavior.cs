@@ -2,9 +2,9 @@ using System.Collections;
 using System.Reflection;
 using Application.Common.Interfaces.Services.Aws;
 using Application.Common.Security;
-using Contracts.Dtos.Responses;
 using Mediator;
 using Serilog;
+using SharedKernel.Responses;
 
 namespace Application.Common.Behaviors;
 

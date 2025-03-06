@@ -6,7 +6,7 @@ services:
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
     networks:
-      - the-teplate-network
+      - the-template-network
     user: "0"
     command: >
       bash -c '
@@ -63,7 +63,7 @@ services:
     ports:
       - ${ES_PORT}:9200
     networks:
-      - the-teplate-network
+      - the-template-network
     environment:
       - node.name=es01
       - cluster.name=${CLUSTER_NAME}
@@ -195,7 +195,7 @@ services:
     ports:
       - ${KIBANA_PORT}:5601
     networks:
-      - the-teplate-network
+      - the-template-network
     environment:
       - SERVERNAME=kibana
       - ELASTICSEARCH_HOSTS=https://es01:9200
@@ -226,5 +226,5 @@ volumes:
     driver: local
 
 networks: 
-  the-teplate-network:
+  the-template-network:
     external: true

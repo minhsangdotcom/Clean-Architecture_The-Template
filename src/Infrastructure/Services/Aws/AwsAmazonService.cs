@@ -3,8 +3,8 @@ using Amazon.S3.Model;
 using Application.Common.Interfaces.Services.Aws;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
-using Contracts.Extensions;
 using Microsoft.Extensions.Options;
+using SharedKernel.Extensions;
 
 namespace Infrastructure.Services.Aws;
 

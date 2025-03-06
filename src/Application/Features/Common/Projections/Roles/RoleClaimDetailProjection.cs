@@ -1,4 +1,4 @@
-using Contracts.Dtos.Models;
+using SharedKernel.Models;
 
 namespace Application.Features.Common.Projections.Roles;
 

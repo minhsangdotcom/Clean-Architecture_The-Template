@@ -1,7 +1,7 @@
+using Api.common.RouteResults;
+using Api.common.Routers;
 using Application.Features.Users.Commands.ResetPassword;
 using Ardalis.ApiEndpoints;
-using Contracts.RouteResults;
-using Contracts.Routers;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;

@@ -1,25 +1,23 @@
 services:
-  webapi: &webapi_defaults
+  webapi:
     image: ghcr.io/${GITHUB_USER_NAME}/${IMAGE_NAME}:latest
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
     expose:
       - "8080"
     networks:
-      - the-teplate-network
+      - the-template-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-  
-  webapi1:
-    <<: *webapi_defaults  # Reuse defaults
-    container_name: the_template1
-
-  webapi2:
-    <<: *webapi_defaults  # Reuse defaults
-    container_name: the_template2
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
 
   nginx:
     image: nginx:latest
@@ -30,11 +28,10 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./logs:/var/log/nginx
     depends_on:
-      - webapi1
-      - webapi2
+      - webapi
     networks:
-      - the-teplate-network
+      - the-template-network
 
-networks: 
-  the-teplate-network:
+networks:
+  the-template-network:
     external: true

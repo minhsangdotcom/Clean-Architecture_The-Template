@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using Contracts.Constants;
+using SharedKernel.Constants;
 
 namespace Contracts.Dtos.Responses;
 

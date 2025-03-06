@@ -1,7 +1,7 @@
 using Application.Common.Interfaces.Services.Identity;
-using Contracts.Constants;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
+using SharedKernel.Constants;
 
 namespace Application.Features.Permissions;
 

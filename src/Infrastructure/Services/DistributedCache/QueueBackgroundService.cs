@@ -1,54 +1,79 @@
 using Application.Common.Interfaces.Services.DistributedCache;
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Features.QueueLogs;
 using Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Infrastructure.Services.DistributedCache;
 
-public class QueueBackgroundService(IServiceProvider serviceProvider) : BackgroundService
+public class QueueBackgroundService(
+    IQueueFactory queueFactory,
+    IServiceProvider serviceProvider,
+    IOptions<QueueSettings> options
+) : BackgroundService
 {
-    protected const int MAXIMUM_RETRY = 10;
-    private const int INITIAL_RETRY_TIME_IN_SEC = 3;
-    private const int MAX_RETRY_INCREMENT_SEC = 1;
+    private readonly QueueSettings queueSettings = options.Value;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using IServiceScope scope = serviceProvider.CreateScope();
         ISender sender = scope.ServiceProvider.GetRequiredService<ISender>();
         ILogger logger = scope.ServiceProvider.GetRequiredService<ILogger>();
-        IUnitOfWork unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
         while (!stoppingToken.IsCancellationRequested)
         {
-            // PayCartPayload? request = await queueService.DequeueAsync<PayCartPayload>();
+            // IQueueService deadLetterQueue = queueFactory.GetQueue(QueueType.DeadLetterQueue);
+
+            // if (!await deadLetterQueue.PingAsync())
+            // {
+            //     logger.Warning("Redis server has shut down");
+            //     continue;
+            // }
+
+            // PayCartPayload? request = await queueFactory
+            //     .GetQueue(QueueType.OriginQueue)
+            //     .DequeueAsync<PayCartPayload, PayCartRequest>();
+
             // if (request != null)
             // {
-            //     await Process(sender.Send(request, stoppingToken), logger, unitOfWork);
+            //     await ProcessWithRetryAsync<PayCartPayload, PayCartResponse>(
+            //         request,
+            //         sender,
+            //         logger,
+            //         deadLetterQueue,
+            //         stoppingToken
+            //     );
             // }
 
             await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
         }
     }
 
-    private static async Task Process<T>(
-        ValueTask<QueueResponse<T>> task,
+    private async Task ProcessWithRetryAsync<TRequest, TResponse>(
+        TRequest request,
+        ISender sender,
         ILogger logger,
-        IUnitOfWork unitOfWork
+        IQueueService queueService,
+        CancellationToken cancellationToken
     )
-        where T : class
+        where TRequest : class
+        where TResponse : class
     {
-        QueueResponse<T> queueResponse = new();
-        int retry = 0;
-        int retryDelay = INITIAL_RETRY_TIME_IN_SEC;
+        QueueResponse<TResponse>? queueResponse = new();
+        int attempt = 0;
+        int maximumRetryAttempt = queueSettings.MaxRetryAttempts;
+        double maximumDelay = queueSettings.MaximumDelayInSec;
 
-        while (retry < MAXIMUM_RETRY)
+        while (attempt <= maximumRetryAttempt)
         {
-            queueResponse = await task;
+            queueResponse =
+                await sender.Send(request, cancellationToken) as QueueResponse<TResponse>;
 
             // sucess case
-            if (queueResponse.IsSuccess)
+            if (queueResponse!.IsSuccess)
             {
                 logger.Information(
                     "excuting request {payloadId} has been success!",
@@ -60,42 +85,64 @@ public class QueueBackgroundService(IServiceProvider serviceProvider) : Backgrou
             // 500 or 400 error
             if (queueResponse.ErrorType == QueueErrorType.Persistent)
             {
-                await PushToDeadLetterQueue(queueResponse, logger, unitOfWork);
+                CreateQueueLogCommand createQueueLogCommand =
+                    new()
+                    {
+                        RequestId = queueResponse.PayloadId!.Value,
+                        ErrorDetail = queueResponse.Error,
+                        Request = request,
+                        RetryCount = attempt,
+                    };
+                await sender.Send(createQueueLogCommand, cancellationToken);
                 break;
             }
 
             // transient error retry but
             if (queueResponse.ErrorType == QueueErrorType.Transient)
             {
-                retry++;
-                queueResponse.RetryCount = retry;
-                await Task.Delay(TimeSpan.FromSeconds(retryDelay));
-                retryDelay += MAX_RETRY_INCREMENT_SEC;
+                attempt++;
+                if (attempt > maximumRetryAttempt)
+                {
+                    break;
+                }
+
+                queueResponse.RetryCount = attempt;
+
+                // Calculate delay time with exponential jitter backoff method
+                // 1st -> 2.1s; 2nd -> 4.2; 3rd -> 8.2; 4th -> 16.1
+                double backoff = Math.Pow(QueueExtention.INIT_DELAY, attempt); // Exponential backoff (2^attempt)
+                double jitter = QueueExtention.GenerateJitter(0, QueueExtention.MAXIMUM_JITTER); // Add jitter
+                double delay = Math.Min(backoff + jitter, maximumDelay);
+
+                TimeSpan delayTime = TimeSpan.FromSeconds(delay);
+                logger.Warning($"Retry {attempt} in {delayTime.TotalSeconds:F2} seconds...");
+                await Task.Delay(delayTime, cancellationToken);
             }
         }
 
         if (!queueResponse.IsSuccess && queueResponse.ErrorType == QueueErrorType.Transient)
         {
-            //logging into db
-            await PushToDeadLetterQueue(queueResponse, logger, unitOfWork);
+            // if it still fail after many attempts then push it into dead letter queue
+            logger.Warning(
+                "Push request {payloadId} into dead letter queue for maximum attempts",
+                queueResponse.PayloadId
+            );
+            await queueService.EnqueueAsync(request);
+            await sender.Send(
+                new CreateQueueLogCommand()
+                {
+                    RequestId = queueResponse.PayloadId!.Value,
+                    ErrorDetail = new
+                    {
+                        queueResponse.ErrorType,
+                        queueResponse.Error,
+                        Message = $"Push request {queueResponse.PayloadId} into dead letter queue for maximum attempts",
+                    },
+                    Request = request,
+                    RetryCount = queueResponse.RetryCount,
+                },
+                cancellationToken
+            );
         }
-    }
-
-    private static async Task PushToDeadLetterQueue<T>(
-        QueueResponse<T> response,
-        ILogger logger,
-        IUnitOfWork unitOfWork
-    )
-        where T : class
-    {
-        logger.Information("Pushing request {payloadId} to dead letter queue.", response.PayloadId);
-        var deadLetterQueue = new DeadLetterQueue()
-        {
-            RequestId = response.PayloadId!.Value,
-            ErrorDetail = response.Error,
-            RetryCount = response.RetryCount,
-        };
-        await unitOfWork.Repository<DeadLetterQueue>().AddAsync(deadLetterQueue);
-        await unitOfWork.SaveAsync();
     }
 }

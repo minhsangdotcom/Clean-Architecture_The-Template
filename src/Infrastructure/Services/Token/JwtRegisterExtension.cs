@@ -1,10 +1,10 @@
 using System.Text;
 using Application.Common.Exceptions;
-using Contracts.Common.Messages;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using SharedKernel.Common.Messages;
 
 namespace Infrastructure.Services.Token;
 

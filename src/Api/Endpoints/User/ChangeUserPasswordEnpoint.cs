@@ -1,8 +1,8 @@
+using Api.common.RouteResults;
+using Api.common.Routers;
 using Application.Common.Auth;
 using Application.Features.Users.Commands.ChangePassword;
 using Ardalis.ApiEndpoints;
-using Contracts.RouteResults;
-using Contracts.Routers;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;

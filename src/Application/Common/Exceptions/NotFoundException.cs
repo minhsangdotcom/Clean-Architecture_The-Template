@@ -1,5 +1,5 @@
-using Contracts.Common.Messages;
 using Microsoft.AspNetCore.Http;
+using SharedKernel.Common.Messages;
 
 namespace Application.Common.Exceptions;
 

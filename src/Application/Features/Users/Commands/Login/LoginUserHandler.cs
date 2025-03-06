@@ -5,13 +5,13 @@ using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Projections.Users;
 using AutoMapper;
-using Contracts.Common.Messages;
-using Contracts.Constants;
-using Contracts.Extensions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using SharedKernel.Common.Messages;
+using SharedKernel.Constants;
+using SharedKernel.Extensions;
 using Wangkanai.Detection.Services;
 
 namespace Application.Features.Users.Commands.Login;

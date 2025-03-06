@@ -1,8 +1,8 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
-using Contracts.Common.Messages;
 using Domain.Aggregates.Roles;
 using Mediator;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Roles.Commands.Delete;
 

@@ -1,9 +1,9 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Validators.Users;
-using Contracts.Common.Messages;
 using Domain.Aggregates.Users;
 using FluentValidation;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.Update;
 

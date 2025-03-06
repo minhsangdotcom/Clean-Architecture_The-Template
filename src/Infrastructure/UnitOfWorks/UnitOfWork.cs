@@ -1,18 +1,25 @@
 using System.Data.Common;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
-using Domain.Common;
+using Infrastructure.Common;
 using Infrastructure.UnitOfWorks.CachedRepositories;
 using Infrastructure.UnitOfWorks.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Serilog;
+using SharedKernel.Common;
 
 namespace Infrastructure.UnitOfWorks;
 
-public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache, ILogger logger)
-    : IUnitOfWork
+public class UnitOfWork(
+    IMapper mapper,
+    IDbContext dbContext,
+    IMemoryCache cache,
+    ILogger logger,
+    IOptions<CacheSettings> options
+) : IUnitOfWork
 {
     public DbTransaction? CurrentTransaction { get; set; }
 
@@ -57,7 +64,7 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
             // proxy design pattern
             object? cachedRepositoryInstance = Activator.CreateInstance(
                 cachedRepositoryType.MakeGenericType(typeof(TEntity)),
-                [repositoryInstance, cache, logger]
+                [repositoryInstance, cache, logger, options]
             );
             value = cachedRepositoryInstance;
             repositories.Add(type, value);

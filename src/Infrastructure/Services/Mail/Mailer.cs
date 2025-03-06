@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Services.Mail;
+using Contracts.Dtos.Requests;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 

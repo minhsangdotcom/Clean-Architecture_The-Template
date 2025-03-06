@@ -2,9 +2,9 @@ using System.Reflection;
 using Domain.Aggregates.AuditLogs;
 using Domain.Aggregates.AuditLogs.Enums;
 using Domain.Aggregates.Users.Enums;
-using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch;
 using Serilog;
+using SharedKernel.Common.ElasticConfigurations;
 
 namespace Infrastructure.Services.Elastics;
 

@@ -1,9 +1,10 @@
+using Api.common.RouteResults;
+using Api.common.Routers;
 using Application.Common.Auth;
 using Application.Features.Roles.Commands.Delete;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
-using Contracts.RouteResults;
-using Contracts.Routers;
+using Contracts.Constants;
 using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +19,7 @@ public class DeleteRoleEndpoint(ISender sender)
     [SwaggerOperation(Tags = [Router.RoleRoute.Tags], Summary = "Delete Role")]
     [AuthorizeBy(permissions: $"{ActionPermission.delete}:{ObjectPermission.role}")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
-        [FromRoute(Name = Router.Id)] string roleId,
+        [FromRoute(Name = RoutePath.Id)] string roleId,
         CancellationToken cancellationToken = default
     )
     {

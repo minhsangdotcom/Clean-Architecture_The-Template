@@ -23,7 +23,7 @@ namespace Infrastructure.Data.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "citext");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Application.Common.Interfaces.Services.DistributedCache.DeadLetterQueue", b =>
+            modelBuilder.Entity("Domain.Aggregates.QueueLogs.QueueLog", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("character varying(26)")
@@ -42,6 +42,14 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("error_detail");
 
+                    b.Property<int>("ProcessedBy")
+                        .HasColumnType("integer")
+                        .HasColumnName("processed_by");
+
+                    b.Property<object>("Request")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("request");
+
                     b.Property<Guid>("RequestId")
                         .HasColumnType("uuid")
                         .HasColumnName("request_id");
@@ -59,9 +67,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnName("updated_by");
 
                     b.HasKey("Id")
-                        .HasName("pk_dead_letter_queue");
+                        .HasName("pk_queue_log");
 
-                    b.ToTable("dead_letter_queue", (string)null);
+                    b.ToTable("queue_log", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Regions.Commune", b =>
@@ -412,9 +420,6 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasDatabaseName("ix_user_email");
-
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_user_id");
 
                     b.HasIndex("Username")
                         .IsUnique()

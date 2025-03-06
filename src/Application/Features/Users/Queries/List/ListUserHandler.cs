@@ -1,9 +1,9 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.QueryStringProcessing;
-using Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
+using SharedKernel.Responses;
 
 namespace Application.Features.Users.Queries.List;
 

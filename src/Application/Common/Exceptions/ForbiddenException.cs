@@ -1,5 +1,5 @@
-using Domain.Exceptions;
 using Microsoft.AspNetCore.Http;
+using SharedKernel.Exceptions;
 
 namespace Application.Common.Exceptions;
 

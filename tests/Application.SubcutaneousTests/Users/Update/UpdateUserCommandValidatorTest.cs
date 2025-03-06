@@ -1,6 +1,5 @@
 using System.Net;
 using Application.Common.Exceptions;
-using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Update;
 using Application.SubcutaneousTests.Extensions;
 using AutoFixture;

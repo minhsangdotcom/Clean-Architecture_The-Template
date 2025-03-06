@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
+using Infrastructure.Common;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Services;
@@ -112,6 +113,9 @@ public static class DependencyInjection
             .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
             .AddJwtAuth(configuration)
             .AddMemoryCache()
+            .Configure<CacheSettings>(options =>
+                configuration.GetSection(nameof(CacheSettings)).Bind(options)
+            )
             .AddRedis(configuration)
             .AddHangfireConfiguration(configuration)
             .AddElasticSearch(configuration);

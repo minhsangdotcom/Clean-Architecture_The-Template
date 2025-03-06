@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
-using Contracts.Dtos.Requests;
-using Contracts.Dtos.Responses;
-using Domain.Common.Specs.Interfaces;
+using SharedKernel.Common.Specs.Interfaces;
+using SharedKernel.Requests;
+using SharedKernel.Responses;
 
 namespace Application.Common.Interfaces.UnitOfWorks;
 

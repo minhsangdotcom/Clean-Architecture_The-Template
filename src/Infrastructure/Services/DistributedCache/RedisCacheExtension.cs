@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.Services.DistributedCache;
-using Contracts.Extensions;
+using SharedKernel.Extensions;
 using StackExchange.Redis;
 
 namespace Infrastructure.Services.DistributedCache;

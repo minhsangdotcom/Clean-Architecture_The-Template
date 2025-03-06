@@ -1,12 +1,12 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Ardalis.GuardClauses;
-using Contracts.Constants;
-using Contracts.Extensions.Reflections;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Events;
 using Domain.Aggregates.Users.ValueObjects;
-using Domain.Common;
 using Mediator;
+using SharedKernel.Common;
+using SharedKernel.Constants;
+using SharedKernel.Extensions.Reflections;
 
 namespace Domain.Aggregates.Users;
 
