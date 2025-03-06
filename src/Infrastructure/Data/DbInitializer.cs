@@ -1,7 +1,6 @@
 using System.Data.Common;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Constants;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
@@ -11,6 +10,7 @@ using Infrastructure.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using SharedKernel.Constants;
 
 namespace Infrastructure.Data;
 

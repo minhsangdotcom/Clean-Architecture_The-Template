@@ -1,8 +1,7 @@
 using Application.Common.Interfaces.Services.DistributedCache;
-using Contracts.Dtos.Requests;
-using Contracts.Extensions;
 using Microsoft.Extensions.Options;
 using NRedisStack;
+using SharedKernel.Extensions;
 using StackExchange.Redis;
 
 namespace Infrastructure.Services.DistributedCache;

@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     networks:
-      - the-teplate-network
+      - the-template-network
     volumes:
       - ./db_data:/var/lib/postgresql/data/
   
@@ -24,10 +24,10 @@ services:
     depends_on:
       - database
     networks:
-      - the-teplate-network
+      - the-template-network
     volumes:
       - ./pgadmin_data:/var/lib/pgadmin/
 
 networks: 
-  the-teplate-network:
+  the-template-network:
     external: true

@@ -6,6 +6,7 @@ using Application.SubcutaneousTests.Extensions;
 using Contracts.Constants;
 using Domain.Aggregates.Roles;
 using Microsoft.Extensions.DependencyInjection;
+using SharedKernel.Constants;
 
 namespace Application.SubcutaneousTests;
 

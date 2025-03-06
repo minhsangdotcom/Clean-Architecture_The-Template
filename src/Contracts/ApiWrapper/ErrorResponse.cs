@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Contracts.Extensions;
 using Microsoft.AspNetCore.Http;
+using SharedKernel.Extensions;
 
 namespace Contracts.ApiWrapper;
 

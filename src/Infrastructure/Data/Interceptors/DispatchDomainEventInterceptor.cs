@@ -3,6 +3,7 @@ using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using SharedKernel.Common;
 
 namespace Infrastructure.Data.Interceptors;
 

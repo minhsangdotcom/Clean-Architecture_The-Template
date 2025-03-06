@@ -1,7 +1,7 @@
 using Application.Features.Common.Projections.Roles;
-using Contracts.Common.Messages;
 using Domain.Aggregates.Roles;
 using FluentValidation;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Common.Validators.Roles;
 

@@ -1,9 +1,10 @@
 using Application.Common.Interfaces.Services.Elastics;
-using Contracts.Dtos.Responses;
+using Application.UseCases.AuditLogs.Queries;
 using Domain.Aggregates.AuditLogs;
 using Mediator;
+using SharedKernel.Responses;
 
-namespace Application.UseCases.AuditLogs.Queries;
+namespace Application.Features.AuditLogs.Queries;
 
 public class ListAuditlogHandler(IElasticsearchServiceFactory? elasticsearch = null)
     : IRequestHandler<ListAuditlogQuery, PaginationResponse<ListAuditlogResponse>>

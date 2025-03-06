@@ -1,5 +1,5 @@
-using Contracts.Dtos.Requests;
 using Mediator;
+using SharedKernel.Requests;
 
 namespace Application.Features.Roles.Queries.List;
 

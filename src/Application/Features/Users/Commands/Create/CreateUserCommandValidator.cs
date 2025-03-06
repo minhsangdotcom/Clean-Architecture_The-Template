@@ -3,10 +3,10 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Validators.Users;
-using Contracts.Common.Messages;
 using Domain.Aggregates.Users;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.Create;
 
@@ -189,8 +189,8 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             .Repository<User>()
             .AnyAsync(
                 x =>
-                    (!id.HasValue && EF.Functions.ILike(x.Username, username))
-                    || (x.Id != id && EF.Functions.ILike(x.Username, username)),
+                    (!id.HasValue && EF.Functions.Like(x.Username, username))
+                    || (x.Id != id && EF.Functions.Like(x.Username, username)),
                 cancellationToken
             );
     }

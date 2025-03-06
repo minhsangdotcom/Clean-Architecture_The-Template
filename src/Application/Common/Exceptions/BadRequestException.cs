@@ -1,7 +1,7 @@
 using Contracts.ApiWrapper;
-using Contracts.Common.Messages;
-using Domain.Exceptions;
 using Microsoft.AspNetCore.Http;
+using SharedKernel.Common.Messages;
+using SharedKernel.Exceptions;
 
 namespace Application.Common.Exceptions;
 

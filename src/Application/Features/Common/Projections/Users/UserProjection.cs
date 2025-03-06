@@ -1,7 +1,7 @@
 using Application.Common.Security;
 using Application.Features.Common.Projections.Regions;
-using Contracts.Dtos.Models;
 using Domain.Aggregates.Users.Enums;
+using SharedKernel.Models;
 
 namespace Application.Features.Common.Projections.Users;
 

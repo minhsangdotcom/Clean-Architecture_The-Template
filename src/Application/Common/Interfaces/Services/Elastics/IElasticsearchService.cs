@@ -1,7 +1,7 @@
-using Contracts.Dtos.Requests;
-using Contracts.Dtos.Responses;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
+using SharedKernel.Requests;
+using SharedKernel.Responses;
 
 namespace Application.Common.Interfaces.Services.Elastics;
 

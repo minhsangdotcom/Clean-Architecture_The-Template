@@ -6,10 +6,10 @@ using Application.Features.Roles.Commands.Update;
 using AutoFixture;
 using AutoMapper;
 using Contracts.ApiWrapper;
-using Contracts.Common.Messages;
 using Domain.Aggregates.Roles;
 using FluentAssertions;
 using Moq;
+using SharedKernel.Common.Messages;
 
 namespace Application.UnitTest.Roles.Commands.Update;
 

@@ -3,12 +3,12 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
-using Contracts.Common.Messages;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.AspNetCore.Http;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.Profiles;
 

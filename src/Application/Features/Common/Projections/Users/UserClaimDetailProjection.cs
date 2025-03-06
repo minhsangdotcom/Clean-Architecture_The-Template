@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
-using Contracts.Dtos.Models;
 using Domain.Aggregates.Users.Enums;
+using SharedKernel.Models;
 
 namespace Application.Features.Common.Projections.Users;
 

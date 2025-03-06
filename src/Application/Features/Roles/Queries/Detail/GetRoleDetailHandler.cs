@@ -1,9 +1,9 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
 using AutoMapper;
-using Contracts.Common.Messages;
 using Domain.Aggregates.Roles;
 using Mediator;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Roles.Queries.Detail;
 

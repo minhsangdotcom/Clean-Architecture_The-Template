@@ -285,4 +285,8 @@
     <value>Các thông tin xác nhận</value>
     <comment>  </comment>
   </data>
+  <data name="RefreshToken" xml:space="preserve">
+    <value>Mã làm mới</value>
+    <comment> </comment>
+  </data>
 </root>

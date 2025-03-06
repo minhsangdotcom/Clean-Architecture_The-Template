@@ -1,8 +1,8 @@
-using Application.UseCases.AuditLogs.Queries;
+using Api.common.RouteResults;
+using Api.common.Routers;
+using Application.Features.AuditLogs.Queries;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
-using Contracts.RouteResults;
-using Contracts.Routers;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;

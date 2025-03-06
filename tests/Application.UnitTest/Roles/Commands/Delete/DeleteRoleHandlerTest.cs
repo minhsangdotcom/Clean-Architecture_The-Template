@@ -3,11 +3,11 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Features.Roles.Commands.Delete;
 using AutoFixture;
 using Contracts.ApiWrapper;
-using Contracts.Common.Messages;
 using Domain.Aggregates.Roles;
 using FluentAssertions;
 using Mediator;
 using Moq;
+using SharedKernel.Common.Messages;
 
 namespace Application.UnitTest.Roles.Commands.Delete;
 

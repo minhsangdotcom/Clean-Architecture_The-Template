@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.Services;
-using Contracts.Routers;
+using Contracts.Constants;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace Infrastructure.Services;
@@ -7,7 +7,7 @@ namespace Infrastructure.Services;
 public class ActionAccessorService(IActionContextAccessor actionContextAccessor)
     : IActionAccessorService
 {
-    public string? Id => GetRouteData(Router.Id);
+    public string? Id => GetRouteData(RoutePath.Id);
 
     public string? GetAction() =>
         actionContextAccessor.ActionContext?.ActionDescriptor?.RouteValues["action"];

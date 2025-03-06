@@ -1,14 +1,14 @@
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Common.Messages;
 using Contracts.Dtos.Models;
 using Contracts.Dtos.Requests;
-using Contracts.Extensions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.Extensions.Configuration;
+using SharedKernel.Common.Messages;
+using SharedKernel.Extensions;
 
 namespace Application.Features.Users.Commands.RequestResetPassword;
 

@@ -1,9 +1,9 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
-using Contracts.Constants;
-using Contracts.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using SharedKernel.Constants;
+using SharedKernel.Extensions;
 
 namespace Application.Common.Auth;
 
@@ -30,9 +30,12 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
             return;
         }
 
-        AuthorizeModel? authorizeModel = SerializerExtension
-            .Deserialize<AuthorizeModel>(requirement.Requirement())
-            .Object;
+        string? authorize = requirement.Requirement();
+        AuthorizeModel? authorizeModel = null;
+        if (!string.IsNullOrWhiteSpace(authorize))
+        {
+            authorizeModel = SerializerExtension.Deserialize<AuthorizeModel>(authorize).Object;
+        }
 
         if (
             authorizeModel == null

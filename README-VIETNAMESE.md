@@ -259,7 +259,7 @@ _Phụ thuộc vào tầng Application và Domain_
 
 _Phụ thuộc vào tầng Application and Infrastructure_
 
-**_Contract_** : Chứa shared components qua các tầng
+**_Contract_** : Chứa shared components cho các tầng Application, Infrastructure and API.
 
 # Bắt đầu thôi nào
 
