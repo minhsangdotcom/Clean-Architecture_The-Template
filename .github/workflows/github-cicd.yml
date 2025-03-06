@@ -27,7 +27,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.13"
+          dotnet-version: "8.0.406"
           cache: true
           cache-dependency-path: "src/**/packages.lock.json"
       - name: Install dependencies
