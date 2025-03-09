@@ -1,17 +1,16 @@
-using Application.Common.Interfaces.Services.DistributedCache;
+using Application.Common.Interfaces.Services.Queue;
 using Application.Features.QueueLogs;
 using Contracts.Dtos.Responses;
-using Domain.Aggregates.QueueLogs;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Serilog;
 
-namespace Infrastructure.Services.DistributedCache;
+namespace Infrastructure.Services.Queue;
 
-public class DeadletterQueueBackgroundService(
-    IQueueFactory factory,
+public class QueueBackgroundService(
+    IQueueFactory queueFactory,
     IServiceProvider serviceProvider,
     IOptions<QueueSettings> options
 ) : BackgroundService
@@ -26,14 +25,17 @@ public class DeadletterQueueBackgroundService(
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            // IQueueService deadLetterQueue = factory.GetQueue(QueueType.DeadLetterQueue);
+            // IQueueService deadLetterQueue = queueFactory.GetQueue(QueueType.DeadLetterQueue);
 
             // if (!await deadLetterQueue.PingAsync())
             // {
             //     logger.Warning("Redis server has shut down");
             //     continue;
             // }
-            // var request = await deadLetterQueue.DequeueAsync<PayCartPayload, PayCartPayload>();
+
+            // PayCartPayload? request = await queueFactory
+            //     .GetQueue(QueueType.OriginQueue)
+            //     .DequeueAsync<PayCartPayload, PayCartRequest>();
 
             // if (request != null)
             // {
@@ -41,10 +43,12 @@ public class DeadletterQueueBackgroundService(
             //         request,
             //         sender,
             //         logger,
+            //         deadLetterQueue,
             //         stoppingToken
             //     );
             // }
-            await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
+
+            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
         }
     }
 
@@ -52,6 +56,7 @@ public class DeadletterQueueBackgroundService(
         TRequest request,
         ISender sender,
         ILogger logger,
+        IQueueService queueService,
         CancellationToken cancellationToken
     )
         where TRequest : class
@@ -59,7 +64,7 @@ public class DeadletterQueueBackgroundService(
     {
         QueueResponse<TResponse>? queueResponse = new();
         int attempt = 0;
-        int maximumRetryAttempt = queueSettings.DeadLetterMaxRetryAttempts;
+        int maximumRetryAttempt = queueSettings.MaxRetryAttempts;
         double maximumDelay = queueSettings.MaximumDelayInSec;
 
         while (attempt <= maximumRetryAttempt)
@@ -80,10 +85,14 @@ public class DeadletterQueueBackgroundService(
             // 500 or 400 error
             if (queueResponse.ErrorType == QueueErrorType.Persistent)
             {
-                CreateQueueLogCommand createQueueLogCommand = MaptoCreateQueueLogCommand(
-                    queueResponse,
-                    request
-                );
+                CreateQueueLogCommand createQueueLogCommand =
+                    new()
+                    {
+                        RequestId = queueResponse.PayloadId!.Value,
+                        ErrorDetail = queueResponse.Error,
+                        Request = request,
+                        RetryCount = attempt,
+                    };
                 await sender.Send(createQueueLogCommand, cancellationToken);
                 break;
             }
@@ -96,6 +105,7 @@ public class DeadletterQueueBackgroundService(
                 {
                     break;
                 }
+
                 queueResponse.RetryCount = attempt;
 
                 // Calculate delay time with exponential jitter backoff method
@@ -105,38 +115,34 @@ public class DeadletterQueueBackgroundService(
                 double delay = Math.Min(backoff + jitter, maximumDelay);
 
                 TimeSpan delayTime = TimeSpan.FromSeconds(delay);
-                logger.Warning(
-                    $"Dead letter queue Retry {attempt} in {delayTime.TotalSeconds:F2} seconds..."
-                );
+                logger.Warning($"Retry {attempt} in {delayTime.TotalSeconds:F2} seconds...");
                 await Task.Delay(delayTime, cancellationToken);
             }
         }
 
         if (!queueResponse.IsSuccess && queueResponse.ErrorType == QueueErrorType.Transient)
         {
-            // if it still fail after many attempts then logging into db
-            CreateQueueLogCommand createQueueLogCommand = MaptoCreateQueueLogCommand(
-                queueResponse,
-                request
+            // if it still fail after many attempts then push it into dead letter queue
+            logger.Warning(
+                "Push request {payloadId} into dead letter queue for maximum attempts",
+                queueResponse.PayloadId
             );
-            await sender.Send(createQueueLogCommand, cancellationToken);
+            await queueService.EnqueueAsync(request);
+            await sender.Send(
+                new CreateQueueLogCommand()
+                {
+                    RequestId = queueResponse.PayloadId!.Value,
+                    ErrorDetail = new
+                    {
+                        queueResponse.ErrorType,
+                        queueResponse.Error,
+                        Message = $"Push request {queueResponse.PayloadId} into dead letter queue for maximum attempts",
+                    },
+                    Request = request,
+                    RetryCount = queueResponse.RetryCount,
+                },
+                cancellationToken
+            );
         }
-    }
-
-    private static CreateQueueLogCommand MaptoCreateQueueLogCommand<TResponse, TRequest>(
-        QueueResponse<TResponse> response,
-        TRequest request
-    )
-        where TRequest : class
-        where TResponse : class
-    {
-        return new CreateQueueLogCommand()
-        {
-            RequestId = response.PayloadId!.Value,
-            ErrorDetail = response.Error,
-            Request = request,
-            RetryCount = response.RetryCount,
-            ProcessedBy = QueueType.DeadLetterQueue,
-        };
     }
 }

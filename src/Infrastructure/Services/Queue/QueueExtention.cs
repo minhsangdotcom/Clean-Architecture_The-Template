@@ -1,4 +1,4 @@
-namespace Infrastructure.Services.DistributedCache;
+namespace Infrastructure.Services.Queue;
 
 public static class QueueExtention
 {
@@ -8,6 +8,6 @@ public static class QueueExtention
     public static double GenerateJitter(double minFactor, double maxFactor)
     {
         Random random = new();
-        return minFactor + ((maxFactor - minFactor) * random.NextDouble());
+        return minFactor + (maxFactor - minFactor) * random.NextDouble();
     }
 }

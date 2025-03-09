@@ -1,13 +1,13 @@
-using Application.Common.Interfaces.Services.DistributedCache;
-using Contracts.Dtos.Requests;
+using Application.Common.Interfaces.Services.Cache;
+using Application.Common.Interfaces.Services.Queue;
 using Microsoft.Extensions.Options;
 using NRedisStack;
 using SharedKernel.Extensions;
 using StackExchange.Redis;
 
-namespace Infrastructure.Services.DistributedCache;
+namespace Infrastructure.Services.Queue;
 
-public class QueueService(IRedisCacheService redisCache, IOptions<QueueSettings> options)
+public class DeadLetterQueueService(IRedisCacheService redisCache, IOptions<QueueSettings> options)
     : IQueueService
 {
     private readonly QueueSettings queueSettings = options.Value;
@@ -18,7 +18,7 @@ public class QueueService(IRedisCacheService redisCache, IOptions<QueueSettings>
 
     public async Task<TResponse?> DequeueAsync<TResponse, TRequest>()
     {
-        string queueName = $"{queueSettings.OriginQueueName}:{typeof(TRequest).Name}";
+        string queueName = $"{queueSettings.DeadLetterQueueName}:{typeof(TRequest).Name}";
         Tuple<RedisKey, RedisValue>? value = await redisCache.Database.BRPopAsync([queueName], 1);
 
         if (value == null)
@@ -33,16 +33,15 @@ public class QueueService(IRedisCacheService redisCache, IOptions<QueueSettings>
 
     public async Task<bool> EnqueueAsync<T>(T payload)
     {
-        QueueRequest<T> request = new() { PayloadId = Guid.NewGuid(), Payload = payload };
-        var result = SerializerExtension.Serialize(request);
-        string queueName = $"{queueSettings.OriginQueueName}:{typeof(T).Name}";
+        var result = SerializerExtension.Serialize(payload!);
+        string queueName = $"{queueSettings.DeadLetterQueueName}:{typeof(T).Name}";
         long length = await redisCache.Database.ListLeftPushAsync(queueName, result.StringJson);
         size = length;
 
         return length > 0;
     }
 
-    public long Length() => redisCache.Database.ListLength(queueSettings.OriginQueueName);
+    public long Length() => redisCache.Database.ListLength(queueSettings.DeadLetterQueueName);
 
     public async Task<bool> PingAsync()
     {

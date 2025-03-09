@@ -3,7 +3,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
-    <ProjectReference Include="..\Contracts\Contracts.csproj" />
     <Using Include="BCrypt.Net.BCrypt" Static="True" />
   </ItemGroup>
 

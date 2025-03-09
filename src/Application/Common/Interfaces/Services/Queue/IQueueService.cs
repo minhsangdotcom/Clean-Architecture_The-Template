@@ -1,4 +1,4 @@
-namespace Application.Common.Interfaces.Services.DistributedCache;
+namespace Application.Common.Interfaces.Services.Queue;
 
 public interface IQueueService
 {

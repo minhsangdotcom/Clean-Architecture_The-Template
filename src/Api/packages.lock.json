@@ -1667,7 +1667,6 @@
         "dependencies": {
           "AWSSDK.S3": "[4.0.0-preview.9, )",
           "Application": "[1.0.0, )",
-          "Contracts": "[1.0.0, )",
           "Domain": "[1.0.0, )",
           "EFCore.NamingConventions": "[8.0.3, )",
           "Hangfire.AspNetCore": "[1.8.18, )",

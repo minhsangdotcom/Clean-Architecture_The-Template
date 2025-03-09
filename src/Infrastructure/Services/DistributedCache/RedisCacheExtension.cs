@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Services.DistributedCache;
+using Application.Common.Interfaces.Services.Cache;
 using SharedKernel.Extensions;
 using StackExchange.Redis;
 
