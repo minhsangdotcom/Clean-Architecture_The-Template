@@ -6,7 +6,7 @@ using Serilog;
 
 namespace Infrastructure.Services.Identity;
 
-public class MediaUpdateService<T>(IAmazonS3Service awsAmazonService, ILogger logger)
+public class MediaUpdateService<T>(IStorageService storageService, ILogger logger)
     : IMediaUpdateService<T>
     where T : class
 {
@@ -19,7 +19,7 @@ public class MediaUpdateService<T>(IAmazonS3Service awsAmazonService, ILogger lo
             return;
         }
 
-        var response = await awsAmazonService.DeleteAsync(key);
+        var response = await storageService.DeleteAsync(key);
 
         if (!response.IsSuccess)
         {
@@ -37,7 +37,7 @@ public class MediaUpdateService<T>(IAmazonS3Service awsAmazonService, ILogger lo
             return null;
         }
 
-        return $"{Directory}/{awsAmazonService.UniqueFileName(avatar.FileName)}";
+        return $"{Directory}/{storageService.UniqueFileName(avatar.FileName)}";
     }
 
     public async Task<string?> UploadAvatarAsync(IFormFile? avatar, string? key)
@@ -47,7 +47,7 @@ public class MediaUpdateService<T>(IAmazonS3Service awsAmazonService, ILogger lo
             return null;
         }
 
-        AwsResponse response = await awsAmazonService.UploadAsync(avatar!.OpenReadStream(), key);
+        StorageResponse response = await storageService.UploadAsync(avatar!.OpenReadStream(), key);
 
         if (!response.IsSuccess)
         {
@@ -60,7 +60,7 @@ public class MediaUpdateService<T>(IAmazonS3Service awsAmazonService, ILogger lo
 
         logger.Information(
             "\nUpdate avatar success full with the path: {path}.\n",
-            response.S3UploadedPath
+            response.FilePath
         );
         return key;
     }
