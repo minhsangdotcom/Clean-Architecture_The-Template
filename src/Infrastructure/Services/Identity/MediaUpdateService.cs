@@ -1,5 +1,5 @@
-using Application.Common.Interfaces.Services.Aws;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.Services.Storage;
 using Contracts.Dtos.Responses;
 using Microsoft.AspNetCore.Http;
 using Serilog;

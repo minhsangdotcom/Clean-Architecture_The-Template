@@ -2,7 +2,7 @@ using Application.Common.Interfaces.Registers;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
 
-namespace Application.Common.Interfaces.Services.Aws;
+namespace Application.Common.Interfaces.Services.Storage;
 
 public interface IStorageService : ISingleton
 {

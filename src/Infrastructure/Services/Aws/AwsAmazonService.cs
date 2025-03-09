@@ -1,6 +1,6 @@
 using Amazon.S3;
 using Amazon.S3.Model;
-using Application.Common.Interfaces.Services.Aws;
+using Application.Common.Interfaces.Services.Storage;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
 using Microsoft.Extensions.Options;
