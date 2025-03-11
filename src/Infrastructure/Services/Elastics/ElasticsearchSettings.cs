@@ -14,4 +14,6 @@ public class ElasticsearchSettings
     public bool IsEnbaled { get; set; }
 
     public string? DefaultIndex { get; set; } = "DefaultIndex";
+
+    public string? PrefixIndex { get; set; } = "TheTemplate";
 }

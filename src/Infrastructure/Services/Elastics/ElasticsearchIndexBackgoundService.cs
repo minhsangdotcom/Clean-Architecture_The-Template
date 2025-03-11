@@ -1,15 +1,19 @@
 using System.Reflection;
 using Elastic.Clients.Elasticsearch;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Infrastructure.Services.Elastics;
 
 public class ElasticsearchIndexBackgoundService(
     ILogger logger,
-    ElasticsearchClient elasticsearchClient
+    ElasticsearchClient elasticsearchClient,
+    IOptions<ElasticsearchSettings> options
 ) : IHostedLifecycleService
 {
+    private ElasticsearchSettings elasticsearchSettings = options.Value;
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         try
@@ -21,7 +25,8 @@ public class ElasticsearchIndexBackgoundService(
             }
 
             var configures = ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
-                Assembly.GetExecutingAssembly()
+                Assembly.GetExecutingAssembly(),
+                elasticsearchSettings.PrefixIndex!
             );
             await ElasticsearchRegisterHelper.ElasticFluentConfigAsync(
                 elasticsearchClient,
