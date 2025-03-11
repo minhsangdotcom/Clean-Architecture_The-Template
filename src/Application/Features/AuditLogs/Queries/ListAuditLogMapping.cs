@@ -1,4 +1,3 @@
-using Application.UseCases.AuditLogs.Queries;
 using AutoMapper;
 using Domain.Aggregates.AuditLogs;
 

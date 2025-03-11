@@ -1,8 +1,7 @@
 using Application.Common.Interfaces.Services.Elastics;
-using Application.UseCases.AuditLogs.Queries;
+using Contracts.Dtos.Responses;
 using Domain.Aggregates.AuditLogs;
 using Mediator;
-using SharedKernel.Responses;
 
 namespace Application.Features.AuditLogs.Queries;
 

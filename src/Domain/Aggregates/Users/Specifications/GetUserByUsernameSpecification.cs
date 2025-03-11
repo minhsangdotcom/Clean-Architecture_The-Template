@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using SharedKernel.Common.Specs;
+using Specification;
 
 namespace Domain.Aggregates.Users.Specifications;
 

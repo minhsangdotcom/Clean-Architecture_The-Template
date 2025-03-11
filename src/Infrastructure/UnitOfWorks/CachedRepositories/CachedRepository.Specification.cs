@@ -2,11 +2,10 @@ using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
 using Application.Common.Interfaces.UnitOfWorks;
-using Microsoft.Extensions.Caching.Memory;
+using Contracts.Dtos.Requests;
+using Contracts.Dtos.Responses;
 using Newtonsoft.Json;
-using SharedKernel.Common.Specs.Interfaces;
-using SharedKernel.Requests;
-using SharedKernel.Responses;
+using Specification.Interfaces;
 
 namespace Infrastructure.UnitOfWorks.CachedRepositories;
 

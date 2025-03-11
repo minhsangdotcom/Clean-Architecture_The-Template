@@ -3,8 +3,8 @@ using Domain.Aggregates.AuditLogs;
 using Domain.Aggregates.AuditLogs.Enums;
 using Domain.Aggregates.Users.Enums;
 using Elastic.Clients.Elasticsearch;
+using FluentConfiguration.Configurations;
 using Serilog;
-using SharedKernel.Common.ElasticConfigurations;
 
 namespace Infrastructure.Services.Elastics;
 

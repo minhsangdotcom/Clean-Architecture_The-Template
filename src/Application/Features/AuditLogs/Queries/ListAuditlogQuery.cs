@@ -1,7 +1,6 @@
-using Application.UseCases.AuditLogs.Queries;
+using Contracts.Dtos.Requests;
+using Contracts.Dtos.Responses;
 using Mediator;
-using SharedKernel.Requests;
-using SharedKernel.Responses;
 
 namespace Application.Features.AuditLogs.Queries;
 

@@ -40,7 +40,8 @@ public static class ElasticSearchExtension
 
             IEnumerable<ElasticConfigureResult> elkConfigbuilder =
                 ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
-                    Assembly.GetExecutingAssembly()
+                    Assembly.GetExecutingAssembly(),
+                    elasticsearch.PrefixIndex!
                 );
             ElasticsearchRegisterHelper.ConfigureConnectionSettings(ref settings, elkConfigbuilder);
 

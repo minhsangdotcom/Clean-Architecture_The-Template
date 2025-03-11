@@ -7,7 +7,6 @@ using Infrastructure.UnitOfWorks.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Serilog;
-using SharedKernel.Common;
 
 namespace Infrastructure.UnitOfWorks;
 
@@ -26,7 +25,6 @@ public class UnitOfWork(
     public IRepository<TEntity> Repository<TEntity>()
         where TEntity : class
     {
-        typeof(TEntity).IsValidBaseType();
         string type = typeof(TEntity).FullName!;
 
         if (!repositories.TryGetValue(type, out object? value))
@@ -46,7 +44,6 @@ public class UnitOfWork(
     public IRepository<TEntity> CachedRepository<TEntity>()
         where TEntity : class
     {
-        typeof(TEntity).IsValidBaseType();
         string type = $"{typeof(TEntity).FullName}-cached";
 
         if (!repositories.TryGetValue(type, out object? value))
