@@ -5,7 +5,7 @@ using Mediator;
 
 namespace Application.Features.AuditLogs.Queries;
 
-public class ListAuditlogHandler(IElasticsearchServiceFactory elasticsearch)
+public class ListAuditlogHandler(IElasticsearchServiceFactory? elasticsearch = null)
     : IRequestHandler<ListAuditlogQuery, PaginationResponse<ListAuditlogResponse>>
 {
     public async ValueTask<PaginationResponse<ListAuditlogResponse>> Handle(
@@ -13,6 +13,10 @@ public class ListAuditlogHandler(IElasticsearchServiceFactory elasticsearch)
         CancellationToken cancellationToken
     )
     {
+        if (elasticsearch == null)
+        {
+            throw new NotImplementedException("Elasticsearch has not enabled");
+        }
         return await elasticsearch
             .Get<AuditLog>()
             .PaginatedListAsync<ListAuditlogResponse>(request);
