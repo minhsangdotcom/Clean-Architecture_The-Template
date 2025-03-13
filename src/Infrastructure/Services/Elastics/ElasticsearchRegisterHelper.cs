@@ -67,7 +67,10 @@ public class ElasticsearchRegisterHelper
     /// </summary>
     /// <param name="elasticsearchClient"></param>
     /// <returns></returns>
-    public static async Task SeedingAsync(ElasticsearchClient elasticsearchClient)
+    public static async Task SeedingAsync(
+        ElasticsearchClient elasticsearchClient,
+        string? prefix = null
+    )
     {
         var auditLog = await elasticsearchClient.SearchAsync<AuditLog>();
         if (auditLog.Documents.Count > 0)
@@ -167,7 +170,7 @@ public class ElasticsearchRegisterHelper
 
         var response = await elasticsearchClient.IndexManyAsync(
             auditLogs,
-            ElsIndexExtension.GetName<AuditLog>()
+            ElsIndexExtension.GetName<AuditLog>(prefix)
         );
 
         if (response.IsSuccess())

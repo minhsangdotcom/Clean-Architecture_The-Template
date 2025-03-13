@@ -12,7 +12,7 @@ public class ElasticsearchIndexBackgoundService(
     IOptions<ElasticsearchSettings> options
 ) : IHostedLifecycleService
 {
-    private ElasticsearchSettings elasticsearchSettings = options.Value;
+    private readonly ElasticsearchSettings elasticsearchSettings = options.Value;
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -33,7 +33,10 @@ public class ElasticsearchIndexBackgoundService(
                 configures
             );
 
-            await ElasticsearchRegisterHelper.SeedingAsync(elasticsearchClient);
+            await ElasticsearchRegisterHelper.SeedingAsync(
+                elasticsearchClient,
+                elasticsearchSettings.PrefixIndex!
+            );
         }
         catch (Exception ex)
         {

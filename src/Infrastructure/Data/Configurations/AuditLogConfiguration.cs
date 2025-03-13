@@ -8,7 +8,7 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
 {
     public void Configure(ref ElasticsearchConfigBuilder<AuditLog> buider, string? prefix = null)
     {
-        buider.ToIndex();
+        buider.ToIndex(prefix);
         buider.HasKey(key => key.Id);
 
         buider.Settings(setting =>
