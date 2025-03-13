@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Serilog;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -71,11 +72,12 @@ try
     if (isDevelopment)
     {
         app.UseSwagger();
-        app.UseSwaggerUI(x =>
+        app.UseSwaggerUI(configs =>
         {
-            x.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-            x.RoutePrefix = "docs";
-            x.ConfigObject.PersistAuthorization = true;
+            configs.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            configs.RoutePrefix = "docs";
+            configs.ConfigObject.PersistAuthorization = true;
+            configs.DocExpansion(DocExpansion.None);
         });
         app.Lifetime.ApplicationStarted.Register(() =>
         {
