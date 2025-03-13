@@ -126,16 +126,13 @@ public static class PaginationExtension
             T? theLast = list.LastOrDefault();
             int length = list.Count;
 
-            if (length < payload.Size)
+            if (
+                length < payload.Size
+                || (length == payload.Size && CompareToTheflag(theLast, payload.Last))
+            )
             {
                 return new PaginationResult<T>(list, length);
             }
-
-            if (length == payload.Size && CompareToTheflag(theLast, payload.Last))
-            {
-                return new PaginationResult<T>(list, length);
-            }
-
             return new PaginationResult<T>(list, length, EncodeCursor(theLast, payload.Sort));
         }
 
@@ -149,24 +146,22 @@ public static class PaginationExtension
         int count = await results.CountAsync();
 
         // whether or not we're currently at first or last page
-        if (count < payload.Size)
-        {
-            return new PaginationResult<T>(results, count);
-        }
-
-        if (
-            count == payload.Size
-            && CompareToTheflag(
-                payload.IsPrevious ? first : last,
-                payload.IsPrevious ? payload.First : payload.Last
-            )
-        )
-        {
-            return new PaginationResult<T>(results, count);
-        }
-
         string? next = EncodeCursor(last, payload.Sort);
         string? pre = EncodeCursor(first, payload.Sort);
+
+        var cursor = payload.IsPrevious ? first : last;
+        var flag = payload.IsPrevious ? payload.Last : payload.First;
+        if (count < payload.Size || (count == payload.Size && CompareToTheflag(cursor, flag)))
+        {
+            if (!payload.IsPrevious)
+            {
+                next = null;
+            }
+            if (payload.IsPrevious)
+            {
+                pre = null;
+            }
+        }
 
         return new PaginationResult<T>(results, count, next, pre);
     }
