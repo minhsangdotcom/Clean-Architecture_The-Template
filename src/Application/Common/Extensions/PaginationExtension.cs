@@ -5,11 +5,13 @@ using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using SharedKernel.Extensions;
 using SharedKernel.Extensions.Encryption;
 using SharedKernel.Extensions.Expressions;
 using SharedKernel.Extensions.QueryExtensions;
 using SharedKernel.Extensions.Reflections;
 using SharedKernel.Models;
+using SharedKernel.Results;
 
 namespace Application.Common.Extensions;
 
@@ -118,51 +120,55 @@ public static class PaginationExtension
         PaginationPayload<T> payload
     )
     {
-        bool isFirstMove = string.IsNullOrWhiteSpace(payload.Cursor);
-        if (isFirstMove)
+        if (string.IsNullOrWhiteSpace(payload.Cursor))
         {
-            IEnumerable<T> list = await payload.Query.Take(payload.Size).ToListAsync();
-            T? theLast = list.Last();
+            List<T> list = await payload.Query.Take(payload.Size).ToListAsync();
+            T? theLast = list.LastOrDefault();
+            int length = list.Count;
 
-            string? cursor = EncodeCursor(theLast, payload.Sort);
-            return new PaginationResult<T>(list, list.Count(), cursor);
+            if (length < payload.Size)
+            {
+                return new PaginationResult<T>(list, length);
+            }
+
+            if (length == payload.Size && CompareToTheflag(theLast, payload.Last))
+            {
+                return new PaginationResult<T>(list, length);
+            }
+
+            return new PaginationResult<T>(list, length, EncodeCursor(theLast, payload.Sort));
         }
 
-        IQueryable<T> results = Enumerable.Empty<T>().AsQueryable();
-        if (!string.IsNullOrWhiteSpace(payload.Cursor))
-        {
-            Dictionary<string, object?>? cursorObject = DecodeCursor(payload.Cursor);
-            IQueryable<T> list = MoveForwardOrBackwardAsync(
-                    payload.Query,
-                    cursorObject!,
-                    payload.Sort
-                )
-                .Take(payload.Size);
-
-            results = payload.IsPrevious ? list.Sort(payload.OriginalSort) : list;
-        }
+        Dictionary<string, object?>? cursorObject = DecodeCursor(payload.Cursor);
+        IQueryable<T> data = MoveForwardOrBackwardAsync(payload.Query, cursorObject!, payload.Sort)
+            .Take(payload.Size);
+        IQueryable<T> results = payload.IsPrevious ? data.Sort(payload.OriginalSort) : data;
 
         T? last = await results.LastOrDefaultAsync();
         T? first = await results.FirstOrDefaultAsync();
         int count = await results.CountAsync();
 
         // whether or not we're currently at first or last page
-        string? nextCursor =
-            (
-                count < payload.Size
-                || CompareToTheflag(last, payload.IsPrevious ? payload.First : payload.Last)
-            ) && !payload.IsPrevious
-                ? null
-                : EncodeCursor(last, payload.Sort);
-        string? preCursor =
-            (
-                count < payload.Size
-                || CompareToTheflag(first, payload.IsPrevious ? payload.Last : payload.First)
-            ) && payload.IsPrevious
-                ? null
-                : EncodeCursor(first, payload.Sort);
+        if (count < payload.Size)
+        {
+            return new PaginationResult<T>(results, count);
+        }
 
-        return new PaginationResult<T>(results, count, nextCursor, preCursor);
+        if (
+            count == payload.Size
+            && CompareToTheflag(
+                payload.IsPrevious ? first : last,
+                payload.IsPrevious ? payload.First : payload.Last
+            )
+        )
+        {
+            return new PaginationResult<T>(results, count);
+        }
+
+        string? next = EncodeCursor(last, payload.Sort);
+        string? pre = EncodeCursor(first, payload.Sort);
+
+        return new PaginationResult<T>(results, count, next, pre);
     }
 
     /// <summary>
@@ -313,31 +319,48 @@ public static class PaginationExtension
         return body;
     }
 
-    private static ConvertExpressionTypeResult ConvertType(
-        MemberExpression memberExpression,
-        object? value
-    )
+    private static ConvertExpressionTypeResult ConvertType(MemberExpression left, object? right)
     {
-        Expression member = memberExpression;
-        Type memberType = memberExpression.GetMemberExpressionType();
+        Expression member = left;
+        Type leftType = left.GetMemberExpressionType();
+        Type? rightType = right?.GetType();
+
+        if (leftType == typeof(Ulid))
+        {
+            Ulid ulid = right == null ? Ulid.Empty : Ulid.Parse(right.ToString());
+            return new(member, Expression.Constant(ulid, leftType));
+        }
 
         if (
-            memberType.IsNullable()
-                && memberType.GenericTypeArguments.Length > 0
-                && memberType.GenericTypeArguments[0].IsEnum
-            || memberType.IsEnum
+            leftType.IsNullable()
+                && leftType.GenericTypeArguments.Length > 0
+                && leftType.GenericTypeArguments[0].IsEnum
+            || leftType.IsEnum
         )
         {
-            Type type = value?.GetType() ?? typeof(long);
-            return new(Expression.Convert(member, type), Expression.Constant(value, type));
+            Type type = rightType ?? typeof(long);
+            return new(Expression.Convert(member, type), Expression.Constant(right, type));
         }
 
-        if (memberType != value?.GetType())
+        if (leftType != rightType)
         {
-            return new(member, Expression.Constant(value, memberType));
+            Type targetType = leftType;
+
+            if (targetType.IsNullable() && targetType.GenericTypeArguments.Length > 0)
+            {
+                targetType = targetType.GenericTypeArguments[0];
+            }
+
+            if (right is DateTime dateTime && targetType == typeof(DateTimeOffset))
+            {
+                DateTimeOffset dateTimeOffset = new(dateTime);
+                return new(member, Expression.Constant(dateTimeOffset, leftType));
+            }
+            object? changedTypeValue = Convert.ChangeType(right, targetType);
+            return new(member, Expression.Constant(changedTypeValue, leftType));
         }
 
-        return new(member, Expression.Constant(value));
+        return new(member, Expression.Constant(right));
     }
 
     private static MethodCallExpression CompareUlidByExpression(Expression left, object? value)
@@ -458,8 +481,7 @@ public static class PaginationExtension
 
     private static Dictionary<string, object?>? DecodeCursor(string cursor)
     {
-        string key = AesGcmEncryption.GenKey(EncryptKey());
-        string stringCursor = AesGcmEncryption.Decrypt(cursor, key);
+        string stringCursor = cursor.DecompressString();
         var serializeResult = JsonConvert.DeserializeObject<Dictionary<string, object?>>(
             stringCursor
         );
@@ -475,8 +497,7 @@ public static class PaginationExtension
 
         Dictionary<string, object?> properties = GetEncryptionProperties(entity, sort);
         string json = JsonConvert.SerializeObject(properties, Formatting.Indented);
-        string key = AesGcmEncryption.GenKey(EncryptKey());
-        return AesGcmEncryption.Encrypt(json, key);
+        return json.CompressString();
     }
 
     /// <summary>
@@ -512,12 +533,6 @@ public static class PaginationExtension
     {
         return TransformSort(sort).Select(field => field.Key).ToList();
     }
-
-    /// <summary>
-    /// Encrypt aes key
-    /// </summary>
-    /// <returns></returns>
-    private static string EncryptKey() => "+%9d$t}L76?Zh2TtNcNR,DNy&a6/W9";
 }
 
 internal record PaginationPayload<T>(
@@ -531,11 +546,16 @@ internal record PaginationPayload<T>(
     int Size
 );
 
+internal record ProcessResultPayload<T>(
+    IEnumerable<T> List,
+    int RequestSize,
+    T FirstFlag,
+    T LastFlag
+);
+
 internal record PaginationResult<T>(
     IEnumerable<T> Data,
     int PageSize,
     string? Next = null,
     string? Pre = null
 );
-
-internal record ConvertExpressionTypeResult(Expression Member, ConstantExpression Value);

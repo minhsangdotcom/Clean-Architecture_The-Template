@@ -242,8 +242,8 @@
       },
       "BouncyCastle.Cryptography": {
         "type": "Transitive",
-        "resolved": "2.5.0",
-        "contentHash": "rc7vRCq/KD3GtIwSgRtjanGaBwTb9nLenFDZnEcauWlssuuEoxcbMfWA3QWWho6QDMSOSkWjs657McdHzEtEcw=="
+        "resolved": "2.5.1",
+        "contentHash": "zy8TMeTP+1FH2NrLaNZtdRbBdq7u5MI+NFZQOBSM69u5RFkciinwzV2eveY6Kjf5MzgsYvvl6kTStsj3JrXqkg=="
       },
       "CaseConverter": {
         "type": "Transitive",
@@ -984,9 +984,10 @@
       },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Transitive",
-        "resolved": "1.0.1",
-        "contentHash": "L+yoSTSlyVxaHK+ykAoF4VuX0JlYvJAiSb7tfvgK43U8Zfui4+6KuXfcBwmv5pUNiC5Y0ubDnSxvrR3uSUH+SA==",
+        "resolved": "1.0.2",
+        "contentHash": "OmkUGQ/id6QcKpuuGvyNmrhmtmCIDasUQvPztXxIwbTnxoIfsQ6CvrAfXCBD6cpkHb/NfsBvKni48cmimRYwjg==",
         "dependencies": {
+          "BouncyCastle.Cryptography": "2.5.1",
           "CaseConverter": "2.0.1",
           "Ulid": "1.3.4"
         }
@@ -1366,7 +1367,7 @@
           "Microsoft.AspNetCore.Mvc.Core": "[2.3.0, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "Ulid": "[1.3.4, )",
-          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.1, )"
+          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.2, )"
         }
       },
       "domain": {
@@ -1375,7 +1376,7 @@
           "Ardalis.SharedKernel": "[2.1.1, )",
           "Mediator.Abstractions": "[3.0.0-preview.27, )",
           "Ulid": "[1.3.4, )",
-          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.1, )",
+          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.2, )",
           "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.1, )"
         }
       },

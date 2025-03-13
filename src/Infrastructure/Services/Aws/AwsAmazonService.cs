@@ -41,6 +41,7 @@ public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSet
             PutObjectResponse res = await amazonS3.PutObjectAsync(request);
             response.FilePath = GeneratePreSignedURL(request.Key);
             response.Key = request.Key;
+            response.IsSuccess = true;
         }
         catch (AmazonS3Exception ex)
         {
@@ -114,6 +115,7 @@ public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSet
             //return new() { S3UploadedPath = GeneratePreSignedURL(request.Key!), Key = request.Key };
             storageResponse.FilePath = GeneratePreSignedURL(request.Key!);
             storageResponse.Key = request.Key;
+            storageResponse.IsSuccess = true;
         }
         catch (Exception ex)
         {
