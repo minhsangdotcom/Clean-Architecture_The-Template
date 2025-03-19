@@ -4,6 +4,43 @@
 
 #
 
+![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?style=for-the-badge&color=orange)
+![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?style=for-the-badge&color=pink)
+![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?style=for-the-badge&color=%23f61d9c)
+
+#  Bảng nội dung
+<div id ='content'/>
+
+- [Ngôn ngữ](#)
+- [Nhãn](#)
+- [Bảng nội dung](#content)
+- [Mô Hình Kiến Trúc Sạch (Clean Architecture)](#mô-hình-kiến-trúc-sạch-clean-architecture)
+- [Cho mình 1 ⭐ nhé](#cho-mình-1--nhé)
+- [Định Nghĩa](#định-nghĩa)
+    - [Lợi ích](#lợi-ích)
+    - [Nhược điểm](#nhược-điểm)
+- [Features :rocket:](#features-rocket)
+- [Nhá hàng cho các tính năng :fire:](#nhá-hàng-cho-các-tính-năng-fire)
+    - [Authentication](#authentication)
+    - [Dynamic search and sort](#dynamic-search-and-sort)
+    - [Cross-cutting concerns](#cross-cutting-concerns)
+    - [Lưu trử file media bằng Minio](#lưu-trử-file-media-bằng-minio)
+    - [Tự động dịch message](#tự-động-dịch-message)
+- [Sơ lượt về Cấu trúc :mag\_right:](#sơ-lượt-về-cấu-trúc-mag_right)
+- [Bắt đầu thôi nào](#bắt-đầu-thôi-nào)
+  - [Cách để chạy ứng dụng](#cách-để-chạy-ứng-dụng)
+  - [Hướng dẫn sử dụng](#hướng-dẫn-sử-dụng)
+    - [Authorize](#authorize)
+    - [Thêm một quyền mới vào ứng dụng](#thêm-một-quyền-mới-vào-ứng-dụng)
+    - [Bộ lọc](#bộ-lọc)
+    - [Phân trang](#phân-trang)
+- [Công nghệ](#công-nghệ)
+- [Hỗ trợ](#hỗ-trợ)
+- [Lời cảm ơn](#lời-cảm-ơn)
+- [Cấp phép](#cấp-phép)
+
+
 # Mô Hình Kiến Trúc Sạch (Clean Architecture)
 
 Template này được thiết kế dành cho các bạn backend làm việc với ASP.NET Core. Nó cung cấp một cách hiệu quả để xây dựng các ứng dụng enterprise một cách đơn giản bằng cách tận dụng lợi thế từ kiến trúc Clean Architecture và .NET Core framework.
