@@ -8,6 +8,7 @@
 ![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?style=for-the-badge&color=pink)
 ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?style=for-the-badge&color=%23f61d9c)
 
+# Table of Contents
 - [1. Language](#1-languages)
 - [2. Badges](#2-badge)
 - [3. Table of Contents](#3-table-of-contents)

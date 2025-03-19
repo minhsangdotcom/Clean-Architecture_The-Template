@@ -10,11 +10,10 @@
 ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?style=for-the-badge&color=%23f61d9c)
 
 #  Bảng nội dung
-<div id ='content'/>
 
 - [Ngôn ngữ](#)
 - [Nhãn](#)
-- [Bảng nội dung](#content)
+- [Bảng nội dung](#Bảng-nội-dung)
 - [Mô Hình Kiến Trúc Sạch (Clean Architecture)](#mô-hình-kiến-trúc-sạch-clean-architecture)
 - [Cho mình 1 ⭐ nhé](#cho-mình-1--nhé)
 - [Định Nghĩa](#định-nghĩa)
