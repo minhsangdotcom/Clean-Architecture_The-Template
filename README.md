@@ -15,28 +15,28 @@
 - [2. .NET Core Clean Architecture The Template Introduction](#2-net-core-clean-architecture-the-template-introduction)
 - [3. Give a Star! ⭐](#3-give-a-star-)
 - [4. What is Clean Architecture?](#4-what-is-clean-architecture)
-    - [5 Advandtage](#5-advandtage)
-    - [5.0.1. Disadvandtage](#501-disadvandtage)
-- [6. Features :rocket:](#6-features-rocket)
-- [7. Demo :fire:](#7-demo-fire)
-    - [7.0.1. Authentication](#701-authentication)
-    - [8. Dynamic search and sort](#8-dynamic-search-and-sort)
-    - [8.0.3. Cross-cutting concerns](#803-cross-cutting-concerns)
-    - [8.0.4. AWS S3 by Minio](#804-aws-s3-by-minio)
-    - [8.0.5. Automatic Translatable Message](#805-automatic-translatable-message)
-- [9. Structure Overview :mag\_right:](#9-structure-overview-mag_right)
-- [10. Getting started](#10-getting-started)
-  - [10.1. Run .NET Core Clean Architecture Project](#101-run-net-core-clean-architecture-project)
-  - [10.2. Basic Usage](#102-basic-usage)
-    - [10.2.1. Authorize](#1021-authorize)
-    - [10.2.2. Create role with permissions:](#1022-create-role-with-permissions)
-    - [10.2.3. How to add new permissions in your app](#1023-how-to-add-new-permissions-in-your-app)
-    - [10.2.4. Filtering](#1024-filtering)
-    - [10.2.5. Pagination](#1025-pagination)
-- [11. Technology](#11-technology)
-- [12. Support](#12-support)
-- [13. Credits](#13-credits)
-- [14. Licence](#14-licence)
+    - [4.0.1 Advandtage](#401-advandtage)
+    - [4.0.2. Disadvandtage](402-disadvandtage)
+- [5. Features :rocket:](#5-features-rocket)
+- [6. Demo :fire:](#6-demo-fire)
+    - [6.0.1. Authentication](#601-authentication)
+    - [6.0.2. Dynamic search and sort](#602-dynamic-search-and-sort)
+    - [6.0.3. Cross-cutting concerns](#603-cross-cutting-concerns)
+    - [6.0.4. AWS S3 by Minio](#604-aws-s3-by-minio)
+    - [6.0.5. Automatic Translatable Message](#605-automatic-translatable-message)
+- [7. Structure Overview :mag\_right:](#7-structure-overview-mag_right)
+- [8. Getting started](#8-getting-started)
+  - [8.1. Run .NET Core Clean Architecture Project](#81-run-net-core-clean-architecture-project)
+  - [8.2. Basic Usage](#82-basic-usage)
+    - [8.2.1. Authorize](#821-authorize)
+    - [8.2.2. Create role with permissions:](#822-create-role-with-permissions)
+    - [8.2.3. How to add new permissions in your app](#823-how-to-add-new-permissions-in-your-app)
+    - [8.2.4. Filtering](#824-filtering)
+    - [8.2.5. Pagination](#825-pagination)
+- [9. Technology](#9-technology)
+- [10. Support](#10-support)
+- [11. Credits](#11-credits)
+- [12. Licence](#12-licence)
 
 
 # 2. .NET Core Clean Architecture The Template Introduction
@@ -61,7 +61,7 @@ At its core, Clean Architecture organizes code into concentric circles, with eac
 
 The dependency rule states that code dependencies should only point inward, ensuring that inner layers remain isolated from external layers.
 
-### 5 Advandtage
+### 4.0.1 Advandtage
 
 - **_Seperation of Concerns_**: Each layer is responsible for a specific aspect of the application, making the code easier to understand and maintain.
 - **_Testability_**: Since business logic is decoupled from frameworks and UI, unit testing becomes simpler and more reliable.
@@ -70,7 +70,7 @@ The dependency rule states that code dependencies should only point inward, ensu
 - **_Scalability_**: The clear structure supports growth and the addition of new features without significant refactoring.
 - **_Framework Independence_**: Avoids being locked into a specific framework, making it easier to migrate to newer technologies.
 
-### 5.0.1. Disadvandtage
+### 4.0.2. Disadvandtage
 
 - **_Complexity_**: The layered structure can add complexity, especially for smaller projects where simpler architectures might suffice.
 - **_Initial Overhead_**: Setting up Clean Architecture requires additional effort to organize layers and follow strict design principles.
@@ -78,7 +78,7 @@ The dependency rule states that code dependencies should only point inward, ensu
 - **_Over-Engineering Risk_**: For small-scale applications, the additional layers might be unnecessary and lead to over-complication.
 - **_Performance Overhead_**: The abstraction and indirection between layers can introduce slight performance trade-offs, though typically negligible.
 
-# 6. Features :rocket:
+# 5. Features :rocket:
 
 What makes this Clean Architecture template stand out from the rest?
 
@@ -104,9 +104,9 @@ Let's explore the features:
 1. [Automactic translatable message](src/Contracts/Common/Messages/)
 1. [Open source and MIT license](#licence)
 
-# 7. Demo :fire:
+# 6. Demo :fire:
 
-### 7.0.1. Authentication
+### 6.0.1. Authentication
 
 ```json
 {
@@ -141,7 +141,7 @@ Let's explore the features:
 }
 ```
 
-### 8. Dynamic search and sort
+### 6.0.2. Dynamic search and sort
 
 ```
 http://localhost:8080/api/Users?PageSize=2&Search.Keyword=N%E1%BA%B5ng&Search.Targets=province.name&Sort=dayOfBirth
@@ -149,15 +149,15 @@ http://localhost:8080/api/Users?PageSize=2&Search.Keyword=N%E1%BA%B5ng&Search.Ta
 
 ![search and sort feature](Screenshots/search-sort.png)
 
-### 8.0.3. Cross-cutting concerns
+### 6.0.3. Cross-cutting concerns
 
 ![Cross-cutting Concerns feature](Screenshots/crosscutting-concern.png)
 
-### 8.0.4. AWS S3 by Minio
+### 6.0.4. AWS S3 by Minio
 
 ![AWS s3 feature](Screenshots/AWS_S3_Feature.png)
 
-### 8.0.5. Automatic Translatable Message
+### 6.0.5. Automatic Translatable Message
 
 ```json
 {
@@ -182,7 +182,7 @@ http://localhost:8080/api/Users?PageSize=2&Search.Keyword=N%E1%BA%B5ng&Search.Ta
 }
 ```
 
-# 9. Structure Overview :mag_right:
+# 7. Structure Overview :mag_right:
 
 **_Domain_**: Domain layer serves as the core of clean architecture application and contains key elements such as:
 
@@ -296,9 +296,9 @@ _It depends on Application and Infrastructure layer_
 
 **_Contract_** : Contains shared components for Application, Infrastructure and API layer.
 
-# 10. Getting started
+# 8. Getting started
 
-## 10.1. Run .NET Core Clean Architecture Project
+## 8.1. Run .NET Core Clean Architecture Project
 
 The following prerequisites are required to build and run the solution:
 
@@ -397,9 +397,9 @@ dotnet run
 
 Congrat! you are all set up :tada: :tada: :tada: :clap:
 
-## 10.2. Basic Usage
+## 8.2. Basic Usage
 
-### 10.2.1. Authorize
+### 8.2.1. Authorize
 
 To Achieve this, let's add AuthorizeBy attribute on controller
 
@@ -417,7 +417,7 @@ To Achieve this, let's add AuthorizeBy attribute on controller
     }
 ```
 
-### 10.2.2. Create role with permissions:
+### 8.2.2. Create role with permissions:
 
 Json payload is like
 
@@ -438,7 +438,7 @@ Json payload is like
 }
 ```
 
-### 10.2.3. How to add new permissions in your app
+### 8.2.3. How to add new permissions in your app
 
 To get this, let's navigate to constants folder in Infrastructure layer, then open Credential.cs file and pay your attention on PermissionGroups Dictionary
 
@@ -502,7 +502,7 @@ public static class ObjectPermission
 
 Define your new one, then push it into PermissionGroups dictionary, and restart application.
 
-### 10.2.4. Filtering
+### 8.2.4. Filtering
 
 To do filter in this template, we use LHS Brackets.
 
@@ -602,7 +602,7 @@ To Apply dynamic filter, you just call any list method at Repository class
         );
 ```
 
-### 10.2.5. Pagination
+### 8.2.5. Pagination
 
 This template supports offset pagination and cursor pagination.
 
@@ -707,7 +707,7 @@ To Enable cursor pagination just add this line
 ```
 
 
-# 11. Technology
+# 9. Technology
 
 - .NET 8
 - EntityFramework core 8
@@ -723,11 +723,11 @@ To Enable cursor pagination just add this line
 - Docker
 - Github Workflow
 
-# 12. Support
+# 10. Support
 
 If you are having problems, please let me know by issue section.
 
-# 13. Credits
+# 11. Credits
 
 :heart: Thank you guys so much :heart: :pray:.
 
@@ -749,6 +749,6 @@ If you are having problems, please let me know by issue section.
 - [Clean testing by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture/tree/main/tests)\
   An inspiring repository of testing best practices, showcasing how to write robust and meaningful tests to ensure the reliability of clean architecture-based projects.
 
-# 14. Licence
+# 12. Licence
 
 This project is licensed with the [MIT license](LICENSE).
