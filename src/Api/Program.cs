@@ -17,6 +17,8 @@ var services = builder.Services;
 var configuration = builder.Configuration;
 
 #region main dependencies
+string? url = builder.Configuration["urls"] ?? "http://0.0.0.0:8080";
+builder.WebHost.UseUrls(url);
 builder.AddConfiguration();
 builder
     .Services.AddControllers()
