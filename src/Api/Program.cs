@@ -71,13 +71,14 @@ try
 
     app.UseHangfireDashboard(configuration);
 
+    const string routeRefix = "docs";
     if (isDevelopment)
     {
         app.UseSwagger();
         app.UseSwaggerUI(configs =>
         {
             configs.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-            configs.RoutePrefix = "docs";
+            configs.RoutePrefix = routeRefix;
             configs.ConfigObject.PersistAuthorization = true;
             configs.DocExpansion(DocExpansion.None);
         });
@@ -89,10 +90,16 @@ try
             if (addresses != null && addresses.Length > 0)
             {
                 string? url = addresses?[0];
-                Log.Logger.Information("Application is running at: {Url}", url);
+                string? renewUrl =
+                    url?.Contains("0.0.0.0") == true ? url.Replace("0.0.0.0", "localhost") : url;
+                Log.Logger.Information("Application is running at: {Url}", renewUrl);
+                Log.Logger.Information(
+                    "Swagger UI is running at: {Url}",
+                    $"{renewUrl}/{routeRefix}"
+                );
                 Log.Logger.Information(
                     "Application health check is running at: {Url}",
-                    $"{url}{healthCheckPath}"
+                    $"{renewUrl}{healthCheckPath}"
                 );
             }
         });
