@@ -1,6 +1,6 @@
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users.Enums;
-using SharedKernel.Common;
+using Domain.Common;
 
 namespace Domain.Aggregates.Users;
 

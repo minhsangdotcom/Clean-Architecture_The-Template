@@ -25,12 +25,11 @@ public sealed class ValidationBehavior<TMessage, TResponse>(
                 validators.Select(v => v.ValidateAsync(context, cancellationToken))
             );
 
-            List<ValidationFailure> failures = validationResults
+            IEnumerable<ValidationFailure> failures = validationResults
                 .Where(r => r.Errors.Count != 0)
-                .SelectMany(r => r.Errors)
-                .ToList();
+                .SelectMany(r => r.Errors);
 
-            if (failures.Count != 0)
+            if (failures.Any())
             {
                 throw new Exceptions.ValidationException(failures);
             }

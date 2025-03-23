@@ -29,7 +29,7 @@ jobs:
         with:
           dotnet-version: "8.0.406"
           cache: true
-          cache-dependency-path: "src/**/packages.lock.json"
+          cache-dependency-path: "**/packages.lock.json"
       - name: Install dependencies
         run: dotnet restore --locked-mode
       - name: Build

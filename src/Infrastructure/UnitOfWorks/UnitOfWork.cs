@@ -1,24 +1,20 @@
 using System.Data.Common;
+using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
-using Infrastructure.Common;
 using Infrastructure.UnitOfWorks.CachedRepositories;
 using Infrastructure.UnitOfWorks.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
 using Serilog;
-using SharedKernel.Common;
 
 namespace Infrastructure.UnitOfWorks;
 
 public class UnitOfWork(
     IMapper mapper,
     IDbContext dbContext,
-    IMemoryCache cache,
     ILogger logger,
-    IOptions<CacheSettings> options
+    IMemoryCacheService memoryCacheService
 ) : IUnitOfWork
 {
     public DbTransaction? CurrentTransaction { get; set; }
@@ -29,7 +25,6 @@ public class UnitOfWork(
     public IRepository<TEntity> Repository<TEntity>()
         where TEntity : class
     {
-        typeof(TEntity).IsValidBaseType();
         string type = typeof(TEntity).FullName!;
 
         if (!repositories.TryGetValue(type, out object? value))
@@ -49,7 +44,6 @@ public class UnitOfWork(
     public IRepository<TEntity> CachedRepository<TEntity>()
         where TEntity : class
     {
-        typeof(TEntity).IsValidBaseType();
         string type = $"{typeof(TEntity).FullName}-cached";
 
         if (!repositories.TryGetValue(type, out object? value))
@@ -64,7 +58,7 @@ public class UnitOfWork(
             // proxy design pattern
             object? cachedRepositoryInstance = Activator.CreateInstance(
                 cachedRepositoryType.MakeGenericType(typeof(TEntity)),
-                [repositoryInstance, cache, logger, options]
+                [repositoryInstance, logger, memoryCacheService]
             );
             value = cachedRepositoryInstance;
             repositories.Add(type, value);

@@ -216,9 +216,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
         !await unitOfWork
             .Repository<User>()
             .AnyAsync(
-                x =>
-                    (!id.HasValue && EF.Functions.Like(x.Email, email))
-                    || (x.Id != id && EF.Functions.Like(x.Email, email)),
+                x => (!id.HasValue && x.Email == email) || (x.Id != id && x.Email == email),
                 cancellationToken
             );
 

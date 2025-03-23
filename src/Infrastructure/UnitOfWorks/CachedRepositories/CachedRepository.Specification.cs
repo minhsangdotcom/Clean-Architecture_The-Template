@@ -2,11 +2,10 @@ using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
 using Application.Common.Interfaces.UnitOfWorks;
-using Microsoft.Extensions.Caching.Memory;
+using Contracts.Dtos.Requests;
+using Contracts.Dtos.Responses;
 using Newtonsoft.Json;
-using SharedKernel.Common.Specs.Interfaces;
-using SharedKernel.Requests;
-using SharedKernel.Responses;
+using Specification.Interfaces;
 
 namespace Infrastructure.UnitOfWorks.CachedRepositories;
 
@@ -26,14 +25,9 @@ public partial class CachedRepository<T> : IRepository<T>
             string key = $"{spec.CacheKey}-{nameof(FindByConditionAsync)}";
             string hashingKey = HashKey(key);
             logger.Information("checking cache for {key}", hashingKey);
-            return cache.GetOrCreateAsync(
+            return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                entry =>
-                {
-                    entry.SetOptions(cacheOptions);
-                    logger.Warning("fetching source for {key}", hashingKey);
-                    return repository.FindByConditionAsync<TResult>(spec, cancellationToken);
-                }
+                () => repository.FindByConditionAsync<TResult>(spec, cancellationToken)
             );
         }
         return repository.FindByConditionAsync<TResult>(spec, cancellationToken);
@@ -49,14 +43,9 @@ public partial class CachedRepository<T> : IRepository<T>
             string key = $"{spec.CacheKey}-{nameof(FindByConditionAsync)}";
             string hashingKey = HashKey(key);
             logger.Information("checking cache for {key}", hashingKey);
-            return cache.GetOrCreateAsync(
+            return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                entry =>
-                {
-                    entry.SetOptions(cacheOptions);
-                    logger.Warning("fetching source for {key}", hashingKey);
-                    return repository.FindByConditionAsync(spec, cancellationToken);
-                }
+                () => repository.FindByConditionAsync(spec, cancellationToken)
             );
         }
         return repository.FindByConditionAsync(spec, cancellationToken);
@@ -73,14 +62,9 @@ public partial class CachedRepository<T> : IRepository<T>
             string key = $"{spec.CacheKey}-{nameof(ListAsync)}";
             string hashingKey = HashKey(key, queryParam);
             logger.Information("checking cache for {key}", hashingKey);
-            return cache.GetOrCreateAsync(
+            return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                entry =>
-                {
-                    entry.SetOptions(cacheOptions);
-                    logger.Warning("fetching source for {key}", hashingKey);
-                    return repository.ListAsync(spec, queryParam, cancellationToken);
-                }
+                () => repository.ListAsync(spec, queryParam, cancellationToken)
             )!;
         }
         return repository.ListAsync(spec, queryParam, cancellationToken);
@@ -99,19 +83,15 @@ public partial class CachedRepository<T> : IRepository<T>
             string key = $"{spec.CacheKey}-{nameof(ListWithGroupbyAsync)}";
             string hashingKey = HashKey(key, queryParam, groupByExpression.ToString());
             logger.Information("checking cache for {key}", hashingKey);
-            return cache.GetOrCreateAsync(
+            return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                entry =>
-                {
-                    entry.SetOptions(cacheOptions);
-                    logger.Warning("fetching source for {key}", hashingKey);
-                    return repository.ListWithGroupbyAsync<TGroupProperty, TResult>(
+                () =>
+                    repository.ListWithGroupbyAsync<TGroupProperty, TResult>(
                         spec,
                         queryParam,
                         groupByExpression,
                         cancellationToken
-                    );
-                }
+                    )
             )!;
         }
         return repository.ListWithGroupbyAsync<TGroupProperty, TResult>(
@@ -133,14 +113,9 @@ public partial class CachedRepository<T> : IRepository<T>
             string key = $"{spec.CacheKey}-{nameof(PagedListAsync)}";
             string hashingKey = HashKey(key, queryParam);
             logger.Information("checking cache for {key}", hashingKey);
-            return cache.GetOrCreateAsync(
+            return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                entry =>
-                {
-                    entry.SetOptions(cacheOptions);
-                    logger.Warning("fetching source for {key}", hashingKey);
-                    return repository.PagedListAsync<TResult>(spec, queryParam, cancellationToken);
-                }
+                () => repository.PagedListAsync<TResult>(spec, queryParam, cancellationToken)
             )!;
         }
         return repository.PagedListAsync<TResult>(spec, queryParam, cancellationToken);
@@ -156,14 +131,9 @@ public partial class CachedRepository<T> : IRepository<T>
             string key = $"{spec.CacheKey}-{nameof(PagedList)}";
             string hashingKey = HashKey(key, queryParam);
             logger.Information("checking cache for {key}", hashingKey);
-            return cache.GetOrCreate(
+            return memoryCacheService.GetOrSet(
                 hashingKey,
-                entry =>
-                {
-                    entry.SetOptions(cacheOptions);
-                    logger.Warning("fetching source for {key}", hashingKey);
-                    return repository.PagedList<TResult>(spec, queryParam);
-                }
+                () => repository.PagedList<TResult>(spec, queryParam)
             )!;
         }
         return repository.PagedList<TResult>(spec, queryParam);
@@ -182,19 +152,15 @@ public partial class CachedRepository<T> : IRepository<T>
             string key = $"{spec.CacheKey}-{nameof(PagedListWithGroupByAsync)}";
             string hashingKey = HashKey(key, queryParam, groupByExpression.ToString()!);
             logger.Information("checking cache for {key}", hashingKey);
-            return cache.GetOrCreate(
+            return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                entry =>
-                {
-                    entry.SetOptions(cacheOptions);
-                    logger.Warning("fetching source for {key}", hashingKey);
-                    return repository.PagedListWithGroupByAsync<TGroupProperty, TResult>(
+                () =>
+                    repository.PagedListWithGroupByAsync<TGroupProperty, TResult>(
                         spec,
                         queryParam,
                         groupByExpression,
                         cancellationToken
-                    );
-                }
+                    )
             )!;
         }
         return repository.PagedListWithGroupByAsync<TGroupProperty, TResult>(
@@ -216,18 +182,14 @@ public partial class CachedRepository<T> : IRepository<T>
             string key = $"{spec.CacheKey}-{nameof(PagedListWithGroupBy)}";
             string hashingKey = HashKey(key, queryParam, groupByExpression.ToString());
             logger.Information("checking cache for {key}", hashingKey);
-            return cache.GetOrCreate(
+            return memoryCacheService.GetOrSet(
                 hashingKey,
-                entry =>
-                {
-                    entry.SetOptions(cacheOptions);
-                    logger.Warning("fetching source for {key}", hashingKey);
-                    return repository.PagedListWithGroupBy<TGroupProperty, TResult>(
+                () =>
+                    repository.PagedListWithGroupBy<TGroupProperty, TResult>(
                         spec,
                         queryParam,
                         groupByExpression
-                    );
-                }
+                    )
             )!;
         }
         return repository.PagedListWithGroupBy<TGroupProperty, TResult>(
@@ -248,14 +210,9 @@ public partial class CachedRepository<T> : IRepository<T>
             string key = $"{spec.CacheKey}-{nameof(CursorPagedListAsync)}";
             string hashingKey = HashKey(key, queryParam, uniqueSort);
             logger.Information("checking cache for {key}", hashingKey);
-            return cache.GetOrCreateAsync(
+            return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                entry =>
-                {
-                    entry.SetOptions(cacheOptions);
-                    logger.Warning("fetching source for {key}", hashingKey);
-                    return repository.CursorPagedListAsync<TResult>(spec, queryParam, uniqueSort);
-                }
+                () => repository.CursorPagedListAsync<TResult>(spec, queryParam, uniqueSort)
             )!;
         }
         return repository.CursorPagedListAsync<TResult>(spec, queryParam, uniqueSort);
@@ -277,19 +234,15 @@ public partial class CachedRepository<T> : IRepository<T>
             string key = $"{spec.CacheKey}-{nameof(CursorPagedListWithGroupByAsync)}";
             string hashingKey = HashKey(key, queryParam, uniqueSort);
             logger.Information("checking cache for {key}", hashingKey);
-            return cache.GetOrCreateAsync(
+            return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                entry =>
-                {
-                    entry.SetOptions(cacheOptions);
-                    logger.Warning("fetching source for {key}", hashingKey);
-                    return repository.CursorPagedListWithGroupByAsync<TGroupProperty, TResult>(
+                () =>
+                    repository.CursorPagedListWithGroupByAsync<TGroupProperty, TResult>(
                         spec,
                         queryParam,
                         groupByExpression,
                         uniqueSort
-                    );
-                }
+                    )
             )!;
         }
         return repository.CursorPagedListWithGroupByAsync<TGroupProperty, TResult>(

@@ -2,7 +2,7 @@ using System.Reflection;
 using CaseConverter;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
-using SharedKernel.Common.ElasticConfigurations;
+using FluentConfiguration.Configurations;
 using SharedKernel.Extensions.Reflections;
 using SharedKernel.Models;
 

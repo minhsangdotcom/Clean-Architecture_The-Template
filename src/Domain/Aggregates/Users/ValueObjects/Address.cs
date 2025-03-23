@@ -1,6 +1,6 @@
 using Ardalis.GuardClauses;
-using Ardalis.SharedKernel;
 using Domain.Aggregates.Regions;
+using Domain.Common;
 
 namespace Domain.Aggregates.Users.ValueObjects;
 

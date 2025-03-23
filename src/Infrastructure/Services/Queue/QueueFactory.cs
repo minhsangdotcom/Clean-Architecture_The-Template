@@ -1,9 +1,8 @@
-using Application.Common.Interfaces.Registers;
-using Application.Common.Interfaces.Services.DistributedCache;
+using Application.Common.Interfaces.Services.Queue;
 using Domain.Aggregates.QueueLogs;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.Services.DistributedCache;
+namespace Infrastructure.Services.Queue;
 
 public class QueueFactory(IServiceScopeFactory serviceScopeFactory) : IQueueFactory
 {

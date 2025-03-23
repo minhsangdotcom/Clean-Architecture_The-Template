@@ -104,9 +104,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
     {
         string caseName = name.ToSnakeCase();
         return !await roleManagerService.Roles.AnyAsync(
-            x =>
-                (!id.HasValue && EF.Functions.Like(x.Name, caseName))
-                || (x.Id != id && EF.Functions.Like(x.Name, caseName)),
+            x => (!id.HasValue && x.Name == caseName) || (x.Id != id && x.Name == caseName),
             cancellationToken
         );
     }

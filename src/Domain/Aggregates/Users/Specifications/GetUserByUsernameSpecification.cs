@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using SharedKernel.Common.Specs;
+using Specification;
 
 namespace Domain.Aggregates.Users.Specifications;
 
@@ -7,6 +7,6 @@ public class GetUserByUsernameSpecification : Specification<User>
 {
     public GetUserByUsernameSpecification(string username)
     {
-        Query.Where(x => EF.Functions.Like(x.Username, username)).AsNoTracking();
+        Query.Where(x => x.Username == username).AsNoTracking();
     }
 }

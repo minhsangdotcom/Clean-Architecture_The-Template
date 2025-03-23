@@ -1,4 +1,4 @@
-namespace Infrastructure.Common;
+namespace Infrastructure.Services.MemoryCache;
 
 public class CacheSettings
 {

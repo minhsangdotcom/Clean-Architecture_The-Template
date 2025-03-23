@@ -189,8 +189,8 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             .Repository<User>()
             .AnyAsync(
                 x =>
-                    (!id.HasValue && EF.Functions.Like(x.Username, username))
-                    || (x.Id != id && EF.Functions.Like(x.Username, username)),
+                    (!id.HasValue && x.Username == username)
+                    || (x.Id != id && x.Username == username),
                 cancellationToken
             );
     }

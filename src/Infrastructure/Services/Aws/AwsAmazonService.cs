@@ -1,6 +1,6 @@
 using Amazon.S3;
 using Amazon.S3.Model;
-using Application.Common.Interfaces.Services.Aws;
+using Application.Common.Interfaces.Services.Storage;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
 using Microsoft.Extensions.Options;
@@ -9,31 +9,11 @@ using SharedKernel.Extensions;
 namespace Infrastructure.Services.Aws;
 
 public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSetting)
-    : IAmazonS3Service
+    : IStorageService
 {
     private readonly S3AwsSettings s3AwsSettings = awsSetting.Value;
 
-    public async Task<AwsResponse> DeleteAsync(string key)
-    {
-        try
-        {
-            var request = new DeleteObjectRequest
-            {
-                BucketName = s3AwsSettings.BucketName,
-                Key = key,
-            };
-
-            await amazonS3.DeleteObjectAsync(request);
-
-            return new();
-        }
-        catch (AmazonS3Exception ex)
-        {
-            return new(ex.Message);
-        }
-    }
-
-    public async Task<AwsResponse> UploadAsync(Stream stream, string key) =>
+    public async Task<StorageResponse> UploadAsync(Stream stream, string key) =>
         await UploadAsync(
             new PutObjectRequest
             {
@@ -43,7 +23,7 @@ public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSet
             }
         );
 
-    public async Task<AwsResponse> UploadAsync(string path, string key) =>
+    public async Task<StorageResponse> UploadAsync(string path, string key) =>
         await UploadAsync(
             new PutObjectRequest
             {
@@ -53,25 +33,29 @@ public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSet
             }
         );
 
-    private async Task<AwsResponse> UploadAsync(PutObjectRequest request)
+    private async Task<StorageResponse> UploadAsync(PutObjectRequest request)
     {
+        StorageResponse response = new();
         try
         {
             PutObjectResponse res = await amazonS3.PutObjectAsync(request);
-
-            return new() { S3UploadedPath = GeneratePreSignedURL(request.Key), Key = request.Key };
+            response.FilePath = GeneratePreSignedURL(request.Key);
+            response.Key = request.Key;
+            response.IsSuccess = true;
         }
         catch (AmazonS3Exception ex)
         {
-            return new AwsResponse(ex.Message);
+            response.Error = ex.Message;
         }
         catch (Exception ex)
         {
-            return new AwsResponse(ex.Message);
+            response.Error = ex.Message;
         }
+
+        return response;
     }
 
-    public async Task<AwsResponse> UploadMultiplePartAsync(AwsRequest request)
+    public async Task<StorageResponse> UploadMultiplePartAsync(MultiplePartUploadRequest request)
     {
         List<UploadPartResponse> uploadResponses = [];
 
@@ -82,6 +66,7 @@ public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSet
             initiateRequest
         );
 
+        StorageResponse storageResponse = new();
         try
         {
             long filePosition = 0;
@@ -127,7 +112,10 @@ public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSet
 
             await amazonS3.CompleteMultipartUploadAsync(completeRequest);
 
-            return new() { S3UploadedPath = GeneratePreSignedURL(request.Key!), Key = request.Key };
+            //return new() { S3UploadedPath = GeneratePreSignedURL(request.Key!), Key = request.Key };
+            storageResponse.FilePath = GeneratePreSignedURL(request.Key!);
+            storageResponse.Key = request.Key;
+            storageResponse.IsSuccess = true;
         }
         catch (Exception ex)
         {
@@ -142,17 +130,42 @@ public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSet
                 };
             await amazonS3.AbortMultipartUploadAsync(abortMPURequest);
 
-            return new(ex.Message);
+            storageResponse.Error = ex.Message;
         }
+
+        return storageResponse;
+    }
+
+    public async Task<StorageResponse> DeleteAsync(string key)
+    {
+        StorageResponse storage = new();
+        try
+        {
+            var request = new DeleteObjectRequest
+            {
+                BucketName = s3AwsSettings.BucketName,
+                Key = key,
+            };
+
+            await amazonS3.DeleteObjectAsync(request);
+            storage.IsSuccess = true;
+        }
+        catch (AmazonS3Exception ex)
+        {
+            storage.Error = ex.Message;
+        }
+
+        return storage;
     }
 
     public string UniqueFileName(string fileName)
     {
         string name = Path.GetFileNameWithoutExtension(fileName).SpecialCharacterRemoving();
         string extension = Path.GetExtension(fileName);
-
         return $"{name}.{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}{extension}";
     }
+
+    public string? GetPublicUrl() => s3AwsSettings.PublicUrl;
 
     public string? GetFullpath(string? key) =>
         string.IsNullOrWhiteSpace(key) ? null : GeneratePreSignedURL(key);
@@ -177,6 +190,4 @@ public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSet
             StringComparison.OrdinalIgnoreCase
         );
     }
-
-    public string? GetPublicUrl() => s3AwsSettings.PublicUrl;
 }

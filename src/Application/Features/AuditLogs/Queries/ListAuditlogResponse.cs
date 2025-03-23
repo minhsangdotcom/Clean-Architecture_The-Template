@@ -1,5 +1,5 @@
 using Domain.Aggregates.AuditLogs;
 
-namespace Application.UseCases.AuditLogs.Queries;
+namespace Application.Features.AuditLogs.Queries;
 
 public class ListAuditlogResponse : AuditLog;

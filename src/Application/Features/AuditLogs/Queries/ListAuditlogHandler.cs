@@ -1,8 +1,7 @@
 using Application.Common.Interfaces.Services.Elastics;
-using Application.UseCases.AuditLogs.Queries;
+using Contracts.Dtos.Responses;
 using Domain.Aggregates.AuditLogs;
 using Mediator;
-using SharedKernel.Responses;
 
 namespace Application.Features.AuditLogs.Queries;
 
@@ -16,7 +15,7 @@ public class ListAuditlogHandler(IElasticsearchServiceFactory? elasticsearch = n
     {
         if (elasticsearch == null)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Elasticsearch has not enabled");
         }
         return await elasticsearch
             .Get<AuditLog>()

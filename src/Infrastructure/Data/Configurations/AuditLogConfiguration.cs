@@ -1,14 +1,14 @@
 using Domain.Aggregates.AuditLogs;
 using Elastic.Clients.Elasticsearch.Analysis;
-using SharedKernel.Common.ElasticConfigurations;
+using FluentConfiguration.Configurations;
 
 namespace Infrastructure.Data.Configurations;
 
 public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
 {
-    public void Configure(ref ElasticsearchConfigBuilder<AuditLog> buider)
+    public void Configure(ref ElasticsearchConfigBuilder<AuditLog> buider, string? prefix = null)
     {
-        buider.ToIndex();
+        buider.ToIndex(prefix);
         buider.HasKey(key => key.Id);
 
         buider.Settings(setting =>

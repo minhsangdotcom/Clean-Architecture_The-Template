@@ -1,6 +1,6 @@
 namespace Contracts.Dtos.Requests;
 
-public class AwsRequest
+public class MultiplePartUploadRequest
 {
     public long ContentLength { get; set; }
 

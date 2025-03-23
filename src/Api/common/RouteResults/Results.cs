@@ -8,17 +8,21 @@ namespace Api.common.RouteResults;
 
 public static class Results
 {
-    public static ActionResult<ApiResponse> Ok200(this ControllerBase controller, object data) =>
+    public static ActionResult<ApiResponse<T>> Ok200<T>(this ControllerBase controller, T data)
+        where T : class =>
         controller.ToActionResult(
-            new Result<ApiResponse>(new ApiResponse(data, Message.SUCCESS, StatusCodes.Status200OK))
+            new Result<ApiResponse<T>>(
+                new ApiResponse<T>(data, Message.SUCCESS, StatusCodes.Status200OK)
+            )
         );
 
-    public static ActionResult<ApiResponse> Created201(
+    public static ActionResult<ApiResponse<T>> Created201<T>(
         this ControllerBase controller,
         string routeName,
         Ulid id,
-        object? data = null
-    ) => controller.CreatedAtRoute(routeName, new { id }, data);
+        T? data = null
+    )
+        where T : class => controller.CreatedAtRoute(routeName, new { id }, data);
 
     public static ActionResult NoContent204(this ControllerBase controller) =>
         controller.NoContent();

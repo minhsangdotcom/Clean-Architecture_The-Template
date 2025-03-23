@@ -3,8 +3,8 @@ using Domain.Aggregates.AuditLogs;
 using Domain.Aggregates.AuditLogs.Enums;
 using Domain.Aggregates.Users.Enums;
 using Elastic.Clients.Elasticsearch;
+using FluentConfiguration.Configurations;
 using Serilog;
-using SharedKernel.Common.ElasticConfigurations;
 
 namespace Infrastructure.Services.Elastics;
 
@@ -67,7 +67,10 @@ public class ElasticsearchRegisterHelper
     /// </summary>
     /// <param name="elasticsearchClient"></param>
     /// <returns></returns>
-    public static async Task SeedingAsync(ElasticsearchClient elasticsearchClient)
+    public static async Task SeedingAsync(
+        ElasticsearchClient elasticsearchClient,
+        string? prefix = null
+    )
     {
         var auditLog = await elasticsearchClient.SearchAsync<AuditLog>();
         if (auditLog.Documents.Count > 0)
@@ -167,7 +170,7 @@ public class ElasticsearchRegisterHelper
 
         var response = await elasticsearchClient.IndexManyAsync(
             auditLogs,
-            ElsIndexExtension.GetName<AuditLog>()
+            ElsIndexExtension.GetName<AuditLog>(prefix)
         );
 
         if (response.IsSuccess())
@@ -189,7 +192,8 @@ public class ElasticsearchRegisterHelper
     /// <param name="assembly"></param>
     /// <returns></returns>
     public static IEnumerable<ElasticConfigureResult> GetElasticsearchConfigBuilder(
-        Assembly assembly
+        Assembly assembly,
+        string prefix
     )
     {
         var configuringTypes = GetConfiguringTypes(assembly);
@@ -203,7 +207,7 @@ public class ElasticsearchRegisterHelper
             var elasticsearchConfigBuilder = CreateElasticsearchConfigBuilder(iType);
             var elsConfig = Activator.CreateInstance(type);
 
-            method.Invoke(elsConfig, [elasticsearchConfigBuilder]);
+            method.Invoke(elsConfig, [elasticsearchConfigBuilder, prefix]);
 
             yield return new ElasticConfigureResult(elasticsearchConfigBuilder!, iType);
         }

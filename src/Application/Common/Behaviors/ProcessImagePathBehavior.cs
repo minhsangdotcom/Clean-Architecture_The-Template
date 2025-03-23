@@ -1,16 +1,16 @@
 using System.Collections;
 using System.Reflection;
-using Application.Common.Interfaces.Services.Aws;
+using Application.Common.Interfaces.Services.Storage;
 using Application.Common.Security;
+using Contracts.Dtos.Responses;
 using Mediator;
 using Serilog;
-using SharedKernel.Responses;
 
 namespace Application.Common.Behaviors;
 
 public class ProcessImagePathBehavior<TMessage, TResponse>(
     ILogger logger,
-    IAmazonS3Service awsAmazonService
+    IStorageService storageService
 ) : MessagePostProcessor<TMessage, TResponse>
     where TMessage : notnull, IMessage
 {
@@ -92,9 +92,9 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
     private void UpdatePropertyIfNotPublicUrl(object target, PropertyInfo property, object key)
     {
         string imageKeyStr = key.ToString()!;
-        if (!imageKeyStr.StartsWith(awsAmazonService.GetPublicUrl()!))
+        if (!imageKeyStr.StartsWith(storageService.GetPublicUrl()!))
         {
-            string? fullPath = awsAmazonService.GetFullpath(imageKeyStr);
+            string? fullPath = storageService.GetFullpath(imageKeyStr);
             logger.Information("image path {value}", fullPath);
             property.SetValue(target, fullPath);
         }

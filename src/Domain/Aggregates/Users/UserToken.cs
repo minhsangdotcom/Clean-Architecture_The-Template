@@ -1,4 +1,4 @@
-using SharedKernel.Common;
+using Domain.Common;
 
 namespace Domain.Aggregates.Users;
 

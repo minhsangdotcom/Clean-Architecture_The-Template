@@ -3,7 +3,6 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
-using Infrastructure.Common;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Services;
@@ -13,6 +12,8 @@ using Infrastructure.Services.Elastics;
 using Infrastructure.Services.Hangfires;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Mail;
+using Infrastructure.Services.MemoryCache;
+using Infrastructure.Services.Queue;
 using Infrastructure.Services.Token;
 using Infrastructure.UnitOfWorks;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -117,6 +118,7 @@ public static class DependencyInjection
                 configuration.GetSection(nameof(CacheSettings)).Bind(options)
             )
             .AddRedis(configuration)
+            .AddQueue(configuration)
             .AddHangfireConfiguration(configuration)
             .AddElasticSearch(configuration);
 

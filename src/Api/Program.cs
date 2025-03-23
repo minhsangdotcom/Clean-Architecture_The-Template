@@ -10,12 +10,15 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Serilog;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
 
 #region main dependencies
+string? url = builder.Configuration["urls"] ?? "http://0.0.0.0:8080";
+builder.WebHost.UseUrls(url);
 builder.AddConfiguration();
 builder
     .Services.AddControllers()
@@ -68,14 +71,16 @@ try
 
     app.UseHangfireDashboard(configuration);
 
+    const string routeRefix = "docs";
     if (isDevelopment)
     {
         app.UseSwagger();
-        app.UseSwaggerUI(x =>
+        app.UseSwaggerUI(configs =>
         {
-            x.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-            x.RoutePrefix = "docs";
-            x.ConfigObject.PersistAuthorization = true;
+            configs.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            configs.RoutePrefix = routeRefix;
+            configs.ConfigObject.PersistAuthorization = true;
+            configs.DocExpansion(DocExpansion.None);
         });
         app.Lifetime.ApplicationStarted.Register(() =>
         {
@@ -85,10 +90,16 @@ try
             if (addresses != null && addresses.Length > 0)
             {
                 string? url = addresses?[0];
-                Log.Logger.Information("Application is running at: {Url}", url);
+                string? renewUrl =
+                    url?.Contains("0.0.0.0") == true ? url.Replace("0.0.0.0", "localhost") : url;
+                Log.Logger.Information("Application is running at: {Url}", renewUrl);
+                Log.Logger.Information(
+                    "Swagger UI is running at: {Url}",
+                    $"{renewUrl}/{routeRefix}"
+                );
                 Log.Logger.Information(
                     "Application health check is running at: {Url}",
-                    $"{url}{healthCheckPath}"
+                    $"{renewUrl}{healthCheckPath}"
                 );
             }
         });

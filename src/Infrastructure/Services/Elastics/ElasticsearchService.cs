@@ -1,21 +1,25 @@
 using Application.Common.Interfaces.Services.Elastics;
 using AutoMapper;
+using Contracts.Dtos.Requests;
+using Contracts.Dtos.Responses;
+using Domain.Common;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.Fluent;
 using Elastic.Clients.Elasticsearch.QueryDsl;
-using SharedKernel.Common;
-using SharedKernel.Common.ElasticConfigurations;
+using FluentConfiguration.Configurations;
+using Microsoft.Extensions.Options;
 using SharedKernel.Models;
-using SharedKernel.Requests;
-using SharedKernel.Responses;
 
 namespace Infrastructure.Services.Elastics;
 
-public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper mapper)
-    : IElasticsearchService<T>
+public class ElasticsearchService<T>(
+    ElasticsearchClient elasticClient,
+    IMapper mapper,
+    IOptions<ElasticsearchSettings> options
+) : IElasticsearchService<T>
     where T : class
 {
-    private readonly string indexName = ElsIndexExtension.GetName<T>();
+    private readonly string indexName = ElsIndexExtension.GetName<T>(options.Value?.PrefixIndex);
 
     public async Task<T> AddAsync(T entity)
     {

@@ -1,14 +1,15 @@
 using System.Linq.Expressions;
+using Application.Common.Extensions;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper.QueryableExtensions;
+using Contracts.Dtos.Requests;
+using Contracts.Dtos.Responses;
+using Domain.Common;
 using Microsoft.EntityFrameworkCore;
-using SharedKernel.Common;
-using SharedKernel.Common.Specs;
-using SharedKernel.Common.Specs.Interfaces;
 using SharedKernel.Extensions.QueryExtensions;
 using SharedKernel.Models;
-using SharedKernel.Requests;
-using SharedKernel.Responses;
+using Specification;
+using Specification.Interfaces;
 
 namespace Infrastructure.UnitOfWorks.Repositories;
 

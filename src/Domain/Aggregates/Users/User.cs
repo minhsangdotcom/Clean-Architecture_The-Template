@@ -3,8 +3,8 @@ using Ardalis.GuardClauses;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Events;
 using Domain.Aggregates.Users.ValueObjects;
+using Domain.Common;
 using Mediator;
-using SharedKernel.Common;
 using SharedKernel.Constants;
 using SharedKernel.Extensions.Reflections;
 
