@@ -12,12 +12,14 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Api.Endpoints.User;
 
 public class CreateUserEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<CreateUserCommand>.WithActionResult<ApiResponse>
+    : EndpointBaseAsync.WithRequest<CreateUserCommand>.WithActionResult<
+        ApiResponse<CreateUserResponse>
+    >
 {
     [HttpPost(Router.UserRoute.Users)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "create User")]
     [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(
+    public override async Task<ActionResult<ApiResponse<CreateUserResponse>>> HandleAsync(
         [FromForm] CreateUserCommand request,
         CancellationToken cancellationToken = default
     )

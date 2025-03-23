@@ -11,12 +11,14 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Api.Endpoints.User;
 
 public class UpdateUserProfileEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<UpdateUserProfileCommand>.WithActionResult<ApiResponse>
+    : EndpointBaseAsync.WithRequest<UpdateUserProfileCommand>.WithActionResult<
+        ApiResponse<UpdateUserProfileResponse>
+    >
 {
     [HttpPut(Router.UserRoute.Profile)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Update Profile User")]
     [AuthorizeBy]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(
+    public override async Task<ActionResult<ApiResponse<UpdateUserProfileResponse>>> HandleAsync(
         [FromForm] UpdateUserProfileCommand request,
         CancellationToken cancellationToken = default
     ) => this.Ok200(await sender.Send(request, cancellationToken));

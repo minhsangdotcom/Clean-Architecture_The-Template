@@ -13,12 +13,12 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Api.Endpoints.Roles;
 
 public class DeleteRoleEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<string>.WithActionResult<ApiResponse>
+    : EndpointBaseAsync.WithRequest<string>.WithActionResult<ApiResponse<string>>
 {
     [HttpDelete(Router.RoleRoute.GetUpdateDelete)]
     [SwaggerOperation(Tags = [Router.RoleRoute.Tags], Summary = "Delete Role")]
     [AuthorizeBy(permissions: $"{ActionPermission.delete}:{ObjectPermission.role}")]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(
+    public override async Task<ActionResult<ApiResponse<string>>> HandleAsync(
         [FromRoute(Name = RoutePath.Id)] string roleId,
         CancellationToken cancellationToken = default
     )

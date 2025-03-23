@@ -12,12 +12,14 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Api.Endpoints.Roles;
 
 public class CreateRoleEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<CreateRoleCommand>.WithActionResult<ApiResponse>
+    : EndpointBaseAsync.WithRequest<CreateRoleCommand>.WithActionResult<
+        ApiResponse<CreateRoleResponse>
+    >
 {
     [HttpPost(Router.RoleRoute.Roles)]
     [SwaggerOperation(Tags = [Router.RoleRoute.Tags], Summary = "create Role")]
     [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.role}")]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(
+    public override async Task<ActionResult<ApiResponse<CreateRoleResponse>>> HandleAsync(
         CreateRoleCommand request,
         CancellationToken cancellationToken = default
     )
