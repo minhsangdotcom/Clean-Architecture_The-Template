@@ -40,13 +40,14 @@ public static class Credential
         };
 
     public static readonly IReadOnlyCollection<KeyValuePair<string, string>> ADMIN_CLAIMS =
-        PermissionGroups
+    [
+        .. PermissionGroups
             .SelectMany(x => x.Value)
             .Select(permission => new KeyValuePair<string, string>(
                 ClaimTypes.Permission,
                 permission
-            ))
-            .ToList();
+            )),
+    ];
 
     public static readonly IReadOnlyCollection<KeyValuePair<string, string>> MANAGER_CLAIMS =
     [

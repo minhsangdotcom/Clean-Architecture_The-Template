@@ -2,6 +2,7 @@ using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using FluentAssertions;
 using Infrastructure.Constants;
@@ -13,9 +14,7 @@ namespace Application.SubcutaneousTests.Users.Create;
 public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
     private readonly Fixture fixture = new();
-
     private Ulid roleId;
-
     private CreateUserCommand command = new();
 
     [Fact]
@@ -76,34 +75,33 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        await testingFixture.SeedingRegionsAsync();
-        var response = await testingFixture.CreateRoleAsync("adminTest");
-        roleId = response.Id;
-        await testingFixture.SeedingUserAsync();
+        UserAddress address = await testingFixture.SeedingRegionsAsync();
+        Role role = await testingFixture.CreateAdminRoleAsync();
+        roleId = role.Id;
 
         IFormFile file = FileHelper.GenerateIFormfile(
             Path.Combine(Directory.GetCurrentDirectory(), "Files", "avatar_cute_2.jpg")
         );
         command = fixture
             .Build<CreateUserCommand>()
-            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
-            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
-            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
+            .With(x => x.ProvinceId, address.ProvinceId)
+            .With(x => x.DistrictId, address.DistrictId)
+            .With(x => x.CommuneId, address.CommuneId)
             .With(x => x.Avatar, file)
             .With(
                 x => x.UserClaims,
-                Credential
-                    .MANAGER_CLAIMS.Select(x => new UserClaimModel()
+                [
+                    .. Credential.MANAGER_CLAIMS.Select(x => new UserClaimModel()
                     {
                         ClaimType = x.Key,
                         ClaimValue = x.Value,
-                    })
-                    .ToList()
+                    }),
+                ]
             )
             .With(x => x.Roles, [roleId])
-            .With(x => x.Email, "super.admin@gmail.com")
-            .With(x => x.PhoneNumber, "0925123123")
-            .With(x => x.Username, "super.admin")
+            .With(x => x.Email, "admin@gmail.com")
+            .With(x => x.PhoneNumber, "0123456789")
+            .With(x => x.Username, "admin.super")
             .Create();
     }
 

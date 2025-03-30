@@ -1,10 +1,9 @@
 using Application.Common.Interfaces.Services.Identity;
 using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Create;
-using Application.Features.Roles.Commands.Update;
 using Application.SubcutaneousTests.Extensions;
-using Contracts.Constants;
 using Domain.Aggregates.Roles;
+using Infrastructure.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.Constants;
 
@@ -28,50 +27,66 @@ public partial class TestingFixture
         return await roleManagerService.FindByIdAsync(id);
     }
 
-    public async Task<Role> CreateRoleAsync(string roleName)
+    public async Task<Role> CreateAdminRoleAsync()
     {
-        CreateRoleCommand role =
-            new()
+        List<RoleClaimModel> roleClaimModels =
+        [
+            .. Credential.ADMIN_CLAIMS.Select(x => new RoleClaimModel()
             {
-                Name = roleName,
-                RoleClaims =
-                [
-                    new RoleClaimModel()
-                    {
-                        ClaimType = ClaimTypes.Permission,
-                        ClaimValue = "create:user",
-                    },
-                    new RoleClaimModel()
-                    {
-                        ClaimType = ClaimTypes.Permission,
-                        ClaimValue = "detail:user",
-                    },
-                ],
-            };
-        factory.ThrowIfNull();
-        var response = await SendAsync(role);
-        using var scope = factory!.Services.CreateScope();
-        var roleManagerService = scope.ServiceProvider.GetRequiredService<IRoleManagerService>();
-        return (await roleManagerService.FindByIdAsync(response.Id))!;
+                ClaimType = x.Key,
+                ClaimValue = x.Value,
+            }),
+        ];
+
+        return await CreateRoleAsync(Credential.ADMIN_ROLE, roleClaimModels);
     }
 
-    public UpdateRoleCommand ToUpdateRoleCommand(Role role)
+    public async Task<Role> CreateManagerRoleAsync()
     {
-        return new()
-        {
-            RoleId = role.Id.ToString(),
-            Role = new UpdateRole()
+        List<RoleClaimModel> roleClaimModels =
+        [
+            .. Credential.MANAGER_CLAIMS.Select(x => new RoleClaimModel()
             {
-                Name = role.Name,
-                Description = role.Description,
-                RoleClaims = role.RoleClaims!.Select(x => new RoleClaimModel()
-                    {
-                        ClaimType = x.ClaimType,
-                        ClaimValue = x.ClaimValue,
-                        Id = x.Id,
-                    })
-                    .ToList(),
-            },
-        };
+                ClaimType = x.Key,
+                ClaimValue = x.Value,
+            }),
+        ];
+
+        return await CreateRoleAsync(Credential.MANAGER_ROLE, roleClaimModels);
     }
+
+    public async Task<Role> CreateNormalRoleAsync() =>
+        await CreateRoleAsync("user", DefaultUserClaims());
+
+    public async Task<Role> CreateRoleAsync(string roleName, List<RoleClaimModel> roleClaims)
+    {
+        CreateRoleCommand role = new() { Name = roleName, RoleClaims = roleClaims };
+        factory.ThrowIfNull();
+        CreateRoleResponse response = await SendAsync(role);
+        return (await FindRoleByIdIncludeRoleClaimsAsync(response.Id))!;
+    }
+
+    public static List<RoleClaimModel> DefaultUserClaims() =>
+        [
+            new RoleClaimModel()
+            {
+                ClaimType = ClaimTypes.Permission,
+                ClaimValue = $"{ActionPermission.list}:{ObjectPermission.role}",
+            },
+            new RoleClaimModel()
+            {
+                ClaimType = ClaimTypes.Permission,
+                ClaimValue = $"{ActionPermission.detail}:{ObjectPermission.role}",
+            },
+            new RoleClaimModel()
+            {
+                ClaimType = ClaimTypes.Permission,
+                ClaimValue = $"{ActionPermission.list}:{ObjectPermission.user}",
+            },
+            new RoleClaimModel()
+            {
+                ClaimType = ClaimTypes.Permission,
+                ClaimValue = $"{ActionPermission.detail}:{ObjectPermission.user}",
+            },
+        ];
 }

@@ -1,6 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Features.Users.Commands.Delete;
 using AutoFixture;
+using Domain.Aggregates.Users;
 using FluentAssertions;
 
 namespace Application.SubcutaneousTests.Users.Delete;
@@ -38,10 +39,8 @@ public class DeleteUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        await testingFixture.SeedingRegionsAsync();
-        await testingFixture.SeedingUserAsync();
-        var response = await testingFixture.CreateUserAsync();
-
-        id = Ulid.Parse(response.UserId);
+        UserAddress address = await testingFixture.SeedingRegionsAsync();
+        User user = await testingFixture.CreateNormalUserAsync(address);
+        id = user.Id;
     }
 }

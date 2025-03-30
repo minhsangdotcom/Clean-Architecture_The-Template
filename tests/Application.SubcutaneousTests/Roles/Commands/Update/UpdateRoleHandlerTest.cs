@@ -1,6 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Update;
+using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
 using CaseConverter;
 using Contracts.ApiWrapper;
@@ -20,7 +21,6 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task UpdateRole_WhenIdNotFound_ShouldReturnNotFoundException()
     {
         UpdateRole updatedRole = fixture.Build<UpdateRole>().Without(x => x.RoleClaims).Create();
-
         Ulid ulid = Ulid.NewUlid();
         UpdateRoleCommand updateRoleCommand = fixture
             .Build<UpdateRoleCommand>()
@@ -37,6 +37,7 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .Invoking(() => testingFixture.SendAsync(updateRoleCommand))
             .Should()
             .ThrowAsync<NotFoundException>(becauseArgs: messageResults);
+
         ReasonTranslation error = result.And.Errors.First().Reasons.First();
         MessageResult messageResult = messageResults[0];
         error.Should().NotBeNull();
@@ -66,6 +67,7 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task UpdateRole_WhenNoDescription_ShouldUpdateRole()
     {
         updateRoleCommand.Role.Description = null;
+
         var createRoleResponse = await testingFixture.SendAsync(updateRoleCommand);
 
         Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
@@ -88,6 +90,7 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         roleClaims[0].ClaimValue = "create.users";
         updateRole.Name = $"name{Guid.NewGuid()}";
         updateRole.Description = $"description{Guid.NewGuid()}";
+
         var createRoleResponse = await testingFixture.SendAsync(updateRoleCommand);
 
         Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
@@ -105,12 +108,10 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        Role role = await testingFixture.CreateRoleAsync("admin");
-        updateRoleCommand = testingFixture.ToUpdateRoleCommand(role);
+        updateRoleCommand = RoleMappingExtension.ToUpdateRoleCommand(
+            await testingFixture.CreateAdminRoleAsync()
+        );
     }
 
-    public async Task DisposeAsync()
-    {
-        await Task.CompletedTask;
-    }
+    public async Task DisposeAsync() => await Task.CompletedTask;
 }

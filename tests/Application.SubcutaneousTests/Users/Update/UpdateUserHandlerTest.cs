@@ -1,8 +1,10 @@
 using Application.Common.Exceptions;
 using Application.Features.Users.Commands.Update;
+using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
 using Domain.Aggregates.Users;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.SubcutaneousTests.Users.Update;
 
@@ -10,7 +12,6 @@ namespace Application.SubcutaneousTests.Users.Update;
 public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
     private readonly Fixture fixture = new();
-
     private UpdateUserCommand updateUserCommand = new();
 
     [Fact]
@@ -38,6 +39,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private async Task UpdateUser_WhenNoAvatar_ShouldUpdateSuccess()
     {
         updateUserCommand.User!.Avatar = null;
+
         UpdateUserResponse response = await testingFixture.SendAsync(updateUserCommand);
         User? user = await testingFixture.FindUserByIdAsync(response.Id);
 
@@ -48,6 +50,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private async Task UpdateUser_WhenNoDayOfBirth_ShouldUpdateSuccess()
     {
         updateUserCommand.User!.DayOfBirth = null;
+
         UpdateUserResponse response = await testingFixture.SendAsync(updateUserCommand);
         User? user = await testingFixture.FindUserByIdAsync(response.Id);
 
@@ -58,12 +61,13 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private async Task UpdateUser_ShouldUpdateSuccess()
     {
         UpdateUserResponse response = await testingFixture.SendAsync(updateUserCommand);
+
         User? user = await testingFixture.FindUserByIdAsync(response.Id);
 
         AssertUser(user, updateUserCommand);
     }
 
-    private void AssertUser(User? user, UpdateUserCommand updateUserCommand)
+    private static void AssertUser(User? user, UpdateUserCommand updateUserCommand)
     {
         UpdateUser updateUser = updateUserCommand.User!;
         user.Should().NotBeNull();
@@ -113,16 +117,19 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         }
     }
 
-    public async Task DisposeAsync()
-    {
-        await Task.CompletedTask;
-    }
+    public async Task DisposeAsync() => await Task.CompletedTask;
 
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        await testingFixture.SeedingRegionsAsync();
-        await testingFixture.SeedingUserAsync();
-        updateUserCommand = await testingFixture.CreateUserAsync();
+        UserAddress address = await testingFixture.SeedingRegionsAsync();
+
+        IFormFile file = FileHelper.GenerateIFormfile(
+            Path.Combine(Directory.GetCurrentDirectory(), "Files", "avatar_cute_2.jpg")
+        );
+
+        updateUserCommand = UserMappingExtension.ToUpdateUserCommand(
+            await testingFixture.CreateManagerUserAsync(address, file)
+        );
     }
 }

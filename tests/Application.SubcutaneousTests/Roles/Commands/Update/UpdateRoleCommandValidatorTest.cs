@@ -1,11 +1,14 @@
 using System.Net;
 using Application.Common.Exceptions;
+using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Update;
 using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Roles;
 using FluentAssertions;
+using Infrastructure.Constants;
+using SharedKernel.Common.Messages;
 
 namespace Application.SubcutaneousTests.Roles.Commands.Update;
 
@@ -13,7 +16,6 @@ namespace Application.SubcutaneousTests.Roles.Commands.Update;
 public class UpdateRoleCommandValidatorTest(TestingFixture testingFixture) : IAsyncLifetime
 {
     private readonly Fixture fixture = new();
-
     private UpdateRoleCommand updateRoleCommand = new();
 
     [Fact]
@@ -39,10 +41,9 @@ public class UpdateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateRole_WhenDuplicatedName_ShouldReturnDuplicatedMessage()
     {
-        const string ROLE_NAME = "userTest";
-        Role role = await testingFixture.CreateRoleAsync(ROLE_NAME);
-
-        updateRoleCommand.Role.Name = role.Name;
+        updateRoleCommand.Role.Name = Credential.ADMIN_ROLE;
+        UserAddress address = await testingFixture.SeedingRegionsAsync();
+        await testingFixture.CreateAdminUserAsync(address);
 
         var response = await testingFixture.MakeRequestAsync(
             "roles",
@@ -60,13 +61,22 @@ public class UpdateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
         firstElement.PropertyName.Should().Be("Name");
         List<ReasonTranslation> reasons = [.. firstElement.Reasons];
 
-        reasons[0].Message.Should().Be("role_name_existence");
+        reasons[0]
+            .Message.Should()
+            .Be(
+                Messager
+                    .Create<RoleModel>(nameof(Role))
+                    .Property(x => x.Name!)
+                    .Message(MessageType.Existence)
+                    .Build()
+                    .Message
+            );
     }
 
     [Fact]
     public async Task CreateRole_WhenInvalidLengthDescription_ShouldReturnValidationException()
     {
-        updateRoleCommand.Role.Description = new string(fixture.CreateMany<char>(1001).ToArray());
+        updateRoleCommand.Role.Description = new string([.. fixture.CreateMany<char>(1001)]);
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateRoleCommand))
             .Should()
@@ -93,17 +103,14 @@ public class UpdateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
             .ThrowAsync<ValidationException>();
     }
 
-    public async Task DisposeAsync()
-    {
-        await Task.CompletedTask;
-    }
+    public async Task DisposeAsync() => await Task.CompletedTask;
 
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
 
-        Role role = await testingFixture.CreateRoleAsync("managerTest");
-        updateRoleCommand = testingFixture.ToUpdateRoleCommand(role);
-        await testingFixture.SeedingUserAsync();
+        updateRoleCommand = RoleMappingExtension.ToUpdateRoleCommand(
+            await testingFixture.CreateManagerRoleAsync()
+        );
     }
 }
