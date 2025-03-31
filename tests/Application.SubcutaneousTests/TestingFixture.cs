@@ -69,14 +69,14 @@ public partial class TestingFixture : IAsyncLifetime
         }
 
         var loginPayload = new { Username = "super.admin", Password = "Admin@123" };
-        HttpResponseMessage httpResponse = await Client!.CreateRequestAsync(
+        HttpResponseMessage httpResponse = await Client.CreateRequestAsync(
             $"{BASE_URL}users/login",
             HttpMethod.Post,
             loginPayload
         );
         var response = await httpResponse.ToResponse<Response<LoginResponse>>();
 
-        return await Client!.CreateRequestAsync(
+        return await Client.CreateRequestAsync(
             $"{BASE_URL}{uriString}",
             method,
             payload,
