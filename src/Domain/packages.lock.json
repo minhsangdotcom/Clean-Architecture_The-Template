@@ -19,9 +19,9 @@
       },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Direct",
-        "requested": "[1.0.2, )",
-        "resolved": "1.0.2",
-        "contentHash": "OmkUGQ/id6QcKpuuGvyNmrhmtmCIDasUQvPztXxIwbTnxoIfsQ6CvrAfXCBD6cpkHb/NfsBvKni48cmimRYwjg==",
+        "requested": "[1.0.3-alpha, )",
+        "resolved": "1.0.3-alpha",
+        "contentHash": "r+cTQgL4hcRN5sJJHUWJWOaip6KuSNxs4/FOUC97Se9Wqg/5A6xvLwgS+eZ5BZzu6g4BIiqjaKAGeJAz1Rz12g==",
         "dependencies": {
           "BouncyCastle.Cryptography": "2.5.1",
           "CaseConverter": "2.0.1",
@@ -30,9 +30,9 @@
       },
       "minhsangdotcom.TheTemplate.SpecificationPattern": {
         "type": "Direct",
-        "requested": "[1.0.1, )",
-        "resolved": "1.0.1",
-        "contentHash": "Ur7VPjo0SX+Lfwngz4hvpzw8pBKCRaqAyOFXwFOlCmYPe3euK5xntJbsiKwTlu0Qb+nD717Mi8aoy2ew61KGRg==",
+        "requested": "[1.0.2-alpha, )",
+        "resolved": "1.0.2-alpha",
+        "contentHash": "UlbHLn+kYhqJ/nhiBGcMVNy8bX+MHCionasEalXDXPxkklNg5nSuOeuR9M3cWwQjmYYG8HObo3lccvMjVjIbkA==",
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "8.0.13",
           "Microsoft.EntityFrameworkCore.Relational": "8.0.13"

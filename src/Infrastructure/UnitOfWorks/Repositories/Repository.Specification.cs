@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedKernel.Extensions.QueryExtensions;
 using SharedKernel.Models;
 using Specification;
+using Specification.Evaluators;
 using Specification.Interfaces;
 
 namespace Infrastructure.UnitOfWorks.Repositories;
@@ -183,7 +184,7 @@ public partial class Repository<T> : IRepository<T>
             );
 
     private IQueryable<T> ApplySpecification(ISpecification<T> spec) =>
-        SpecificationEvaluator<T>.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
+        SpecificationEvaluator.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
 
     private static string GetSort(string? sort)
     {

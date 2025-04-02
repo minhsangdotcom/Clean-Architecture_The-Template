@@ -10,8 +10,8 @@
   <ItemGroup>
     <PackageReference Include="Ardalis.GuardClauses" Version="5.0.0" />
     <PackageReference Include="Mediator.Abstractions" Version="3.0.0-preview.27" />
-    <PackageReference Include="minhsangdotcom.TheTemplate.SharedKernel" Version="1.0.2" />
-    <PackageReference Include="minhsangdotcom.TheTemplate.SpecificationPattern" Version="1.0.1" />
+    <PackageReference Include="minhsangdotcom.TheTemplate.SharedKernel" Version="1.0.3-alpha" />
+    <PackageReference Include="minhsangdotcom.TheTemplate.SpecificationPattern" Version="1.0.2-alpha" />
     <PackageReference Include="Ulid" Version="1.3.4" />
   </ItemGroup>
 

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Specification;
+using Specification.Builders;
 
 namespace Domain.Aggregates.Users.Specifications;
 

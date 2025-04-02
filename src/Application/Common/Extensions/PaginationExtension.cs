@@ -346,11 +346,7 @@ public static class PaginationExtension
                 targetType = targetType.GenericTypeArguments[0];
             }
 
-            if (right is DateTime dateTime && targetType == typeof(DateTimeOffset))
-            {
-                DateTimeOffset dateTimeOffset = new(dateTime);
-                return new(member, Expression.Constant(dateTimeOffset, leftType));
-            }
+           //???
             object? changedTypeValue = Convert.ChangeType(right, targetType);
             return new(member, Expression.Constant(changedTypeValue, leftType));
         }
