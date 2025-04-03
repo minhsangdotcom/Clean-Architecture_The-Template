@@ -690,15 +690,15 @@ public class DbInitializer
     {
         Province? province = await unitOfWork
             .Repository<Province>()
-            .ApplyQuery(x => x.Code == provinceCode)
+            .QueryAsync(x => x.Code == provinceCode)
             .FirstOrDefaultAsync();
         District? district = await unitOfWork
             .Repository<District>()
-            .ApplyQuery(x => x.Code == districtCode)
+            .QueryAsync(x => x.Code == districtCode)
             .FirstOrDefaultAsync();
         Commune? commune = await unitOfWork
             .Repository<Commune>()
-            .ApplyQuery(x => x.Code == communeCode)
+            .QueryAsync(x => x.Code == communeCode)
             .FirstOrDefaultAsync();
         return new(province, district, commune);
     }

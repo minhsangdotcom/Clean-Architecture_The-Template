@@ -5,11 +5,7 @@ namespace Application.Common.Interfaces.UnitOfWorks;
 public interface IRepositoryAsync<T>
     where T : class
 {
-    Task<IEnumerable<T>> ListAsync(CancellationToken cancellationToken = default);
-
-    Task<IEnumerable<TResult>> ListAsync<TResult>(CancellationToken cancellationToken = default)
-        where TResult : class;
-
+    #region Read
     Task<T?> FindByIdAsync<TId>(TId id, CancellationToken cancellationToken = default)
         where TId : notnull;
 
@@ -18,6 +14,25 @@ public interface IRepositoryAsync<T>
         CancellationToken cancellationToken = default
     );
 
+    Task<TResult?> FindByConditionAsync<TResult>(
+        Expression<Func<T, bool>> criteria,
+        Expression<Func<T, TResult>> mappingResult,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class;
+
+    Task<IEnumerable<T>> ListAsync(CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<TResult>> ListAsync<TResult>(
+        Expression<Func<T, TResult>> mappingResult,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class;
+
+    IQueryable<T> QueryAsync(Expression<Func<T, bool>>? criteria = null);
+    #endregion
+
+    #region Write
     Task<T> AddAsync(T entity, CancellationToken cancellationToken = default);
 
     Task<IEnumerable<T>> AddRangeAsync(
@@ -34,7 +49,9 @@ public interface IRepositoryAsync<T>
     Task DeleteAsync(T entity);
 
     Task DeleteRangeAsync(IEnumerable<T> entities);
+    #endregion
 
+    #region bool
     Task<bool> AnyAsync(
         Expression<Func<T, bool>>? criteria = null,
         CancellationToken cancellationToken = default
@@ -45,7 +62,6 @@ public interface IRepositoryAsync<T>
         CancellationToken cancellationToken = default
     );
 
-    IQueryable<T> ApplyQuery(Expression<Func<T, bool>>? criteria = null);
-
     IQueryable<T> Fromsql(string sqlQuery, params object[] parameters);
+    #endregion
 }

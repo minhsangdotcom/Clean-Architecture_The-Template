@@ -12,14 +12,6 @@ public partial class CachedRepository<T>(
 ) : IRepository<T>
     where T : class
 {
-    public async Task<IEnumerable<T>> ListAsync(CancellationToken cancellationToken = default) =>
-        await repository.ListAsync(cancellationToken);
-
-    public async Task<IEnumerable<TResult>> ListAsync<TResult>(
-        CancellationToken cancellationToken = default
-    )
-        where TResult : class => await repository.ListAsync<TResult>(cancellationToken);
-
     public async Task<T?> FindByIdAsync<TId>(TId id, CancellationToken cancellationToken = default)
         where TId : notnull => await repository.FindByIdAsync(id, cancellationToken);
 
@@ -27,6 +19,23 @@ public partial class CachedRepository<T>(
         Expression<Func<T, bool>> criteria,
         CancellationToken cancellationToken = default
     ) => await repository.FindByConditionAsync(criteria, cancellationToken);
+
+    public async Task<TResult?> FindByConditionAsync<TResult>(
+        Expression<Func<T, bool>> criteria,
+        Expression<Func<T, TResult>> mappingResult,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class =>
+        await repository.FindByConditionAsync(criteria, mappingResult, cancellationToken);
+
+    public async Task<IEnumerable<T>> ListAsync(CancellationToken cancellationToken = default) =>
+        await repository.ListAsync(cancellationToken);
+
+    public async Task<IEnumerable<TResult>> ListAsync<TResult>(
+        Expression<Func<T, TResult>> mappingResult,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class => await repository.ListAsync(mappingResult, cancellationToken);
 
     public async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default) =>
         await repository.AddAsync(entity, cancellationToken);
@@ -58,8 +67,8 @@ public partial class CachedRepository<T>(
         CancellationToken cancellationToken = default
     ) => await repository.CountAsync(criteria, cancellationToken);
 
-    public IQueryable<T> ApplyQuery(Expression<Func<T, bool>>? criteria = null) =>
-        repository.ApplyQuery(criteria);
+    public IQueryable<T> QueryAsync(Expression<Func<T, bool>>? criteria = null) =>
+        repository.QueryAsync(criteria);
 
     public IQueryable<T> Fromsql(string sqlQuery, params object[] parameters) =>
         repository.Fromsql(sqlQuery, parameters);

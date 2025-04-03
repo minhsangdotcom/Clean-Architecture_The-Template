@@ -32,7 +32,7 @@ public class UnitOfWork(
             Type repositoryType = typeof(Repository<>);
             object? repositoryInstance = Activator.CreateInstance(
                 repositoryType.MakeGenericType(typeof(TEntity)),
-                [dbContext, mapper]
+                [dbContext]
             );
             value = repositoryInstance;
             repositories.Add(type, value);

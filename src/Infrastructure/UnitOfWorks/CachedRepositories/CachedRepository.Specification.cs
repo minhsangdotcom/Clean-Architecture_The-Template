@@ -12,10 +12,9 @@ namespace Infrastructure.UnitOfWorks.CachedRepositories;
 public partial class CachedRepository<T> : IRepository<T>
     where T : class
 {
-    public IQueryable<T> ApplyQuery(ISpecification<T> spec) => repository.ApplyQuery(spec);
-
     public Task<TResult?> FindByConditionAsync<TResult>(
         ISpecification<T> spec,
+        Expression<Func<T, TResult>> mappingResult,
         CancellationToken cancellationToken = default
     )
         where TResult : class
@@ -27,10 +26,10 @@ public partial class CachedRepository<T> : IRepository<T>
             logger.Information("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                () => repository.FindByConditionAsync<TResult>(spec, cancellationToken)
+                () => repository.FindByConditionAsync(spec, mappingResult, cancellationToken)
             );
         }
-        return repository.FindByConditionAsync<TResult>(spec, cancellationToken);
+        return repository.FindByConditionAsync(spec, mappingResult, cancellationToken);
     }
 
     public Task<T?> FindByConditionAsync(
@@ -70,41 +69,31 @@ public partial class CachedRepository<T> : IRepository<T>
         return repository.ListAsync(spec, queryParam, cancellationToken);
     }
 
-    //? i will come up with the best idea for groupby
-    public Task<IEnumerable<TResult>> ListWithGroupbyAsync<TGroupProperty, TResult>(
+    public Task<IEnumerable<TResult>> ListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TGroupProperty>> groupByExpression,
+        Expression<Func<T, TResult>> mappingResult,
         CancellationToken cancellationToken = default
     )
+        where TResult : class
     {
         if (spec.CacheEnabled)
         {
-            string key = $"{spec.CacheKey}-{nameof(ListWithGroupbyAsync)}";
-            string hashingKey = HashKey(key, queryParam, groupByExpression.ToString());
+            string key = $"{spec.CacheKey}-{nameof(ListAsync)}";
+            string hashingKey = HashKey(key, queryParam);
             logger.Information("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                () =>
-                    repository.ListWithGroupbyAsync<TGroupProperty, TResult>(
-                        spec,
-                        queryParam,
-                        groupByExpression,
-                        cancellationToken
-                    )
+                () => repository.ListAsync(spec, queryParam, mappingResult, cancellationToken)
             )!;
         }
-        return repository.ListWithGroupbyAsync<TGroupProperty, TResult>(
-            spec,
-            queryParam,
-            groupByExpression,
-            cancellationToken
-        );
+        return repository.ListAsync(spec, queryParam, mappingResult, cancellationToken);
     }
 
     public Task<PaginationResponse<TResult>> PagedListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
+        Expression<Func<T, TResult>> mappingResult,
         CancellationToken cancellationToken = default
     )
     {
@@ -115,95 +104,20 @@ public partial class CachedRepository<T> : IRepository<T>
             logger.Information("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                () => repository.PagedListAsync<TResult>(spec, queryParam, cancellationToken)
+                () => repository.PagedListAsync(spec, queryParam, mappingResult, cancellationToken)
             )!;
         }
-        return repository.PagedListAsync<TResult>(spec, queryParam, cancellationToken);
-    }
-
-    public PaginationResponse<TResult> PagedList<TResult>(
-        ISpecification<T> spec,
-        QueryParamRequest queryParam
-    )
-    {
-        if (spec.CacheEnabled)
-        {
-            string key = $"{spec.CacheKey}-{nameof(PagedList)}";
-            string hashingKey = HashKey(key, queryParam);
-            logger.Information("checking cache for {key}", hashingKey);
-            return memoryCacheService.GetOrSet(
-                hashingKey,
-                () => repository.PagedList<TResult>(spec, queryParam)
-            )!;
-        }
-        return repository.PagedList<TResult>(spec, queryParam);
-    }
-
-    //? i will come up with the best idea for groupby
-    public Task<PaginationResponse<TResult>> PagedListWithGroupByAsync<TGroupProperty, TResult>(
-        ISpecification<T> spec,
-        QueryParamRequest queryParam,
-        Expression<Func<T, TGroupProperty>> groupByExpression,
-        CancellationToken cancellationToken = default
-    )
-    {
-        if (spec.CacheEnabled)
-        {
-            string key = $"{spec.CacheKey}-{nameof(PagedListWithGroupByAsync)}";
-            string hashingKey = HashKey(key, queryParam, groupByExpression.ToString()!);
-            logger.Information("checking cache for {key}", hashingKey);
-            return memoryCacheService.GetOrSetAsync(
-                hashingKey,
-                () =>
-                    repository.PagedListWithGroupByAsync<TGroupProperty, TResult>(
-                        spec,
-                        queryParam,
-                        groupByExpression,
-                        cancellationToken
-                    )
-            )!;
-        }
-        return repository.PagedListWithGroupByAsync<TGroupProperty, TResult>(
-            spec,
-            queryParam,
-            groupByExpression,
-            cancellationToken
-        );
-    }
-
-    public PaginationResponse<TResult> PagedListWithGroupBy<TGroupProperty, TResult>(
-        ISpecification<T> spec,
-        QueryParamRequest queryParam,
-        Expression<Func<T, TGroupProperty>> groupByExpression
-    )
-    {
-        if (spec.CacheEnabled)
-        {
-            string key = $"{spec.CacheKey}-{nameof(PagedListWithGroupBy)}";
-            string hashingKey = HashKey(key, queryParam, groupByExpression.ToString());
-            logger.Information("checking cache for {key}", hashingKey);
-            return memoryCacheService.GetOrSet(
-                hashingKey,
-                () =>
-                    repository.PagedListWithGroupBy<TGroupProperty, TResult>(
-                        spec,
-                        queryParam,
-                        groupByExpression
-                    )
-            )!;
-        }
-        return repository.PagedListWithGroupBy<TGroupProperty, TResult>(
-            spec,
-            queryParam,
-            groupByExpression
-        );
+        return repository.PagedListAsync(spec, queryParam, mappingResult, cancellationToken);
     }
 
     public Task<PaginationResponse<TResult>> CursorPagedListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        string? uniqueSort = null!
+        Expression<Func<T, TResult>> mappingResult,
+        string? uniqueSort = null!,
+        CancellationToken cancellationToken = default
     )
+        where TResult : class
     {
         if (spec.CacheEnabled)
         {
@@ -212,44 +126,22 @@ public partial class CachedRepository<T> : IRepository<T>
             logger.Information("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                () => repository.CursorPagedListAsync<TResult>(spec, queryParam, uniqueSort)
-            )!;
-        }
-        return repository.CursorPagedListAsync<TResult>(spec, queryParam, uniqueSort);
-    }
-
-    //? i will come up with the best idea for groupby
-    public Task<PaginationResponse<TResult>> CursorPagedListWithGroupByAsync<
-        TGroupProperty,
-        TResult
-    >(
-        ISpecification<T> spec,
-        QueryParamRequest queryParam,
-        Expression<Func<T, TGroupProperty>> groupByExpression,
-        string? uniqueSort = null
-    )
-    {
-        if (spec.CacheEnabled)
-        {
-            string key = $"{spec.CacheKey}-{nameof(CursorPagedListWithGroupByAsync)}";
-            string hashingKey = HashKey(key, queryParam, uniqueSort);
-            logger.Information("checking cache for {key}", hashingKey);
-            return memoryCacheService.GetOrSetAsync(
-                hashingKey,
                 () =>
-                    repository.CursorPagedListWithGroupByAsync<TGroupProperty, TResult>(
+                    repository.CursorPagedListAsync(
                         spec,
                         queryParam,
-                        groupByExpression,
-                        uniqueSort
+                        mappingResult,
+                        uniqueSort,
+                        cancellationToken
                     )
             )!;
         }
-        return repository.CursorPagedListWithGroupByAsync<TGroupProperty, TResult>(
+        return repository.CursorPagedListAsync(
             spec,
             queryParam,
-            groupByExpression,
-            uniqueSort
+            mappingResult,
+            uniqueSort,
+            cancellationToken
         );
     }
 

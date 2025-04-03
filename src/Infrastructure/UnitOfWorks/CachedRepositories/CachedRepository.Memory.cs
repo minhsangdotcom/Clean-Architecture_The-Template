@@ -6,16 +6,22 @@ namespace Infrastructure.UnitOfWorks.CachedRepositories;
 public partial class CachedRepository<T> : IRepository<T>
     where T : class
 {
-    public IEnumerable<T> List() => repository.List();
-
-    public IEnumerable<TResult> List<TResult>()
-        where TResult : class => repository.List<TResult>();
-
     public T? FindById<TId>(TId id)
         where TId : notnull => repository.FindById(id);
 
     public T? FindByCondition(Expression<Func<T, bool>> criteria) =>
         repository.FindByCondition(criteria);
+
+    public TResult? FindByCondition<TResult>(
+        Expression<Func<T, bool>> criteria,
+        Expression<Func<T, TResult>> mappingResult
+    )
+        where TResult : class => repository.FindByCondition(criteria, mappingResult);
+
+    public IEnumerable<T> List() => repository.List();
+
+    public IEnumerable<TResult> List<TResult>(Expression<Func<T, TResult>> mappingResult)
+        where TResult : class => repository.List(mappingResult);
 
     public T Add(T entity) => repository.Add(entity);
 
@@ -35,6 +41,6 @@ public partial class CachedRepository<T> : IRepository<T>
 
     public int Count(Expression<Func<T, bool>>? criteria = null) => repository.Count(criteria);
 
-    public IEnumerable<T> ApplyQuerySync(Expression<Func<T, bool>>? criteria = null) =>
-        repository.ApplyQuerySync(criteria);
+    public IEnumerable<T> Query(Expression<Func<T, bool>>? criteria = null) =>
+        repository.Query(criteria);
 }

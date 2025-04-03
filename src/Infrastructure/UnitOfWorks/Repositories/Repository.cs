@@ -1,29 +1,16 @@
 using System.Linq.Expressions;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
+using Contracts.Dtos.Requests;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Specification.Interfaces;
 
 namespace Infrastructure.UnitOfWorks.Repositories;
 
-public partial class Repository<T>(IDbContext dbContext, IMapper mapper) : IRepository<T>
+public partial class Repository<T>(IDbContext dbContext) : IRepository<T>
     where T : class
 {
-    private readonly IConfigurationProvider _configurationProvider = mapper.ConfigurationProvider;
-
-    public async Task<IEnumerable<T>> ListAsync(CancellationToken cancellationToken = default) =>
-        await dbContext.Set<T>().ToListAsync(cancellationToken);
-
-    public async Task<IEnumerable<TResult>> ListAsync<TResult>(
-        CancellationToken cancellationToken = default
-    )
-        where TResult : class =>
-        await dbContext
-            .Set<T>()
-            .ProjectTo<TResult>(_configurationProvider)
-            .ToListAsync(cancellationToken);
-
+    #region Read
     public async Task<T?> FindByIdAsync<TId>(TId id, CancellationToken cancellationToken = default)
         where TId : notnull =>
         await dbContext.Set<T>().FindAsync([id], cancellationToken: cancellationToken);
@@ -33,6 +20,34 @@ public partial class Repository<T>(IDbContext dbContext, IMapper mapper) : IRepo
         CancellationToken cancellationToken = default
     ) => await dbContext.Set<T>().Where(criteria).FirstOrDefaultAsync(cancellationToken);
 
+    public async Task<TResult?> FindByConditionAsync<TResult>(
+        Expression<Func<T, bool>> criteria,
+        Expression<Func<T, TResult>> mappingResult,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class =>
+        await dbContext
+            .Set<T>()
+            .Where(criteria)
+            .Select(mappingResult)
+            .FirstOrDefaultAsync(cancellationToken);
+
+    public async Task<IEnumerable<T>> ListAsync(CancellationToken cancellationToken = default) =>
+        await dbContext.Set<T>().ToListAsync(cancellationToken);
+
+    public async Task<IEnumerable<TResult>> ListAsync<TResult>(
+        Expression<Func<T, TResult>> mappingResult,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class =>
+        await dbContext.Set<T>().Select(mappingResult).ToListAsync(cancellationToken);
+
+    public IQueryable<T> QueryAsync(Expression<Func<T, bool>>? criteria = null) =>
+        dbContext.Set<T>().Where(criteria ?? (x => true));
+
+    #endregion
+
+    #region Write
     public async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
     {
         EntityEntry<T> entityEntry = await dbContext.Set<T>().AddAsync(entity, cancellationToken);
@@ -77,7 +92,9 @@ public partial class Repository<T>(IDbContext dbContext, IMapper mapper) : IRepo
         dbContext.Set<T>().RemoveRange(entities);
         await Task.CompletedTask;
     }
+    #endregion
 
+    #region Bool
     public async Task<bool> AnyAsync(
         Expression<Func<T, bool>>? criteria = null,
         CancellationToken cancellationToken = default
@@ -88,9 +105,8 @@ public partial class Repository<T>(IDbContext dbContext, IMapper mapper) : IRepo
         CancellationToken cancellationToken = default
     ) => await dbContext.Set<T>().CountAsync(criteria ?? (x => true), cancellationToken);
 
-    public IQueryable<T> ApplyQuery(Expression<Func<T, bool>>? criteria = null) =>
-        dbContext.Set<T>().Where(criteria ?? (x => true));
-
     public IQueryable<T> Fromsql(string sqlQuery, params object[] parameters) =>
         dbContext.Set<T>().FromSqlRaw(sqlQuery, parameters);
+
+    #endregion
 }
