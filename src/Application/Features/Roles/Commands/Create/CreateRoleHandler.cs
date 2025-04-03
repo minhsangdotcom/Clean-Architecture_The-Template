@@ -5,7 +5,7 @@ using Mediator;
 
 namespace Application.Features.Roles.Commands.Create;
 
-public class CreateRoleHandler(IRoleManagerService roleManagerService, IMapper mapper)
+public class CreateRoleHandler(IRoleManagerService roleManagerService)
     : IRequestHandler<CreateRoleCommand, CreateRoleResponse>
 {
     public async ValueTask<CreateRoleResponse> Handle(
@@ -13,8 +13,8 @@ public class CreateRoleHandler(IRoleManagerService roleManagerService, IMapper m
         CancellationToken cancellationToken
     )
     {
-        Role mappingRole = mapper.Map<Role>(command);
+        Role mappingRole = command.ToRole();
         Role role = await roleManagerService.CreateRoleAsync(mappingRole);
-        return mapper.Map<CreateRoleResponse>(role);
+        return role.ToCreateRoleResponse();
     }
 }

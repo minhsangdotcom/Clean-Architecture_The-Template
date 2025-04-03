@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.QueryStringProcessing;
+using Application.Features.Common.Mapping.Regions;
 using Application.Features.Common.Projections.Regions;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Regions;
@@ -17,9 +18,10 @@ public class ListCommuneHandler(IUnitOfWork unitOfWork)
     ) =>
         await unitOfWork
             .Repository<Commune>()
-            .PagedListAsync<CommuneDetailProjection>(
+            .PagedListAsync(
                 new ListCommuneSpecification(),
                 request.ValidateQuery().ValidateFilter(typeof(CommuneDetailProjection)),
+                x => x.ToCommuneDetailProjection(),
                 cancellationToken
             );
 }

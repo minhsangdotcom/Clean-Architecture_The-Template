@@ -12,15 +12,13 @@ namespace Application.Features.Roles.Queries.List;
 
 public static class ListRoleMapping
 {
-    public static ListRoleResponse ToListRoleResponse(this Role role)
+    public static IEnumerable<ListRoleResponse> ToListRoleResponse(this List<Role> roles)
     {
-        return new()
+        return roles.Select(role =>
         {
-            Id = role.Id,
-            CreatedAt = role.CreatedAt,
-            Description = role.Description,
-            Name = role.Name,
-            Guard = role.Guard,
-        };
+            ListRoleResponse listRole = new();
+            listRole.MappingFrom(role);
+            return listRole;
+        });
     }
 }

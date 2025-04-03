@@ -14,14 +14,10 @@ public static class CreateRoleMapping
             RoleClaims = roleCommand.RoleClaims?.ToListRoleClaim(),
         };
 
-    public static CreateRoleResponse ToCreateRoleResponse(this Role role) =>
-        new()
-        {
-            Id = role.Id,
-            CreatedAt = role.CreatedAt,
-            Name = role.Name,
-            Description = role.Description,
-            Guard = role.Guard,
-            RoleClaims = role.RoleClaims?.ToListRoleClaimDetailProjection(),
-        };
+    public static CreateRoleResponse ToCreateRoleResponse(this Role role)
+    {
+        CreateRoleResponse roleResponse = new();
+        roleResponse.MappingFrom(role);
+        return roleResponse;
+    }
 }

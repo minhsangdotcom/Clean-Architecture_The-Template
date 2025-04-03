@@ -18,18 +18,17 @@ namespace Application.Features.Roles.Commands.Update;
 
 public static class UpdateRoleMapping
 {
-    public static Role ToRole(this UpdateRole updateRole) =>
-        new()
-        {
-            Name = updateRole.Name.ToSnakeCase().ToUpper(),
-            Description = updateRole.Description,
-        };
+    public static Role FromUpdateRole(this Role role, UpdateRole updateRole)
+    {
+        role.Name = updateRole.Name!;
+        role.Description = updateRole.Description;
+        return role;
+    }
 
-    public static UpdateRoleResponse ToUpdateRoleResponse(this Role role) =>
-        new()
-        {
-            Name = role.Name.ToSnakeCase().ToUpper(),
-            Description = role.Description,
-            RoleClaims = role.RoleClaims?.ToListRoleClaimDetailProjection(),
-        };
+    public static UpdateRoleResponse ToUpdateRoleResponse(this Role role)
+    {
+        UpdateRoleResponse roleResponse = new();
+        roleResponse.MappingFrom(role);
+        return roleResponse;
+    }
 }

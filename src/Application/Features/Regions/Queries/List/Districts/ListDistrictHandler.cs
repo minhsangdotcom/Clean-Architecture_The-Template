@@ -17,9 +17,10 @@ public class ListDistrictHandler(IUnitOfWork unitOfWork)
     ) =>
         await unitOfWork
             .Repository<District>()
-            .PagedListAsync<DistrictDetailProjection>(
+            .PagedListAsync(
                 new ListDistrictSpecification(),
                 request.ValidateQuery().ValidateFilter(typeof(DistrictDetailProjection)),
+                x => x.ToDistrictDetailProjection(),
                 cancellationToken
             );
 }

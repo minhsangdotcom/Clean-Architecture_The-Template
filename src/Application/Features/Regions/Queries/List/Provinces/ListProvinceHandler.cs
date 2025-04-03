@@ -17,8 +17,10 @@ public class ListProvinceHandler(IUnitOfWork unitOfWork)
     ) =>
         await unitOfWork
             .Repository<Province>()
-            .PagedListAsync<ProvinceProjection>(
+            .PagedListAsync(
                 new ListProvinceSpecification(),
-                request.ValidateQuery().ValidateFilter(typeof(ProvinceProjection))
+                request.ValidateQuery().ValidateFilter(typeof(ProvinceProjection)),
+                x => x.ToProvinceProjection(),
+                cancellationToken
             );
 }
