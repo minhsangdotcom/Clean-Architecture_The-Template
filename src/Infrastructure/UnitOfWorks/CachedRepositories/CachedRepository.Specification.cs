@@ -50,6 +50,25 @@ public partial class CachedRepository<T> : IRepository<T>
         return repository.FindByConditionAsync(spec, cancellationToken);
     }
 
+    public Task<TResult?> FindByConditionAsync<TResult>(
+        ISpecification<T, TResult> spec,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class
+    {
+        if (spec.CacheEnabled)
+        {
+            string key = $"{spec.CacheKey}-{nameof(FindByConditionAsync)}";
+            string hashingKey = HashKey(key);
+            logger.Information("checking cache for {key}", hashingKey);
+            return memoryCacheService.GetOrSetAsync(
+                hashingKey,
+                () => repository.FindByConditionAsync(spec, cancellationToken)
+            );
+        }
+        return repository.FindByConditionAsync(spec, cancellationToken);
+    }
+
     public Task<IEnumerable<T>> ListAsync(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
@@ -143,6 +162,46 @@ public partial class CachedRepository<T> : IRepository<T>
             uniqueSort,
             cancellationToken
         );
+    }
+
+    public Task<PaginationResponse<TResult>> PagedListAsync<TResult>(
+        ISpecification<T, TResult> spec,
+        QueryParamRequest queryParam,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class
+    {
+        if (spec.CacheEnabled)
+        {
+            string key = $"{spec.CacheKey}-{nameof(PagedListAsync)}";
+            string hashingKey = HashKey(key, queryParam);
+            logger.Information("checking cache for {key}", hashingKey);
+            return memoryCacheService.GetOrSetAsync(
+                hashingKey,
+                () => repository.PagedListAsync(spec, queryParam, cancellationToken)
+            )!;
+        }
+        return repository.PagedListAsync(spec, queryParam, cancellationToken);
+    }
+
+    public Task<PaginationResponse<TResult>> CursorPagedListAsync<TResult>(
+        ISpecification<T, TResult> spec,
+        QueryParamRequest queryParam,
+        string? uniqueSort = null
+    )
+        where TResult : class
+    {
+        if (spec.CacheEnabled)
+        {
+            string key = $"{spec.CacheKey}-{nameof(CursorPagedListAsync)}";
+            string hashingKey = HashKey(key, queryParam);
+            logger.Information("checking cache for {key}", hashingKey);
+            return memoryCacheService.GetOrSetAsync(
+                hashingKey,
+                () => repository.CursorPagedListAsync(spec, queryParam, uniqueSort)
+            )!;
+        }
+        return repository.CursorPagedListAsync(spec, queryParam, uniqueSort);
     }
 
     private static string HashKey(params object?[] parameters)
