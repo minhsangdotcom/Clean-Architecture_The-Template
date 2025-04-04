@@ -1,15 +1,9 @@
 using System.Linq.Expressions;
-using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.UnitOfWorks;
-using Serilog;
 
 namespace Infrastructure.UnitOfWorks.CachedRepositories;
 
-public partial class CachedRepository<T>(
-    IRepository<T> repository,
-    ILogger logger,
-    IMemoryCacheService memoryCacheService
-) : IRepository<T>
+public partial class CachedAsyncRepository<T>(IAsyncRepository<T> repository) : IAsyncRepository<T>
     where T : class
 {
     public async Task<T?> FindByIdAsync<TId>(TId id, CancellationToken cancellationToken = default)

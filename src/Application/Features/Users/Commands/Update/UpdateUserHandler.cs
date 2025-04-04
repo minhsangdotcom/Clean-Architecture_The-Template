@@ -64,7 +64,7 @@ public class UpdateUserHandler(
 
         try
         {
-            DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+            DbTransaction transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
             await unitOfWork.Repository<User>().UpdateAsync(user);
             await unitOfWork.SaveAsync(cancellationToken);

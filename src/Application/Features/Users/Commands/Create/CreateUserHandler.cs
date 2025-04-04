@@ -47,7 +47,7 @@ public class CreateUserHandler(
         string? userAvatar = null;
         try
         {
-            DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+            DbTransaction transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
             User user = await unitOfWork
                 .Repository<User>()

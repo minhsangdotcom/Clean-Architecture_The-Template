@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 
 namespace Application.Common.Interfaces.UnitOfWorks;
 
-public interface IMemoryRepository<T>
+public interface IMemoryRepository<T> : IRepository<T>
     where T : class
 {
     #region Read

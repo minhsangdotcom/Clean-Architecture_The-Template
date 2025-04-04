@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 
 namespace Application.Common.Interfaces.UnitOfWorks;
 
-public interface IRepositoryAsync<T>
+public interface IAsyncRepository<T> : IRepository<T>
     where T : class
 {
     #region Read

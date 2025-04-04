@@ -1,73 +1,55 @@
 using System.Data.Common;
-using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
-using Infrastructure.UnitOfWorks.CachedRepositories;
 using Infrastructure.UnitOfWorks.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace Infrastructure.UnitOfWorks;
 
 public class UnitOfWork(
-    IMapper mapper,
     IDbContext dbContext,
     ILogger logger,
-    IMemoryCacheService memoryCacheService
+    IServiceScopeFactory serviceScopeFactory
 ) : IUnitOfWork
 {
     public DbTransaction? CurrentTransaction { get; set; }
-
-    private readonly Dictionary<string, object?> repositories = [];
     private bool disposed = false;
 
-    public IRepository<TEntity> Repository<TEntity>()
+    public ISpecificationRepository<TEntity> SpecificationRepository<TEntity>(bool isCached = false)
         where TEntity : class
     {
-        string type = typeof(TEntity).FullName!;
+        using IServiceScope serviceScope = serviceScopeFactory.CreateScope();
+        IServiceProvider serviceProvider = serviceScope.ServiceProvider;
 
-        if (!repositories.TryGetValue(type, out object? value))
+        if (isCached)
         {
-            Type repositoryType = typeof(Repository<>);
-            object? repositoryInstance = Activator.CreateInstance(
-                repositoryType.MakeGenericType(typeof(TEntity)),
-                [dbContext]
-            );
-            value = repositoryInstance;
-            repositories.Add(type, value);
+            return serviceProvider.GetRequiredService<ISpecificationRepository<TEntity>>();
         }
-
-        return (IRepository<TEntity>)value!;
+        return serviceProvider.GetRequiredService<SpecificationRepository<TEntity>>();
     }
 
-    public IRepository<TEntity> CachedRepository<TEntity>()
+    public IStaticPredicateSpecificationRepository<TEntity> PredicateSpecificationRepository<TEntity>(
+        bool isCached = false
+    )
         where TEntity : class
     {
-        string type = $"{typeof(TEntity).FullName}-cached";
+        using IServiceScope serviceScope = serviceScopeFactory.CreateScope();
+        IServiceProvider serviceProvider = serviceScope.ServiceProvider;
 
-        if (!repositories.TryGetValue(type, out object? value))
+        if (isCached)
         {
-            Type cachedRepositoryType = typeof(CachedRepository<>);
-            Type repositoryType = typeof(Repository<>);
-
-            object? repositoryInstance = Activator.CreateInstance(
-                repositoryType.MakeGenericType(typeof(TEntity)),
-                [dbContext, mapper]
-            );
-            // proxy design pattern
-            object? cachedRepositoryInstance = Activator.CreateInstance(
-                cachedRepositoryType.MakeGenericType(typeof(TEntity)),
-                [repositoryInstance, logger, memoryCacheService]
-            );
-            value = cachedRepositoryInstance;
-            repositories.Add(type, value);
+            return serviceProvider.GetRequiredService<
+                IStaticPredicateSpecificationRepository<TEntity>
+            >();
         }
-
-        return (IRepository<TEntity>)value!;
+        return serviceProvider.GetRequiredService<
+            StaticPredicateSpecificationRepository<TEntity>
+        >();
     }
 
-    public async Task<DbTransaction> CreateTransactionAsync(
+    public async Task<DbTransaction> BeginTransactionAsync(
         CancellationToken cancellationToken = default
     )
     {
@@ -144,7 +126,6 @@ public class UnitOfWork(
     {
         if (!disposed && disposing)
         {
-            repositories?.Clear();
             dbContext.Dispose();
         }
 

@@ -1,15 +1,18 @@
 using System.Linq.Expressions;
-using System.Security.Cryptography;
-using System.Text;
+using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
-using Newtonsoft.Json;
+using Serilog;
 using Specification.Interfaces;
 
 namespace Infrastructure.UnitOfWorks.CachedRepositories;
 
-public partial class CachedRepository<T> : IRepository<T>
+public class CachedSpecificationRepository<T>(
+    ISpecificationRepository<T> repository,
+    ILogger logger,
+    IMemoryCacheService memoryCacheService
+) : ISpecificationRepository<T>
     where T : class
 {
     public Task<TResult?> FindByConditionAsync<TResult>(
@@ -22,7 +25,7 @@ public partial class CachedRepository<T> : IRepository<T>
         if (spec.CacheEnabled)
         {
             string key = $"{spec.CacheKey}-{nameof(FindByConditionAsync)}";
-            string hashingKey = HashKey(key);
+            string hashingKey = RepositoryExtention.HashKey(key);
             logger.Information("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
@@ -40,26 +43,7 @@ public partial class CachedRepository<T> : IRepository<T>
         if (spec.CacheEnabled)
         {
             string key = $"{spec.CacheKey}-{nameof(FindByConditionAsync)}";
-            string hashingKey = HashKey(key);
-            logger.Information("checking cache for {key}", hashingKey);
-            return memoryCacheService.GetOrSetAsync(
-                hashingKey,
-                () => repository.FindByConditionAsync(spec, cancellationToken)
-            );
-        }
-        return repository.FindByConditionAsync(spec, cancellationToken);
-    }
-
-    public Task<TResult?> FindByConditionAsync<TResult>(
-        ISpecification<T, TResult> spec,
-        CancellationToken cancellationToken = default
-    )
-        where TResult : class
-    {
-        if (spec.CacheEnabled)
-        {
-            string key = $"{spec.CacheKey}-{nameof(FindByConditionAsync)}";
-            string hashingKey = HashKey(key);
+            string hashingKey = RepositoryExtention.HashKey(key);
             logger.Information("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
@@ -78,7 +62,7 @@ public partial class CachedRepository<T> : IRepository<T>
         if (spec.CacheEnabled)
         {
             string key = $"{spec.CacheKey}-{nameof(ListAsync)}";
-            string hashingKey = HashKey(key, queryParam);
+            string hashingKey = RepositoryExtention.HashKey(key, queryParam);
             logger.Information("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
@@ -99,7 +83,7 @@ public partial class CachedRepository<T> : IRepository<T>
         if (spec.CacheEnabled)
         {
             string key = $"{spec.CacheKey}-{nameof(ListAsync)}";
-            string hashingKey = HashKey(key, queryParam);
+            string hashingKey = RepositoryExtention.HashKey(key, queryParam);
             logger.Information("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
@@ -119,7 +103,7 @@ public partial class CachedRepository<T> : IRepository<T>
         if (spec.CacheEnabled)
         {
             string key = $"{spec.CacheKey}-{nameof(PagedListAsync)}";
-            string hashingKey = HashKey(key, queryParam);
+            string hashingKey = RepositoryExtention.HashKey(key, queryParam);
             logger.Information("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
@@ -141,7 +125,7 @@ public partial class CachedRepository<T> : IRepository<T>
         if (spec.CacheEnabled)
         {
             string key = $"{spec.CacheKey}-{nameof(CursorPagedListAsync)}";
-            string hashingKey = HashKey(key, queryParam, uniqueSort);
+            string hashingKey = RepositoryExtention.HashKey(key, queryParam, uniqueSort);
             logger.Information("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
@@ -162,80 +146,5 @@ public partial class CachedRepository<T> : IRepository<T>
             uniqueSort,
             cancellationToken
         );
-    }
-
-    public Task<PaginationResponse<TResult>> PagedListAsync<TResult>(
-        ISpecification<T, TResult> spec,
-        QueryParamRequest queryParam,
-        CancellationToken cancellationToken = default
-    )
-        where TResult : class
-    {
-        if (spec.CacheEnabled)
-        {
-            string key = $"{spec.CacheKey}-{nameof(PagedListAsync)}";
-            string hashingKey = HashKey(key, queryParam);
-            logger.Information("checking cache for {key}", hashingKey);
-            return memoryCacheService.GetOrSetAsync(
-                hashingKey,
-                () => repository.PagedListAsync(spec, queryParam, cancellationToken)
-            )!;
-        }
-        return repository.PagedListAsync(spec, queryParam, cancellationToken);
-    }
-
-    public Task<PaginationResponse<TResult>> CursorPagedListAsync<TResult>(
-        ISpecification<T, TResult> spec,
-        QueryParamRequest queryParam,
-        string? uniqueSort = null
-    )
-        where TResult : class
-    {
-        if (spec.CacheEnabled)
-        {
-            string key = $"{spec.CacheKey}-{nameof(CursorPagedListAsync)}";
-            string hashingKey = HashKey(key, queryParam);
-            logger.Information("checking cache for {key}", hashingKey);
-            return memoryCacheService.GetOrSetAsync(
-                hashingKey,
-                () => repository.CursorPagedListAsync(spec, queryParam, uniqueSort)
-            )!;
-        }
-        return repository.CursorPagedListAsync(spec, queryParam, uniqueSort);
-    }
-
-    private static string HashKey(params object?[] parameters)
-    {
-        StringBuilder text = new();
-        foreach (object? param in parameters)
-        {
-            if (param is null)
-            {
-                continue;
-            }
-
-            if (param is string)
-            {
-                AppendParameter(text, param.ToString()!);
-                continue;
-            }
-
-            var result = JsonConvert.SerializeObject(param);
-            AppendParameter(text, result);
-        }
-
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(text.ToString()));
-        return Convert.ToHexString(bytes);
-    }
-
-    private static StringBuilder AppendParameter(StringBuilder text, string param)
-    {
-        if (!string.IsNullOrWhiteSpace(text.ToString()))
-        {
-            text.Append('_');
-        }
-        text.Append(param);
-
-        return text;
     }
 }

@@ -5,7 +5,7 @@ using Specification.Interfaces;
 
 namespace Application.Common.Interfaces.UnitOfWorks;
 
-public interface ISpecificationRepository<T>
+public interface ISpecificationRepository<T> : IRepository<T>
     where T : class
 {
     Task<T?> FindByConditionAsync(

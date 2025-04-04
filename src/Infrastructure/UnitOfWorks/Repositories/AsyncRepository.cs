@@ -1,13 +1,11 @@
 using System.Linq.Expressions;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Dtos.Requests;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Specification.Interfaces;
 
 namespace Infrastructure.UnitOfWorks.Repositories;
 
-public partial class Repository<T>(IDbContext dbContext) : IRepository<T>
+public class AsyncRepository<T>(IDbContext dbContext) : IAsyncRepository<T>
     where T : class
 {
     #region Read

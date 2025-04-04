@@ -54,7 +54,7 @@ public class DbInitializer
         Role[] roles = [adminRole, managerRole];
         try
         {
-            DbTransaction dbTransaction = await unitOfWork.CreateTransactionAsync();
+            DbTransaction dbTransaction = await unitOfWork.BeginTransactionAsync();
 
             if (!await roleManagerService.Roles.AnyAsync())
             {

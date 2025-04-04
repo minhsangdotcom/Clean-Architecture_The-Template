@@ -3,7 +3,8 @@ using Application.Common.Interfaces.UnitOfWorks;
 
 namespace Infrastructure.UnitOfWorks.CachedRepositories;
 
-public partial class CachedRepository<T> : IRepository<T>
+public partial class CachedMemoryRepository<T>(IMemoryRepository<T> repository)
+    : IMemoryRepository<T>
     where T : class
 {
     public T? FindById<TId>(TId id)

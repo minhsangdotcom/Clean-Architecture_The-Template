@@ -6,13 +6,17 @@ using Contracts.Dtos.Responses;
 using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Extensions.QueryExtensions;
-using SharedKernel.Models;
 using Specification.Evaluators;
 using Specification.Interfaces;
 
 namespace Infrastructure.UnitOfWorks.Repositories;
 
-public partial class Repository<T> : IRepository<T>
+/// <summary>
+/// specification just do where include and extensions will do the rest such as :filter,search,sort,pagination
+/// </summary>
+/// <typeparam name="T">must be BaseEntity or AggregateRoot</typeparam>
+/// <param name="dbContext">must be IDbcontext</param>
+public class SpecificationRepository<T>(IDbContext dbContext) : ISpecificationRepository<T>
     where T : class
 {
     public async Task<T?> FindByConditionAsync(
@@ -34,7 +38,7 @@ public partial class Repository<T> : IRepository<T>
         CancellationToken cancellationToken = default
     )
     {
-        string uniqueSort = GetSort(queryParam.Sort);
+        string uniqueSort = queryParam.Sort.GetSort();
         Search? search = queryParam.Search;
 
         return await ApplySpecification(spec)
@@ -52,7 +56,7 @@ public partial class Repository<T> : IRepository<T>
     )
         where TResult : class
     {
-        string uniqueSort = GetSort(queryParam.Sort);
+        string uniqueSort = queryParam.Sort.GetSort();
         Search? search = queryParam.Search;
 
         return await ApplySpecification(spec)
@@ -70,7 +74,7 @@ public partial class Repository<T> : IRepository<T>
         CancellationToken cancellationToken = default
     )
     {
-        string uniqueSort = GetSort(queryParam.Sort);
+        string uniqueSort = queryParam.Sort.GetSort();
         Search? search = queryParam.Search;
 
         return await ApplySpecification(spec)
@@ -98,22 +102,11 @@ public partial class Repository<T> : IRepository<T>
                     queryParam.Cursor?.Before,
                     queryParam.Cursor?.After,
                     queryParam.PageSize,
-                    GetDefaultSort(queryParam.Sort),
+                    queryParam.Sort.GetDefaultSort(),
                     uniqueSort ?? nameof(BaseEntity.Id)
                 )
             );
 
-    public static string GetSort(string? sort)
-    {
-        string defaultSort = GetDefaultSort(sort);
-        return $"{defaultSort},{nameof(BaseEntity.Id)}";
-    }
-
     private IQueryable<T> ApplySpecification(ISpecification<T> spec) =>
         SpecificationEvaluator.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
-
-    private static string GetDefaultSort(string? sort) =>
-        string.IsNullOrWhiteSpace(sort)
-            ? $"{nameof(BaseEntity.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}"
-            : sort.Trim();
 }

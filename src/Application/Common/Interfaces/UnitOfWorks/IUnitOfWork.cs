@@ -6,13 +6,15 @@ public interface IUnitOfWork : IDisposable
 {
     public DbTransaction? CurrentTransaction { get; protected set; }
 
-    IRepository<TEntity> Repository<TEntity>()
+    ISpecificationRepository<TEntity> SpecificationRepository<TEntity>(bool isCached = false)
         where TEntity : class;
 
-    IRepository<TEntity> CachedRepository<TEntity>()
+    IStaticPredicateSpecificationRepository<TEntity> PredicateSpecificationRepository<TEntity>(
+        bool isCached = false
+    )
         where TEntity : class;
 
-    Task<DbTransaction> CreateTransactionAsync(CancellationToken cancellationToken = default);
+    Task<DbTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 
     Task CommitAsync(CancellationToken cancellationToken = default);
 
