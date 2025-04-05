@@ -1,14 +1,11 @@
 using Application.Common.Interfaces.Services.Elastics;
-using AutoMapper;
 using Elastic.Clients.Elasticsearch;
-using FluentConfiguration.Configurations;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.Elastics;
 
 public class ElasticsearchServiceFactory(
     ElasticsearchClient elasticClient,
-    IMapper mapper,
     IOptions<ElasticsearchSettings> options
 ) : IElasticsearchServiceFactory
 {
@@ -24,7 +21,7 @@ public class ElasticsearchServiceFactory(
             Type repositoryType = typeof(ElasticsearchService<>);
             object? repositoryInstance = Activator.CreateInstance(
                 repositoryType.MakeGenericType(typeof(TEntity)),
-                [elasticClient, mapper, options]
+                [elasticClient, options]
             );
             value = repositoryInstance;
             repositories.Add(type, value);

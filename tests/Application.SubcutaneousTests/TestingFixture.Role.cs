@@ -34,6 +34,7 @@ public partial class TestingFixture
             new()
             {
                 Name = roleName,
+                Description = null,
                 RoleClaims =
                 [
                     new RoleClaimModel()

@@ -3,8 +3,7 @@ using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Features.Common.Projections.Users;
-using AutoMapper;
+using Application.Features.Common.Mapping.Users;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
@@ -20,8 +19,7 @@ public class LoginUserHandler(
     IUnitOfWork unitOfWork,
     ITokenFactory tokenFactory,
     IDetectionService detectionService,
-    ICurrentUser currentUser,
-    IMapper mapper
+    ICurrentUser currentUser
 ) : IRequestHandler<LoginUserCommand, LoginUserResponse>
 {
     public async ValueTask<LoginUserResponse> Handle(
@@ -31,7 +29,7 @@ public class LoginUserHandler(
     {
         User user =
             await unitOfWork
-                .Repository<User>()
+                .SpecificationRepository<User>()
                 .FindByConditionAsync(
                     new GetUserByUsernameSpecification(request.Username!),
                     cancellationToken
@@ -95,7 +93,7 @@ public class LoginUserHandler(
             AccessTokenExpiredIn = (long)
                 Math.Ceiling((accesstokenExpiredTime - DateTime.UtcNow).TotalSeconds),
             TokenType = JwtBearerDefaults.AuthenticationScheme,
-            User = mapper.Map<UserProjection>(user),
+            User = user.ToUserProjection(),
         };
     }
 }

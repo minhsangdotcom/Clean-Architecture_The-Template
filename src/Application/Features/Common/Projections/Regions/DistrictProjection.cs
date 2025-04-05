@@ -12,5 +12,11 @@ public class DistrictProjection : Region
         FullName = district.FullName;
         FullNameEn = district.FullNameEn;
         CustomName = district.CustomName;
+
+        Id = district.Id;
+        CreatedAt = district.CreatedAt;
+        CreatedBy = district.CreatedBy;
+        UpdatedAt = district.UpdatedAt;
+        UpdatedBy = district.UpdatedBy;
     }
 }

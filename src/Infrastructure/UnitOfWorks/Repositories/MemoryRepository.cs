@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Infrastructure.UnitOfWorks.Repositories;
 
-public partial class MemoryRepository<T>(IDbContext dbContext) : IMemoryRepository<T>
+public class MemoryRepository<T>(IDbContext dbContext) : IMemoryRepository<T>
     where T : class
 {
     #region Read

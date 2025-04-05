@@ -12,5 +12,11 @@ public class ProvinceProjection : Region
         FullName = province.FullName;
         FullNameEn = province.FullNameEn;
         CustomName = province.CustomName;
+
+        Id = province.Id;
+        CreatedAt = province.CreatedAt;
+        CreatedBy = province.CreatedBy;
+        UpdatedAt = province.UpdatedAt;
+        UpdatedBy = province.UpdatedBy;
     }
 }

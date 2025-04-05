@@ -55,32 +55,7 @@ public static class DependencyInjection
             .AddScoped<IDbContext, TheDbContext>()
             .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddSingleton<UpdateAuditableEntityInterceptor>()
-            .AddSingleton<DispatchDomainEventInterceptor>()
-            //* register as proxy design pattern for caching repository
-            .AddScoped(typeof(SpecificationRepository<>))
-            .AddScoped(typeof(StaticPredicateSpecificationRepository<>))
-            .AddScoped(typeof(ISpecificationRepository<>), typeof(CachedSpecificationRepository<>))
-            .AddScoped(
-                typeof(IStaticPredicateSpecificationRepository<>),
-                typeof(CachedStaticPredicateSpecificationRepository<>)
-            );
-
-        // if (environmentName!.CompareTo("Testing") == 0)
-        // {
-        //     services.AddDbContext<TheDbContext>(
-        //         (sp, options) =>
-        //         {
-        //             NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
-        //             options
-        //                 .UseNpgsql(npgsqlDataSource)
-        //                 .AddInterceptors(
-        //                     sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
-        //                     sp.GetRequiredService<DispatchDomainEventInterceptor>()
-        //                 );
-        //         }
-        //     );
-        // }
-        // else { }
+            .AddSingleton<DispatchDomainEventInterceptor>();
 
         services.AddDbContextPool<TheDbContext>(
             (sp, options) =>

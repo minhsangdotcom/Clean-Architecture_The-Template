@@ -62,7 +62,7 @@ try
         && app.Environment.EnvironmentName != "Testing-Development"
     )
     {
-        var scope = app.Services.CreateScope();
+        using var scope = app.Services.CreateScope();
         var serviceProvider = scope.ServiceProvider;
         await RegionDataSeeding.SeedingAsync(serviceProvider);
         await DbInitializer.InitializeAsync(serviceProvider);

@@ -1,7 +1,7 @@
 using System.Data.Common;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
+using Application.Features.Users.Commands.Update;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -12,7 +12,6 @@ namespace Application.Features.Users.Commands.Create;
 
 public class CreateUserHandler(
     IUnitOfWork unitOfWork,
-    IMapper mapper,
     IMediaUpdateService<User> mediaUpdateService,
     IUserManagerService userManagerService
 ) : IRequestHandler<CreateUserCommand, CreateUserResponse>
@@ -22,7 +21,7 @@ public class CreateUserHandler(
         CancellationToken cancellationToken
     )
     {
-        User mappingUser = mapper.Map<User>(command);
+        User mappingUser = command.ToUser();
 
         Province? province = await unitOfWork
             .Repository<Province>()
@@ -58,14 +57,8 @@ public class CreateUserHandler(
             user.CreateDefaultUserClaims();
             await unitOfWork.SaveAsync(cancellationToken);
 
-            List<UserClaim> customClaims = mapper.Map<List<UserClaim>>(
-                command.UserClaims,
-                opt =>
-                {
-                    opt.Items[nameof(UserClaim.Type)] = KindaUserClaimType.Custom;
-                    opt.Items[nameof(UserClaim.UserId)] = user.Id;
-                }
-            );
+            List<UserClaim> customClaims =
+                command.UserClaims?.ToListUserClaim(KindaUserClaimType.Custom, user.Id) ?? [];
 
             await userManagerService.CreateUserAsync(
                 user,
@@ -78,9 +71,10 @@ public class CreateUserHandler(
 
             return (
                 await unitOfWork
-                    .Repository<User>()
-                    .FindByConditionAsync<CreateUserResponse>(
+                    .SpecificationRepository<User>()
+                    .FindByConditionAsync(
                         new GetUserByIdSpecification(user.Id),
+                        x => x.ToCreateUserResponse(),
                         cancellationToken
                     )
             )!;

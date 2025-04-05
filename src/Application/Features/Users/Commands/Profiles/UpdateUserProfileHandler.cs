@@ -2,7 +2,6 @@ using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
@@ -15,7 +14,6 @@ namespace Application.Features.Users.Commands.Profiles;
 public class UpdateUserProfileHandler(
     IUnitOfWork unitOfWork,
     ICurrentUser currentUser,
-    IMapper mapper,
     IMediaUpdateService<User> avatarUpdate
 ) : IRequestHandler<UpdateUserProfileCommand, UpdateUserProfileResponse>
 {
@@ -26,7 +24,7 @@ public class UpdateUserProfileHandler(
     {
         User user =
             await unitOfWork
-                .Repository<User>()
+                .SpecificationRepository<User>()
                 .FindByConditionAsync(
                     new GetUserByIdWithoutIncludeSpecification(currentUser.Id ?? Ulid.Empty),
                     cancellationToken
@@ -38,7 +36,7 @@ public class UpdateUserProfileHandler(
         IFormFile? avatar = command.Avatar;
         string? oldAvatar = user.Avatar;
 
-        mapper.Map(command, user);
+        user.MapFromUpdateUserProfileCommand(command);
 
         Province? province = await unitOfWork
             .Repository<Province>()
@@ -73,9 +71,10 @@ public class UpdateUserProfileHandler(
 
         return (
             await unitOfWork
-                .Repository<User>()
-                .FindByConditionAsync<UpdateUserProfileResponse>(
+                .SpecificationRepository<User>()
+                .FindByConditionAsync(
                     new GetUserByIdSpecification(user.Id),
+                    x => x.ToUpdateUserProfileResponse(),
                     cancellationToken
                 )
         )!;

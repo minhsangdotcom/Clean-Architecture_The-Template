@@ -15,9 +15,10 @@ public class GetUserDetailHandler(IUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     ) =>
         await unitOfWork
-            .Repository<User>()
-            .FindByConditionAsync<GetUserDetailResponse>(
+            .SpecificationRepository<User>()
+            .FindByConditionAsync(
                 new GetUserByIdSpecification(query.UserId),
+                x => x.ToGetUserDetailResponse(),
                 cancellationToken
             )
         ?? throw new NotFoundException(

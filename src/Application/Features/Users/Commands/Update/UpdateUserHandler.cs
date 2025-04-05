@@ -2,7 +2,6 @@ using System.Data.Common;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -15,7 +14,6 @@ namespace Application.Features.Users.Commands.Update;
 
 public class UpdateUserHandler(
     IUnitOfWork unitOfWork,
-    IMapper mapper,
     IMediaUpdateService<User> mediaUpdateService,
     IUserManagerService userManagerService
 ) : IRequestHandler<UpdateUserCommand, UpdateUserResponse>
@@ -27,7 +25,7 @@ public class UpdateUserHandler(
     {
         User user =
             await unitOfWork
-                .Repository<User>()
+                .SpecificationRepository<User>()
                 .FindByConditionAsync(
                     new GetUserByIdSpecification(Ulid.Parse(command.UserId)),
                     cancellationToken
@@ -39,7 +37,7 @@ public class UpdateUserHandler(
         IFormFile? avatar = command.User!.Avatar;
         string? oldAvatar = user.Avatar;
 
-        mapper.Map(command.User, user);
+        user.FromUpdateUser(command.User);
 
         Province? province = await unitOfWork
             .Repository<Province>()
@@ -69,14 +67,8 @@ public class UpdateUserHandler(
             await unitOfWork.Repository<User>().UpdateAsync(user);
             await unitOfWork.SaveAsync(cancellationToken);
 
-            List<UserClaim> customUserClaims = mapper.Map<List<UserClaim>>(
-                command.User.UserClaims,
-                opt =>
-                {
-                    opt.Items[nameof(UserClaim.Type)] = KindaUserClaimType.Custom;
-                    opt.Items[nameof(UserClaim.UserId)] = user.Id;
-                }
-            );
+            List<UserClaim> customUserClaims =
+                command.User.UserClaims?.ToListUserClaim(KindaUserClaimType.Custom, user.Id) ?? [];
 
             await userManagerService.UpdateUserAsync(
                 user,
@@ -87,7 +79,7 @@ public class UpdateUserHandler(
             await unitOfWork.CommitAsync(cancellationToken);
 
             await mediaUpdateService.DeleteAvatarAsync(oldAvatar);
-            return mapper.Map<UpdateUserResponse>(user);
+            return user.ToUpdateUserResponse();
         }
         catch (Exception)
         {

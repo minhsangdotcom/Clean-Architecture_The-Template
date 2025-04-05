@@ -15,9 +15,11 @@ public class ListUserHandler(IUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     ) =>
         await unitOfWork
-            .CachedRepository<User>()
-            .CursorPagedListAsync<ListUserResponse>(
+            .SpecificationRepository<User>(true)
+            .CursorPagedListAsync(
                 new ListUserSpecification(),
-                query.ValidateQuery().ValidateFilter(typeof(ListUserResponse))
+                query.ValidateQuery().ValidateFilter(typeof(ListUserResponse)),
+                ListUserMapping.Selector(),
+                cancellationToken: cancellationToken
             );
 }

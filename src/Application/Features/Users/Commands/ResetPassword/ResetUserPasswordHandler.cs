@@ -18,7 +18,7 @@ public class ResetUserPasswordHandler(IUnitOfWork unitOfWork)
     {
         User user =
             await unitOfWork
-                .Repository<User>()
+                .SpecificationRepository<User>()
                 .FindByConditionAsync(
                     new GetUserByIdIncludeResetPassword(command.UserId),
                     cancellationToken

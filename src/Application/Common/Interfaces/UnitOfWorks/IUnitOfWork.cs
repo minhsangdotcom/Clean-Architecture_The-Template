@@ -6,9 +6,24 @@ public interface IUnitOfWork : IDisposable
 {
     public DbTransaction? CurrentTransaction { get; protected set; }
 
+    IAsyncRepository<TEntity> Repository<TEntity>(bool isCached = false)
+        where TEntity : class;
+
+    /// <summary>
+    /// only read operations with specification pattern
+    /// </summary>
+    /// <typeparam name="TEntity">Entity type</typeparam>
+    /// <param name="isCached">Do cache or not</param>
+    /// <returns></returns>
     ISpecificationRepository<TEntity> SpecificationRepository<TEntity>(bool isCached = false)
         where TEntity : class;
 
+    /// <summary>
+    /// only read operations with specification pattern in static query
+    /// </summary>
+    /// <typeparam name="TEntity">Entity type</typeparam>
+    /// <param name="isCached">Do cache or not</param>
+    /// <returns></returns>
     IStaticPredicateSpecificationRepository<TEntity> PredicateSpecificationRepository<TEntity>(
         bool isCached = false
     )

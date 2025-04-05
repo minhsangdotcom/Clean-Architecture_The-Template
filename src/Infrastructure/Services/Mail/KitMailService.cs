@@ -1,5 +1,4 @@
 using Application.Common.Interfaces.Services.Mail;
-using AutoMapper;
 using Contracts.Dtos.Requests;
 using MailKit.Net.Smtp;
 using MailKit.Security;
@@ -9,13 +8,12 @@ using Serilog;
 
 namespace Infrastructure.Services.Mail;
 
-public class KitMailService(IOptions<EmailSettings> options, ILogger logger, IMapper mapper)
-    : IMailService
+public class KitMailService(IOptions<EmailSettings> options, ILogger logger) : IMailService
 {
     private readonly EmailSettings emailSettings = options.Value;
 
     public async Task<bool> SendAsync(MessageMailMetaData metaData) =>
-        await EmailAsync(mapper.Map<MailData>(metaData));
+        await EmailAsync(metaData.MapToMailData());
 
     public async Task<bool> SendWithTemplateAsync(TemplateMailMetaData metaData)
     {

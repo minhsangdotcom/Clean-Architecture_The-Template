@@ -1,5 +1,4 @@
 using Application.Common.Interfaces.Services.Elastics;
-using AutoMapper;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
 using Domain.Common;
@@ -14,7 +13,6 @@ namespace Infrastructure.Services.Elastics;
 
 public class ElasticsearchService<T>(
     ElasticsearchClient elasticClient,
-    IMapper mapper,
     IOptions<ElasticsearchSettings> options
 ) : IElasticsearchService<T>
     where T : class
@@ -93,19 +91,10 @@ public class ElasticsearchService<T>(
         return searchResponse.Documents;
     }
 
-    public async Task<PaginationResponse<TResult>> PaginatedListAsync<TResult>(
+    public async Task<SearchResponse<T>> ListAsync(
         QueryParamRequest request,
         Action<QueryDescriptor<T>>? filter = null
-    )
-    {
-        SearchResponse<T> searchResponse = await SearchAsync(request, filter);
-        return new PaginationResponse<TResult>(
-            mapper.Map<IEnumerable<TResult>>(searchResponse.Documents?.AsEnumerable() ?? []),
-            (int)searchResponse.Total,
-            request.Page,
-            request.PageSize
-        );
-    }
+    ) => await SearchAsync(request, filter);
 
     public async Task<PaginationResponse<T>> PaginatedListAsync(
         QueryParamRequest request,

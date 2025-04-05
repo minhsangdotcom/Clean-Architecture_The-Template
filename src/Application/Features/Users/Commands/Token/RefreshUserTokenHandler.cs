@@ -29,7 +29,7 @@ public class RefreshUserTokenHandler(
     {
         DecodeTokenResponse decodeToken = ValidateRefreshToken(command.RefreshToken!);
         UserToken? refresh = await unitOfWork
-            .Repository<UserToken>()
+            .SpecificationRepository<UserToken>()
             .FindByConditionAsync(
                 new GetRefreshtokenSpecification(
                     command.RefreshToken!,
@@ -39,7 +39,7 @@ public class RefreshUserTokenHandler(
             );
 
         IEnumerable<UserToken> refreshTokens = await unitOfWork
-            .Repository<UserToken>()
+            .SpecificationRepository<UserToken>()
             .ListAsync(
                 new ListRefreshtokenByFamillyIdSpecification(
                     decodeToken.FamilyId!,
