@@ -20,13 +20,13 @@ public interface ISpecificationRepository<T> : IRepository<T>
     )
         where TResult : class;
 
-    Task<IEnumerable<T>> ListAsync(
+    Task<IList<T>> ListAsync(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
         CancellationToken cancellationToken = default
     );
 
-    Task<IEnumerable<TResult>> ListAsync<TResult>(
+    Task<IList<TResult>> ListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
         Expression<Func<T, TResult>> mappingResult,

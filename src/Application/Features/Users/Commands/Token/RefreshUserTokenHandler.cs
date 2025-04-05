@@ -28,28 +28,23 @@ public class RefreshUserTokenHandler(
     )
     {
         DecodeTokenResponse decodeToken = ValidateRefreshToken(command.RefreshToken!);
-        UserToken? refresh = await unitOfWork
-            .SpecificationRepository<UserToken>()
-            .FindByConditionAsync(
-                new GetRefreshtokenSpecification(
-                    command.RefreshToken!,
-                    Ulid.Parse(decodeToken.Sub!)
-                ),
-                cancellationToken
-            );
-
-        IEnumerable<UserToken> refreshTokens = await unitOfWork
+        IList<UserToken> refreshTokens = await unitOfWork
             .SpecificationRepository<UserToken>()
             .ListAsync(
                 new ListRefreshtokenByFamillyIdSpecification(
                     decodeToken.FamilyId!,
                     Ulid.Parse(decodeToken.Sub!)
                 ),
-                new() { Sort = $"{nameof(UserToken.CreatedAt)} {OrderTerm.DESC}" },
+                new()
+                {
+                    Sort =
+                        $"{nameof(UserToken.CreatedAt).ToLower()}${OrderTerm.DELIMITER}{OrderTerm.DESC}",
+                },
                 cancellationToken
             );
+        UserToken validRefreshToken = refreshTokens[0];
 
-        if (refresh == null)
+        if (validRefreshToken == null)
         {
             await unitOfWork.Repository<UserToken>().DeleteRangeAsync(refreshTokens);
             await unitOfWork.SaveAsync(cancellationToken);
@@ -58,31 +53,27 @@ public class RefreshUserTokenHandler(
                     Messager
                         .Create<UserToken>(nameof(User))
                         .Property(x => x.RefreshToken!)
-                        .Message(MessageType.Correct)
+                        .Message(MessageType.Valid)
                         .Negative()
                         .BuildMessage(),
                 ]
             );
         }
 
-        if (refresh.User!.Status == UserStatus.Inactive)
+        if (validRefreshToken.User!.Status == UserStatus.Inactive)
         {
             throw new BadRequestException(
                 [Messager.Create<User>().Message(MessageType.Active).Negative().BuildMessage()]
             );
         }
 
-        await unitOfWork.Repository<UserToken>().DeleteRangeAsync(refreshTokens);
-
         var accesstokenExpiredTime = tokenFactory.AccesstokenExpiredTime;
-
         var accessToken = tokenFactory.CreateToken(
             [new(JwtRegisteredClaimNames.Sub.ToString(), decodeToken.Sub!.ToString())],
             accesstokenExpiredTime
         );
 
         var refreshTokenExpiredTime = tokenFactory.RefreshtokenExpiredTime;
-
         string refreshToken = tokenFactory.CreateToken(
             [
                 new(JwtRegisteredClaimNames.Sub.ToString(), decodeToken.Sub!.ToString()),

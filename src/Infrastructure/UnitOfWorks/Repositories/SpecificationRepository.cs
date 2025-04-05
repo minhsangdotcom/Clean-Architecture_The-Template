@@ -32,7 +32,7 @@ public class SpecificationRepository<T>(IDbContext dbContext) : ISpecificationRe
         where TResult : class =>
         await ApplySpecification(spec).Select(mappingResult).FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<IEnumerable<T>> ListAsync(
+    public async Task<IList<T>> ListAsync(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
         CancellationToken cancellationToken = default
@@ -48,7 +48,7 @@ public class SpecificationRepository<T>(IDbContext dbContext) : ISpecificationRe
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<TResult>> ListAsync<TResult>(
+    public async Task<IList<TResult>> ListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
         Expression<Func<T, TResult>> mappingResult,

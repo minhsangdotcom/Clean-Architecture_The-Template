@@ -17,15 +17,13 @@ public interface IUserManagerService : IScope
     Task CreateUserAsync(
         User user,
         IEnumerable<Ulid> roleIds,
-        IEnumerable<UserClaim>? claims = null,
-        DbTransaction? transaction = null
+        IEnumerable<UserClaim>? claims = null
     );
 
     Task UpdateUserAsync(
         User user,
         IEnumerable<Ulid>? roleIds,
-        IEnumerable<UserClaim>? claims = null,
-        DbTransaction? transaction = null
+        IEnumerable<UserClaim>? claims = null
     );
 
     Task AddRoleToUserAsync(User user, IEnumerable<Ulid> roleIds);

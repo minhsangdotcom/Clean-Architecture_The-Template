@@ -272,9 +272,6 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         return roleClaims.Any(x => claims.Contains(new(x.ClaimType, x.ClaimValue)));
     }
 
-    private async Task<Role> GetAsync(Ulid id) =>
-        Guard.Against.NotFound($"{id}", await GetByIdAsync(id), NOT_FOUND_MESSAGE);
-
     private static IEnumerable<UserClaim> ProcessUserClaimUpdate(
         IEnumerable<RoleClaim> roleClaimsToModify,
         IEnumerable<RoleClaim> rolesClaimsToProcess

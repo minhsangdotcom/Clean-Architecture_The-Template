@@ -35,7 +35,6 @@ public class RequestResetUserPasswordHandler(
             );
 
         string token = StringExtension.GenerateRandomString(40);
-
         DateTimeOffset expiredTime = DateTimeOffset.UtcNow.AddHours(
             configuration.GetValue<int>("ForgotPasswordExpiredTimeInHour")
         );

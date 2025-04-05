@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Data.Common;
 using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -17,7 +18,7 @@ public class UnitOfWork(
 {
     public DbTransaction? CurrentTransaction { get; set; }
 
-    private readonly Dictionary<string, object?> repositories = [];
+    private readonly ConcurrentDictionary<string, object?> repositories = [];
 
     private bool disposed = false;
 
@@ -25,58 +26,55 @@ public class UnitOfWork(
         where TEntity : class
     {
         string key = GetKey(typeof(TEntity).FullName!, nameof(Repository), isCached);
-        if (!repositories.TryGetValue(key, out object? value))
-        {
-            Type repositoryType = typeof(AsyncRepository<>);
-            object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
-
-            if (isCached)
+        object? repositoryInstance = repositories.GetOrAdd(
+            key,
+            key =>
             {
-                value = CreateInstance<TEntity>(
-                    typeof(CachedAsyncRepository<>),
-                    repositoryInstance!,
-                    logger,
-                    memoryCacheService
-                );
-                repositories.Add(key, value);
-            }
-            else
-            {
-                value = repositoryInstance;
-                repositories.Add(key, value);
-            }
-        }
+                Type repositoryType = typeof(AsyncRepository<>);
+                object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
 
-        return (IAsyncRepository<TEntity>)value!;
+                if (isCached)
+                {
+                    return CreateInstance<TEntity>(
+                        typeof(CachedAsyncRepository<>),
+                        repositoryInstance!,
+                        logger,
+                        memoryCacheService
+                    );
+                }
+                return repositoryInstance;
+            }
+        );
+
+        return (IAsyncRepository<TEntity>)repositoryInstance!;
     }
 
     public ISpecificationRepository<TEntity> SpecificationRepository<TEntity>(bool isCached = false)
         where TEntity : class
     {
         string key = GetKey(typeof(TEntity).FullName!, nameof(SpecificationRepository), isCached);
-        if (!repositories.TryGetValue(key, out object? value))
-        {
-            Type repositoryType = typeof(SpecificationRepository<>);
-            object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
 
-            if (isCached)
+        object? repositoryInstance = repositories.GetOrAdd(
+            key,
+            key =>
             {
-                value = CreateInstance<TEntity>(
-                    typeof(CachedSpecificationRepository<>),
-                    repositoryInstance!,
-                    logger,
-                    memoryCacheService
-                );
-                repositories.Add(key, value);
-            }
-            else
-            {
-                value = repositoryInstance;
-                repositories.Add(key, value);
-            }
-        }
+                Type repositoryType = typeof(SpecificationRepository<>);
+                object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
 
-        return (ISpecificationRepository<TEntity>)value!;
+                if (isCached)
+                {
+                    return CreateInstance<TEntity>(
+                        typeof(CachedSpecificationRepository<>),
+                        repositoryInstance!,
+                        logger,
+                        memoryCacheService
+                    );
+                }
+                return repositoryInstance;
+            }
+        );
+
+        return (ISpecificationRepository<TEntity>)repositoryInstance!;
     }
 
     public IStaticPredicateSpecificationRepository<TEntity> PredicateSpecificationRepository<TEntity>(
@@ -89,29 +87,27 @@ public class UnitOfWork(
             nameof(PredicateSpecificationRepository),
             isCached
         );
-        if (!repositories.TryGetValue(key, out object? value))
-        {
-            Type repositoryType = typeof(StaticPredicateSpecificationRepository<>);
-            object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
-
-            if (isCached)
+        object? repositoryInstance = repositories.GetOrAdd(
+            key,
+            key =>
             {
-                value = CreateInstance<TEntity>(
-                    typeof(CachedStaticPredicateSpecificationRepository<>),
-                    repositoryInstance!,
-                    logger,
-                    memoryCacheService
-                );
-                repositories.Add(key, value);
-            }
-            else
-            {
-                value = repositoryInstance;
-                repositories.Add(key, value);
-            }
-        }
+                Type repositoryType = typeof(StaticPredicateSpecificationRepository<>);
+                object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
 
-        return (IStaticPredicateSpecificationRepository<TEntity>)value!;
+                if (isCached)
+                {
+                    return CreateInstance<TEntity>(
+                        typeof(CachedStaticPredicateSpecificationRepository<>),
+                        repositoryInstance!,
+                        logger,
+                        memoryCacheService
+                    );
+                }
+                return repositoryInstance;
+            }
+        );
+
+        return (IStaticPredicateSpecificationRepository<TEntity>)repositoryInstance!;
     }
 
     public async Task<DbTransaction> BeginTransactionAsync(

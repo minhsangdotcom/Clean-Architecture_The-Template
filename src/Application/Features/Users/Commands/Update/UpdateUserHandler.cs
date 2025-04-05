@@ -1,4 +1,3 @@
-using System.Data.Common;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -53,29 +52,27 @@ public class UpdateUserHandler(
                 .Repository<Commune>()
                 .FindByIdAsync(command.User.CommuneId.Value, cancellationToken);
         }
+        //* replace address
         user.UpdateAddress(new(province!, district!, commune, command.User.Street!));
 
         string? key = mediaUpdateService.GetKey(avatar);
         user.Avatar = await mediaUpdateService.UploadAvatarAsync(avatar, key);
-        // update default claim
+
+        //* trigger event to update default claims -  that's infomation of user
         user.UpdateDefaultUserClaims();
 
         try
         {
-            DbTransaction transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
+            _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
             await unitOfWork.Repository<User>().UpdateAsync(user);
             await unitOfWork.SaveAsync(cancellationToken);
 
+            //* update custom claims of user like permissions ...
             List<UserClaim> customUserClaims =
                 command.User.UserClaims?.ToListUserClaim(KindaUserClaimType.Custom, user.Id) ?? [];
+            await userManagerService.UpdateUserAsync(user, command.User.Roles!, customUserClaims);
 
-            await userManagerService.UpdateUserAsync(
-                user,
-                command.User.Roles!,
-                customUserClaims,
-                transaction
-            );
             await unitOfWork.CommitAsync(cancellationToken);
 
             await mediaUpdateService.DeleteAvatarAsync(oldAvatar);

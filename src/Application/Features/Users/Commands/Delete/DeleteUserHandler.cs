@@ -8,7 +8,7 @@ using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.Delete;
 
-public class DeleteUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User> MediaUpdateService)
+public class DeleteUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User> mediaUpdateService)
     : IRequestHandler<DeleteUserCommand>
 {
     public async ValueTask<Unit> Handle(
@@ -30,7 +30,7 @@ public class DeleteUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User>
         await unitOfWork.Repository<User>().DeleteAsync(user);
         await unitOfWork.SaveAsync(cancellationToken);
 
-        await MediaUpdateService.DeleteAvatarAsync(avatar);
+        await mediaUpdateService.DeleteAvatarAsync(avatar);
         return Unit.Value;
     }
 }
