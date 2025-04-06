@@ -146,63 +146,6 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                 .Date(d => d.Agent!.DayOfBirth!)
                                 .ByteNumber(b => b.Agent!.Gender!)
                                 .Keyword(x => x.Agent!.CreatedAt)
-                                .Nested(
-                                    n => n.Agent!.Role!,
-                                    config =>
-                                        config.Properties(p =>
-                                            p.Text(
-                                                    t => t.Agent!.Role!.Name!,
-                                                    config =>
-                                                        config
-                                                            .Fields(f =>
-                                                                f.Keyword(
-                                                                    ElsIndexExtension.GetKeywordName<RoleTest>(
-                                                                        n => n.Name!
-                                                                    )
-                                                                )
-                                                            )
-                                                            .Analyzer("myTokenizer")
-                                                            .SearchAnalyzer("standardAnalyzer")
-                                                )
-                                                .Text(
-                                                    t => t.Agent!.Role!.Guard!,
-                                                    config =>
-                                                        config
-                                                            .Fields(f =>
-                                                                f.Keyword(
-                                                                    ElsIndexExtension.GetKeywordName<RoleTest>(
-                                                                        n => n.Guard!
-                                                                    )
-                                                                )
-                                                            )
-                                                            .Analyzer("myTokenizer")
-                                                            .SearchAnalyzer("standardAnalyzer")
-                                                )
-                                                .Nested(
-                                                    n => n.Agent!.Role!.Permissions!,
-                                                    config =>
-                                                        config.Properties(p =>
-                                                            p.Text(
-                                                                t =>
-                                                                    t.Agent!.Role!.Permissions!.First().Name!,
-                                                                config =>
-                                                                    config
-                                                                        .Fields(f =>
-                                                                            f.Keyword(
-                                                                                ElsIndexExtension.GetKeywordName<PermissionTest>(
-                                                                                    n => n.Name!
-                                                                                )
-                                                                            )
-                                                                        )
-                                                                        .Analyzer("myTokenizer")
-                                                                        .SearchAnalyzer(
-                                                                            "standardAnalyzer"
-                                                                        )
-                                                            )
-                                                        )
-                                                )
-                                        )
-                                )
                         )
                 )
         );
