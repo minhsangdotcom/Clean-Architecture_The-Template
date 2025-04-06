@@ -53,7 +53,7 @@ public class CachedSpecificationRepository<T>(
         return repository.FindByConditionAsync(spec, cancellationToken);
     }
 
-    public Task<IEnumerable<T>> ListAsync(
+    public Task<IList<T>> ListAsync(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
         CancellationToken cancellationToken = default
@@ -72,7 +72,7 @@ public class CachedSpecificationRepository<T>(
         return repository.ListAsync(spec, queryParam, cancellationToken);
     }
 
-    public Task<IEnumerable<TResult>> ListAsync<TResult>(
+    public Task<IList<TResult>> ListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
         Expression<Func<T, TResult>> mappingResult,

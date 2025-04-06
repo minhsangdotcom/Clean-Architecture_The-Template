@@ -1,7 +1,6 @@
 using Application.Common.Interfaces.Registers;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
-using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
@@ -16,8 +15,6 @@ using Infrastructure.Services.MemoryCache;
 using Infrastructure.Services.Queue;
 using Infrastructure.Services.Token;
 using Infrastructure.UnitOfWorks;
-using Infrastructure.UnitOfWorks.CachedRepositories;
-using Infrastructure.UnitOfWorks.Repositories;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -70,19 +67,12 @@ public static class DependencyInjection
             }
         );
 
+        services.AddOptions<EmailSettings>().Bind(configuration.GetSection(nameof(EmailSettings)));
+
         services
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentUser, CurrentUserService>()
             .AddSingleton(typeof(IMediaUpdateService<>), typeof(MediaUpdateService<>))
-            .AddTransient<KitMailService>()
-            .AddTransient<IMailService, KitMailService>(provider =>
-                provider.GetService<KitMailService>()!
-            )
-            .AddTransient<FluentMailService>()
-            .AddTransient<IMailService, FluentMailService>(provider =>
-                provider.GetService<FluentMailService>()!
-            )
-            .AddFluentMail(configuration)
             .Scan(scan =>
                 scan.FromCallingAssembly()
                     .AddClasses(classes => classes.AssignableTo<IScope>())

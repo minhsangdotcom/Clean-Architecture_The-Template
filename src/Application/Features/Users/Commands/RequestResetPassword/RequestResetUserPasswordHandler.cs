@@ -15,7 +15,7 @@ namespace Application.Features.Users.Commands.RequestResetPassword;
 public class RequestResetUserPasswordHandler(
     IUnitOfWork unitOfWork,
     IConfiguration configuration,
-    IMailer mailer
+    IMailService mailService
 ) : IRequestHandler<RequestResetUserPasswordCommand>
 {
     public async ValueTask<Unit> Handle(
@@ -56,20 +56,18 @@ public class RequestResetUserPasswordHandler(
         var link = new UriBuilder(domain) { Query = $"token={token}&id={user.Id}" };
         string expiry = expiredTime.ToLocalTime().ToString("dd/MM/yyyy hh:mm:ss");
 
-        _ = await mailer
-            .Email()
-            .SendWithTemplateAsync(
-                new TemplateMailMetaData()
-                {
-                    DisplayName = "The template Reset password",
-                    Subject = "Reset password",
-                    To = [user.Email],
-                    Template = new(
-                        "ForgotPassword",
-                        new ResetPasswordModel() { ResetLink = link.ToString(), Expiry = expiry }
-                    ),
-                }
-            );
+        _ = await mailService.SendWithTemplateAsync(
+            new MailTemplateData()
+            {
+                DisplayName = "The template Reset password",
+                Subject = "Reset password",
+                To = [user.Email],
+                Template = new(
+                    "ForgotPassword",
+                    new ResetPasswordModel() { ResetLink = link.ToString(), Expiry = expiry }
+                ),
+            }
+        );
         return Unit.Value;
     }
 }
