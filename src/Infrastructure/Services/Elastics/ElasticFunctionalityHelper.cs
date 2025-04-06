@@ -90,93 +90,6 @@ public static class ElasticFunctionalityHelper
         return search.Bool(b => b.Should(queries));
     }
 
-    private static List<Query> MatchPhraseQuery(
-        List<KeyValuePair<PropertyType, string>> stringProperties,
-        string keyword
-    )
-    {
-        List<Query> queries = [];
-
-        //*search for the same level property
-        List<KeyValuePair<PropertyType, string>> properties = stringProperties.FindAll(x =>
-            x.Key == PropertyType.Property
-        );
-
-        var matchPhraseQueries = properties.Select(x => new MatchPhraseQuery(new Field(x.Value))
-        {
-            Query = $"{keyword}",
-            Boost = 2,
-        });
-
-        queries.AddRange([.. matchPhraseQueries]);
-
-        //* search nested properties
-        //todo: [{"A" ,["A.A1","A.A2"]}, {"A.B", ["A.B.B1","A.B.B2"]}]
-        List<KeyValuePair<string, string>> nestedProperties =
-        [
-            .. stringProperties
-                .Except(properties)
-                .Select(x =>
-                {
-                    string value = x.Value;
-                    int lastDot = value.LastIndexOf('.');
-                    return new KeyValuePair<string, string>(value[..lastDot], value);
-                }),
-        ];
-
-        // * group and sort with the deeper and deeper of nesting
-        var nestedsearch = nestedProperties
-            .GroupBy(x => x.Key)
-            .Select(x => new { key = x.Key, primaryProperty = x.Select(p => p.Value).ToList() })
-            .OrderBy(x => x.key)
-            .ToList();
-
-        //* create nested multi_match search
-        foreach (var nested in nestedsearch)
-        {
-            var key = nested.key;
-            var parts = key.Trim().Split(".");
-            NestedQuery nestedQuery = new();
-
-            string path = string.Empty;
-            for (int i = 0; i < parts.Length; i++)
-            {
-                if (i == 0)
-                {
-                    path += $"{parts[i]}";
-                    nestedQuery.Path = path!;
-                }
-                else
-                {
-                    path += $".{parts[i]}";
-                    NestedQuery nest = new() { Path = path! };
-                    nestedQuery.Query = nest;
-                    nestedQuery = nest;
-                }
-            }
-            nestedQuery.Query = new BoolQuery()
-            {
-                Should =
-                [
-                    .. nested
-                        .primaryProperty.Select(x =>
-                        {
-                            return new MatchPhraseQuery(new Field(x))
-                            {
-                                Query = $"{keyword}",
-                                Boost = 2,
-                            };
-                        })
-                        .ToList(),
-                ],
-            };
-
-            queries.Add(nestedQuery);
-        }
-
-        return queries;
-    }
-
     private static List<Query> MultiMatchQuery(
         List<KeyValuePair<PropertyType, string>> stringProperties,
         string keyword
@@ -190,24 +103,21 @@ public static class ElasticFunctionalityHelper
             new()
             {
                 Query = $"{keyword}",
-                Fields = Fields.FromFields(properties.Select(x => new Field(x.Value)).ToArray()),
+                Fields = Fields.FromFields([.. properties.Select(x => new Field(x.Value))]),
                 //Fuzziness = new Fuzziness(2),
             };
         List<Query> queries = [multiMatchQuery];
 
         //* search nested properties
         //todo: [{"A" ,["A.A1","A.A2"]}, {"A.B", ["A.B.B1","A.B.B2"]}]
-        List<KeyValuePair<string, string>> nestedProperties =
-        [
-            .. stringProperties
-                .Except(properties)
-                .Select(x =>
-                {
-                    string value = x.Value;
-                    int lastDot = value.LastIndexOf('.');
-                    return new KeyValuePair<string, string>(value[..lastDot], value);
-                }),
-        ];
+        IEnumerable<KeyValuePair<string, string>> nestedProperties = stringProperties
+            .Except(properties)
+            .Select(x =>
+            {
+                string value = x.Value;
+                int lastDot = value.LastIndexOf('.');
+                return new KeyValuePair<string, string>(value[..lastDot], value);
+            });
 
         // * group and sort with the deeper and deeper of nesting
         var nestedsearch = nestedProperties
