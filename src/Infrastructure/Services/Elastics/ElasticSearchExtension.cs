@@ -2,6 +2,7 @@ using System.Reflection;
 using Application.Common.Interfaces.Services.Elastics;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
+using FluentConfiguration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -43,13 +44,24 @@ public static class ElasticSearchExtension
                     Assembly.GetExecutingAssembly(),
                     elasticsearch.PrefixIndex!
                 );
+
+            // add configurations of id, ignore properties
             ElasticsearchRegisterHelper.ConfigureConnectionSettings(ref settings, elkConfigbuilder);
 
             var client = new ElasticsearchClient(settings);
 
+            ElasticsearchRegisterHelper
+                .ElasticFluentConfigAsync(client, elkConfigbuilder)
+                .ConfigureAwait(false)
+                .GetAwaiter();
+
+            DataSeeding
+                .SeedingAsync(client, elasticsearch.PrefixIndex)
+                .ConfigureAwait(false)
+                .GetAwaiter();
+
             services
                 .AddSingleton(client)
-                .AddHostedService<ElasticsearchIndexBackgoundService>()
                 .AddSingleton<IElasticsearchServiceFactory, ElasticsearchServiceFactory>();
         }
 

@@ -8,15 +8,6 @@
         "resolved": "4.0.3",
         "contentHash": "W+U9WvmZQgi5cX6FS5GDtDoPzUCV4LkBLkywq/kRZhuDwcbavOzcDAr3LXJFqHUi952Yj3LEYoWW0jbEUQChsA=="
       },
-      "Elastic.Clients.Elasticsearch": {
-        "type": "Direct",
-        "requested": "[8.17.1, )",
-        "resolved": "8.17.1",
-        "contentHash": "H1TI5dMB/si8GzoEy17sgjzr8frO+nURIjfgoHFg3AOGugbvPwm4FzCNLk+R++vdPOmsQ3wS0NZPH3VufP4HcQ==",
-        "dependencies": {
-          "Elastic.Transport": "0.5.7"
-        }
-      },
       "FluentValidation.DependencyInjectionExtensions": {
         "type": "Direct",
         "requested": "[11.11.0, )",
@@ -63,6 +54,16 @@
         "contentHash": "EUNaX3F4fALAfvp7wsCqjqziu1lTNwYRFbIcVJEt6vInWxEpscAM/pcG6GBOx3WcmSRdB7sqtKAKSkyY6XhTig==",
         "dependencies": {
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "7.1.2"
+        }
+      },
+      "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": {
+        "type": "Direct",
+        "requested": "[1.0.1-alpha, )",
+        "resolved": "1.0.1-alpha",
+        "contentHash": "oqzZX0iyIA6jM7p3tgIanoJrQBpEouZx/1OJmBCY+Zv5R9VcCOq5Ymi8c3TICoejv7T2AkMC8WEEtTB+XZdjFA==",
+        "dependencies": {
+          "CaseConverter": "2.0.1",
+          "Elastic.Clients.Elasticsearch": "8.17.1"
         }
       },
       "NRedisStack": {
@@ -151,6 +152,14 @@
         "type": "Transitive",
         "resolved": "2.0.1",
         "contentHash": "asjS7JV9U1NdnO+AzyNJzCENFUp+l2Fn4u7Ub8iOCEf43IEaGbH3rlHJzxKRM5xfwFEAxcijJzBFY7lG1gFHNA=="
+      },
+      "Elastic.Clients.Elasticsearch": {
+        "type": "Transitive",
+        "resolved": "8.17.1",
+        "contentHash": "H1TI5dMB/si8GzoEy17sgjzr8frO+nURIjfgoHFg3AOGugbvPwm4FzCNLk+R++vdPOmsQ3wS0NZPH3VufP4HcQ==",
+        "dependencies": {
+          "Elastic.Transport": "0.5.7"
+        }
       },
       "Elastic.Transport": {
         "type": "Transitive",

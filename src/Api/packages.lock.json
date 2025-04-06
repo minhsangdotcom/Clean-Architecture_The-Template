@@ -879,8 +879,8 @@
       },
       "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": {
         "type": "Transitive",
-        "resolved": "1.0.0",
-        "contentHash": "9IQmD59QmLL5ORTRCKE1D4L1L54hDQqSkeIc35q21wSk3NvwJruzw4yzQWyOub98AuKTtSm4hkYBfk0bjg+v+w==",
+        "resolved": "1.0.1-alpha",
+        "contentHash": "oqzZX0iyIA6jM7p3tgIanoJrQBpEouZx/1OJmBCY+Zv5R9VcCOq5Ymi8c3TICoejv7T2AkMC8WEEtTB+XZdjFA==",
         "dependencies": {
           "CaseConverter": "2.0.1",
           "Elastic.Clients.Elasticsearch": "8.17.1"
@@ -1235,7 +1235,6 @@
           "BCrypt.Net-Next": "[4.0.3, )",
           "Contracts": "[1.0.0, )",
           "Domain": "[1.0.0, )",
-          "Elastic.Clients.Elasticsearch": "[8.17.1, )",
           "FluentValidation.DependencyInjectionExtensions": "[11.11.0, )",
           "JWT": "[11.0.0, )",
           "Mediator.Abstractions": "[3.0.0-preview.27, )",
@@ -1245,7 +1244,8 @@
           "Serilog.AspNetCore": "[9.0.0, )",
           "Serilog.Enrichers.Environment": "[3.0.1, )",
           "Serilog.Sinks.Seq": "[9.0.0, )",
-          "Wangkanai.Detection": "[8.14.0, )"
+          "Wangkanai.Detection": "[8.14.0, )",
+          "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": "[1.0.1-alpha, )"
         }
       },
       "contracts": {
@@ -1282,8 +1282,7 @@
           "Hangfire.PostgreSql": "[1.20.10, )",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "[8.0.11, )",
           "Scrutor": "[4.2.2, )",
-          "Ulid": "[1.3.4, )",
-          "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": "[1.0.0, )"
+          "Ulid": "[1.3.4, )"
         }
       }
     }

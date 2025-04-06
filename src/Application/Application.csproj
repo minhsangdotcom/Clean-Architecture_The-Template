@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
-    <PackageReference Include="Elastic.Clients.Elasticsearch" Version="8.17.1" />
+    <PackageReference Include="minhsangdotcom.TheTemplate.ElasticsearchFluentConfig" Version="1.0.1-alpha" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageReference Include="JWT" Version="11.0.0" />
     <PackageReference Include="Mediator.Abstractions" Version="3.0.0-preview.27" />

@@ -610,6 +610,15 @@
           "System.Runtime": "4.3.0"
         }
       },
+      "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": {
+        "type": "Transitive",
+        "resolved": "1.0.1-alpha",
+        "contentHash": "oqzZX0iyIA6jM7p3tgIanoJrQBpEouZx/1OJmBCY+Zv5R9VcCOq5Ymi8c3TICoejv7T2AkMC8WEEtTB+XZdjFA==",
+        "dependencies": {
+          "CaseConverter": "2.0.1",
+          "Elastic.Clients.Elasticsearch": "8.17.1"
+        }
+      },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Transitive",
         "resolved": "1.0.3-alpha",
@@ -1787,7 +1796,6 @@
           "BCrypt.Net-Next": "[4.0.3, )",
           "Contracts": "[1.0.0, )",
           "Domain": "[1.0.0, )",
-          "Elastic.Clients.Elasticsearch": "[8.17.1, )",
           "FluentValidation.DependencyInjectionExtensions": "[11.11.0, )",
           "JWT": "[11.0.0, )",
           "Mediator.Abstractions": "[3.0.0-preview.27, )",
@@ -1797,7 +1805,8 @@
           "Serilog.AspNetCore": "[9.0.0, )",
           "Serilog.Enrichers.Environment": "[3.0.1, )",
           "Serilog.Sinks.Seq": "[9.0.0, )",
-          "Wangkanai.Detection": "[8.14.0, )"
+          "Wangkanai.Detection": "[8.14.0, )",
+          "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": "[1.0.1-alpha, )"
         }
       },
       "contracts": {
