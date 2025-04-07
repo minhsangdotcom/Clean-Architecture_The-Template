@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Application.Common.Extensions;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Requests;
@@ -14,14 +15,14 @@ namespace Infrastructure.UnitOfWorks.Repositories;
 /// </summary>
 /// <typeparam name="T"> must be BaseEntity or AggregateRoot</typeparam>
 /// <param name="dbContext">IDbcontext</param>
-public partial class StaticPredicateSpecificationRepository<T>(IDbContext dbContext)
+public class StaticPredicateSpecificationRepository<T>(IDbContext dbContext)
     : IStaticPredicateSpecificationRepository<T>
     where T : class
 {
     public async Task<PaginationResponse<TResult>> CursorPagedListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        System.Linq.Expressions.Expression<Func<T, TResult>> mappingResult,
+        Expression<Func<T, TResult>> mappingResult,
         string? uniqueSort = null,
         CancellationToken cancellationToken = default
     )
@@ -40,7 +41,7 @@ public partial class StaticPredicateSpecificationRepository<T>(IDbContext dbCont
 
     public Task<TResult?> FindByConditionAsync<TResult>(
         ISpecification<T> spec,
-        System.Linq.Expressions.Expression<Func<T, TResult>> mappingResult,
+        Expression<Func<T, TResult>> mappingResult,
         CancellationToken cancellationToken = default
     )
         where TResult : class =>
@@ -49,7 +50,7 @@ public partial class StaticPredicateSpecificationRepository<T>(IDbContext dbCont
     public Task<PaginationResponse<TResult>> PagedListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        System.Linq.Expressions.Expression<Func<T, TResult>> mappingResult,
+        Expression<Func<T, TResult>> mappingResult,
         CancellationToken cancellationToken = default
     ) =>
         ApplySpecification(spec)
