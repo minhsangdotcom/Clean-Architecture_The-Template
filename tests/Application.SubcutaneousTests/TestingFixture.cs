@@ -96,8 +96,8 @@ public partial class TestingFixture : IAsyncLifetime
                     })
                     .ToArray(),
             };
-        await roleManagerService.CreateRoleAsync(role);
-        await userManagerService.AddRoleToUserAsync(user, [role.Id]);
+        await roleManagerService.CreateAsync(role);
+        await userManagerService.AssignRolesToUserAsync(user, [role.Id]);
         return user;
     }
 

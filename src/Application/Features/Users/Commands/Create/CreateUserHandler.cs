@@ -61,7 +61,7 @@ public class CreateUserHandler(
             //* adding custom claims like permissions ...etc
             List<UserClaim> customClaims =
                 command.UserClaims?.ToListUserClaim(KindaUserClaimType.Custom, user.Id) ?? [];
-            await userManagerService.CreateUserAsync(user, command.Roles!, customClaims);
+            await userManagerService.CreateAsync(user, command.Roles!, customClaims);
 
             await unitOfWork.CommitAsync(cancellationToken);
 

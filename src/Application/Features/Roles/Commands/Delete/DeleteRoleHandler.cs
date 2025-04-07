@@ -20,7 +20,7 @@ public class DeleteRoleHandler(IRoleManagerService roleManagerService)
                 [Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage()]
             );
 
-        await roleManagerService.DeleteRoleAsync(role);
+        await roleManagerService.DeleteAsync(role);
 
         return Unit.Value;
     }

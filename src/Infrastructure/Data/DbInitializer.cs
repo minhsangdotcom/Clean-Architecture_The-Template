@@ -60,7 +60,7 @@ public class DbInitializer
             if (!await roleManagerService.Roles.AnyAsync())
             {
                 logger.Information("Inserting roles is starting.............");
-                await roleManagerService.CreateRangeRoleAsync(roles);
+                await roleManagerService.CreateRangeAsync(roles);
                 logger.Information("Inserting roles has finished.............");
             }
 
@@ -145,7 +145,7 @@ public class DbInitializer
 
         if (claimsToInsert.Count > 0)
         {
-            await roleManagerService.AddClaimsToRoleAsync(
+            await roleManagerService.AssignClaimsToRoleAsync(
                 role,
                 [
                     .. claimsToInsert.Select(x => new KeyValuePair<string, string>(
@@ -217,8 +217,8 @@ public class DbInitializer
         await unitOfWork.Repository<User>().AddRangeAsync([chloe, johnDoe]);
         await unitOfWork.SaveAsync();
 
-        await userManagerService.CreateUserAsync(chloe, [adminRoleId]);
-        await userManagerService.CreateUserAsync(johnDoe, [managerRoleId]);
+        await userManagerService.CreateAsync(chloe, [adminRoleId]);
+        await userManagerService.CreateAsync(johnDoe, [managerRoleId]);
     }
 
     // private static async Task<List<User>> BulkUserSeedingAsync(IUnitOfWork unitOfWork)

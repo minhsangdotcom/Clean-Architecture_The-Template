@@ -13,7 +13,7 @@ public class CreateRoleHandler(IRoleManagerService roleManagerService)
     )
     {
         Role mappingRole = command.ToRole();
-        Role role = await roleManagerService.CreateRoleAsync(mappingRole);
+        Role role = await roleManagerService.CreateAsync(mappingRole);
         return role.ToCreateRoleResponse();
     }
 }

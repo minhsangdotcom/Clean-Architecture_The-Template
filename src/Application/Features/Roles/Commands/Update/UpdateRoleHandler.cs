@@ -24,7 +24,7 @@ public class UpdateRoleHandler(IRoleManagerService roleManagerService)
         role.FromUpdateRole(command.Role);
 
         List<RoleClaim> roleClaims = command.Role.RoleClaims.ToListRoleClaim() ?? [];
-        await roleManagerService.UpdateRoleAsync(role, roleClaims);
+        await roleManagerService.UpdateAsync(role, roleClaims);
         return role.ToUpdateRoleResponse();
     }
 }

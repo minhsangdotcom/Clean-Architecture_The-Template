@@ -1,4 +1,3 @@
-using System.Data.Common;
 using Application.Common.Interfaces.Registers;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
@@ -14,43 +13,35 @@ public interface IUserManagerService : IScope
 
     public DbSet<UserClaim> UserClaims { get; }
 
-    Task CreateUserAsync(
-        User user,
-        IEnumerable<Ulid> roleIds,
-        IEnumerable<UserClaim>? claims = null
-    );
+    Task CreateAsync(User user, IEnumerable<Ulid> roleIds, IEnumerable<UserClaim>? claims = null);
 
-    Task UpdateUserAsync(
-        User user,
-        IEnumerable<Ulid>? roleIds,
-        IEnumerable<UserClaim>? claims = null
-    );
+    Task UpdateAsync(User user, IEnumerable<Ulid>? roleIds, IEnumerable<UserClaim>? claims = null);
 
-    Task AddRoleToUserAsync(User user, IEnumerable<Ulid> roleIds);
+    Task AssignRolesToUserAsync(User user, IEnumerable<Ulid> roleIds);
 
-    Task UpdateRolesToUserAsync(User user, IEnumerable<Ulid>? roleIds);
+    Task UpdateUserRolesAsync(User user, IEnumerable<Ulid>? roleIds);
 
-    Task RemoveRoleFromUserAsync(User user, IEnumerable<Ulid> roleIds);
+    Task RemoveRolesFromUserAsync(User user, IEnumerable<Ulid> roleIds);
 
-    Task AddClaimsToUserAsync(User user, IEnumerable<UserClaim> claims);
+    Task AssignClaimsToUserAsync(User user, IEnumerable<UserClaim> claims);
 
-    Task UpdateClaimsToUserAsync(User user, IEnumerable<UserClaim> claims);
+    Task UpdateUserClaimsAsync(User user, IEnumerable<UserClaim> claims);
 
-    Task ReplaceDefaultClaimsToUserAsync(IEnumerable<UserClaim> defaultUserClaims);
+    Task UpdateDefaultUserClaimsAsync(IEnumerable<UserClaim> defaultUserClaims);
 
-    Task RemoveClaimsToUserAsync(User user, IEnumerable<Ulid> claimIds);
+    Task RemoveClaimsFromUserAsync(User user, IEnumerable<Ulid> claimIds);
 
-    Task RemoveClaimsToUserAsync(User user, IEnumerable<UserClaim> claims);
+    Task RemoveClaimsFromUserAsync(User user, IEnumerable<UserClaim> claims);
 
-    Task<List<Role>> GetRolesInUser(Ulid userId);
+    Task<List<Role>> GetUserRoles(Ulid userId);
 
-    Task<List<UserClaim>> GetClaimsInUser(Ulid userId);
+    Task<List<UserClaim>> GetUserClaims(Ulid userId);
 
-    Task<bool> HasRolesInUserAsync(Ulid id, IEnumerable<string> roleNames);
+    Task<bool> HasUserRolesAsync(Ulid id, IEnumerable<string> roleNames);
 
-    Task<bool> HasClaimsInUserAsync(Ulid id, IEnumerable<KeyValuePair<string, string>> claims);
+    Task<bool> HasUserClaimsAsync(Ulid id, IEnumerable<KeyValuePair<string, string>> claims);
 
-    Task<bool> HasClaimsAndRoleInUserAsync(
+    Task<bool> HasUserClaimsAndRolesAsync(
         Ulid id,
         IEnumerable<string> roles,
         IEnumerable<KeyValuePair<string, string>> claims
