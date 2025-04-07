@@ -15,7 +15,7 @@ public interface IUnitOfWork : IDisposable
     /// <typeparam name="TEntity">Entity type</typeparam>
     /// <param name="isCached">Do cache or not</param>
     /// <returns></returns>
-    ISpecificationRepository<TEntity> DynamicRepository<TEntity>(bool isCached = false)
+    IDynamicSpecificationRepository<TEntity> ReadOnlyRepository<TEntity>(bool isCached = false)
         where TEntity : class;
 
     /// <summary>
@@ -24,7 +24,7 @@ public interface IUnitOfWork : IDisposable
     /// <typeparam name="TEntity">Entity type</typeparam>
     /// <param name="isCached">Do cache or not</param>
     /// <returns></returns>
-    IStaticPredicateSpecificationRepository<TEntity> StaticRepository<TEntity>(
+    ISpecificationRepository<TEntity> StaticReadOnlyRepository<TEntity>(
         bool isCached = false
     )
         where TEntity : class;

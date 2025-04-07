@@ -18,7 +18,7 @@ public class DeleteUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User>
     {
         User user =
             await unitOfWork
-                .DynamicRepository<User>()
+                .ReadOnlyRepository<User>()
                 .FindByConditionAsync(
                     new GetUserByIdWithoutIncludeSpecification(command.UserId),
                     cancellationToken

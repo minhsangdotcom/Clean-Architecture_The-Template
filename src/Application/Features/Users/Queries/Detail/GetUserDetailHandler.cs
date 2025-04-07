@@ -15,7 +15,7 @@ public class GetUserDetailHandler(IUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     ) =>
         await unitOfWork
-            .DynamicRepository<User>()
+            .ReadOnlyRepository<User>()
             .FindByConditionAsync(
                 new GetUserByIdSpecification(query.UserId),
                 x => x.ToGetUserDetailResponse(),

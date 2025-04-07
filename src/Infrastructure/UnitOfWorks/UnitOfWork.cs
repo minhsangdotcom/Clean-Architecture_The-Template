@@ -49,11 +49,42 @@ public class UnitOfWork(
         return (IAsyncRepository<TEntity>)repositoryInstance!;
     }
 
-    public ISpecificationRepository<TEntity> DynamicRepository<TEntity>(bool isCached = false)
+    public IDynamicSpecificationRepository<TEntity> ReadOnlyRepository<TEntity>(
+        bool isCached = false
+    )
         where TEntity : class
     {
-        string key = GetKey(typeof(TEntity).FullName!, nameof(DynamicRepository), isCached);
+        string key = GetKey(typeof(TEntity).FullName!, nameof(ReadOnlyRepository), isCached);
 
+        object? repositoryInstance = repositories.GetOrAdd(
+            key,
+            key =>
+            {
+                Type repositoryType = typeof(DynamicSpecificationRepository<>);
+                object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
+
+                if (isCached)
+                {
+                    return CreateInstance<TEntity>(
+                        typeof(CachedDynamicSpecRepository<>),
+                        repositoryInstance!,
+                        logger,
+                        memoryCacheService
+                    );
+                }
+                return repositoryInstance;
+            }
+        );
+
+        return (IDynamicSpecificationRepository<TEntity>)repositoryInstance!;
+    }
+
+    public ISpecificationRepository<TEntity> StaticReadOnlyRepository<TEntity>(
+        bool isCached = false
+    )
+        where TEntity : class
+    {
+        string key = GetKey(typeof(TEntity).FullName!, nameof(StaticReadOnlyRepository), isCached);
         object? repositoryInstance = repositories.GetOrAdd(
             key,
             key =>
@@ -75,35 +106,6 @@ public class UnitOfWork(
         );
 
         return (ISpecificationRepository<TEntity>)repositoryInstance!;
-    }
-
-    public IStaticPredicateSpecificationRepository<TEntity> StaticRepository<TEntity>(
-        bool isCached = false
-    )
-        where TEntity : class
-    {
-        string key = GetKey(typeof(TEntity).FullName!, nameof(StaticRepository), isCached);
-        object? repositoryInstance = repositories.GetOrAdd(
-            key,
-            key =>
-            {
-                Type repositoryType = typeof(StaticPredicateSpecificationRepository<>);
-                object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
-
-                if (isCached)
-                {
-                    return CreateInstance<TEntity>(
-                        typeof(CachedStaticPredicateSpecificationRepository<>),
-                        repositoryInstance!,
-                        logger,
-                        memoryCacheService
-                    );
-                }
-                return repositoryInstance;
-            }
-        );
-
-        return (IStaticPredicateSpecificationRepository<TEntity>)repositoryInstance!;
     }
 
     public async Task<DbTransaction> BeginTransactionAsync(

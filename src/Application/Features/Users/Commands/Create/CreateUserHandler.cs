@@ -67,7 +67,7 @@ public class CreateUserHandler(
 
             return (
                 await unitOfWork
-                    .DynamicRepository<User>()
+                    .ReadOnlyRepository<User>()
                     .FindByConditionAsync(
                         new GetUserByIdSpecification(user.Id),
                         x => x.ToCreateUserResponse(),

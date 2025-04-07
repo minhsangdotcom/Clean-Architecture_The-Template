@@ -29,7 +29,7 @@ public class RefreshUserTokenHandler(
     {
         DecodeTokenResponse decodeToken = ValidateRefreshToken(command.RefreshToken!);
         IList<UserToken> refreshTokens = await unitOfWork
-            .DynamicRepository<UserToken>()
+            .ReadOnlyRepository<UserToken>()
             .ListAsync(
                 new ListRefreshtokenByFamillyIdSpecification(
                     decodeToken.FamilyId!,

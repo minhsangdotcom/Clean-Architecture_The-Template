@@ -16,7 +16,7 @@ public class ListProvinceHandler(IUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     ) =>
         await unitOfWork
-            .DynamicRepository<Province>()
+            .ReadOnlyRepository<Province>()
             .PagedListAsync(
                 new ListProvinceSpecification(),
                 request.ValidateQuery().ValidateFilter(typeof(ProvinceProjection)),
