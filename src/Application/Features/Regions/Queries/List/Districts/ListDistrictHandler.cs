@@ -16,7 +16,7 @@ public class ListDistrictHandler(IUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     ) =>
         await unitOfWork
-            .SpecificationRepository<District>()
+            .DynamicRepository<District>()
             .PagedListAsync(
                 new ListDistrictSpecification(),
                 request.ValidateQuery().ValidateFilter(typeof(DistrictDetailProjection)),

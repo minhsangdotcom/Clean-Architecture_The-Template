@@ -24,7 +24,7 @@ public class UpdateUserProfileHandler(
     {
         User user =
             await unitOfWork
-                .SpecificationRepository<User>()
+                .DynamicRepository<User>()
                 .FindByConditionAsync(
                     new GetUserByIdWithoutIncludeSpecification(currentUser.Id ?? Ulid.Empty),
                     cancellationToken
@@ -71,7 +71,7 @@ public class UpdateUserProfileHandler(
 
         return (
             await unitOfWork
-                .SpecificationRepository<User>()
+                .DynamicRepository<User>()
                 .FindByConditionAsync(
                     new GetUserByIdSpecification(user.Id),
                     x => x.ToUpdateUserProfileResponse(),

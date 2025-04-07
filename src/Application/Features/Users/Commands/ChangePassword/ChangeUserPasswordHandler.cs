@@ -20,7 +20,7 @@ public class ChangeUserPasswordHandler(IUnitOfWork unitOfWork, ICurrentUser curr
 
         User user =
             await unitOfWork
-                .SpecificationRepository<User>()
+                .DynamicRepository<User>()
                 .FindByConditionAsync(
                     new GetUserByIdWithoutIncludeSpecification(userId ?? Ulid.Empty),
                     cancellationToken

@@ -10,21 +10,21 @@ public interface IUnitOfWork : IDisposable
         where TEntity : class;
 
     /// <summary>
-    /// only read operations with specification pattern
+    /// Read-only operations in specification pattern
     /// </summary>
     /// <typeparam name="TEntity">Entity type</typeparam>
     /// <param name="isCached">Do cache or not</param>
     /// <returns></returns>
-    ISpecificationRepository<TEntity> SpecificationRepository<TEntity>(bool isCached = false)
+    ISpecificationRepository<TEntity> DynamicRepository<TEntity>(bool isCached = false)
         where TEntity : class;
 
     /// <summary>
-    /// only read operations with specification pattern in static query
+    /// Read-only operations in specification pattern by static query
     /// </summary>
     /// <typeparam name="TEntity">Entity type</typeparam>
     /// <param name="isCached">Do cache or not</param>
     /// <returns></returns>
-    IStaticPredicateSpecificationRepository<TEntity> PredicateSpecificationRepository<TEntity>(
+    IStaticPredicateSpecificationRepository<TEntity> StaticRepository<TEntity>(
         bool isCached = false
     )
         where TEntity : class;

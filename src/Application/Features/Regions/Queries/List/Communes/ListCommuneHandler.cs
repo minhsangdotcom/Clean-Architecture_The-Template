@@ -17,7 +17,7 @@ public class ListCommuneHandler(IUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     ) =>
         await unitOfWork
-            .SpecificationRepository<Commune>()
+            .DynamicRepository<Commune>()
             .PagedListAsync(
                 new ListCommuneSpecification(),
                 request.ValidateQuery().ValidateFilter(typeof(CommuneDetailProjection)),

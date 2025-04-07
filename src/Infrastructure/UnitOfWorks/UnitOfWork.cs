@@ -49,10 +49,10 @@ public class UnitOfWork(
         return (IAsyncRepository<TEntity>)repositoryInstance!;
     }
 
-    public ISpecificationRepository<TEntity> SpecificationRepository<TEntity>(bool isCached = false)
+    public ISpecificationRepository<TEntity> DynamicRepository<TEntity>(bool isCached = false)
         where TEntity : class
     {
-        string key = GetKey(typeof(TEntity).FullName!, nameof(SpecificationRepository), isCached);
+        string key = GetKey(typeof(TEntity).FullName!, nameof(DynamicRepository), isCached);
 
         object? repositoryInstance = repositories.GetOrAdd(
             key,
@@ -77,16 +77,12 @@ public class UnitOfWork(
         return (ISpecificationRepository<TEntity>)repositoryInstance!;
     }
 
-    public IStaticPredicateSpecificationRepository<TEntity> PredicateSpecificationRepository<TEntity>(
+    public IStaticPredicateSpecificationRepository<TEntity> StaticRepository<TEntity>(
         bool isCached = false
     )
         where TEntity : class
     {
-        string key = GetKey(
-            typeof(TEntity).FullName!,
-            nameof(PredicateSpecificationRepository),
-            isCached
-        );
+        string key = GetKey(typeof(TEntity).FullName!, nameof(StaticRepository), isCached);
         object? repositoryInstance = repositories.GetOrAdd(
             key,
             key =>

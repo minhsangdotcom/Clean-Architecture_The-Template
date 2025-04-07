@@ -16,7 +16,7 @@ public class GetUserProfileHandler(IUnitOfWork unitOfWork, ICurrentUser currentU
         CancellationToken cancellationToken
     ) =>
         await unitOfWork
-            .SpecificationRepository<User>()
+            .DynamicRepository<User>()
             .FindByConditionAsync(
                 new GetUserByIdSpecification(currentUser.Id!.Value),
                 x => x.ToGetUserProfileResponse(),
