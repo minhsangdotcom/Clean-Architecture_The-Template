@@ -29,7 +29,7 @@ public class LoginUserHandler(
     {
         User user =
             await unitOfWork
-                .ReadOnlyRepository<User>()
+                .DynamicReadOnlyRepository<User>()
                 .FindByConditionAsync(
                     new GetUserByUsernameSpecification(request.Username!),
                     cancellationToken

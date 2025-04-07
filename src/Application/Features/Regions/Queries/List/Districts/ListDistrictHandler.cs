@@ -16,7 +16,7 @@ public class ListDistrictHandler(IUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     ) =>
         await unitOfWork
-            .ReadOnlyRepository<District>()
+            .DynamicReadOnlyRepository<District>()
             .PagedListAsync(
                 new ListDistrictSpecification(),
                 request.ValidateQuery().ValidateFilter<DistrictProjection>(),

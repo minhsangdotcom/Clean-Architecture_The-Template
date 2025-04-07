@@ -85,7 +85,7 @@ public partial class TestingFixture
         IUnitOfWork? unitOfWork = scope.ServiceProvider.GetService<IUnitOfWork>();
 
         return await unitOfWork!
-            .ReadOnlyRepository<User>()
+            .DynamicReadOnlyRepository<User>()
             .FindByConditionAsync(new GetUserByIdSpecification(userId));
     }
 }

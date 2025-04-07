@@ -15,7 +15,7 @@ public class ListUserHandler(IUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     ) =>
         await unitOfWork
-            .ReadOnlyRepository<User>(true)
+            .DynamicReadOnlyRepository<User>(true)
             .CursorPagedListAsync(
                 new ListUserSpecification(),
                 query.ValidateQuery().ValidateFilter<ListUserResponse>(),

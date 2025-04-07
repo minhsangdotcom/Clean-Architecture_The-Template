@@ -24,7 +24,7 @@ public class UpdateUserHandler(
     {
         User user =
             await unitOfWork
-                .ReadOnlyRepository<User>()
+                .DynamicReadOnlyRepository<User>()
                 .FindByConditionAsync(
                     new GetUserByIdSpecification(Ulid.Parse(command.UserId)),
                     cancellationToken
