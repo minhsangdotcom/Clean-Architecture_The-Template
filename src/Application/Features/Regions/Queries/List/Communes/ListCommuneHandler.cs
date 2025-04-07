@@ -10,9 +10,9 @@ using Mediator;
 namespace Application.Features.Regions.Queries.List.Communes;
 
 public class ListCommuneHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<ListCommuneQuery, PaginationResponse<CommuneDetailProjection>>
+    : IRequestHandler<ListCommuneQuery, PaginationResponse<CommuneProjection>>
 {
-    public async ValueTask<PaginationResponse<CommuneDetailProjection>> Handle(
+    public async ValueTask<PaginationResponse<CommuneProjection>> Handle(
         ListCommuneQuery request,
         CancellationToken cancellationToken
     ) =>
@@ -20,8 +20,8 @@ public class ListCommuneHandler(IUnitOfWork unitOfWork)
             .ReadOnlyRepository<Commune>()
             .PagedListAsync(
                 new ListCommuneSpecification(),
-                request.ValidateQuery().ValidateFilter(typeof(CommuneDetailProjection)),
-                x => x.ToCommuneDetailProjection(),
+                request.ValidateQuery().ValidateFilter<CommuneProjection>(),
+                commune => commune.ToCommuneProjection(),
                 cancellationToken
             );
 }

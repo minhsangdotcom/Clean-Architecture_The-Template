@@ -5,6 +5,4 @@ using Mediator;
 
 namespace Application.Features.Regions.Queries.List.Communes;
 
-public class ListCommuneQuery
-    : QueryParamRequest,
-        IRequest<PaginationResponse<CommuneDetailProjection>>;
+public class ListCommuneQuery : QueryParamRequest, IRequest<PaginationResponse<CommuneProjection>>;

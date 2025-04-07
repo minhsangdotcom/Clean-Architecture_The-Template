@@ -7,4 +7,4 @@ namespace Application.Features.Regions.Queries.List.Districts;
 
 public class ListDistrictQuery
     : QueryParamRequest,
-        IRequest<PaginationResponse<DistrictDetailProjection>>;
+        IRequest<PaginationResponse<DistrictProjection>>;

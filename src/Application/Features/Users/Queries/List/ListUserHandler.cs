@@ -18,7 +18,7 @@ public class ListUserHandler(IUnitOfWork unitOfWork)
             .ReadOnlyRepository<User>(true)
             .CursorPagedListAsync(
                 new ListUserSpecification(),
-                query.ValidateQuery().ValidateFilter(typeof(ListUserResponse)),
+                query.ValidateQuery().ValidateFilter<ListUserResponse>(),
                 ListUserMapping.Selector(),
                 cancellationToken: cancellationToken
             );

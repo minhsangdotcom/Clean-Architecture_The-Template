@@ -13,10 +13,10 @@ public class ListPermissionHandler(IRoleManagerService roleManagerService)
     )
     {
         IList<RoleClaim> roleClaims = await roleManagerService.GetRolePermissionClaimsAsync();
-        return roleClaims.Select(x => new ListPermissionResponse()
+        return roleClaims.Select(claim => new ListPermissionResponse()
         {
-            ClaimType = x.ClaimType,
-            ClaimValue = x.ClaimValue,
+            ClaimType = claim.ClaimType,
+            ClaimValue = claim.ClaimValue,
         });
     }
 }

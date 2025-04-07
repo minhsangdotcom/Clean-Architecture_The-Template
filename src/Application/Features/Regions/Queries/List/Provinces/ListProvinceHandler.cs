@@ -19,8 +19,8 @@ public class ListProvinceHandler(IUnitOfWork unitOfWork)
             .ReadOnlyRepository<Province>()
             .PagedListAsync(
                 new ListProvinceSpecification(),
-                request.ValidateQuery().ValidateFilter(typeof(ProvinceProjection)),
-                x => x.ToProvinceProjection(),
+                request.ValidateQuery().ValidateFilter<ProvinceProjection>(),
+                province => province.ToProvinceProjection(),
                 cancellationToken
             );
 }

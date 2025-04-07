@@ -13,13 +13,13 @@ namespace Api.Endpoints.Regions;
 
 public class ListDistrictEndpoint(ISender sender)
     : EndpointBaseAsync.WithRequest<ListDistrictQuery>.WithActionResult<
-        ApiResponse<PaginationResponse<DistrictDetailProjection>>
+        ApiResponse<PaginationResponse<DistrictProjection>>
     >
 {
     [HttpGet(Router.RegionRoute.Districts)]
     [SwaggerOperation(Tags = [Router.RegionRoute.Tags], Summary = "list District")]
     public override async Task<
-        ActionResult<ApiResponse<PaginationResponse<DistrictDetailProjection>>>
+        ActionResult<ApiResponse<PaginationResponse<DistrictProjection>>>
     > HandleAsync(ListDistrictQuery request, CancellationToken cancellationToken = default) =>
         this.Ok200(await sender.Send(request, cancellationToken));
 }

@@ -33,7 +33,8 @@ public static partial class QueryParamValidate
         return request;
     }
 
-    public static QueryParamRequest ValidateFilter(this QueryParamRequest request, Type type)
+    public static QueryParamRequest ValidateFilter<TResponse>(this QueryParamRequest request)
+        where TResponse : class
     {
         if (request.OriginFilters?.Length <= 0)
         {
@@ -132,7 +133,7 @@ public static partial class QueryParamValidate
                     ]
                 );
             }
-
+            Type type = typeof(TResponse);
             PropertyInfo propertyInfo = type.GetNestedPropertyInfo(string.Join(".", properties));
             Type[] arguments = propertyInfo.PropertyType.GetGenericArguments();
             Type nullableType = arguments.Length > 0 ? arguments[0] : propertyInfo.PropertyType;

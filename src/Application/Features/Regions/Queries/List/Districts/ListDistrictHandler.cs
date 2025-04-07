@@ -9,9 +9,9 @@ using Mediator;
 namespace Application.Features.Regions.Queries.List.Districts;
 
 public class ListDistrictHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<ListDistrictQuery, PaginationResponse<DistrictDetailProjection>>
+    : IRequestHandler<ListDistrictQuery, PaginationResponse<DistrictProjection>>
 {
-    public async ValueTask<PaginationResponse<DistrictDetailProjection>> Handle(
+    public async ValueTask<PaginationResponse<DistrictProjection>> Handle(
         ListDistrictQuery request,
         CancellationToken cancellationToken
     ) =>
@@ -19,8 +19,8 @@ public class ListDistrictHandler(IUnitOfWork unitOfWork)
             .ReadOnlyRepository<District>()
             .PagedListAsync(
                 new ListDistrictSpecification(),
-                request.ValidateQuery().ValidateFilter(typeof(DistrictDetailProjection)),
-                x => x.ToDistrictDetailProjection(),
+                request.ValidateQuery().ValidateFilter<DistrictProjection>(),
+                district => district.ToDistrictProjection(),
                 cancellationToken
             );
 }
