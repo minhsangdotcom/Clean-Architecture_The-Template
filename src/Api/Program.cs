@@ -30,6 +30,7 @@ builder
             new Cysharp.Serialization.Json.UlidJsonConverter()
         );
     });
+services.AddErrorDetails();
 services.AddSwagger(configuration);
 services.AddOpenTelemetryTracing(configuration);
 builder.AddSerialogs();
@@ -104,15 +105,13 @@ try
             }
         });
     }
-
+    app.UseStatusCodePages();
+    app.UseExceptionHandler();
     app.UseAuthentication();
     app.CurrentUser();
     app.UseAuthorization();
     app.UseDetection();
 
-    app.UseSerilogRequestLogging();
-    app.LogContext();
-    app.ExceptionHandler();
     app.MapControllers();
 
     Log.Logger.Information(

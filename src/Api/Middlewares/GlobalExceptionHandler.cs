@@ -11,9 +11,9 @@ public class GlobalExceptionHandler(RequestDelegate next)
         {
             await next.Invoke(context);
         }
-        catch (Exception exception)
+        catch (Exception)
         {
-            await HandleExceptionAsync(context, exception);
+            //await HandleExceptionAsync(context, exception);
         }
     }
 
