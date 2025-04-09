@@ -1,13 +1,13 @@
 namespace Contracts.ApiWrapper;
 
-public class BadRequestError
+public class InvalidParam
 {
     public string? PropertyName { get; set; }
 
-    public IEnumerable<ReasonTranslation> Reasons { get; set; } = [];
+    public IEnumerable<ErrorReason> Reasons { get; set; } = [];
 }
 
-public class ReasonTranslation
+public class ErrorReason
 {
     public string? Message { get; set; }
 

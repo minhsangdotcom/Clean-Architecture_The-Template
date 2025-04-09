@@ -72,12 +72,12 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         ErrorResponse? errorResponse = await response.ToResponse<ErrorResponse>();
         errorResponse.Should().NotBeNull();
-        List<BadRequestError> badRequestErrors = [.. errorResponse!.Errors!];
+        List<InvalidParam> badRequestErrors = [.. errorResponse!.Errors!];
 
-        BadRequestError firstElement = badRequestErrors[0];
+        InvalidParam firstElement = badRequestErrors[0];
 
         firstElement.PropertyName.Should().Be("Email");
-        List<ReasonTranslation> reasons = [.. firstElement.Reasons];
+        List<ErrorReason> reasons = [.. firstElement.Reasons];
 
         reasons[0].Message.Should().Be("user_email_existence");
     }

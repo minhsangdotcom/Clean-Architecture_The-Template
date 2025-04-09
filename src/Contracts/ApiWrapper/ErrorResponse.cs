@@ -13,7 +13,7 @@ public class ErrorResponse : ApiBaseResponse
 
     public object? Exception { get; set; }
 
-    public ICollection<BadRequestError>? Errors { get; init; }
+    public ICollection<InvalidParam>? Errors { get; init; }
 
     public ErrorResponse() { }
 
@@ -37,7 +37,7 @@ public class ErrorResponse : ApiBaseResponse
     }
 
     public ErrorResponse(
-        IEnumerable<BadRequestError> badRequestErrors,
+        IEnumerable<InvalidParam> badRequestErrors,
         string? type = null,
         string? message = null!,
         TraceLogging? trace = null!,

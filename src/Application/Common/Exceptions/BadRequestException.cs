@@ -10,8 +10,8 @@ public class BadRequestException(IEnumerable<MessageResult> errors)
 {
     public virtual int HttpStatusCode { get; protected set; } = StatusCodes.Status400BadRequest;
 
-    public IEnumerable<BadRequestError> Errors { get; set; } =
-        errors.Select(x => new BadRequestError
+    public IEnumerable<InvalidParam> Errors { get; set; } =
+        errors.Select(x => new InvalidParam
         {
             Reasons =
             [

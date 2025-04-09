@@ -14,7 +14,7 @@ public class UpdateDefaultClaimEventHandler(IUserManagerService userManagerServi
     )
     {
         User user = notification.User!;
-        IEnumerable<UserClaim> defaultUserClaims = user.DefaultUserClaimsToUpdates;
+        IReadOnlyCollection<UserClaim> defaultUserClaims = user.DefaultUserClaimsToUpdates;
         await userManagerService.UpdateDefaultUserClaimsAsync(defaultUserClaims);
     }
 }

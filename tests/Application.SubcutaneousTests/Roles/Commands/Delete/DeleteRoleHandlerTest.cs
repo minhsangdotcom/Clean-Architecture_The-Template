@@ -30,7 +30,7 @@ public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .Should()
             .ThrowAsync<NotFoundException>(becauseArgs: messageResults);
 
-        ReasonTranslation error = result.And.Errors.First().Reasons.First();
+        ErrorReason error = result.And.Errors.First().Reasons.First();
         MessageResult messageResult = messageResults[0];
         error.Should().NotBeNull();
 

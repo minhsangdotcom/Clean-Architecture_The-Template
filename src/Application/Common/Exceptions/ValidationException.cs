@@ -10,20 +10,20 @@ public class ValidationException() : CustomException("One or more validation err
 {
     public int HttpStatusCode { get; private set; } = StatusCodes.Status400BadRequest;
 
-    public IEnumerable<BadRequestError> ValidationErrors { get; } = [];
+    public IEnumerable<InvalidParam> ValidationErrors { get; } = [];
 
     public ValidationException(IEnumerable<ValidationFailure> failures)
         : this()
     {
         ValidationErrors = failures
             .GroupBy(x => x.PropertyName)
-            .Select(failureGroups => new BadRequestError
+            .Select(failureGroups => new InvalidParam
             {
                 PropertyName = failureGroups.Key,
                 Reasons = failureGroups.Select(failure =>
                 {
                     MessageResult messageResult = (MessageResult)failure.CustomState;
-                    return new ReasonTranslation()
+                    return new ErrorReason()
                     {
                         Message = messageResult.Message,
                         En = messageResult.En,

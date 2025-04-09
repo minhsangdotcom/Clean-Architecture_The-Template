@@ -1,4 +1,4 @@
-using Application.Common.Exceptions;
+using Application.Common.Errors;
 using Contracts.ApiWrapper;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
