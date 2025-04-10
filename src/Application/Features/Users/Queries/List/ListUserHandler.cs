@@ -1,3 +1,4 @@
+using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.QueryStringProcessing;
 using Contracts.ApiWrapper;
@@ -14,15 +15,33 @@ public class ListUserHandler(IUnitOfWork unitOfWork)
     public async ValueTask<Result<PaginationResponse<ListUserResponse>>> Handle(
         ListUserQuery query,
         CancellationToken cancellationToken
-    ) =>
-        Result<PaginationResponse<ListUserResponse>>.Success(
-            await unitOfWork
-                .DynamicReadOnlyRepository<User>(true)
-                .CursorPagedListAsync(
-                    new ListUserSpecification(),
-                    query.ValidateQuery().ValidateFilter<ListUserResponse>(),
-                    ListUserMapping.Selector(),
-                    cancellationToken: cancellationToken
-                )
-        );
+    )
+    {
+        var validationResult = query.ValidateQuery();
+
+        if (validationResult.Error != null)
+        {
+            return Result<PaginationResponse<ListUserResponse>>.Failure(validationResult.Error);
+        }
+
+        var validationFilterResult = query.ValidateFilter<ListUserQuery, ListUserResponse>();
+
+        if (validationFilterResult.Error != null)
+        {
+            return Result<PaginationResponse<ListUserResponse>>.Failure(
+                validationFilterResult.Error
+            );
+        }
+
+        var response = await unitOfWork
+            .DynamicReadOnlyRepository<User>(true)
+            .CursorPagedListAsync(
+                new ListUserSpecification(),
+                query,
+                ListUserMapping.Selector(),
+                cancellationToken: cancellationToken
+            );
+
+        return Result<PaginationResponse<ListUserResponse>>.Success(response);
+    }
 }

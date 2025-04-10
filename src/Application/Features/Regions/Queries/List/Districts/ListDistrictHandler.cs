@@ -13,17 +13,33 @@ public class ListDistrictHandler(IUnitOfWork unitOfWork)
     : IRequestHandler<ListDistrictQuery, Result<PaginationResponse<DistrictProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<DistrictProjection>>> Handle(
-        ListDistrictQuery request,
+        ListDistrictQuery query,
         CancellationToken cancellationToken
-    ) =>
-        Result<PaginationResponse<DistrictProjection>>.Success(
-            await unitOfWork
-                .DynamicReadOnlyRepository<District>()
-                .PagedListAsync(
-                    new ListDistrictSpecification(),
-                    request.ValidateQuery().ValidateFilter<DistrictProjection>(),
-                    district => district.ToDistrictProjection(),
-                    cancellationToken
-                )
-        );
+    )
+    {
+        var validationResult = query.ValidateQuery();
+
+        if (validationResult.Error != null)
+        {
+            return Result<PaginationResponse<DistrictProjection>>.Failure(validationResult.Error);
+        }
+
+        var validationFilterResult = query.ValidateFilter<ListDistrictQuery, DistrictProjection>();
+
+        if (validationFilterResult.Error != null)
+        {
+            return Result<PaginationResponse<DistrictProjection>>.Failure(
+                validationFilterResult.Error
+            );
+        }
+        var response = await unitOfWork
+            .DynamicReadOnlyRepository<District>()
+            .PagedListAsync(
+                new ListDistrictSpecification(),
+                query,
+                district => district.ToDistrictProjection(),
+                cancellationToken
+            );
+        return Result<PaginationResponse<DistrictProjection>>.Success(response);
+    }
 }

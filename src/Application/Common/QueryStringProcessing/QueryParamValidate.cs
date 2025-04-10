@@ -1,4 +1,5 @@
 using System.Reflection;
+using Application.Common.Errors;
 using Application.Common.Exceptions;
 using Application.Common.Extensions;
 using Contracts.Dtos.Requests;
@@ -12,33 +13,41 @@ namespace Application.Common.QueryStringProcessing;
 
 public static partial class QueryParamValidate
 {
-    public static QueryParamRequest ValidateQuery(this QueryParamRequest request)
+    private const string Message = "Your request parameters didn't validate.";
+
+    public static ValidationRequestResult<T, BadRequestError> ValidateQuery<T>(this T request)
+        where T : QueryParamRequest
     {
         if (
             !string.IsNullOrWhiteSpace(request.Cursor?.Before)
             && !string.IsNullOrWhiteSpace(request.Cursor?.After)
         )
         {
-            throw new BadRequestException(
-                [
+            return new(
+                Error: new BadRequestError(
+                    Message,
                     Messager
                         .Create<QueryParamRequest>("QueryParam")
                         .Property(x => x.Cursor!)
                         .Message(MessageType.Redundant)
-                        .Build(),
-                ]
+                        .Build()
+                )
             );
         }
 
-        return request;
+        return new(request);
     }
 
-    public static QueryParamRequest ValidateFilter<TResponse>(this QueryParamRequest request)
+    public static ValidationRequestResult<TRequest, BadRequestError> ValidateFilter<
+        TRequest,
+        TResponse
+    >(this TRequest request)
         where TResponse : class
+        where TRequest : QueryParamRequest
     {
         if (request.OriginFilters?.Length <= 0)
         {
-            return request;
+            return new(request);
         }
 
         List<QueryResult> queries =
@@ -50,16 +59,17 @@ public static partial class QueryParamValidate
 
         if (length == 1 && !ValidateArrayOperatorInvalidIndex(queries[0].CleanKey))
         {
-            throw new BadRequestException(
-                [
+            return new(
+                Error: new BadRequestError(
+                    Message,
                     Messager
                         .Create<QueryParamRequest>("QueryParam")
                         .Property(x => x.Filter!)
                         .Message(MessageType.Valid)
                         .Negative()
                         .ObjectName("ArrayIndex")
-                        .Build(),
-                ]
+                        .Build()
+                )
             );
         }
 
@@ -70,45 +80,48 @@ public static partial class QueryParamValidate
             //if it's $and,$or,$in and $between then they must have a index after
             if (ValidateArrayOperator(query.CleanKey))
             {
-                throw new BadRequestException(
-                    [
+                return new(
+                    Error: new BadRequestError(
+                        Message,
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
                             .Message(MessageType.Missing)
                             .ObjectName("ArrayIndex")
-                            .Build(),
-                    ]
+                            .Build()
+                    )
                 );
             }
 
             // lack of operator
             if (!ValidateLackOfOperator(query.CleanKey))
             {
-                throw new BadRequestException(
-                    [
+                return new(
+                    Error: new BadRequestError(
+                        Message,
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
                             .Message(MessageType.Missing)
                             .ObjectName("Operator")
-                            .Build(),
-                    ]
+                            .Build()
+                    )
                 );
             }
 
             // if the last element is logical operator it's wrong like filter[$and][0] which is lack of body
             if (LackOfElementInArrayOperator(query.CleanKey))
             {
-                throw new BadRequestException(
-                    [
+                return new(
+                    Error: new BadRequestError(
+                        Message,
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
                             .Message(MessageType.Missing)
                             .ObjectName("Element")
-                            .Build(),
-                    ]
+                            .Build()
+                    )
                 );
             }
 
@@ -122,15 +135,16 @@ public static partial class QueryParamValidate
             // lack of property
             if (!properties.Any())
             {
-                throw new BadRequestException(
-                    [
+                return new(
+                    Error: new BadRequestError(
+                        Message,
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
                             .Message(MessageType.Missing)
                             .ObjectName("Property")
-                            .Build(),
-                    ]
+                            .Build()
+                    )
                 );
             }
             Type type = typeof(TResponse);
@@ -144,49 +158,55 @@ public static partial class QueryParamValidate
                 && query.Value?.IsDigit() == false
             )
             {
-                throw new BadRequestException(
-                    [
+                return new(
+                    Error: new BadRequestError(
+                        Message,
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property("FilterValue")
                             .Message(MessageType.Matching)
                             .Negative()
                             .ObjectName("Integer")
-                            .Build(),
-                    ]
+                            .Build()
+                    )
                 );
             }
 
             if (
-                (nullableType == typeof(DateTime) || nullableType == typeof(DateTimeOffset))
-                && !DateTime.TryParse(query.Value, out var value)
+                (nullableType == typeof(DateTime) && !DateTime.TryParse(query.Value, out _))
+                || (
+                    nullableType == typeof(DateTimeOffset)
+                    && !DateTimeOffset.TryParse(query.Value, out _)
+                )
             )
             {
-                throw new BadRequestException(
-                    [
+                return new(
+                    Error: new BadRequestError(
+                        Message,
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property("FilterValue")
                             .Message(MessageType.Matching)
                             .Negative()
                             .ObjectName("Datetime")
-                            .Build(),
-                    ]
+                            .Build()
+                    )
                 );
             }
 
-            if ((nullableType == typeof(Ulid)) && !Ulid.TryParse(query.Value, out Ulid result))
+            if ((nullableType == typeof(Ulid)) && !Ulid.TryParse(query.Value, out _))
             {
-                throw new BadRequestException(
-                    [
+                return new(
+                    Error: new BadRequestError(
+                        Message,
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property("FilterValue")
                             .Message(MessageType.Matching)
                             .Negative()
                             .ObjectName("Ulid")
-                            .Build(),
-                    ]
+                            .Build()
+                    )
                 );
             }
         }
@@ -261,7 +281,7 @@ public static partial class QueryParamValidate
             SerializerExtension.Serialize(request.DynamicFilter!).StringJson
         );
 
-        return request;
+        return new(request);
     }
 
     private static bool IsNumericType(Type type)

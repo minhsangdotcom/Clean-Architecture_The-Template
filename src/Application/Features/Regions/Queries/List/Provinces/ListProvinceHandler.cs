@@ -13,17 +13,33 @@ public class ListProvinceHandler(IUnitOfWork unitOfWork)
     : IRequestHandler<ListProvinceQuery, Result<PaginationResponse<ProvinceProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<ProvinceProjection>>> Handle(
-        ListProvinceQuery request,
+        ListProvinceQuery query,
         CancellationToken cancellationToken
-    ) =>
-        Result<PaginationResponse<ProvinceProjection>>.Success(
-            await unitOfWork
-                .DynamicReadOnlyRepository<Province>()
-                .PagedListAsync(
-                    new ListProvinceSpecification(),
-                    request.ValidateQuery().ValidateFilter<ProvinceProjection>(),
-                    province => province.ToProvinceProjection(),
-                    cancellationToken
-                )
-        );
+    )
+    {
+        var validationResult = query.ValidateQuery();
+
+        if (validationResult.Error != null)
+        {
+            return Result<PaginationResponse<ProvinceProjection>>.Failure(validationResult.Error);
+        }
+
+        var validationFilterResult = query.ValidateFilter<ListProvinceQuery, ProvinceProjection>();
+
+        if (validationFilterResult.Error != null)
+        {
+            return Result<PaginationResponse<ProvinceProjection>>.Failure(
+                validationFilterResult.Error
+            );
+        }
+        var response = await unitOfWork
+            .DynamicReadOnlyRepository<Province>()
+            .PagedListAsync(
+                new ListProvinceSpecification(),
+                query,
+                province => province.ToProvinceProjection(),
+                cancellationToken
+            );
+        return Result<PaginationResponse<ProvinceProjection>>.Success(response);
+    }
 }

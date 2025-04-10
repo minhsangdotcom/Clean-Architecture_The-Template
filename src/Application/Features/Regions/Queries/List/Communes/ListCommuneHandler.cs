@@ -14,17 +14,35 @@ public class ListCommuneHandler(IUnitOfWork unitOfWork)
     : IRequestHandler<ListCommuneQuery, Result<PaginationResponse<CommuneProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<CommuneProjection>>> Handle(
-        ListCommuneQuery request,
+        ListCommuneQuery query,
         CancellationToken cancellationToken
-    ) =>
-        Result<PaginationResponse<CommuneProjection>>.Success(
-            await unitOfWork
-                .DynamicReadOnlyRepository<Commune>()
-                .PagedListAsync(
-                    new ListCommuneSpecification(),
-                    request.ValidateQuery().ValidateFilter<CommuneProjection>(),
-                    commune => commune.ToCommuneProjection(),
-                    cancellationToken
-                )
-        );
+    )
+    {
+        var validationResult = query.ValidateQuery();
+
+        if (validationResult.Error != null)
+        {
+            return Result<PaginationResponse<CommuneProjection>>.Failure(validationResult.Error);
+        }
+
+        var validationFilterResult = query.ValidateFilter<ListCommuneQuery, CommuneProjection>();
+
+        if (validationFilterResult.Error != null)
+        {
+            return Result<PaginationResponse<CommuneProjection>>.Failure(
+                validationFilterResult.Error
+            );
+        }
+
+        var response = await unitOfWork
+            .DynamicReadOnlyRepository<Commune>()
+            .PagedListAsync(
+                new ListCommuneSpecification(),
+                query,
+                commune => commune.ToCommuneProjection(),
+                cancellationToken
+            );
+
+        return Result<PaginationResponse<CommuneProjection>>.Success(response);
+    }
 }
