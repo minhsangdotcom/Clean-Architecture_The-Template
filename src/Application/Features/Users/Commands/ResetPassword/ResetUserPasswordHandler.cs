@@ -35,9 +35,9 @@ public class ResetUserPasswordHandler(IUnitOfWork unitOfWork)
         }
 
         IEnumerable<UserResetPassword> resetPasswords = user.UserResetPasswords ?? [];
-        UserResetPassword? resetPassword = resetPasswords
-            .OrderByDescending(x => x.CreatedAt)
-            .FirstOrDefault(x => x.Token == command.Token);
+        UserResetPassword? resetPassword = resetPasswords.FirstOrDefault(x =>
+            x.Token == command.Token
+        );
 
         if (resetPassword == null)
         {
