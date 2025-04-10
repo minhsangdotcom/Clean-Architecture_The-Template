@@ -34,8 +34,7 @@ public class ResetUserPasswordHandler(IUnitOfWork unitOfWork)
             );
         }
 
-        IEnumerable<UserResetPassword> resetPasswords = user.UserResetPasswords ?? [];
-        UserResetPassword? resetPassword = resetPasswords.FirstOrDefault(x =>
+        UserResetPassword? resetPassword = user.UserResetPasswords?.FirstOrDefault(x =>
             x.Token == command.Token
         );
 
@@ -80,7 +79,7 @@ public class ResetUserPasswordHandler(IUnitOfWork unitOfWork)
 
         user.SetPassword(HashPassword(command.Password));
 
-        await unitOfWork.Repository<UserResetPassword>().DeleteRangeAsync(resetPasswords);
+        await unitOfWork.Repository<UserResetPassword>().DeleteAsync(resetPassword);
         await unitOfWork.Repository<User>().UpdateAsync(user);
         await unitOfWork.SaveAsync(cancellationToken);
 

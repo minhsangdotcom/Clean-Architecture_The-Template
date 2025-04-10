@@ -1,5 +1,4 @@
 using Application.Common.Errors;
-using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
@@ -26,7 +25,7 @@ public class RequestResetUserPasswordHandler(
     )
     {
         User? user = await unitOfWork
-            .DynamicReadOnlyRepository<User>(true)
+            .DynamicReadOnlyRepository<User>()
             .FindByConditionAsync(
                 new GetUserByEmailSpecification(command.Email),
                 cancellationToken
@@ -54,6 +53,7 @@ public class RequestResetUserPasswordHandler(
                 Expiry = expiredTime,
             };
 
+        await unitOfWork.Repository<UserResetPassword>().DeleteRangeAsync(user.UserResetPasswords!);
         await unitOfWork
             .Repository<UserResetPassword>()
             .AddAsync(userResetPassword, cancellationToken);
