@@ -11,7 +11,7 @@ using Serilog;
 namespace Infrastructure.Services.Queue;
 
 public class DeadletterQueueBackgroundService(
-    IQueueFactory factory,
+    //IQueueFactory factory,
     IServiceProvider serviceProvider,
     IOptions<QueueSettings> options
 ) : BackgroundService
