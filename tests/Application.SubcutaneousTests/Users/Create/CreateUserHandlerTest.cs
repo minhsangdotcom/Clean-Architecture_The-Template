@@ -2,6 +2,7 @@ using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using FluentAssertions;
 using Infrastructure.Constants;
@@ -23,7 +24,8 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     {
         command.UserClaims = null;
 
-        CreateUserResponse response = await testingFixture.SendAsync(command);
+        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
+        CreateUserResponse response = result.Value!;
         User? user = await testingFixture.FindUserByIdAsync(response.Id);
 
         AssertUser(user, command);
@@ -33,7 +35,8 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private async Task CreateUser_WhenNoAvatar_ShouldCreateSuccess()
     {
         command.Avatar = null;
-        CreateUserResponse response = await testingFixture.SendAsync(command);
+        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
+        CreateUserResponse response = result.Value!;
         User? user = await testingFixture.FindUserByIdAsync(response.Id);
 
         AssertUser(user, command);
@@ -43,7 +46,8 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private async Task CreateUser_WhenNoGender_ShouldCreateSuccess()
     {
         command.Gender = null;
-        CreateUserResponse response = await testingFixture.SendAsync(command);
+        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
+        CreateUserResponse response = result.Value!;
         User? user = await testingFixture.FindUserByIdAsync(response.Id);
 
         AssertUser(user, command);
@@ -53,7 +57,8 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private async Task CreateUser_WhenNoDayOfBirth_ShouldCreateSuccess()
     {
         command.DayOfBirth = null;
-        CreateUserResponse response = await testingFixture.SendAsync(command);
+        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
+        CreateUserResponse response = result.Value!;
         User? user = await testingFixture.FindUserByIdAsync(response.Id);
 
         AssertUser(user, command);
@@ -62,7 +67,8 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     [Fact]
     private async Task CreateUser_ShouldCreateSuccess()
     {
-        CreateUserResponse response = await testingFixture.SendAsync(command);
+        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
+        CreateUserResponse response = result.Value!;
         User? user = await testingFixture.FindUserByIdAsync(response.Id);
 
         AssertUser(user, command);

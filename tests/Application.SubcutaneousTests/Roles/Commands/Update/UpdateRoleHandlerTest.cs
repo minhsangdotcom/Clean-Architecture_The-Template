@@ -50,10 +50,12 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task UpdateRole_WhenNoRoleClaims_ShouldUpdateRole()
     {
         updateRoleCommand.Role.RoleClaims = null;
-        var createRoleResponse = await testingFixture.SendAsync(updateRoleCommand);
+
+        Result<UpdateRoleResponse> result = await testingFixture.SendAsync(updateRoleCommand);
+        UpdateRoleResponse updateRoleResponse = result.Value!;
 
         Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
-            createRoleResponse.Id
+            updateRoleResponse.Id
         );
         createdRole.Should().NotBeNull();
         UpdateRole updateRole = updateRoleCommand.Role;
@@ -66,10 +68,12 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task UpdateRole_WhenNoDescription_ShouldUpdateRole()
     {
         updateRoleCommand.Role.Description = null;
-        var createRoleResponse = await testingFixture.SendAsync(updateRoleCommand);
+
+        Result<UpdateRoleResponse> result = await testingFixture.SendAsync(updateRoleCommand);
+        UpdateRoleResponse updateRoleResponse = result.Value!;
 
         Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
-            createRoleResponse.Id
+            updateRoleResponse.Id
         );
         createdRole.Should().NotBeNull();
         UpdateRole updateRole = updateRoleCommand.Role;
@@ -88,10 +92,12 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         roleClaims[0].ClaimValue = "create.users";
         updateRole.Name = $"name{Guid.NewGuid()}";
         updateRole.Description = $"description{Guid.NewGuid()}";
-        var createRoleResponse = await testingFixture.SendAsync(updateRoleCommand);
+
+        Result<UpdateRoleResponse> result = await testingFixture.SendAsync(updateRoleCommand);
+        UpdateRoleResponse updateRoleResponse = result.Value!;
 
         Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
-            createRoleResponse.Id
+            updateRoleResponse.Id
         );
         createdRole.Should().NotBeNull();
         createdRole!.Name.Should().Be(updateRole.Name!.ToSnakeCase().ToUpper());

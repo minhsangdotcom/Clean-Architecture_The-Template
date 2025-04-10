@@ -1,6 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Features.Users.Commands.Update;
 using AutoFixture;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using FluentAssertions;
 
@@ -28,7 +29,8 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     {
         updateUserCommand.User!.UserClaims = null;
 
-        UpdateUserResponse response = await testingFixture.SendAsync(updateUserCommand);
+        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
+        UpdateUserResponse response = result.Value!;
         User? user = await testingFixture.FindUserByIdAsync(response.Id);
 
         AssertUser(user, updateUserCommand);
@@ -38,7 +40,8 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private async Task UpdateUser_WhenNoAvatar_ShouldUpdateSuccess()
     {
         updateUserCommand.User!.Avatar = null;
-        UpdateUserResponse response = await testingFixture.SendAsync(updateUserCommand);
+        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
+        UpdateUserResponse response = result.Value!;
         User? user = await testingFixture.FindUserByIdAsync(response.Id);
 
         AssertUser(user, updateUserCommand);
@@ -48,7 +51,8 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private async Task UpdateUser_WhenNoDayOfBirth_ShouldUpdateSuccess()
     {
         updateUserCommand.User!.DayOfBirth = null;
-        UpdateUserResponse response = await testingFixture.SendAsync(updateUserCommand);
+        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
+        UpdateUserResponse response = result.Value!;
         User? user = await testingFixture.FindUserByIdAsync(response.Id);
 
         AssertUser(user, updateUserCommand);
@@ -57,7 +61,8 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     [Fact]
     private async Task UpdateUser_ShouldUpdateSuccess()
     {
-        UpdateUserResponse response = await testingFixture.SendAsync(updateUserCommand);
+        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
+        UpdateUserResponse response = result.Value!;
         User? user = await testingFixture.FindUserByIdAsync(response.Id);
 
         AssertUser(user, updateUserCommand);

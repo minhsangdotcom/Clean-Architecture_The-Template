@@ -2,6 +2,7 @@ using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Create;
 using AutoFixture;
 using CaseConverter;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Roles;
 using FluentAssertions;
 
@@ -19,7 +20,8 @@ public class CreateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .Build<CreateRoleCommand>()
             .Without(x => x.RoleClaims)
             .Create();
-        CreateRoleResponse createRoleResponse = await testingFixture.SendAsync(command);
+        Result<CreateRoleResponse> result = await testingFixture.SendAsync(command);
+        CreateRoleResponse createRoleResponse = result.Value!;
 
         Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
             createRoleResponse.Id
@@ -40,7 +42,8 @@ public class CreateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .With(x => x.RoleClaims, roleClaims)
             .Create();
 
-        CreateRoleResponse createRoleResponse = await testingFixture.SendAsync(command);
+        Result<CreateRoleResponse> result = await testingFixture.SendAsync(command);
+        CreateRoleResponse createRoleResponse = result.Value!;
 
         Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
             createRoleResponse.Id
@@ -60,7 +63,8 @@ public class CreateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .With(x => x.RoleClaims, roleClaims)
             .Create();
 
-        CreateRoleResponse createRoleResponse = await testingFixture.SendAsync(command);
+        Result<CreateRoleResponse> result = await testingFixture.SendAsync(command);
+        CreateRoleResponse createRoleResponse = result.Value!;
 
         Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
             createRoleResponse.Id

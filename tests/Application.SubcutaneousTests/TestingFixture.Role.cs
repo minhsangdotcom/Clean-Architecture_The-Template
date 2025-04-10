@@ -3,6 +3,7 @@ using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Create;
 using Application.Features.Roles.Commands.Update;
 using Application.SubcutaneousTests.Extensions;
+using Contracts.ApiWrapper;
 using Contracts.Constants;
 using Domain.Aggregates.Roles;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,7 +51,8 @@ public partial class TestingFixture
                 ],
             };
         factory.ThrowIfNull();
-        var response = await SendAsync(role);
+        Result<CreateRoleResponse> result = await SendAsync(role);
+        CreateRoleResponse response = result.Value!;
         using var scope = factory!.Services.CreateScope();
         var roleManagerService = scope.ServiceProvider.GetRequiredService<IRoleManagerService>();
         return (await roleManagerService.FindByIdAsync(response.Id))!;
