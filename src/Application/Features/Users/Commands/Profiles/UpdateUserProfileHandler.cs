@@ -1,7 +1,9 @@
+using Application.Common.Errors;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
@@ -15,23 +17,29 @@ public class UpdateUserProfileHandler(
     IUnitOfWork unitOfWork,
     ICurrentUser currentUser,
     IMediaUpdateService<User> avatarUpdate
-) : IRequestHandler<UpdateUserProfileCommand, UpdateUserProfileResponse>
+) : IRequestHandler<UpdateUserProfileCommand, Result<UpdateUserProfileResponse>>
 {
-    public async ValueTask<UpdateUserProfileResponse> Handle(
+    public async ValueTask<Result<UpdateUserProfileResponse>> Handle(
         UpdateUserProfileCommand command,
         CancellationToken cancellationToken
     )
     {
-        User user =
-            await unitOfWork
-                .DynamicReadOnlyRepository<User>()
-                .FindByConditionAsync(
-                    new GetUserByIdWithoutIncludeSpecification(currentUser.Id ?? Ulid.Empty),
-                    cancellationToken
-                )
-            ?? throw new NotFoundException(
-                [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
+        User? user = await unitOfWork
+            .DynamicReadOnlyRepository<User>()
+            .FindByConditionAsync(
+                new GetUserByIdWithoutIncludeSpecification(currentUser.Id ?? Ulid.Empty),
+                cancellationToken
             );
+
+        if (user == null)
+        {
+            return Result<UpdateUserProfileResponse>.Failure(
+                new NotFoundError(
+                    "Resource is not found",
+                    Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()
+                )
+            );
+        }
 
         IFormFile? avatar = command.Avatar;
         string? oldAvatar = user.Avatar;
@@ -69,14 +77,14 @@ public class UpdateUserProfileHandler(
             throw;
         }
 
-        return (
-            await unitOfWork
-                .DynamicReadOnlyRepository<User>()
-                .FindByConditionAsync(
-                    new GetUserByIdSpecification(user.Id),
-                    x => x.ToUpdateUserProfileResponse(),
-                    cancellationToken
-                )
-        )!;
+        UpdateUserProfileResponse? response = await unitOfWork
+            .DynamicReadOnlyRepository<User>()
+            .FindByConditionAsync(
+                new GetUserByIdSpecification(user.Id),
+                x => x.ToUpdateUserProfileResponse(),
+                cancellationToken
+            );
+
+        return Result<UpdateUserProfileResponse>.Success(response!);
     }
 }

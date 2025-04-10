@@ -1,26 +1,17 @@
-using Contracts.ApiWrapper;
 using Microsoft.AspNetCore.Http;
+using SharedKernel.Common.Messages;
 
-namespace Application.Common.Errors;
+namespace Contracts.ApiWrapper;
 
-public class ErrorDetails : Exception
+public abstract class ErrorDetails
 {
     public int Status { get; set; }
     public string? Title { get; set; }
-    public string? Detail { get; set; }
-
     public string? Type { get; set; }
 
+    public string? Detail { get; set; }
     public List<InvalidParam>? InvalidParams { get; set; }
-
-    public ErrorDetails(string title, string message, string? type = null, int? status = null)
-        : base(message)
-    {
-        Status = status ?? StatusCodes.Status500InternalServerError;
-        Title = title;
-        Detail = message;
-        Type = type ?? "InternalException";
-    }
+    public MessageResult? ErrorMessage { get; set; }
 
     public ErrorDetails(
         string title,
@@ -32,6 +23,19 @@ public class ErrorDetails : Exception
         Title = title;
         Status = status ?? StatusCodes.Status500InternalServerError;
         InvalidParams = invalidParams;
+        Type = type ?? "InternalException";
+    }
+
+    public ErrorDetails(
+        string title,
+        MessageResult erorMessage,
+        string? type = null,
+        int? status = null
+    )
+    {
+        Title = title;
+        Status = status ?? StatusCodes.Status500InternalServerError;
+        ErrorMessage = erorMessage;
         Type = type ?? "InternalException";
     }
 }

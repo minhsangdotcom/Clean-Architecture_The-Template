@@ -1,5 +1,6 @@
+using Contracts.ApiWrapper;
 using Mediator;
 
 namespace Application.Features.Roles.Commands.Delete;
 
-public record DeleteRoleCommand(Ulid RoleId) : IRequest;
+public record DeleteRoleCommand(Ulid RoleId) : IRequest<Result<string>>;

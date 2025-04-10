@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Users.Commands.Update;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -13,9 +14,9 @@ public class CreateUserHandler(
     IUnitOfWork unitOfWork,
     IMediaUpdateService<User> mediaUpdateService,
     IUserManagerService userManagerService
-) : IRequestHandler<CreateUserCommand, CreateUserResponse>
+) : IRequestHandler<CreateUserCommand, Result<CreateUserResponse>>
 {
-    public async ValueTask<CreateUserResponse> Handle(
+    public async ValueTask<Result<CreateUserResponse>> Handle(
         CreateUserCommand command,
         CancellationToken cancellationToken
     )
@@ -65,15 +66,14 @@ public class CreateUserHandler(
 
             await unitOfWork.CommitAsync(cancellationToken);
 
-            return (
-                await unitOfWork
-                    .DynamicReadOnlyRepository<User>()
-                    .FindByConditionAsync(
-                        new GetUserByIdSpecification(user.Id),
-                        x => x.ToCreateUserResponse(),
-                        cancellationToken
-                    )
-            )!;
+            CreateUserResponse? response = await unitOfWork
+                .DynamicReadOnlyRepository<User>()
+                .FindByConditionAsync(
+                    new GetUserByIdSpecification(user.Id),
+                    x => x.ToCreateUserResponse(),
+                    cancellationToken
+                );
+            return Result<CreateUserResponse>.Success(response!);
         }
         catch (Exception)
         {

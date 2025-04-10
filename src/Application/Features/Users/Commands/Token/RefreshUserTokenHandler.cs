@@ -1,8 +1,10 @@
 using System.IdentityModel.Tokens.Jwt;
+using Application.Common.Errors;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -20,14 +22,16 @@ public class RefreshUserTokenHandler(
     ITokenFactory tokenFactory,
     IDetectionService detectionService,
     ICurrentUser currentUser
-) : IRequestHandler<RefreshUserTokenCommand, RefreshUserTokenResponse>
+) : IRequestHandler<RefreshUserTokenCommand, Result<RefreshUserTokenResponse>>
 {
-    public async ValueTask<RefreshUserTokenResponse> Handle(
+    public async ValueTask<Result<RefreshUserTokenResponse>> Handle(
         RefreshUserTokenCommand command,
         CancellationToken cancellationToken
     )
     {
-        DecodeTokenResponse decodeToken = ValidateRefreshToken(command.RefreshToken!);
+        Result<DecodeTokenResponse> result = ValidateRefreshToken(command.RefreshToken!);
+        DecodeTokenResponse decodeToken = result.Value!;
+
         IList<UserToken> refreshTokens = await unitOfWork
             .DynamicReadOnlyRepository<UserToken>()
             .ListAsync(
@@ -44,26 +48,34 @@ public class RefreshUserTokenHandler(
             );
         UserToken validRefreshToken = refreshTokens[0];
 
+        // detect cheating with token, maybe which is stolen
         if (validRefreshToken == null)
         {
+            // remove all the token by family token
             await unitOfWork.Repository<UserToken>().DeleteRangeAsync(refreshTokens);
             await unitOfWork.SaveAsync(cancellationToken);
-            throw new BadRequestException(
-                [
+
+            return Result<RefreshUserTokenResponse>.Failure(
+                new BadRequestError(
+                    "Error has occured with the Refresh token",
                     Messager
                         .Create<UserToken>(nameof(User))
                         .Property(x => x.RefreshToken!)
-                        .Message(MessageType.Valid)
                         .Negative()
-                        .BuildMessage(),
-                ]
+                        .Message(MessageType.Matching)
+                        .ObjectName("CurrentToken")
+                        .BuildMessage()
+                )
             );
         }
 
         if (validRefreshToken.User!.Status == UserStatus.Inactive)
         {
-            throw new BadRequestException(
-                [Messager.Create<User>().Message(MessageType.Active).Negative().BuildMessage()]
+            return Result<RefreshUserTokenResponse>.Failure(
+                new BadRequestError(
+                    "Error has occured with the current user",
+                    Messager.Create<User>().Message(MessageType.Active).Negative().BuildMessage()
+                )
             );
         }
 
@@ -99,26 +111,29 @@ public class RefreshUserTokenHandler(
         await unitOfWork.Repository<UserToken>().AddAsync(userToken, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
 
-        return new() { Token = accessToken, RefreshToken = refreshToken };
+        return Result<RefreshUserTokenResponse>.Success(
+            new() { Token = accessToken, RefreshToken = refreshToken }
+        );
     }
 
-    private DecodeTokenResponse ValidateRefreshToken(string token)
+    private Result<DecodeTokenResponse> ValidateRefreshToken(string token)
     {
         try
         {
-            return tokenFactory.DecodeToken(token);
+            return Result<DecodeTokenResponse>.Success(tokenFactory.DecodeToken(token));
         }
         catch (Exception)
         {
-            throw new BadRequestException(
-                [
+            return Result<DecodeTokenResponse>.Failure(
+                new BadRequestError(
+                    "Error has occured with the Refresh token",
                     Messager
                         .Create<UserToken>(nameof(User))
                         .Property(x => x.RefreshToken!)
                         .Message(MessageType.Valid)
                         .Negative()
-                        .BuildMessage(),
-                ]
+                        .BuildMessage()
+                )
             );
         }
     }

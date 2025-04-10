@@ -1,6 +1,8 @@
+using Application.Common.Errors;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
 using Contracts.Dtos.Models;
 using Contracts.Dtos.Requests;
 using Domain.Aggregates.Users;
@@ -16,23 +18,29 @@ public class RequestResetUserPasswordHandler(
     IUnitOfWork unitOfWork,
     IConfiguration configuration,
     IMailService mailService
-) : IRequestHandler<RequestResetUserPasswordCommand>
+) : IRequestHandler<RequestResetUserPasswordCommand, Result<string>>
 {
-    public async ValueTask<Unit> Handle(
+    public async ValueTask<Result<string>> Handle(
         RequestResetUserPasswordCommand command,
         CancellationToken cancellationToken
     )
     {
-        User user =
-            await unitOfWork
-                .DynamicReadOnlyRepository<User>(true)
-                .FindByConditionAsync(
-                    new GetUserByEmailSpecification(command.Email),
-                    cancellationToken
-                )
-            ?? throw new NotFoundException(
-                [Messager.Create<User>().Message(MessageType.Found).Negative().Build()]
+        User? user = await unitOfWork
+            .DynamicReadOnlyRepository<User>(true)
+            .FindByConditionAsync(
+                new GetUserByEmailSpecification(command.Email),
+                cancellationToken
             );
+
+        if (user == null)
+        {
+            return Result<string>.Failure(
+                new NotFoundError(
+                    "the resource is not found",
+                    Messager.Create<User>().Message(MessageType.Found).Negative().Build()
+                )
+            );
+        }
 
         string token = StringExtension.GenerateRandomString(40);
         DateTimeOffset expiredTime = DateTimeOffset.UtcNow.AddHours(
@@ -46,7 +54,6 @@ public class RequestResetUserPasswordHandler(
                 Expiry = expiredTime,
             };
 
-        await unitOfWork.Repository<UserResetPassword>().DeleteRangeAsync(user.UserResetPasswords!);
         await unitOfWork
             .Repository<UserResetPassword>()
             .AddAsync(userResetPassword, cancellationToken);
@@ -68,6 +75,6 @@ public class RequestResetUserPasswordHandler(
                 ),
             }
         );
-        return Unit.Value;
+        return Result<string>.Success();
     }
 }

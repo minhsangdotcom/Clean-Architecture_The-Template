@@ -1,6 +1,7 @@
-using Application.Common.Exceptions;
+using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -15,23 +16,29 @@ public class UpdateUserHandler(
     IUnitOfWork unitOfWork,
     IMediaUpdateService<User> mediaUpdateService,
     IUserManagerService userManagerService
-) : IRequestHandler<UpdateUserCommand, UpdateUserResponse>
+) : IRequestHandler<UpdateUserCommand, Result<UpdateUserResponse>>
 {
-    public async ValueTask<UpdateUserResponse> Handle(
+    public async ValueTask<Result<UpdateUserResponse>> Handle(
         UpdateUserCommand command,
         CancellationToken cancellationToken
     )
     {
-        User user =
-            await unitOfWork
-                .DynamicReadOnlyRepository<User>()
-                .FindByConditionAsync(
-                    new GetUserByIdSpecification(Ulid.Parse(command.UserId)),
-                    cancellationToken
-                )
-            ?? throw new NotFoundException(
-                [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
+        User? user = await unitOfWork
+            .DynamicReadOnlyRepository<User>()
+            .FindByConditionAsync(
+                new GetUserByIdSpecification(Ulid.Parse(command.UserId)),
+                cancellationToken
             );
+
+        if (user == null)
+        {
+            return Result<UpdateUserResponse>.Failure(
+                new NotFoundError(
+                    "Your resource is not found",
+                    Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()
+                )
+            );
+        }
 
         IFormFile? avatar = command.User!.Avatar;
         string? oldAvatar = user.Avatar;
@@ -76,7 +83,7 @@ public class UpdateUserHandler(
             await unitOfWork.CommitAsync(cancellationToken);
 
             await mediaUpdateService.DeleteAvatarAsync(oldAvatar);
-            return user.ToUpdateUserResponse();
+            return Result<UpdateUserResponse>.Success(user.ToUpdateUserResponse());
         }
         catch (Exception)
         {

@@ -1,4 +1,3 @@
-using Application.Common.Errors;
 using Contracts.ApiWrapper;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
@@ -17,11 +16,6 @@ public class GlobalProblemDetailHandler(
         CancellationToken cancellationToken
     )
     {
-        if (exception is not ErrorDetails errorDetails)
-        {
-            return true;
-        }
-
         IHttpActivityFeature? activityFeature = httpContext.Features.Get<IHttpActivityFeature>();
         string? traceId = activityFeature?.Activity?.TraceId.ToString();
         string? spanId = activityFeature?.Activity?.SpanId.ToString();
@@ -37,20 +31,24 @@ public class GlobalProblemDetailHandler(
         int code = StatusCodes.Status500InternalServerError;
         httpContext.Response.StatusCode = code;
 
+        string instance = $"{httpContext.Request.Method} {httpContext.Request.Path}";
+        Dictionary<string, object?> extensions =
+            new()
+            {
+                { "traceId", traceId },
+                { "spanId", spanId },
+                { "requestId", httpContext.TraceIdentifier },
+            };
+
         ProblemDetails problemDetail =
             new()
             {
                 Status = code,
-                Title = errorDetails.Title,
-                Detail = errorDetails.Message,
-                Type = errorDetails.Type,
-                Instance = $"{httpContext.Request.Method} {httpContext.Request.Path}",
-                Extensions = new Dictionary<string, object?>()
-                {
-                    { "traceId", traceId },
-                    { "spanId", spanId },
-                    { "requestId", httpContext.TraceIdentifier },
-                },
+                Title = "An Error has occured",
+                Detail = exception.Message,
+                Type = exception.GetType().Name,
+                Instance = instance,
+                Extensions = extensions,
             };
 
         if (

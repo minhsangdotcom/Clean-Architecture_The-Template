@@ -1,6 +1,8 @@
+using Application.Common.Errors;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Features.Common.Mapping.Roles;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Roles;
 using Mediator;
 using SharedKernel.Common.Messages;
@@ -8,23 +10,29 @@ using SharedKernel.Common.Messages;
 namespace Application.Features.Roles.Commands.Update;
 
 public class UpdateRoleHandler(IRoleManagerService roleManagerService)
-    : IRequestHandler<UpdateRoleCommand, UpdateRoleResponse>
+    : IRequestHandler<UpdateRoleCommand, Result<UpdateRoleResponse>>
 {
-    public async ValueTask<UpdateRoleResponse> Handle(
+    public async ValueTask<Result<UpdateRoleResponse>> Handle(
         UpdateRoleCommand command,
         CancellationToken cancellationToken
     )
     {
-        Role role =
-            await roleManagerService.GetByIdAsync(Ulid.Parse(command.RoleId))
-            ?? throw new NotFoundException(
-                [Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage()]
+        Role? role = await roleManagerService.GetByIdAsync(Ulid.Parse(command.RoleId));
+
+        if (role == null)
+        {
+            return Result<UpdateRoleResponse>.Failure(
+                new NotFoundError(
+                    "Your Resource is not found",
+                    Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage()
+                )
             );
+        }
 
         role.FromUpdateRole(command.Role);
 
         List<RoleClaim> roleClaims = command.Role.RoleClaims.ToListRoleClaim() ?? [];
         await roleManagerService.UpdateAsync(role, roleClaims);
-        return role.ToUpdateRoleResponse();
+        return Result<UpdateRoleResponse>.Success(role.ToUpdateRoleResponse());
     }
 }

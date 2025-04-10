@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Services.Elastics;
+using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.AuditLogs;
 using Elastic.Clients.Elasticsearch;
@@ -7,9 +8,9 @@ using Mediator;
 namespace Application.Features.AuditLogs.Queries;
 
 public class ListAuditlogHandler(IElasticsearchServiceFactory? elasticsearch = null)
-    : IRequestHandler<ListAuditlogQuery, PaginationResponse<ListAuditlogResponse>>
+    : IRequestHandler<ListAuditlogQuery, Result<PaginationResponse<ListAuditlogResponse>>>
 {
-    public async ValueTask<PaginationResponse<ListAuditlogResponse>> Handle(
+    public async ValueTask<Result<PaginationResponse<ListAuditlogResponse>>> Handle(
         ListAuditlogQuery request,
         CancellationToken cancellationToken
     )
@@ -23,11 +24,14 @@ public class ListAuditlogHandler(IElasticsearchServiceFactory? elasticsearch = n
             .Get<AuditLog>()
             .ListAsync(request);
 
-        return new PaginationResponse<ListAuditlogResponse>(
-            searchResponse.Documents.ToListAuditlogResponse(),
-            (int)searchResponse.Total,
-            request.Page,
-            request.PageSize
-        );
+        PaginationResponse<ListAuditlogResponse> paginationResponse =
+            new(
+                searchResponse.Documents.ToListAuditlogResponse(),
+                (int)searchResponse.Total,
+                request.Page,
+                request.PageSize
+            );
+
+        return Result<PaginationResponse<ListAuditlogResponse>>.Success(paginationResponse);
     }
 }
