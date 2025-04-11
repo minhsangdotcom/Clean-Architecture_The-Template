@@ -31,13 +31,17 @@ public sealed class Result<TResult>
     {
         return new Result<TResult>(false, default, error);
     }
+}
 
-    public static TResult Match(
-        Result<TResult> result,
-        Func<TResult> onSuccess,
-        Func<ErrorDetails, TResult> onFailure
+public static class ResultExtension
+{
+    public static TReturn Match<TResult, TReturn>(
+        this Result<TResult> result,
+        Func<TResult, TReturn> onSuccess,
+        Func<ErrorDetails, TReturn> onFailure
     )
+        where TResult : class
     {
-        return result.IsSuccess ? onSuccess() : onFailure(result.Error!);
+        return result.IsSuccess ? onSuccess(result.Value!) : onFailure(result.Error!);
     }
 }
