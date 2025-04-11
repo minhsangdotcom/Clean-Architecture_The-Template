@@ -18,6 +18,7 @@ public static class ElasticSearchExtension
         ElasticsearchSettings elasticsearch =
             configuration.GetSection(nameof(ElasticsearchSettings)).Get<ElasticsearchSettings>()
             ?? new();
+        services.AddSingleton(typeof(IElasticsearchService<>), typeof(ElasticsearchService<>));
 
         if (elasticsearch.IsEnbaled)
         {

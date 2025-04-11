@@ -1,10 +1,9 @@
 using System.Security.Claims;
-using Application.Common.Interfaces.Registers;
 using Contracts.Dtos.Responses;
 
 namespace Application.Common.Interfaces.Services.Token;
 
-public interface ITokenFactory : ISingleton
+public interface ITokenFactoryService
 {
     public DateTime AccesstokenExpiredTime { get; }
 

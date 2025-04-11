@@ -2,7 +2,7 @@ using StackExchange.Redis;
 
 namespace Application.Common.Interfaces.Services.Cache;
 
-public interface IRedisCacheService : ICacheService
+public interface IDistributedCacheService : ICacheService
 {
     IDatabase Database { get; }
 }

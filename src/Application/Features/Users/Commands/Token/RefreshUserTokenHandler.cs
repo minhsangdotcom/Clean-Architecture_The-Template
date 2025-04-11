@@ -1,6 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
 using Application.Common.Errors;
-using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -19,7 +18,7 @@ namespace Application.Features.Users.Commands.Token;
 
 public class RefreshUserTokenHandler(
     IUnitOfWork unitOfWork,
-    ITokenFactory tokenFactory,
+    ITokenFactoryService tokenFactory,
     IDetectionService detectionService,
     ICurrentUser currentUser
 ) : IRequestHandler<RefreshUserTokenCommand, Result<RefreshUserTokenResponse>>

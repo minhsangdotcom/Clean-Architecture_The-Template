@@ -8,7 +8,7 @@ using StackExchange.Redis;
 
 namespace Infrastructure.Services.Queue;
 
-public class QueueService(IRedisCacheService redisCache, IOptions<QueueSettings> options)
+public class QueueService(IDistributedCacheService redisCache, IOptions<QueueSettings> options)
     : IQueueService
 {
     private readonly QueueSettings queueSettings = options.Value;

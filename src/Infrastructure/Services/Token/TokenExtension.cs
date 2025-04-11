@@ -1,5 +1,6 @@
 using System.Text;
 using Application.Common.Exceptions;
+using Application.Common.Interfaces.Services.Token;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,12 +9,9 @@ using SharedKernel.Common.Messages;
 
 namespace Infrastructure.Services.Token;
 
-public static class JwtRegisterExtension
+public static class TokenExtension
 {
-    public static IServiceCollection AddJwtAuth(
-        this IServiceCollection services,
-        IConfiguration config
-    )
+    public static IServiceCollection AddJwt(this IServiceCollection services, IConfiguration config)
     {
         services.Configure<JwtSettings>(
             config.GetSection($"SecuritySettings:{nameof(JwtSettings)}")
@@ -24,6 +22,7 @@ public static class JwtRegisterExtension
             .Get<JwtSettings>();
 
         return services
+            .AddSingleton<ITokenFactoryService, TokenFactoryService>()
             .AddAuthentication(authentication =>
             {
                 authentication.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

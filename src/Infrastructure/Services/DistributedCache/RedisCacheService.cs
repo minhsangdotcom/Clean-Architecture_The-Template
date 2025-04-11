@@ -5,7 +5,7 @@ using StackExchange.Redis;
 
 namespace Infrastructure.Services.DistributedCache;
 
-public class RedisCacheService(IOptions<RedisDatabaseSettings> options) : IRedisCacheService
+public class RedisCacheService(IOptions<RedisDatabaseSettings> options) : IDistributedCacheService
 {
     private readonly RedisDatabaseSettings redisDatabaseSettings = options.Value;
 

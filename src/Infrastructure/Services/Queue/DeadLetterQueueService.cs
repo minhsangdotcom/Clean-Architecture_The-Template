@@ -7,7 +7,7 @@ using StackExchange.Redis;
 
 namespace Infrastructure.Services.Queue;
 
-public class DeadLetterQueueService(IRedisCacheService redisCache, IOptions<QueueSettings> options)
+public class DeadLetterQueueService(IDistributedCacheService redisCache, IOptions<QueueSettings> options)
     : IQueueService
 {
     private readonly QueueSettings queueSettings = options.Value;

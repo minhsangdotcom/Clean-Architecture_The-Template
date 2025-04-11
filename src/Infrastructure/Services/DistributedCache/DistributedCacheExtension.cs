@@ -4,9 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Services.DistributedCache;
 
-public static class RedisRegisterExtension
+public static class DistributedCacheExtension
 {
-    public static IServiceCollection AddRedis(
+    public static IServiceCollection AddDistributedCache(
         this IServiceCollection services,
         IConfiguration configuration
     )
@@ -21,7 +21,7 @@ public static class RedisRegisterExtension
                 .Configure<RedisDatabaseSettings>(options =>
                     configuration.GetSection(nameof(RedisDatabaseSettings)).Bind(options)
                 )
-                .AddSingleton<IRedisCacheService, RedisCacheService>();
+                .AddSingleton<IDistributedCacheService, RedisCacheService>();
         }
 
         return services;

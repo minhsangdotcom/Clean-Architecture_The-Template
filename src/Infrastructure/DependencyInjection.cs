@@ -1,4 +1,3 @@
-using Application.Common.Interfaces.Registers;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -72,29 +71,16 @@ public static class DependencyInjection
         services
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentUser, CurrentUserService>()
-            .AddSingleton(typeof(IMediaUpdateService<>), typeof(MediaUpdateService<>))
-            .Scan(scan =>
-                scan.FromCallingAssembly()
-                    .AddClasses(classes => classes.AssignableTo<IScope>())
-                    .AsImplementedInterfaces()
-                    .WithScopedLifetime()
-                    .AddClasses(classes => classes.AssignableTo<ISingleton>())
-                    .AsImplementedInterfaces()
-                    .WithSingletonLifetime()
-                    .AddClasses(classes => classes.AssignableTo<ITransient>())
-                    .AsImplementedInterfaces()
-                    .WithTransientLifetime()
-            )
             .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
-            .AddJwtAuth(configuration)
-            .AddMemoryCache()
-            .Configure<CacheSettings>(options =>
-                configuration.GetSection(nameof(CacheSettings)).Bind(options)
-            )
-            .AddRedis(configuration)
+            .AddSingleton<IActionAccessorService, ActionAccessorService>()
+            .AddJwt(configuration)
             .AddQueue(configuration)
             .AddHangfireConfiguration(configuration)
-            .AddElasticSearch(configuration);
+            .AddElasticSearch(configuration)
+            .AddIdentity()
+            .AddMail()
+            .AddMemoryCaching(configuration)
+            .AddDistributedCache(configuration);
 
         return services;
     }
