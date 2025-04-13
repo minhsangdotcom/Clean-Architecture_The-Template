@@ -1,4 +1,3 @@
-using Contracts.ApiWrapper;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -20,25 +19,16 @@ public class GlobalProblemDetailHandler(
         string? traceId = activityFeature?.Activity?.TraceId.ToString();
         string? spanId = activityFeature?.Activity?.SpanId.ToString();
         logger.Error(
-            "\n\n Server {exception} error has {@trace}  error is with message '{Message}'\n {StackTrace}\n at {DatetimeUTC} \n",
+            "\n\n{exception} error's occured having tracing identifier [traceId:{traceId}, spanId:{spanId}] with message '{Message}' {StackTrace}\n",
             exception.GetType().Name,
-            new TraceLogging() { TraceId = traceId, SpanId = spanId },
+            traceId,
+            spanId,
             exception.Message,
-            exception.StackTrace?.TrimStart(),
-            DateTimeOffset.UtcNow
+            exception.StackTrace?.TrimStart()
         );
 
         int code = StatusCodes.Status500InternalServerError;
         httpContext.Response.StatusCode = code;
-
-        string instance = $"{httpContext.Request.Method} {httpContext.Request.Path}";
-        Dictionary<string, object?> extensions =
-            new()
-            {
-                { "traceId", traceId },
-                { "spanId", spanId },
-                { "requestId", httpContext.TraceIdentifier },
-            };
 
         ProblemDetails problemDetail =
             new()
@@ -47,29 +37,15 @@ public class GlobalProblemDetailHandler(
                 Title = "An Error has occured",
                 Detail = exception.Message,
                 Type = exception.GetType().Name,
-                Instance = instance,
-                Extensions = extensions,
             };
 
-        if (
-            !await problemDetailsService.TryWriteAsync(
-                new()
-                {
-                    HttpContext = httpContext,
-                    ProblemDetails = problemDetail,
-                    Exception = exception,
-                }
-            )
-        )
-        {
-            httpContext.Response.ContentType = "application/problem+json";
-            await httpContext.Response.WriteAsJsonAsync(
-                problemDetail,
-                typeof(ProblemDetails),
-                cancellationToken
-            );
-        }
-
-        return true;
+        return await problemDetailsService.TryWriteAsync(
+            new()
+            {
+                HttpContext = httpContext,
+                ProblemDetails = problemDetail,
+                Exception = exception,
+            }
+        );
     }
 }

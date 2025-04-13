@@ -13,6 +13,14 @@ public abstract class ErrorDetails
     public List<InvalidParam>? InvalidParams { get; set; }
     public MessageResult? ErrorMessage { get; set; }
 
+    public ErrorDetails(string title, string detail, string? type = null, int? status = null)
+    {
+        Title = title;
+        Status = status ?? StatusCodes.Status500InternalServerError;
+        Detail = detail;
+        Type = type ?? "InternalException";
+    }
+
     public ErrorDetails(
         string title,
         List<InvalidParam> invalidParams,

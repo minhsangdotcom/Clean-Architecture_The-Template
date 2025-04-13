@@ -19,6 +19,17 @@ public static class ProblemDetailExtention
                         "requestId",
                         context.HttpContext.TraceIdentifier
                     );
+                    IHttpActivityFeature? activityFeature =
+                        context.HttpContext.Features.Get<IHttpActivityFeature>();
+
+                    context.ProblemDetails.Extensions.TryAdd(
+                        "traceId",
+                        activityFeature?.Activity?.TraceId.ToString()
+                    );
+                    context.ProblemDetails.Extensions.TryAdd(
+                        "spanId",
+                        activityFeature?.Activity?.SpanId.ToString()
+                    );
                 };
             })
             .AddExceptionHandler<GlobalProblemDetailHandler>();

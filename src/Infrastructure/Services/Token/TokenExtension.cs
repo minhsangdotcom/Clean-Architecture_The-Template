@@ -51,14 +51,14 @@ public static class TokenExtension
                         return TokenErrorExtension.UnauthorizedException(
                             context,
                             !context.Response.HasStarted
-                                ? new UnauthorizedException(Message.UNAUTHORIZED)
-                                : new UnauthorizedException(Message.TOKEN_EXPIRED)
+                                ? new UnauthorizedError(Message.UNAUTHORIZED)
+                                : new UnauthorizedError(Message.TOKEN_EXPIRED)
                         );
                     },
                     OnForbidden = context =>
                         TokenErrorExtension.ForbiddenException(
                             context,
-                            new ForbiddenException(Message.FORBIDDEN)
+                            new ForbiddenError(Message.FORBIDDEN)
                         ),
                 };
             })
