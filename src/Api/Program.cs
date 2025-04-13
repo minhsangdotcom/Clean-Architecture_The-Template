@@ -1,4 +1,6 @@
 using System.Runtime.InteropServices;
+using Api.common.EndpointConfigurations;
+using Api.common.Routers;
 using Api.Converters;
 using Api.Extensions;
 using Application;
@@ -20,18 +22,19 @@ var configuration = builder.Configuration;
 string? url = builder.Configuration["urls"] ?? "http://0.0.0.0:8080";
 builder.WebHost.UseUrls(url);
 builder.AddConfiguration();
-builder
-    .Services.AddControllers()
-    .AddJsonOptions(option =>
-    {
-        option.JsonSerializerOptions.Converters.Add(new DatetimeConverter());
-        option.JsonSerializerOptions.Converters.Add(new DateTimeOffsetConvert());
-        option.JsonSerializerOptions.Converters.Add(
-            new Cysharp.Serialization.Json.UlidJsonConverter()
-        );
-    });
+
+services.AddEndpoints();
+services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new DatetimeConverter());
+    options.SerializerOptions.Converters.Add(new DateTimeOffsetConvert());
+    options.SerializerOptions.Converters.Add(new Cysharp.Serialization.Json.UlidJsonConverter());
+});
+
+services.AddAuthorization();
 services.AddErrorDetails();
 services.AddSwagger(configuration);
+services.AddApiVersion();
 services.AddOpenTelemetryTracing(configuration);
 builder.AddSerialogs();
 services.AddHealthChecks();
@@ -105,6 +108,7 @@ try
             }
         });
     }
+
     app.UseStatusCodePages();
     app.UseExceptionHandler();
     app.UseAuthentication();
@@ -112,7 +116,7 @@ try
     app.UseAuthorization();
     app.UseDetection();
 
-    app.MapControllers();
+    app.MapEndpoints(apiVersion: EndpointVersion.One);
 
     Log.Logger.Information(
         "Application is in {environment} environment",
