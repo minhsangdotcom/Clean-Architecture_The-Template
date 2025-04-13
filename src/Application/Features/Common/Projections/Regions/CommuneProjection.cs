@@ -9,9 +9,9 @@ public class CommuneProjection : Region
         Id = commune.Id;
         Code = commune.Code;
         Name = commune.Name;
-        NameEn = commune.NameEn;
+        EnglishName = commune.EnglishName;
         FullName = commune.FullName;
-        FullNameEn = commune.FullNameEn;
+        EnglishFullName = commune.EnglishFullName;
         CustomName = commune.CustomName;
         CreatedAt = commune.CreatedAt;
         CreatedBy = commune.CreatedBy;

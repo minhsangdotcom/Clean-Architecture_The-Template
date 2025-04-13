@@ -8,9 +8,9 @@ public class ProvinceProjection : Region
     {
         Code = province.Code;
         Name = province.Name;
-        NameEn = province.NameEn;
+        EnglishName = province.EnglishName;
         FullName = province.FullName;
-        FullNameEn = province.FullNameEn;
+        EnglishFullName = province.EnglishFullName;
         CustomName = province.CustomName;
 
         Id = province.Id;

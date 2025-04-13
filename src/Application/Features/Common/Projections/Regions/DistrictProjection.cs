@@ -8,9 +8,9 @@ public class DistrictProjection : Region
     {
         Code = district.Code;
         Name = district.Name;
-        NameEn = district.NameEn;
+        EnglishName = district.EnglishName;
         FullName = district.FullName;
-        FullNameEn = district.FullNameEn;
+        EnglishFullName = district.EnglishFullName;
         CustomName = district.CustomName;
 
         Id = district.Id;
