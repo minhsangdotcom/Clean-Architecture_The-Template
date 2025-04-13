@@ -17,7 +17,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenNoFirstName_ShouldReturnValidationException()
     {
-        updateUserCommand.User!.FirstName = null;
+        updateUserCommand.UpdateData.FirstName = null;
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
             .Should()
@@ -27,7 +27,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenInvalidLengthOfFirstName_ShouldReturnValidationException()
     {
-        updateUserCommand.User!.FirstName = new string(fixture.CreateMany<char>(257).ToArray());
+        updateUserCommand.UpdateData.FirstName = new string(fixture.CreateMany<char>(257).ToArray());
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
             .Should()
@@ -37,7 +37,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenNoLastName_ShouldReturnValidationException()
     {
-        updateUserCommand.User!.LastName = null;
+        updateUserCommand.UpdateData.LastName = null;
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
             .Should()
@@ -47,7 +47,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenInvalidLengthOfLastName_ShouldReturnValidationException()
     {
-        updateUserCommand.User!.LastName = new string(fixture.CreateMany<char>(257).ToArray());
+        updateUserCommand.UpdateData.LastName = new string(fixture.CreateMany<char>(257).ToArray());
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
             .Should()
@@ -58,12 +58,12 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [InlineData("admin.admin@admin.com.vn")]
     public async Task UpdateUser_WhenDuplicatedEmail_ShouldReturnValidationException(string name)
     {
-        updateUserCommand.User!.Email = name;
+        updateUserCommand.UpdateData.Email = name;
 
         var response = await testingFixture.MakeRequestAsync(
             "users",
             HttpMethod.Post,
-            updateUserCommand.User!,
+            updateUserCommand.UpdateData,
             "multipart/form-data"
         );
 
@@ -88,7 +88,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
         string email
     )
     {
-        updateUserCommand.User!.Email = email;
+        updateUserCommand.UpdateData.Email = email;
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
@@ -103,7 +103,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
         string phoneNumber
     )
     {
-        updateUserCommand.User!.PhoneNumber = phoneNumber;
+        updateUserCommand.UpdateData.PhoneNumber = phoneNumber;
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
             .Should()
@@ -113,7 +113,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenNoProvince_ShouldReturnValidationException()
     {
-        updateUserCommand.User!.ProvinceId = Ulid.Empty;
+        updateUserCommand.UpdateData.ProvinceId = Ulid.Empty;
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
@@ -124,7 +124,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenNotFoundProvince_ShouldReturnValidationException()
     {
-        updateUserCommand.User!.ProvinceId = Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NN");
+        updateUserCommand.UpdateData.ProvinceId = Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NN");
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
             .Should()
@@ -134,7 +134,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenNoDistrict_ShouldReturnValidationException()
     {
-        updateUserCommand.User!.DistrictId = Ulid.Empty;
+        updateUserCommand.UpdateData.DistrictId = Ulid.Empty;
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
             .Should()
@@ -144,7 +144,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenNotFoundDistrict_ShouldReturnValidationException()
     {
-        updateUserCommand.User!.DistrictId = Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QQ");
+        updateUserCommand.UpdateData.DistrictId = Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QQ");
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
@@ -155,7 +155,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenNotFoundCommune_ShouldReturnValidationException()
     {
-        updateUserCommand.User!.CommuneId = Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAVV");
+        updateUserCommand.UpdateData.CommuneId = Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAVV");
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
@@ -166,7 +166,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenNoRoles_ShouldReturnValidationException()
     {
-        updateUserCommand.User!.Roles = null!;
+        updateUserCommand.UpdateData.Roles = null!;
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
@@ -177,7 +177,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenNoClaimType_ShouldReturnValidationException()
     {
-        updateUserCommand.User!.UserClaims!.ForEach(x => x.ClaimType = null);
+        updateUserCommand.UpdateData.UserClaims!.ForEach(x => x.ClaimType = null);
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
@@ -188,7 +188,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenNoClaimValue_ShouldReturnValidationException()
     {
-        updateUserCommand.User!.UserClaims!.ForEach(x => x.ClaimValue = null);
+        updateUserCommand.UpdateData.UserClaims!.ForEach(x => x.ClaimValue = null);
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))

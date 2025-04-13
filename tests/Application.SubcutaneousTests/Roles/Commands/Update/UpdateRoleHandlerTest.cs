@@ -19,13 +19,16 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     [Fact]
     public async Task UpdateRole_WhenIdNotFound_ShouldReturnNotFoundException()
     {
-        UpdateRole updatedRole = fixture.Build<UpdateRole>().Without(x => x.RoleClaims).Create();
+        RoleUpdateRequest updatedRole = fixture
+            .Build<RoleUpdateRequest>()
+            .Without(x => x.RoleClaims)
+            .Create();
 
         Ulid ulid = Ulid.NewUlid();
         UpdateRoleCommand updateRoleCommand = fixture
             .Build<UpdateRoleCommand>()
             .With(x => x.RoleId, ulid.ToString())
-            .With(x => x.Role, updatedRole)
+            .With(x => x.UpdateData, updatedRole)
             .Create();
 
         List<MessageResult> messageResults =
@@ -49,7 +52,7 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     [Fact]
     public async Task UpdateRole_WhenNoRoleClaims_ShouldUpdateRole()
     {
-        updateRoleCommand.Role.RoleClaims = null;
+        updateRoleCommand.UpdateData.RoleClaims = null;
 
         Result<UpdateRoleResponse> result = await testingFixture.SendAsync(updateRoleCommand);
         UpdateRoleResponse updateRoleResponse = result.Value!;
@@ -58,16 +61,16 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             updateRoleResponse.Id
         );
         createdRole.Should().NotBeNull();
-        UpdateRole updateRole = updateRoleCommand.Role;
-        createdRole!.Name.Should().Be(updateRole.Name!.ToSnakeCase().ToUpper());
-        createdRole!.Description.Should().Be(updateRole.Description);
+        RoleUpdateRequest RoleUpdateRequest = updateRoleCommand.UpdateData;
+        createdRole!.Name.Should().Be(RoleUpdateRequest.Name!.ToSnakeCase().ToUpper());
+        createdRole!.Description.Should().Be(RoleUpdateRequest.Description);
         createdRole.RoleClaims.Should().HaveCount(0);
     }
 
     [Fact]
     public async Task UpdateRole_WhenNoDescription_ShouldUpdateRole()
     {
-        updateRoleCommand.Role.Description = null;
+        updateRoleCommand.UpdateData.Description = null;
 
         Result<UpdateRoleResponse> result = await testingFixture.SendAsync(updateRoleCommand);
         UpdateRoleResponse updateRoleResponse = result.Value!;
@@ -76,22 +79,24 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             updateRoleResponse.Id
         );
         createdRole.Should().NotBeNull();
-        UpdateRole updateRole = updateRoleCommand.Role;
-        createdRole!.Name.Should().Be(updateRole.Name!.ToSnakeCase().ToUpper());
-        createdRole.RoleClaims.Should().HaveCount(updateRoleCommand.Role.RoleClaims!.Count);
+        RoleUpdateRequest RoleUpdateRequest = updateRoleCommand.UpdateData;
+        createdRole!.Name.Should().Be(RoleUpdateRequest.Name!.ToSnakeCase().ToUpper());
+        createdRole
+            .RoleClaims.Should()
+            .HaveCount(updateRoleCommand.UpdateData.RoleClaims!.Count);
         createdRole!.Description.Should().BeNull();
     }
 
     [Fact]
     public async Task UpdateRole_ShouldUpdateRole()
     {
-        UpdateRole updateRole = updateRoleCommand.Role;
-        List<RoleClaimModel> roleClaims = updateRole.RoleClaims!;
+        RoleUpdateRequest RoleUpdateRequest = updateRoleCommand.UpdateData;
+        List<RoleClaimModel> roleClaims = RoleUpdateRequest.RoleClaims!;
         roleClaims.RemoveAt(1);
         roleClaims.Add(new RoleClaimModel() { ClaimType = "permission", ClaimValue = "list.user" });
         roleClaims[0].ClaimValue = "create.users";
-        updateRole.Name = $"name{Guid.NewGuid()}";
-        updateRole.Description = $"description{Guid.NewGuid()}";
+        RoleUpdateRequest.Name = $"name{Guid.NewGuid()}";
+        RoleUpdateRequest.Description = $"description{Guid.NewGuid()}";
 
         Result<UpdateRoleResponse> result = await testingFixture.SendAsync(updateRoleCommand);
         UpdateRoleResponse updateRoleResponse = result.Value!;
@@ -100,12 +105,12 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             updateRoleResponse.Id
         );
         createdRole.Should().NotBeNull();
-        createdRole!.Name.Should().Be(updateRole.Name!.ToSnakeCase().ToUpper());
+        createdRole!.Name.Should().Be(RoleUpdateRequest.Name!.ToSnakeCase().ToUpper());
         createdRole
             .RoleClaims!.Select(rc => new { rc.ClaimType, rc.ClaimValue })
             .Should()
             .IntersectWith(roleClaims.Select(rc => new { rc.ClaimType, rc.ClaimValue })!);
-        createdRole!.Description.Should().Be(updateRole.Description);
+        createdRole!.Description.Should().Be(RoleUpdateRequest.Description);
     }
 
     public async Task InitializeAsync()

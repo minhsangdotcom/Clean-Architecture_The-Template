@@ -19,7 +19,7 @@ public class UpdateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateRole_WhenNoName_ShouldReturnValidationException()
     {
-        updateRoleCommand.Role.Name = null;
+        updateRoleCommand.UpdateData.Name = null;
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateRoleCommand))
             .Should()
@@ -29,7 +29,7 @@ public class UpdateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateRole_WhenInvalidLengthName_ShouldReturnValidationException()
     {
-        updateRoleCommand.Role.Name = new string(fixture.CreateMany<char>(258).ToArray());
+        updateRoleCommand.UpdateData.Name = new string(fixture.CreateMany<char>(258).ToArray());
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateRoleCommand))
             .Should()
@@ -42,12 +42,12 @@ public class UpdateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
         const string ROLE_NAME = "userTest";
         Role role = await testingFixture.CreateRoleAsync(ROLE_NAME);
 
-        updateRoleCommand.Role.Name = role.Name;
+        updateRoleCommand.UpdateData.Name = role.Name;
 
         var response = await testingFixture.MakeRequestAsync(
             "roles",
             HttpMethod.Post,
-            updateRoleCommand.Role
+            updateRoleCommand.UpdateData
         );
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -66,7 +66,9 @@ public class UpdateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateRole_WhenInvalidLengthDescription_ShouldReturnValidationException()
     {
-        updateRoleCommand.Role.Description = new string(fixture.CreateMany<char>(1001).ToArray());
+        updateRoleCommand.UpdateData.Description = new string(
+            fixture.CreateMany<char>(1001).ToArray()
+        );
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateRoleCommand))
             .Should()
@@ -76,7 +78,7 @@ public class UpdateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateRole_WhenMissingClaimTypeOfRoleClaim_ShouldReturnValidationException()
     {
-        updateRoleCommand.Role.RoleClaims!.ForEach(x => x.ClaimType = null);
+        updateRoleCommand.UpdateData.RoleClaims!.ForEach(x => x.ClaimType = null);
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateRoleCommand))
             .Should()
@@ -86,7 +88,7 @@ public class UpdateRoleCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateRole_WhenMissingClaimValueOfRoleClaim_ShouldReturnValidationException()
     {
-        updateRoleCommand.Role.RoleClaims!.ForEach(x => x.ClaimValue = null);
+        updateRoleCommand.UpdateData.RoleClaims!.ForEach(x => x.ClaimValue = null);
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateRoleCommand))
             .Should()

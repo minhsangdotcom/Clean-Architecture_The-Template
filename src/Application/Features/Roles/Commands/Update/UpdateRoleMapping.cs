@@ -8,7 +8,7 @@ namespace Application.Features.Roles.Commands.Update;
 // {
 //     public UpdateRoleMapping()
 //     {
-//         CreateMap<UpdateRole, Role>()
+//         CreateMap<RoleUpdateRequest, Role>()
 //             .ForMember(dest => dest.RoleClaims, opt => opt.Ignore())
 //             .IncludeBase<RoleModel, Role>();
 
@@ -18,10 +18,10 @@ namespace Application.Features.Roles.Commands.Update;
 
 public static class UpdateRoleMapping
 {
-    public static Role FromUpdateRole(this Role role, UpdateRole updateRole)
+    public static Role FromUpdateRole(this Role role, RoleUpdateRequest RoleUpdateRequest)
     {
-        role.Name = updateRole.Name!;
-        role.Description = updateRole.Description;
+        role.Name = RoleUpdateRequest.Name!;
+        role.Description = RoleUpdateRequest.Description;
         return role;
     }
 

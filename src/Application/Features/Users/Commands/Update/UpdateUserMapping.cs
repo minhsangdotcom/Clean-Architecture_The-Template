@@ -8,7 +8,7 @@ namespace Application.Features.Users.Commands.Update;
 // {
 //     public UpdateUserMapping()
 //     {
-//         CreateMap<UpdateUser, User>()
+//         CreateMap<UserUpdateRequest, User>()
 //             .ForMember(dest => dest.UserClaims, opt => opt.Ignore())
 //             .ForMember(dest => dest.UserRoles, opt => opt.Ignore());
 //         CreateMap<User, UpdateUserResponse>().IncludeBase<User, UserDetailProjection>();
@@ -17,7 +17,7 @@ namespace Application.Features.Users.Commands.Update;
 
 public static class UpdateUserMapping
 {
-    public static User FromUpdateUser(this User user, UpdateUser update)
+    public static User FromUpdateUser(this User user, UserUpdateRequest update)
     {
         user.Update(
             update.FirstName,

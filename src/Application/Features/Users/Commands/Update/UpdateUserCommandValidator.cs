@@ -16,23 +16,23 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
     {
         _ = Ulid.TryParse(accessorService.Id, out Ulid id);
 
-        RuleFor(x => x.User)
+        RuleFor(x => x.UpdateData)
             .NotEmpty()
             .WithState(x =>
                 Messager
                     .Create<UpdateUserCommand>()
-                    .Property(x => x.User!)
+                    .Property(x => x.UpdateData!)
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
             )
             .SetValidator(new UserValidator(unitOfWork, accessorService)!);
 
-        RuleFor(x => x.User!.Roles)
+        RuleFor(x => x.UpdateData!.Roles)
             .NotEmpty()
             .WithState(x =>
                 Messager
-                    .Create<UpdateUser>(nameof(User))
+                    .Create<UserUpdateRequest>(nameof(User))
                     .Property(x => x.Roles!)
                     .Message(MessageType.Null)
                     .Negative()
@@ -40,10 +40,10 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
             );
 
         When(
-            x => x.User!.UserClaims != null,
+            x => x.UpdateData!.UserClaims != null,
             () =>
             {
-                RuleForEach(x => x.User!.UserClaims).SetValidator(new UserClaimValidator());
+                RuleForEach(x => x.UpdateData!.UserClaims).SetValidator(new UserClaimValidator());
             }
         );
     }

@@ -5,7 +5,7 @@ using FluentValidation;
 
 namespace Application.Features.Roles.Commands.Update;
 
-public class UpdateRoleCommandValidator : AbstractValidator<UpdateRole>
+public class UpdateRoleCommandValidator : AbstractValidator<RoleUpdateRequest>
 {
     public UpdateRoleCommandValidator(
         IRoleManagerService roleManagerService,

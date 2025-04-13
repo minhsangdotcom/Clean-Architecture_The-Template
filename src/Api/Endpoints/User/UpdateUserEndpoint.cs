@@ -23,17 +23,17 @@ public class UpdateUserEndpoint : IEndpoint
                 Description = "Updates the information of an existing user identified by their ID.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
-            .WithRequestValidation<UpdateUser>();
+            .WithRequestValidation<UserUpdateRequest>();
     }
 
     private async Task<Results<Ok<ApiResponse<UpdateUserResponse>>, ProblemHttpResult>> HandleAsync(
         [FromRoute] string id,
-        [FromForm] UpdateUser request,
+        [FromForm] UserUpdateRequest request,
         [FromServices] ISender sender,
         CancellationToken cancellationToken = default
     )
     {
-        var command = new UpdateUserCommand() { UserId = id.ToString(), User = request };
+        var command = new UpdateUserCommand() { UserId = id.ToString(), UpdateData = request };
         var result = await sender.Send(command, cancellationToken);
         return result.ToResult();
     }

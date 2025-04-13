@@ -27,7 +27,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     [Fact]
     private async Task UpdateUser_WhenNoCustomClaim_ShouldUpdateSuccess()
     {
-        updateUserCommand.User!.UserClaims = null;
+        updateUserCommand.UpdateData!.UserClaims = null;
 
         Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
         UpdateUserResponse response = result.Value!;
@@ -39,7 +39,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     [Fact]
     private async Task UpdateUser_WhenNoAvatar_ShouldUpdateSuccess()
     {
-        updateUserCommand.User!.Avatar = null;
+        updateUserCommand.UpdateData!.Avatar = null;
         Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
         UpdateUserResponse response = result.Value!;
         User? user = await testingFixture.FindUserByIdAsync(response.Id);
@@ -50,7 +50,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     [Fact]
     private async Task UpdateUser_WhenNoDayOfBirth_ShouldUpdateSuccess()
     {
-        updateUserCommand.User!.DayOfBirth = null;
+        updateUserCommand.UpdateData!.DayOfBirth = null;
         Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
         UpdateUserResponse response = result.Value!;
         User? user = await testingFixture.FindUserByIdAsync(response.Id);
@@ -70,16 +70,16 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
 
     private void AssertUser(User? user, UpdateUserCommand updateUserCommand)
     {
-        UpdateUser updateUser = updateUserCommand.User!;
+        UserUpdateRequest UserUpdateRequest = updateUserCommand.UpdateData!;
         user.Should().NotBeNull();
-        user!.FirstName.Should().Be(updateUser.FirstName);
-        user!.LastName.Should().Be(updateUser.LastName);
-        user!.Email.Should().Be(updateUser.Email);
-        user!.PhoneNumber.Should().Be(updateUser.PhoneNumber);
-        user!.Address!.Province!.Id.Should().Be(updateUser.ProvinceId);
-        user!.Address!.District!.Id.Should().Be(updateUser.DistrictId);
+        user!.FirstName.Should().Be(UserUpdateRequest.FirstName);
+        user!.LastName.Should().Be(UserUpdateRequest.LastName);
+        user!.Email.Should().Be(UserUpdateRequest.Email);
+        user!.PhoneNumber.Should().Be(UserUpdateRequest.PhoneNumber);
+        user!.Address!.Province!.Id.Should().Be(UserUpdateRequest.ProvinceId);
+        user!.Address!.District!.Id.Should().Be(UserUpdateRequest.DistrictId);
 
-        if (updateUser.Avatar != null)
+        if (UserUpdateRequest.Avatar != null)
         {
             user.Avatar.Should().NotBeNull();
         }
@@ -88,32 +88,32 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             user.Avatar.Should().BeNull();
         }
 
-        if (updateUser.DayOfBirth.HasValue)
+        if (UserUpdateRequest.DayOfBirth.HasValue)
         {
-            user!.DayOfBirth!.Value.Date.Should().Be(updateUser.DayOfBirth.Value.Date);
+            user!.DayOfBirth!.Value.Date.Should().Be(UserUpdateRequest.DayOfBirth.Value.Date);
         }
         else
         {
             user.DayOfBirth.Should().BeNull();
         }
 
-        if (updateUser.CommuneId != null || updateUser.CommuneId != Ulid.Empty)
+        if (UserUpdateRequest.CommuneId != null || UserUpdateRequest.CommuneId != Ulid.Empty)
         {
-            user.Address.Commune!.Id.Should().Be(updateUser.CommuneId!.Value);
+            user.Address.Commune!.Id.Should().Be(UserUpdateRequest.CommuneId!.Value);
         }
         else
         {
             user.Address.Commune.Should().BeNull();
         }
 
-        user.UserRoles!.Select(x => x.RoleId).Should().Contain(updateUser.Roles);
+        user.UserRoles!.Select(x => x.RoleId).Should().Contain(UserUpdateRequest.Roles);
 
-        if (updateUser.UserClaims?.Count > 0)
+        if (UserUpdateRequest.UserClaims?.Count > 0)
         {
             user.UserClaims!.Select(x => new { x.ClaimType, x.ClaimValue })
                 .Should()
                 .IntersectWith(
-                    updateUser.UserClaims.Select(x => new { x.ClaimType, x.ClaimValue })!
+                    UserUpdateRequest.UserClaims.Select(x => new { x.ClaimType, x.ClaimValue })!
                 );
         }
     }

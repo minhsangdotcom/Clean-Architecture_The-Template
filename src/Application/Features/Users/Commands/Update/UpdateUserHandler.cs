@@ -40,27 +40,27 @@ public class UpdateUserHandler(
             );
         }
 
-        IFormFile? avatar = command.User!.Avatar;
+        IFormFile? avatar = command.UpdateData!.Avatar;
         string? oldAvatar = user.Avatar;
 
-        user.FromUpdateUser(command.User);
+        user.FromUpdateUser(command.UpdateData);
 
         Province? province = await unitOfWork
             .Repository<Province>()
-            .FindByIdAsync(command.User.ProvinceId, cancellationToken);
+            .FindByIdAsync(command.UpdateData.ProvinceId, cancellationToken);
         District? district = await unitOfWork
             .Repository<District>()
-            .FindByIdAsync(command.User.DistrictId, cancellationToken);
+            .FindByIdAsync(command.UpdateData.DistrictId, cancellationToken);
 
         Commune? commune = null;
-        if (command.User.CommuneId.HasValue)
+        if (command.UpdateData.CommuneId.HasValue)
         {
             commune = await unitOfWork
                 .Repository<Commune>()
-                .FindByIdAsync(command.User.CommuneId.Value, cancellationToken);
+                .FindByIdAsync(command.UpdateData.CommuneId.Value, cancellationToken);
         }
         //* replace address
-        user.UpdateAddress(new(province!, district!, commune, command.User.Street!));
+        user.UpdateAddress(new(province!, district!, commune, command.UpdateData.Street!));
 
         string? key = mediaUpdateService.GetKey(avatar);
         user.Avatar = await mediaUpdateService.UploadAvatarAsync(avatar, key);
@@ -77,8 +77,9 @@ public class UpdateUserHandler(
 
             //* update custom claims of user like permissions ...
             List<UserClaim> customUserClaims =
-                command.User.UserClaims?.ToListUserClaim(KindaUserClaimType.Custom, user.Id) ?? [];
-            await userManagerService.UpdateAsync(user, command.User.Roles!, customUserClaims);
+                command.UpdateData.UserClaims?.ToListUserClaim(KindaUserClaimType.Custom, user.Id)
+                ?? [];
+            await userManagerService.UpdateAsync(user, command.UpdateData.Roles!, customUserClaims);
 
             await unitOfWork.CommitAsync(cancellationToken);
 

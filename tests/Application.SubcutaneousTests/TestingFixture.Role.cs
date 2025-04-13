@@ -63,7 +63,7 @@ public partial class TestingFixture
         return new()
         {
             RoleId = role.Id.ToString(),
-            Role = new UpdateRole()
+            UpdateData = new RoleUpdateRequest()
             {
                 Name = role.Name,
                 Description = role.Description,

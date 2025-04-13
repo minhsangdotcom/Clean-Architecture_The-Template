@@ -1,5 +1,4 @@
 using Application.Common.Errors;
-using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Features.Common.Mapping.Roles;
 using Contracts.ApiWrapper;
@@ -29,9 +28,9 @@ public class UpdateRoleHandler(IRoleManagerService roleManagerService)
             );
         }
 
-        role.FromUpdateRole(command.Role);
+        role.FromUpdateRole(command.UpdateData);
 
-        List<RoleClaim> roleClaims = command.Role.RoleClaims.ToListRoleClaim() ?? [];
+        List<RoleClaim> roleClaims = command.UpdateData.RoleClaims.ToListRoleClaim() ?? [];
         await roleManagerService.UpdateAsync(role, roleClaims);
         return Result<UpdateRoleResponse>.Success(role.ToUpdateRoleResponse());
     }

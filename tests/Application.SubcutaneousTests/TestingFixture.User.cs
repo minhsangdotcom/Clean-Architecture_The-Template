@@ -53,7 +53,7 @@ public partial class TestingFixture
         return new()
         {
             UserId = createUserResponse.Id.ToString(),
-            User = new UpdateUser()
+            UpdateData = new UserUpdateRequest()
             {
                 FirstName = createUserResponse.FirstName,
                 LastName = createUserResponse.LastName,
