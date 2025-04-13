@@ -28,7 +28,7 @@ public class DeleteRoleEndpoint : IEndpoint
     private async Task<Results<NoContent, ProblemHttpResult>> HandleAsync(
         [FromRoute] string id,
         [FromServices] ISender sender,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     )
     {
         var result = await sender.Send(new DeleteRoleCommand(Ulid.Parse(id)), cancellationToken);

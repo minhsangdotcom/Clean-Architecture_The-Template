@@ -19,7 +19,8 @@ public static class ResultMapping
 
     public static Results<CreatedAtRoute<ApiResponse<T>>, ProblemHttpResult> ToCreatedResult<T>(
         this Result<T> result,
-        object id
+        object id,
+        string route
     )
         where T : class
     {
@@ -27,7 +28,7 @@ public static class ResultMapping
             success =>
                 TypedResults.CreatedAtRoute(
                     new ApiResponse<T>(success, Message.SUCCESS),
-                    Router.RoleRoute.GetRouteName,
+                    route,
                     new { id }
                 ),
             failure => TypedResults.Problem(failure.ToProblemDetails())

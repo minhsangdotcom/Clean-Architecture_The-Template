@@ -30,8 +30,8 @@ public class SpecificationRepository<T>(IDbContext dbContext) : ISpecificationRe
             .Select(mappingResult)
             .ToCursorPagedListAsync(
                 new CursorPaginationRequest(
-                    queryParam.Cursor?.Before,
-                    queryParam.Cursor?.After,
+                    queryParam.Before,
+                    queryParam.After,
                     queryParam.PageSize,
                     queryParam.Sort.GetDefaultSort(),
                     uniqueSort ?? nameof(BaseEntity.Id)

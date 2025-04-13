@@ -31,10 +31,10 @@ public class CreateRoleEndpoint : IEndpoint
     > HandleAsync(
         [FromBody] CreateRoleCommand request,
         [FromServices] ISender sender,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     )
     {
         var result = await sender.Send(request, cancellationToken);
-        return result.ToCreatedResult(result.Value!.Id);
+        return result.ToCreatedResult(result.Value!.Id, Router.RoleRoute.GetRouteName);
     }
 }

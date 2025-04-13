@@ -18,7 +18,6 @@ public static class SwaggerExtension
 
         return services.AddSwaggerGen(option =>
         {
-            option.EnableAnnotations();
             option.AddSecurityDefinition(
                 JwtBearerDefaults.AuthenticationScheme,
                 new OpenApiSecurityScheme

@@ -34,7 +34,7 @@ public class ListDistrictEndpoint : IEndpoint
     > HandleAsync(
         ListDistrictQuery request,
         [FromServices] ISender sender,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     )
     {
         var result = await sender.Send(request, cancellationToken);

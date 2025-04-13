@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using Contracts.Dtos.Requests;
 
 namespace Contracts.Dtos.Responses;
 
@@ -41,7 +40,9 @@ public class Paging<T>
 
     public bool? HasPreviousPage { get; set; }
 
-    public Cursor Cursor { get; set; } = new();
+    public string? Before { get; set; }
+
+    public string? After { get; set; }
 
     public Paging(int totalPage, int currentPage = 1, int pageSize = 10)
     {
@@ -62,9 +63,9 @@ public class Paging<T>
     {
         PageSize = pageSize;
         TotalPage = totalPage;
-        Cursor.After = nextCursor;
+        After = nextCursor;
         HasNextPage = nextCursor != null;
-        Cursor.Before = previousCursor;
+        Before = previousCursor;
         HasPreviousPage = previousCursor != null;
     }
 }

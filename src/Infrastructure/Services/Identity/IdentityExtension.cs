@@ -8,8 +8,8 @@ public static class IdentityExtension
     public static IServiceCollection AddIdentity(this IServiceCollection services)
     {
         return services
-            .AddSingleton<IRoleManagerService, RoleManagerService>()
-            .AddSingleton<IUserManagerService, UserManagerService>()
+            .AddScoped<IRoleManagerService, RoleManagerService>()
+            .AddScoped<IUserManagerService, UserManagerService>()
             .AddSingleton(typeof(IMediaUpdateService<>), typeof(MediaUpdateService<>));
     }
 }

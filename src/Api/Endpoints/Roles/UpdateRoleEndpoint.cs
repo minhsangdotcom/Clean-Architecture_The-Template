@@ -30,7 +30,7 @@ public class UpdateRoleEndpoint : IEndpoint
         [FromRoute] string id,
         [FromBody] UpdateRole request,
         [FromServices] ISender sender,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     )
     {
         var command = new UpdateRoleCommand() { RoleId = id.ToString(), Role = request };

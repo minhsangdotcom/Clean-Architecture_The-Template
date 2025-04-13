@@ -1,6 +1,5 @@
 using System.Reflection;
 using Application.Common.Errors;
-using Application.Common.Exceptions;
 using Application.Common.Extensions;
 using Contracts.Dtos.Requests;
 using Serilog;
@@ -18,17 +17,14 @@ public static partial class QueryParamValidate
     public static ValidationRequestResult<T, BadRequestError> ValidateQuery<T>(this T request)
         where T : QueryParamRequest
     {
-        if (
-            !string.IsNullOrWhiteSpace(request.Cursor?.Before)
-            && !string.IsNullOrWhiteSpace(request.Cursor?.After)
-        )
+        if (!string.IsNullOrWhiteSpace(request.Before) && !string.IsNullOrWhiteSpace(request.After))
         {
             return new(
                 Error: new BadRequestError(
                     Message,
                     Messager
                         .Create<QueryParamRequest>("QueryParam")
-                        .Property(x => x.Cursor!)
+                        .Property("Cursor")
                         .Message(MessageType.Redundant)
                         .Build()
                 )
@@ -245,16 +241,17 @@ public static partial class QueryParamValidate
             )
         )
         {
-            throw new BadRequestException(
-                [
+            return new(
+                Error: new BadRequestError(
+                    Message,
                     Messager
                         .Create<QueryParamRequest>("QueryParam")
                         .Property(x => x.Filter!)
                         .Message(MessageType.Valid)
                         .ObjectName("BetweenOperator")
                         .Negative()
-                        .Build(),
-                ]
+                        .Build()
+                )
             );
         }
 
@@ -262,15 +259,16 @@ public static partial class QueryParamValidate
         var trimQueries = queries.Select(x => string.Join(".", x.CleanKey));
         if (trimQueries.Distinct().Count() != queries.Count)
         {
-            throw new BadRequestException(
-                [
+            return new(
+                Error: new BadRequestError(
+                    Message,
                     Messager
                         .Create<QueryParamRequest>("QueryParam")
                         .Property("FilterElement")
                         .Message(MessageType.Unique)
                         .Negative()
-                        .Build(),
-                ]
+                        .Build()
+                )
             );
         }
 

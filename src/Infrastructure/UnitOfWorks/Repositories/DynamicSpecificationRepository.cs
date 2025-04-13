@@ -40,11 +40,10 @@ public class DynamicSpecificationRepository<T>(IDbContext dbContext)
     )
     {
         string uniqueSort = queryParam.Sort.GetSort();
-        Search? search = queryParam.Search;
 
         return await ApplySpecification(spec)
             .Filter(queryParam.DynamicFilter)
-            .Search(search?.Keyword, search?.Targets)
+            .Search(queryParam.Keyword, queryParam.Targets)
             .Sort(uniqueSort)
             .ToListAsync(cancellationToken);
     }
@@ -58,11 +57,10 @@ public class DynamicSpecificationRepository<T>(IDbContext dbContext)
         where TResult : class
     {
         string uniqueSort = queryParam.Sort.GetSort();
-        Search? search = queryParam.Search;
 
         return await ApplySpecification(spec)
             .Filter(queryParam.DynamicFilter)
-            .Search(search?.Keyword, search?.Targets)
+            .Search(queryParam.Keyword, queryParam.Targets)
             .Sort(uniqueSort)
             .Select(mappingResult)
             .ToListAsync(cancellationToken);
@@ -76,11 +74,10 @@ public class DynamicSpecificationRepository<T>(IDbContext dbContext)
     )
     {
         string uniqueSort = queryParam.Sort.GetSort();
-        Search? search = queryParam.Search;
 
         return await ApplySpecification(spec)
             .Filter(queryParam.DynamicFilter)
-            .Search(search?.Keyword, search?.Targets)
+            .Search(queryParam.Keyword, queryParam.Targets)
             .Sort(uniqueSort)
             .Select(mappingResult)
             .ToPagedListAsync(queryParam.Page, queryParam.PageSize, cancellationToken);
@@ -96,12 +93,12 @@ public class DynamicSpecificationRepository<T>(IDbContext dbContext)
         where TResult : class =>
         await ApplySpecification(spec)
             .Filter(queryParam.DynamicFilter)
-            .Search(queryParam.Search?.Keyword, queryParam.Search?.Targets)
+            .Search(queryParam.Keyword, queryParam.Targets)
             .Select(mappingResult)
             .ToCursorPagedListAsync(
                 new CursorPaginationRequest(
-                    queryParam.Cursor?.Before,
-                    queryParam.Cursor?.After,
+                    queryParam.Before,
+                    queryParam.After,
                     queryParam.PageSize,
                     queryParam.Sort.GetDefaultSort(),
                     uniqueSort ?? nameof(BaseEntity.Id)

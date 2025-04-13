@@ -29,7 +29,7 @@ public class GetRoleDetailEndpoint : IEndpoint
     private async Task<Results<Ok<ApiResponse<RoleDetailResponse>>, ProblemHttpResult>> HandleAsync(
         [FromRoute] string id,
         [FromServices] ISender sender,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     )
     {
         var command = new GetRoleDetailQuery(Ulid.Parse(id));

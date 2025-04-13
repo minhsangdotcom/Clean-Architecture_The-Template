@@ -33,7 +33,7 @@ public class ListAuditLogEndpoint : IEndpoint
     > HandleAsync(
         ListAuditlogQuery request,
         [FromServices] ISender sender,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     )
     {
         var result = await sender.Send(request, cancellationToken);

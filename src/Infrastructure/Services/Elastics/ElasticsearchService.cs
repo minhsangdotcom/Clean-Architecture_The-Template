@@ -153,10 +153,10 @@ public class ElasticsearchService<T>(
         {
             queries.Add(filter);
         }
-        if (!string.IsNullOrWhiteSpace(request.Search?.Keyword))
+        if (!string.IsNullOrWhiteSpace(request.Keyword))
         {
             queries.Add(search =>
-                search.Search(request.Search.Keyword, searchProperties: request.Search?.Targets)
+                search.Search(request.Keyword, searchProperties: request.Targets)
             );
         }
 

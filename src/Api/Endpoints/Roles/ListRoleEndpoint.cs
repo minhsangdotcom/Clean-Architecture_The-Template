@@ -32,7 +32,7 @@ public class ListRoleEndpoint : IEndpoint
     > HandleAsync(
         ListRoleQuery request,
         [FromServices] ISender sender,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     )
     {
         var result = await sender.Send(request, cancellationToken);

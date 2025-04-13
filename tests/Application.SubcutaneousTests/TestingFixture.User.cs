@@ -47,8 +47,8 @@ public partial class TestingFixture
                     new UserClaimModel() { ClaimType = "test3", ClaimValue = "test3.value" },
                 ],
             };
-
-        CreateUserResponse createUserResponse = await SendAsync(command);
+        var result = await SendAsync(command);
+        CreateUserResponse createUserResponse = result.Value!;
 
         return new()
         {
