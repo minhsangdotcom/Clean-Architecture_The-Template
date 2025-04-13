@@ -1,28 +1,41 @@
-using Api.common.RouteResults;
+using Api.common.Documents;
+using Api.common.EndpointConfigurations;
+using Api.common.Results;
 using Api.common.Routers;
-using Application.Common.Auth;
 using Application.Features.Roles.Queries.List;
-using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
-using Infrastructure.Constants;
 using Mediator;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.Roles;
 
-public class ListRoleEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<ListRoleQuery>.WithActionResult<
-        ApiResponse<IEnumerable<ListRoleResponse>>
-    >
+public class ListRoleEndpoint : IEndpoint
 {
-    [HttpGet(Router.RoleRoute.Roles)]
-    [SwaggerOperation(Tags = [Router.RoleRoute.Tags], Summary = "List Role")]
-    [AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.role}")]
-    public override async Task<
-        ActionResult<ApiResponse<IEnumerable<ListRoleResponse>>>
+    public EndpointVersion Version => EndpointVersion.One;
+
+    public void MapEndpoint(IEndpointRouteBuilder app)
+    {
+        app.MapGet(Router.RoleRoute.Roles, HandleAsync)
+            .WithOpenApi(operation => new OpenApiOperation(operation)
+            {
+                Summary = "Get list of roles",
+                Description = "Returns a list of roles",
+                Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
+                Parameters = operation.AddDocs(),
+            });
+    }
+
+    private async Task<
+        Results<Ok<ApiResponse<IEnumerable<ListRoleResponse>>>, ProblemHttpResult>
     > HandleAsync(
-        [FromQuery] ListRoleQuery request,
-        CancellationToken cancellationToken = default
-    ) => this.Ok200(await sender.Send(request, cancellationToken));
+        ListRoleQuery request,
+        [FromServices] ISender sender,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await sender.Send(request, cancellationToken);
+        return result.ToResult();
+    }
 }

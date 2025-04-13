@@ -28,10 +28,9 @@ public static class Router
 
     public static class RoleRoute
     {
-        public const string Roles = $"{RoutePath.prefix}{nameof(Roles)}";
+        public const string Roles = nameof(Roles);
 
-        public const string GetUpdateDelete =
-            $"{RoutePath.prefix}{nameof(Roles)}/" + "{" + RoutePath.Id + "}";
+        public const string GetUpdateDelete = $"{nameof(Roles)}/" + "{" + RoutePath.Id + "}";
 
         public const string GetRouteName = $"{Roles}DetailEndpoint";
 
@@ -40,22 +39,22 @@ public static class Router
 
     public static class PermissionRoute
     {
-        public const string Permissions = $"{RoutePath.prefix}{nameof(Permissions)}";
+        public const string Permissions = nameof(Permissions);
 
         public const string Tags = $"{nameof(Permissions)} endpoint";
     }
 
     public static class AuditLogRoute
     {
-        public const string AuditLog = $"{RoutePath.prefix}{nameof(AuditLog)}";
+        public const string AuditLog = nameof(AuditLog);
         public const string Tags = $"{nameof(AuditLog)} endpoint";
     }
 
     public static class RegionRoute
     {
-        public const string Provinces = $"{RoutePath.prefix}{nameof(Provinces)}";
-        public const string Districts = $"{RoutePath.prefix}{nameof(Districts)}";
-        public const string Communes = $"{RoutePath.prefix}{nameof(Communes)}";
+        public const string Provinces = nameof(Provinces);
+        public const string Districts = nameof(Districts);
+        public const string Communes = nameof(Communes);
         public const string Tags = $"{nameof(RegionRoute)} endpoint";
     }
 }

@@ -1,26 +1,40 @@
-using Api.common.RouteResults;
+using Api.common.EndpointConfigurations;
+using Api.common.Results;
 using Api.common.Routers;
-using Application.Common.Auth;
 using Application.Features.Roles.Commands.Update;
-using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
-using Infrastructure.Constants;
 using Mediator;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.Roles;
 
-public class UpdateRoleEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<UpdateRoleCommand>.WithActionResult<
-        ApiResponse<UpdateRoleResponse>
-    >
+public class UpdateRoleEndpoint : IEndpoint
 {
-    [HttpPut(Router.RoleRoute.GetUpdateDelete)]
-    [SwaggerOperation(Tags = [Router.RoleRoute.Tags], Summary = "update Role")]
-    [AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.role}")]
-    public override async Task<ActionResult<ApiResponse<UpdateRoleResponse>>> HandleAsync(
-        UpdateRoleCommand request,
-        CancellationToken cancellationToken = default
-    ) => this.Ok200(await sender.Send(request, cancellationToken));
+    public EndpointVersion Version => EndpointVersion.One;
+
+    public void MapEndpoint(IEndpointRouteBuilder app)
+    {
+        app.MapPut(Router.RoleRoute.GetUpdateDelete, HandleAsync)
+            .WithOpenApi(operation => new OpenApiOperation(operation)
+            {
+                Summary = "Update existed Role",
+                Description = "Returns the role updated",
+                Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
+            })
+            .WithRequestValidation<UpdateRole>();
+    }
+
+    private async Task<Results<Ok<ApiResponse<UpdateRoleResponse>>, ProblemHttpResult>> HandleAsync(
+        [FromRoute] string id,
+        [FromBody] UpdateRole request,
+        [FromServices] ISender sender,
+        CancellationToken cancellationToken
+    )
+    {
+        var command = new UpdateRoleCommand() { RoleId = id.ToString(), Role = request };
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToResult();
+    }
 }

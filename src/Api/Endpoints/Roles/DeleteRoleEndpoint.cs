@@ -1,29 +1,37 @@
-using Api.common.RouteResults;
+using Api.common.EndpointConfigurations;
+using Api.common.Results;
 using Api.common.Routers;
-using Application.Common.Auth;
 using Application.Features.Roles.Commands.Delete;
-using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
-using Contracts.Constants;
-using Infrastructure.Constants;
 using Mediator;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.Roles;
 
-public class DeleteRoleEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<string>.WithActionResult<ApiResponse<string>>
+public class DeleteRoleEndpoint : IEndpoint
 {
-    [HttpDelete(Router.RoleRoute.GetUpdateDelete)]
-    [SwaggerOperation(Tags = [Router.RoleRoute.Tags], Summary = "Delete Role")]
-    [AuthorizeBy(permissions: $"{ActionPermission.delete}:{ObjectPermission.role}")]
-    public override async Task<ActionResult<ApiResponse<string>>> HandleAsync(
-        [FromRoute(Name = RoutePath.Id)] string roleId,
-        CancellationToken cancellationToken = default
+    public EndpointVersion Version => EndpointVersion.One;
+
+    public void MapEndpoint(IEndpointRouteBuilder app)
+    {
+        app.MapDelete(Router.RoleRoute.GetUpdateDelete, HandleAsync)
+            .WithOpenApi(operation => new OpenApiOperation(operation)
+            {
+                Summary = "Delete existed role by id",
+                Description = "Returns 204 status code",
+                Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
+            });
+    }
+
+    private async Task<Results<NoContent, ProblemHttpResult>> HandleAsync(
+        [FromRoute] string id,
+        [FromServices] ISender sender,
+        CancellationToken cancellationToken
     )
     {
-        await sender.Send(new DeleteRoleCommand(Ulid.Parse(roleId)), cancellationToken);
-        return this.NoContent204();
+        var result = await sender.Send(new DeleteRoleCommand(Ulid.Parse(id)), cancellationToken);
+        return result.ToNoContentResult();
     }
 }
