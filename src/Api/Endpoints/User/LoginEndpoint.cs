@@ -19,8 +19,8 @@ public class LoginEndpoint : IEndpoint
         app.MapPost(Router.UserRoute.Login, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Login user",
-                Description = "Returns login success with a pair of token",
+                Summary = "Login user 🔓",
+                Description = " Authenticates a user with valid credentials and returns an access",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             });
     }

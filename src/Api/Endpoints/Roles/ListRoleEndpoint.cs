@@ -20,8 +20,9 @@ public class ListRoleEndpoint : IEndpoint
         app.MapGet(Router.RoleRoute.Roles, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Get list of roles",
-                Description = "Returns a list of roles",
+                Summary = "Get list of roles 📋",
+                Description =
+                    "Retrieves a list of all available roles in the system, along with their basic information (e.g., name, assigned permissions, etc.).",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
                 Parameters = operation.AddDocs(),
             });

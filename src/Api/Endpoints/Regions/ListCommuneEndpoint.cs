@@ -22,8 +22,8 @@ public class ListCommuneEndpoint : IEndpoint
         app.MapGet(Router.RegionRoute.Communes, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Get list of communes",
-                Description = "Returns a list of communes in Vietnam.",
+                Summary = "Get list of communes 🗺️ 🇻🇳",
+                Description = "Retrieves a list of communes in Vietnam.",
                 Tags = [new OpenApiTag() { Name = Router.RegionRoute.Tags }],
                 Parameters = operation.AddDocs(),
             });

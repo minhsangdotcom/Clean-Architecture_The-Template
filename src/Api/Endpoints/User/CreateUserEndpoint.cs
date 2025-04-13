@@ -30,8 +30,8 @@ public class CreateUserEndpoint : IEndpoint
         app.MapPost(Router.UserRoute.Users, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Create user",
-                Description = "Returns a new user",
+                Summary = "Create user 🧑",
+                Description = "Creates a new user and returns the created user details.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
             .WithRequestValidation<CreateUserCommand>();

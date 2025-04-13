@@ -19,7 +19,7 @@ public class GetUserProfileEndpoint : IEndpoint
         app.MapGet(Router.UserRoute.Profile, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Get profile of existed user",
+                Summary = "Get current user's profile 🧑‍💼",
                 Description = "Returns user profile if found",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             });

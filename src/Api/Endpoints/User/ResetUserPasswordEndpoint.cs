@@ -18,8 +18,9 @@ public class ResetUserPasswordEndpoint : IEndpoint
         app.MapPut(Router.UserRoute.ResetPassowrd, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "reset user password",
-                Description = "Returns 204",
+                Summary = "Reset user password 🔄 🔑",
+                Description =
+                    "Resets a user's password using a valid token from a password reset request.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             });
     }

@@ -18,8 +18,8 @@ public class DeleteUserEndpoint : IEndpoint
         app.MapDelete(Router.UserRoute.GetUpdateDelete, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Delete existed user by id",
-                Description = "Returns 204 status code",
+                Summary = "Delete user 🗑️",
+                Description = "Deletes an existing user identified by their unique ID.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             });
     }

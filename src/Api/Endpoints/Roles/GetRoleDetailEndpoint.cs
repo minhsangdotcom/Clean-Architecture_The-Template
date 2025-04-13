@@ -20,8 +20,9 @@ public class GetRoleDetailEndpoint : IEndpoint
             .WithName(Router.RoleRoute.GetRouteName)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Get detail of existed Role",
-                Description = "Returns the role if found",
+                Summary = "Get role details 🔎",
+                Description =
+                    "Retrieves detailed information about a specific role, including its name and associated claims/permissions. Use this to review or audit the role’s configurations.",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             });
     }

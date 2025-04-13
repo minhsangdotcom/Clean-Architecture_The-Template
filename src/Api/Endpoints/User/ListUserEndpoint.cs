@@ -21,8 +21,8 @@ public class ListUserEndpoint : IEndpoint
         app.MapGet(Router.UserRoute.Users, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Get list of user",
-                Description = "Returns a list of user",
+                Summary = "Get list of user 📄",
+                Description = "Retrieves a list of all registered users in the system.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
                 Parameters = operation.AddDocs(),
             });

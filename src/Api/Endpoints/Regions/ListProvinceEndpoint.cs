@@ -22,8 +22,8 @@ public class ListProvinceEndpoint : IEndpoint
         app.MapGet(Router.RegionRoute.Provinces, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Get list of provinces",
-                Description = "Returns a list of provinces in Vietnam.",
+                Summary = "Get list of provinces 🗺️ 🇻🇳",
+                Description = "Retrieves a list of provinces in Vietnam.",
                 Tags = [new OpenApiTag() { Name = Router.RegionRoute.Tags }],
                 Parameters = operation.AddDocs(),
             });

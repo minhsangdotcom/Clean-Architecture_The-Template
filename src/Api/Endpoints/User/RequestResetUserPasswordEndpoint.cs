@@ -18,8 +18,9 @@ public class RequestResetUserPasswordEndpoint : IEndpoint
         app.MapPost(Router.UserRoute.RequestResetPassowrd, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Request to reset user password",
-                Description = "Returns 204",
+                Summary = "Request password reset 📧",
+                Description =
+                    "Sends a reset password email to the user based on their email address.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             });
     }

@@ -19,8 +19,9 @@ public class UpdateRoleEndpoint : IEndpoint
         app.MapPut(Router.RoleRoute.GetUpdateDelete, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Update existed Role",
-                Description = "Returns the role updated",
+                Summary = "Update role 📝",
+                Description =
+                    "Updates an existing role's information. You can modify the name and add or remove claims/permissions. This endpoint helps ensure your authorization model stays current with your users' needs.",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             })
             .WithRequestValidation<UpdateRole>();

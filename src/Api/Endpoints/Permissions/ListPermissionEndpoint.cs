@@ -20,8 +20,8 @@ public class ListPermissionEndpoint : IEndpoint
         app.MapGet(Router.PermissionRoute.Permissions, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Get Permissions in system",
-                Description = "Returns a list of permissions in the system.",
+                Summary = "Get list of Permissions in Application 📄",
+                Description = "Retrieves a list of permissions in Application.",
                 Tags = [new OpenApiTag() { Name = Router.PermissionRoute.Tags }],
                 Parameters = operation.AddDocs(),
             });

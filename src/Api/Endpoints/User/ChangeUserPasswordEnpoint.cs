@@ -19,8 +19,9 @@ public class ChangeUserPasswordEnpoint : IEndpoint
         app.MapPut(Router.UserRoute.ChangePassword, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Change user password",
-                Description = "Returns 204",
+                Summary = "Change user password 🔑",
+                Description =
+                    "Allows an authenticated user to change their current password by providing the old and new password.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             });
     }

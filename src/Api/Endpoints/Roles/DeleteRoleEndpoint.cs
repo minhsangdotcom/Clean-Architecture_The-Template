@@ -19,8 +19,9 @@ public class DeleteRoleEndpoint : IEndpoint
         app.MapDelete(Router.RoleRoute.GetUpdateDelete, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Delete existed role by id",
-                Description = "Returns 204 status code",
+                Summary = " Delete role 🗑️",
+                Description =
+                    "Deletes an existing role by its unique ID. Once deleted, the role and its associated claims/permission will no longer be available",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             });
     }

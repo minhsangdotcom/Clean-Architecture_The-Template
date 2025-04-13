@@ -4,6 +4,7 @@ using Api.common.Routers;
 using Api.Converters;
 using Api.Extensions;
 using Application;
+using Cysharp.Serialization.Json;
 using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.Data;
@@ -28,7 +29,7 @@ services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new DatetimeConverter());
     options.SerializerOptions.Converters.Add(new DateTimeOffsetConvert());
-    options.SerializerOptions.Converters.Add(new Cysharp.Serialization.Json.UlidJsonConverter());
+    options.SerializerOptions.Converters.Add(new UlidJsonConverter());
 });
 
 services.AddAuthorization();

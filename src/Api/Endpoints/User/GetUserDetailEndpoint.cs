@@ -20,8 +20,8 @@ public class GetUserDetailEndpoint : IEndpoint
             .WithName(Router.UserRoute.GetRouteName)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Get detail of existed user",
-                Description = "Returns the user if found",
+                Summary = "Get user by ID 🧾",
+                Description = "Retrieves detailed information of a user based on their unique ID.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             });
     }

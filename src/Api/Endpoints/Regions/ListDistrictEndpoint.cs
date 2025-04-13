@@ -22,8 +22,8 @@ public class ListDistrictEndpoint : IEndpoint
         app.MapGet(Router.RegionRoute.Districts, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Get list of District",
-                Description = "Returns a list of districts in Vietnam.",
+                Summary = "Get list of districts 🗺️ 🇻🇳",
+                Description = "Retrieves a list of districts in Vietnam.",
                 Tags = [new OpenApiTag() { Name = Router.RegionRoute.Tags }],
                 Parameters = operation.AddDocs(),
             });

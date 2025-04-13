@@ -19,8 +19,8 @@ public class UpdateUserProfileEndpoint : IEndpoint
         app.MapPut(Router.UserRoute.Profile, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Update profile of user",
-                Description = "Returns the user profile",
+                Summary = "Update user profile 🛠️ 👨 📋",
+                Description = "Updates profile information for the currently authenticated user.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
             .WithRequestValidation<UpdateUserProfileCommand>();

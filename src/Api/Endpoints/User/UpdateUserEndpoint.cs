@@ -19,8 +19,8 @@ public class UpdateUserEndpoint : IEndpoint
         app.MapPut(Router.UserRoute.GetUpdateDelete, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
-                Summary = "Update existed user",
-                Description = "Returns the user updated",
+                Summary = " Update user ✏️ 🧑‍💻",
+                Description = "Updates the information of an existing user identified by their ID.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
             .WithRequestValidation<UpdateUser>();
