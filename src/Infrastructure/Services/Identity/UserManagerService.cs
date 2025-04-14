@@ -5,7 +5,9 @@ using Ardalis.GuardClauses;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
+using Infrastructure.Constants;
 using Microsoft.EntityFrameworkCore;
+using SharedKernel.Constants;
 
 namespace Infrastructure.Services.Identity;
 
@@ -317,12 +319,31 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
         IEnumerable<KeyValuePair<string, string>> claims
     )
     {
-        List<UserClaim> userClaims = await userContext
-            .Where(x => x.Id == id)
-            .SelectMany(x => x.UserClaims!)
+        List<UserClaim> userClaims = await UserClaims
+            .Where(x => x.UserId == id && x.ClaimType == ClaimTypes.Permission)
             .ToListAsync();
 
-        return userClaims.Any(x => claims.Contains(new(x.ClaimType, x.ClaimValue)));
+        return userClaims.Exists(x => claims.Contains(new(x.ClaimType, x.ClaimValue)));
+    }
+
+    //! benchmark
+    public async Task<bool> HasUserPermissionAsync(Ulid id, IEnumerable<string> claims)
+    {
+        List<string> permissions = await UserClaims
+            .Where(x => x.UserId == id && x.ClaimType == ClaimTypes.Permission)
+            .Select(x => x.ClaimValue)
+            .ToListAsync();
+
+        var claimsSet = new HashSet<string>(claims);
+        if (permissions.Any(claimsSet.Contains))
+        {
+            return true;
+        }
+
+        var permissionsSet = new HashSet<string>(permissions);
+        return Credential
+            .permissions[typeof(Permission).FullName!]
+            .Any(x => permissionsSet.Contains(x.Key) && x.Value.Exists(p => claimsSet.Contains(p)));
     }
 
     public async Task<bool> HasUserClaimsAndRolesAsync(

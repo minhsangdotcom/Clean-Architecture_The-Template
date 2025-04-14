@@ -73,12 +73,9 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
 
         if (authorizeModel.Permissions?.Count > 0)
         {
-            bool hasPermission = await userManagerService.HasUserClaimsAsync(
+            bool hasPermission = await userManagerService.HasUserPermissionAsync(
                 userId.Value,
-                authorizeModel.Permissions.Select(permission => new KeyValuePair<string, string>(
-                    ClaimTypes.Permission,
-                    permission
-                ))
+                authorizeModel.Permissions
             );
             SuccessOrFailiureHandler(context, requirement, hasPermission);
 

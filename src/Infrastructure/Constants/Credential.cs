@@ -14,7 +14,7 @@ public static class Credential
     public const string ADMIN_ROLE_ID = "01J79JQZRWAKCTCQV64VYKMZ56";
     public const string MANAGER_ROLE_ID = "01JB19HK30BGYJBZGNETQY8905";
 
-    private static readonly Dictionary<string, Dictionary<string, string[]>> permissions =
+    public static readonly Dictionary<string, Dictionary<string, List<string>>> permissions =
         new()
         {
             { nameof(User), Permission.CreatebasicPermissions(PermissionResource.User) },
@@ -42,7 +42,7 @@ public static class Permission
     public static string Generate(string action, string resource) =>
         $"{action.ToSnakeCase()}:{resource.ToSnakeCase()}";
 
-    public static Dictionary<string, string[]> CreatebasicPermissions(string resource) =>
+    public static Dictionary<string, List<string>> CreatebasicPermissions(string resource) =>
         new()
         {
             { Generate(PermissionAction.List, resource), [] },

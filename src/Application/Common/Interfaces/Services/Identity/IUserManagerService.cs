@@ -40,6 +40,8 @@ public interface IUserManagerService
 
     Task<bool> HasUserClaimsAsync(Ulid id, IEnumerable<KeyValuePair<string, string>> claims);
 
+    Task<bool> HasUserPermissionAsync(Ulid id, IEnumerable<string> claims);
+
     Task<bool> HasUserClaimsAndRolesAsync(
         Ulid id,
         IEnumerable<string> roles,
