@@ -10,8 +10,6 @@ using Infrastructure;
 using Infrastructure.Data;
 using Infrastructure.Services.Hangfire;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.Hosting.Server.Features;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
@@ -82,32 +80,13 @@ try
         app.UseSwagger();
         app.UseSwaggerUI(configs =>
         {
-            configs.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            configs.SwaggerEndpoint("/swagger/v1/swagger.json", "The Template API V1");
             configs.RoutePrefix = routeRefix;
             configs.ConfigObject.PersistAuthorization = true;
             configs.DocExpansion(DocExpansion.None);
         });
-        app.Lifetime.ApplicationStarted.Register(() =>
-        {
-            var server = app.Services.GetRequiredService<IServer>();
-            var addresses = server.Features.Get<IServerAddressesFeature>()?.Addresses.ToArray();
 
-            if (addresses != null && addresses.Length > 0)
-            {
-                string? url = addresses?[0];
-                string? renewUrl =
-                    url?.Contains("0.0.0.0") == true ? url.Replace("0.0.0.0", "localhost") : url;
-                Log.Logger.Information("Application is running at: {Url}", renewUrl);
-                Log.Logger.Information(
-                    "Swagger UI is running at: {Url}",
-                    $"{renewUrl}/{routeRefix}"
-                );
-                Log.Logger.Information(
-                    "Application health check is running at: {Url}",
-                    $"{renewUrl}{healthCheckPath}"
-                );
-            }
-        });
+        app.AddLog(Log.Logger, routeRefix, healthCheckPath);
     }
 
     app.UseStatusCodePages();
