@@ -194,7 +194,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
                     ClaimValue = roleClaim.ClaimValue,
                     RoleClaimId = roleClaim.Id,
                     UserId = userId,
-                    Type = KindaUserClaimType.Custom,
+                    Type = UserClaimType.Custom,
                 }
             );
             userClaims.AddRange(additionUserClaims);

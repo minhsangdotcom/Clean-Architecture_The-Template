@@ -6,7 +6,7 @@ using FluentConfiguration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.Services.Elastics;
+namespace Infrastructure.Services.ElasticSeach;
 
 public static class ElasticSearchExtension
 {

@@ -175,10 +175,7 @@ public class User : AggregateRoot
             return;
         }
 
-        UserClaim[] defaultClaims =
-        [
-            .. UserClaims.Where(x => x.Type == KindaUserClaimType.Default),
-        ];
+        UserClaim[] defaultClaims = [.. UserClaims.Where(x => x.Type == UserClaimType.Default)];
         Span<UserClaim> currentUserClaims = defaultClaims.AsSpan();
 
         List<UserClaim> userClaims = GetUserClaims();

@@ -1,4 +1,4 @@
-namespace Infrastructure.Services.Hangfires;
+namespace Infrastructure.Services.Hangfire;
 
 public class HangfirePostgreStorageOptions
 {

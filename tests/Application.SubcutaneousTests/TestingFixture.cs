@@ -6,6 +6,7 @@ using Domain.Aggregates.Users;
 using Infrastructure.Constants;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
+using SharedKernel.Constants;
 
 namespace Application.SubcutaneousTests;
 
@@ -91,8 +92,8 @@ public partial class TestingFixture : IAsyncLifetime
                 RoleClaims = Credential
                     .ADMIN_CLAIMS.Select(x => new RoleClaim()
                     {
-                        ClaimType = x.Key,
-                        ClaimValue = x.Value,
+                        ClaimType = ClaimTypes.Permission,
+                        ClaimValue = x,
                     })
                     .ToArray(),
             };

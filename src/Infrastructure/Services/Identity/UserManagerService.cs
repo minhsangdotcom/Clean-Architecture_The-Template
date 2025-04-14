@@ -99,7 +99,7 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
             ClaimType = x.ClaimType,
             ClaimValue = x.ClaimValue,
             RoleClaimId = x.Id,
-            Type = KindaUserClaimType.Custom,
+            Type = UserClaimType.Custom,
         });
         ICollection<UserClaim> currentUserClaims = currentUser.UserClaims!;
 
@@ -238,7 +238,7 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
         );
 
         IEnumerable<UserClaim> customUserClaims = currentUser.UserClaims!.Where(x =>
-            x.Type == KindaUserClaimType.Custom
+            x.Type == UserClaimType.Custom
         );
         IEnumerable<UserClaim> claimsToProcess = claims;
 
@@ -278,7 +278,7 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
         );
 
         IEnumerable<UserClaim> currentUserClaims = currentUser.UserClaims!.Where(p =>
-            p.Type == KindaUserClaimType.Custom
+            p.Type == UserClaimType.Custom
         );
         if (claimIds.Any(x => !currentUserClaims.Any(p => p.Id == x)))
         {

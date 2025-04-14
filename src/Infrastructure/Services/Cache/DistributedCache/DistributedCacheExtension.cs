@@ -2,7 +2,7 @@ using Application.Common.Interfaces.Services.Cache;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.Services.DistributedCache;
+namespace Infrastructure.Services.Cache.DistributedCache;
 
 public static class DistributedCacheExtension
 {

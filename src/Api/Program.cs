@@ -8,7 +8,7 @@ using Cysharp.Serialization.Json;
 using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.Data;
-using Infrastructure.Services.Hangfires;
+using Infrastructure.Services.Hangfire;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;

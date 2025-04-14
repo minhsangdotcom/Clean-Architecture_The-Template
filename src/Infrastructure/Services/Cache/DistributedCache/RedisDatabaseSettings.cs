@@ -1,4 +1,4 @@
-namespace Infrastructure.Services.DistributedCache;
+namespace Infrastructure.Services.Cache.DistributedCache;
 
 public class RedisDatabaseSettings
 {

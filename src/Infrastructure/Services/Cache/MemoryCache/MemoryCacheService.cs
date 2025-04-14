@@ -3,7 +3,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Serilog;
 
-namespace Infrastructure.Services.MemoryCache;
+namespace Infrastructure.Services.Cache.MemoryCache;
 
 public class MemoryCacheService : IMemoryCacheService
 {

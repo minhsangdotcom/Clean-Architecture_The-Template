@@ -2,7 +2,7 @@ using Application.Common.Interfaces.Services.Cache;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.Services.MemoryCache;
+namespace Infrastructure.Services.Cache.MemoryCache;
 
 public static class MemoryCacheExtension
 {

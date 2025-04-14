@@ -68,7 +68,7 @@ public partial class TestingFixture
                 UserClaims =
                 [
                     .. createUserResponse
-                        .UserClaims!.Where(x => x.Type == KindaUserClaimType.Custom)
+                        .UserClaims!.Where(x => x.Type == UserClaimType.Custom)
                         .Select(x => new UserClaimModel()
                         {
                             ClaimType = x.ClaimType,

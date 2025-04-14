@@ -3,15 +3,16 @@ using Hangfire.Console;
 using Hangfire.Console.Extensions;
 using Hangfire.PostgreSql;
 using HangfireBasicAuthenticationFilter;
+using Infrastructure.Services.Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
-namespace Infrastructure.Services.Hangfires;
+namespace Infrastructure.Services.Hangfire;
 
-public static class HangfireRegisterExtension
+public static class HangfireExtension
 {
     public static IServiceCollection AddHangfireConfiguration(
         this IServiceCollection services,

@@ -3,10 +3,11 @@ using CaseConverter;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using FluentConfiguration.Configurations;
+using Infrastructure.Services.ElasticSeach;
 using SharedKernel.Extensions.Reflections;
 using SharedKernel.Models;
 
-namespace Infrastructure.Services.Elastics;
+namespace Infrastructure.Services.ElasticSeach;
 
 public static class ElasticFunctionalityHelper
 {

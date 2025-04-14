@@ -39,7 +39,7 @@ public static class UpdateUserMapping
 
     public static List<UserClaim> ToListUserClaim(
         this List<UserClaimModel> userClaims,
-        KindaUserClaimType claimType,
+        UserClaimType claimType,
         Ulid userId
     )
     {

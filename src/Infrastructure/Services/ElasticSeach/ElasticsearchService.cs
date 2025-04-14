@@ -9,7 +9,7 @@ using FluentConfiguration.Configurations;
 using Microsoft.Extensions.Options;
 using SharedKernel.Models;
 
-namespace Infrastructure.Services.Elastics;
+namespace Infrastructure.Services.ElasticSeach;
 
 public class ElasticsearchService<T>(
     ElasticsearchClient elasticClient,
@@ -54,7 +54,7 @@ public class ElasticsearchService<T>(
 
     public async Task DeleteAsync(T entity)
     {
-        await elasticClient.DeleteAsync<T>(
+        await elasticClient.DeleteAsync(
             entity,
             i => i.Index(indexName).Refresh(Refresh.WaitFor)
         );

@@ -7,6 +7,7 @@ using Domain.Aggregates.Users;
 using FluentAssertions;
 using Infrastructure.Constants;
 using Microsoft.AspNetCore.Http;
+using SharedKernel.Constants;
 
 namespace Application.SubcutaneousTests.Users.Create;
 
@@ -101,8 +102,8 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
                 Credential
                     .MANAGER_CLAIMS.Select(x => new UserClaimModel()
                     {
-                        ClaimType = x.Key,
-                        ClaimValue = x.Value,
+                        ClaimType = ClaimTypes.Permission,
+                        ClaimValue = x,
                     })
                     .ToList()
             )

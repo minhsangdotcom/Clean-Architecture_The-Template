@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace Infrastructure.Services.Hangfires;
+namespace Infrastructure.Services.Hangfire;
 
 public class ValidateHangfireStorage : IValidateOptions<HangfireStorageSettings>
 {

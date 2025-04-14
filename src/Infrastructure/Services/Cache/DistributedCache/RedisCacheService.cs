@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using SharedKernel.Extensions;
 using StackExchange.Redis;
 
-namespace Infrastructure.Services.DistributedCache;
+namespace Infrastructure.Services.Cache.DistributedCache;
 
 public class RedisCacheService(IOptions<RedisDatabaseSettings> options) : IDistributedCacheService
 {

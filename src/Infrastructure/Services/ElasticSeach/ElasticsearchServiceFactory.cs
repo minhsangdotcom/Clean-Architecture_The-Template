@@ -2,7 +2,7 @@ using Application.Common.Interfaces.Services.Elastics;
 using Elastic.Clients.Elasticsearch;
 using Microsoft.Extensions.Options;
 
-namespace Infrastructure.Services.Elastics;
+namespace Infrastructure.Services.ElasticSeach;
 
 public class ElasticsearchServiceFactory(
     ElasticsearchClient elasticClient,

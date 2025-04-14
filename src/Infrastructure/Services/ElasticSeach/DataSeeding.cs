@@ -4,7 +4,7 @@ using Domain.Aggregates.Users.Enums;
 using Elastic.Clients.Elasticsearch;
 using FluentConfiguration.Configurations;
 
-namespace Infrastructure.Services.Elastics;
+namespace Infrastructure.Services.ElasticSeach;
 
 public static class DataSeeding
 {

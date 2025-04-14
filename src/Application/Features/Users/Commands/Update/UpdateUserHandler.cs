@@ -77,8 +77,7 @@ public class UpdateUserHandler(
 
             //* update custom claims of user like permissions ...
             List<UserClaim> customUserClaims =
-                command.UpdateData.UserClaims?.ToListUserClaim(KindaUserClaimType.Custom, user.Id)
-                ?? [];
+                command.UpdateData.UserClaims?.ToListUserClaim(UserClaimType.Custom, user.Id) ?? [];
             await userManagerService.UpdateAsync(user, command.UpdateData.Roles!, customUserClaims);
 
             await unitOfWork.CommitAsync(cancellationToken);

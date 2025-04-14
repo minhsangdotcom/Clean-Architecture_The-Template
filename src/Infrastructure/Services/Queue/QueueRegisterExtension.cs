@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.Services.Queue;
-using Infrastructure.Services.DistributedCache;
+using Infrastructure.Services.Cache.DistributedCache;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

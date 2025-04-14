@@ -1,6 +1,6 @@
 namespace Domain.Aggregates.Users.Enums;
 
-public enum KindaUserClaimType
+public enum UserClaimType
 {
     Default = 1,
 
