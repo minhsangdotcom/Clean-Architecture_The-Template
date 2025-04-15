@@ -42,7 +42,7 @@ public class DynamicSpecificationRepository<T>(IDbContext dbContext)
         string uniqueSort = queryParam.Sort.GetSort();
 
         return await ApplySpecification(spec)
-            .Filter(queryParam.DynamicFilter)
+            .Filter(queryParam.Filter)
             .Search(queryParam.Keyword, queryParam.Targets)
             .Sort(uniqueSort)
             .ToListAsync(cancellationToken);
@@ -59,7 +59,7 @@ public class DynamicSpecificationRepository<T>(IDbContext dbContext)
         string uniqueSort = queryParam.Sort.GetSort();
 
         return await ApplySpecification(spec)
-            .Filter(queryParam.DynamicFilter)
+            .Filter(queryParam.Filter)
             .Search(queryParam.Keyword, queryParam.Targets)
             .Sort(uniqueSort)
             .Select(mappingResult)
@@ -76,7 +76,7 @@ public class DynamicSpecificationRepository<T>(IDbContext dbContext)
         string uniqueSort = queryParam.Sort.GetSort();
 
         return await ApplySpecification(spec)
-            .Filter(queryParam.DynamicFilter)
+            .Filter(queryParam.Filter)
             .Search(queryParam.Keyword, queryParam.Targets)
             .Sort(uniqueSort)
             .Select(mappingResult)
@@ -92,7 +92,7 @@ public class DynamicSpecificationRepository<T>(IDbContext dbContext)
     )
         where TResult : class =>
         await ApplySpecification(spec)
-            .Filter(queryParam.DynamicFilter)
+            .Filter(queryParam.Filter)
             .Search(queryParam.Keyword, queryParam.Targets)
             .Select(mappingResult)
             .ToCursorPagedListAsync(

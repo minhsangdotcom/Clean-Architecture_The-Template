@@ -35,9 +35,7 @@ public class QueryParamRequest
     /// </summary>
     public string? Sort { get; set; }
 
-    public Dictionary<string, string>? Filter { get; set; } = null;
-
-    public object? DynamicFilter { get; set; } = null;
+    public object? Filter { get; set; } = null;
 
     public string[]? OriginFilters { get; set; }
 }
@@ -51,8 +49,15 @@ public static class QueryParamRequestExtension
         string? after = context.Request.Query["after"];
         string? keyword = context.Request.Query["keyword"];
         string? sort = context.Request.Query["sort"];
-        _ = int.TryParse(context.Request.Query["page"], out var page);
-        _ = int.TryParse(context.Request.Query["pageSize"], out var pageSize);
+        if (!int.TryParse(context.Request.Query["page"], out int page))
+        {
+            page = 1;
+        }
+        if (!int.TryParse(context.Request.Query["pageSize"], out int pageSize))
+        {
+            pageSize = 100;
+        }
+
         string[] queryString = GetQueryParams(context);
         var query = context.Request.Query["targets"];
         var targets = query.Count > 0 ? query.ToList() : null;

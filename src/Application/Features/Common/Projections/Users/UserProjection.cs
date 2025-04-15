@@ -25,13 +25,15 @@ public class UserProjection : BaseResponse
 
     public Gender? Gender { get; set; }
 
-    public ProvinceProjection? Province { get; set; }
+    // public ProvinceProjection? Province { get; set; }
 
-    public DistrictProjection? District { get; set; }
+    // public DistrictProjection? District { get; set; }
 
-    public CommuneProjection? Commune { get; set; }
+    // public CommuneProjection? Commune { get; set; }
 
-    public string? Street { get; set; }
+    public string? Address { get; set; }
+
+    //public string? Street { get; set; }
 
     [File]
     public string? Avatar { get; set; }
@@ -55,9 +57,10 @@ public class UserProjection : BaseResponse
         Gender = user.Gender;
         Avatar = user.Avatar;
         Status = user.Status;
-        Street = user.Address?.Street;
-        Province = user.Address?.Province?.ToProvinceProjection();
-        District = user.Address?.District?.ToDistrictProjection();
-        Commune = user.Address?.Commune?.ToCommuneProjection();
+        //Street = user.Address?.Street;
+        // Province = user.Address?.Province?.ToProvinceProjection();
+        // District = user.Address?.District?.ToDistrictProjection();
+        // Commune = user.Address?.Commune?.ToCommuneProjection();
+        Address = user.Address?.ToString();
     }
 }

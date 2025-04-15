@@ -60,10 +60,10 @@ public partial class TestingFixture
                 Email = createUserResponse.Email,
                 DayOfBirth = createUserResponse.DayOfBirth,
                 PhoneNumber = createUserResponse.PhoneNumber,
-                ProvinceId = createUserResponse.Province!.Id,
-                DistrictId = createUserResponse.District!.Id,
-                CommuneId = createUserResponse.Commune!.Id,
-                Street = createUserResponse.Street,
+                // ProvinceId = createUserResponse.Province!.Id,
+                // DistrictId = createUserResponse.District!.Id,
+                // CommuneId = createUserResponse.Commune!.Id,
+                //Street = createUserResponse.Street,
                 Roles = [.. createUserResponse.Roles!.Select(x => x.Id)],
                 UserClaims =
                 [

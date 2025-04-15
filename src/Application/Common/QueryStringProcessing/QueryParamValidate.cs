@@ -272,11 +272,11 @@ public static partial class QueryParamValidate
             );
         }
 
-        request.DynamicFilter = StringExtension.Parse(queries);
+        request.Filter = StringExtension.Parse(queries);
 
         Log.Information(
             "Filter has been bound {filter}",
-            SerializerExtension.Serialize(request.DynamicFilter!).StringJson
+            SerializerExtension.Serialize(request.Filter!).StringJson
         );
 
         return new(request);
