@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Application.Common.Extensions;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.Binds;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
 using Domain.Common;

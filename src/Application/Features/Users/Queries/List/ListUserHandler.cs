@@ -1,4 +1,3 @@
-using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.QueryStringProcessing;
 using Contracts.ApiWrapper;

@@ -1,5 +1,5 @@
 using Ardalis.GuardClauses;
-using Domain.Common;
+using SharedKernel.Common;
 
 namespace Domain.Aggregates.Users.ValueObjects;
 
