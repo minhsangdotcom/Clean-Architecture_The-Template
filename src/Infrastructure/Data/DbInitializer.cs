@@ -178,11 +178,11 @@ public class DbInitializer
                 "minhsang.1mil@gmail.com",
                 "0925123123",
                 new Address(
-                    region.Province!.Name,
+                    region.Province!.FullName,
                     region.Province!.Id,
-                    region.District!.Name,
+                    region.District!.FullName,
                     region.District!.Id,
-                    region.Commune?.Name,
+                    region.Commune?.FullName,
                     region.Commune?.Id,
                     "132 Ham Nghi"
                 )
@@ -205,11 +205,11 @@ public class DbInitializer
                 "john.doe@example.com",
                 "0803456789",
                 new Address(
-                    johnDoeRegion.Province!.Name,
+                    johnDoeRegion.Province!.FullName,
                     johnDoeRegion.Province!.Id,
-                    johnDoeRegion.District!.Name,
+                    johnDoeRegion.District!.FullName,
                     johnDoeRegion.District!.Id,
-                    johnDoeRegion.Commune?.Name,
+                    johnDoeRegion.Commune?.FullName,
                     johnDoeRegion.Commune?.Id,
                     "136/9 Le Thanh Ton"
                 )

@@ -41,11 +41,11 @@ public class CreateUserHandler(
         //* creating new user address
         mappingUser.UpdateAddress(
             new(
-                province!.Name,
+                province!.FullName,
                 province.Id,
-                district!.Name,
+                district!.FullName,
                 district.Id,
-                commune?.Name,
+                commune?.FullName,
                 commune?.Id,
                 command.Street!
             )

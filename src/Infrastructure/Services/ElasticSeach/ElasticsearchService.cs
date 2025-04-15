@@ -54,10 +54,7 @@ public class ElasticsearchService<T>(
 
     public async Task DeleteAsync(T entity)
     {
-        await elasticClient.DeleteAsync(
-            entity,
-            i => i.Index(indexName).Refresh(Refresh.WaitFor)
-        );
+        await elasticClient.DeleteAsync(entity, i => i.Index(indexName).Refresh(Refresh.WaitFor));
     }
 
     public async Task DeleteByQueryAsync(Action<QueryDescriptor<T>> querySelector)

@@ -1,10 +1,8 @@
+using System.Text.Json.Serialization;
 using Application.Common.Security;
-using Application.Features.Common.Mapping.Regions;
-using Application.Features.Common.Projections.Regions;
-using Application.Features.Regions.Queries.List.Districts;
-using Application.Features.Regions.Queries.List.Provinces;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
+using Domain.Aggregates.Users.ValueObjects;
 using SharedKernel.Models;
 
 namespace Application.Features.Common.Projections.Users;
@@ -25,15 +23,10 @@ public class UserProjection : BaseResponse
 
     public Gender? Gender { get; set; }
 
-    // public ProvinceProjection? Province { get; set; }
-
-    // public DistrictProjection? District { get; set; }
-
-    // public CommuneProjection? Commune { get; set; }
-
     public string? Address { get; set; }
 
-    //public string? Street { get; set; }
+    [JsonIgnore]
+    public Address? UserAddress { get; set; }
 
     [File]
     public string? Avatar { get; set; }
@@ -57,10 +50,7 @@ public class UserProjection : BaseResponse
         Gender = user.Gender;
         Avatar = user.Avatar;
         Status = user.Status;
-        //Street = user.Address?.Street;
-        // Province = user.Address?.Province?.ToProvinceProjection();
-        // District = user.Address?.District?.ToDistrictProjection();
-        // Commune = user.Address?.Commune?.ToCommuneProjection();
+        UserAddress = user.Address;
         Address = user.Address?.ToString();
     }
 }

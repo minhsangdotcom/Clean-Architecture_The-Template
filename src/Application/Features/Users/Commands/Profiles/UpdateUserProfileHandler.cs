@@ -1,5 +1,4 @@
 using Application.Common.Errors;
-using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -62,11 +61,11 @@ public class UpdateUserProfileHandler(
         }
         user.UpdateAddress(
             new(
-                province!.Name,
+                province!.FullName,
                 province.Id,
-                district!.Name,
+                district!.FullName,
                 district.Id,
-                commune?.Name,
+                commune?.FullName,
                 commune?.Id,
                 command.Street!
             )

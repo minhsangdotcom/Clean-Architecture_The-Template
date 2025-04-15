@@ -62,11 +62,11 @@ public class UpdateUserHandler(
         //* replace address
         user.UpdateAddress(
             new(
-                province!.Name,
+                province!.FullName,
                 province.Id,
-                district!.Name,
+                district!.FullName,
                 district.Id,
-                commune?.Name,
+                commune?.FullName,
                 commune?.Id,
                 command.UpdateData.Street!
             )
