@@ -56,11 +56,19 @@ public static class Permission
             },
             {
                 Generate(PermissionAction.Update, resource),
-                [Generate(PermissionAction.Detail, resource)]
+
+                [
+                    Generate(PermissionAction.Detail, resource),
+                    Generate(PermissionAction.List, resource),
+                ]
             },
             {
                 Generate(PermissionAction.Delete, resource),
-                [Generate(PermissionAction.Detail, resource)]
+
+                [
+                    Generate(PermissionAction.Detail, resource),
+                    Generate(PermissionAction.List, resource),
+                ]
             },
         };
 }
