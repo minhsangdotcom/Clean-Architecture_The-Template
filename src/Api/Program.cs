@@ -74,7 +74,7 @@ try
 
     app.UseHangfireDashboard(configuration);
 
-    const string routeRefix = "docs";
+    string routeRefix = configuration.GetSection("SwaggerRoutePrefix").Get<string>() ?? "docs";
     if (isDevelopment)
     {
         app.UseSwagger();
@@ -85,7 +85,6 @@ try
             configs.ConfigObject.PersistAuthorization = true;
             configs.DocExpansion(DocExpansion.None);
         });
-
         app.AddLog(Log.Logger, routeRefix, healthCheckPath);
     }
 
