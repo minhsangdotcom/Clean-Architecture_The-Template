@@ -39,7 +39,17 @@ public class CreateUserHandler(
         }
 
         //* creating new user address
-        mappingUser.UpdateAddress(new(province!, district!, commune, command.Street!));
+        mappingUser.UpdateAddress(
+            new(
+                province!.Name,
+                province.Id,
+                district!.Name,
+                district.Id,
+                commune?.Name,
+                commune?.Id,
+                command.Street!
+            )
+        );
 
         //* adding user avatar
         string? key = mediaUpdateService.GetKey(command.Avatar);

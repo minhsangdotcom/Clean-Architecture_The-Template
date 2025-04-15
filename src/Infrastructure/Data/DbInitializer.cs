@@ -167,7 +167,7 @@ public class DbInitializer
         Ulid managerRoleId
     )
     {
-        GetRegionResult region = await GetRegionAsync(unitOfWork, "79", "783", "27543");
+        GetRegionResult region = await GetRegionAsync(unitOfWork, "79", "783", "27535");
 
         User chloe =
             new(
@@ -177,7 +177,15 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "minhsang.1mil@gmail.com",
                 "0925123123",
-                new Address(region.Province!, region.District!, region.Commune, "132 Ham Nghi")
+                new Address(
+                    region.Province!.Name,
+                    region.Province!.Id,
+                    region.District!.Name,
+                    region.District!.Id,
+                    region.Commune?.Name,
+                    region.Commune?.Id,
+                    "132 Ham Nghi"
+                )
             )
             {
                 DayOfBirth = new DateTime(1990, 10, 1),
@@ -197,9 +205,12 @@ public class DbInitializer
                 "john.doe@example.com",
                 "0803456789",
                 new Address(
-                    johnDoeRegion.Province!,
-                    johnDoeRegion.District!,
-                    johnDoeRegion.Commune,
+                    johnDoeRegion.Province!.Name,
+                    johnDoeRegion.Province!.Id,
+                    johnDoeRegion.District!.Name,
+                    johnDoeRegion.District!.Id,
+                    johnDoeRegion.Commune?.Name,
+                    johnDoeRegion.Commune?.Id,
                     "136/9 Le Thanh Ton"
                 )
             )

@@ -60,7 +60,17 @@ public class UpdateUserProfileHandler(
                 .Repository<Commune>()
                 .FindByIdAsync(command.CommuneId.Value, cancellationToken);
         }
-        user.UpdateAddress(new(province!, district!, commune, command.Street!));
+        user.UpdateAddress(
+            new(
+                province!.Name,
+                province.Id,
+                district!.Name,
+                district.Id,
+                commune?.Name,
+                commune?.Id,
+                command.Street!
+            )
+        );
 
         string? key = avatarUpdate.GetKey(avatar);
         user.Avatar = await avatarUpdate.UploadAvatarAsync(avatar, key);

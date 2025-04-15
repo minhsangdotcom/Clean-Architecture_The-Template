@@ -21,9 +21,14 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             {
                 address.Property(x => x.Street).IsRequired();
 
-                address.HasOne(x => x.Province);
-                address.HasOne(x => x.District);
-                address.HasOne(x => x.Commune);
+                address.Property(x => x.Province).IsRequired();
+                address.Property(x => x.ProvinceId).IsRequired();
+
+                address.Property(x => x.District).IsRequired();
+                address.Property(x => x.DistrictId).IsRequired();
+
+                address.Property(x => x.CommuneId);
+                address.Property(x => x.Commune);
             }
         );
     }

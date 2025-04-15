@@ -121,8 +121,8 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         user!.LastName.Should().Be(createUserCommand.LastName);
         user!.Email.Should().Be(createUserCommand.Email);
         user!.PhoneNumber.Should().Be(createUserCommand.PhoneNumber);
-        user!.Address!.Province!.Id.Should().Be(createUserCommand.ProvinceId);
-        user!.Address!.District!.Id.Should().Be(createUserCommand.DistrictId);
+        user!.Address!.ProvinceId.Should().Be(createUserCommand.ProvinceId);
+        user!.Address!.DistrictId.Should().Be(createUserCommand.DistrictId);
         user!.Username!.Should().Be(createUserCommand.Username);
         BCrypt.Net.BCrypt.Verify(createUserCommand.Password, user.Password).Should().BeTrue();
 
@@ -149,7 +149,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
 
         if (createUserCommand.CommuneId != null || createUserCommand.CommuneId != Ulid.Empty)
         {
-            user.Address.Commune!.Id.Should().Be(createUserCommand.CommuneId!.Value);
+            user.Address.CommuneId.Should().Be(createUserCommand.CommuneId!.Value);
         }
         else
         {

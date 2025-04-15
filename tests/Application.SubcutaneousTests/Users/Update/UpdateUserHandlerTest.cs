@@ -76,8 +76,8 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         user!.LastName.Should().Be(UserUpdateRequest.LastName);
         user!.Email.Should().Be(UserUpdateRequest.Email);
         user!.PhoneNumber.Should().Be(UserUpdateRequest.PhoneNumber);
-        user!.Address!.Province!.Id.Should().Be(UserUpdateRequest.ProvinceId);
-        user!.Address!.District!.Id.Should().Be(UserUpdateRequest.DistrictId);
+        user!.Address!.ProvinceId.Should().Be(UserUpdateRequest.ProvinceId);
+        user!.Address!.DistrictId.Should().Be(UserUpdateRequest.DistrictId);
 
         if (UserUpdateRequest.Avatar != null)
         {
@@ -99,7 +99,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
 
         if (UserUpdateRequest.CommuneId != null || UserUpdateRequest.CommuneId != Ulid.Empty)
         {
-            user.Address.Commune!.Id.Should().Be(UserUpdateRequest.CommuneId!.Value);
+            user.Address.CommuneId.Should().Be(UserUpdateRequest.CommuneId!.Value);
         }
         else
         {

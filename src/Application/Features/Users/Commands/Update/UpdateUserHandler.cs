@@ -60,7 +60,17 @@ public class UpdateUserHandler(
                 .FindByIdAsync(command.UpdateData.CommuneId.Value, cancellationToken);
         }
         //* replace address
-        user.UpdateAddress(new(province!, district!, commune, command.UpdateData.Street!));
+        user.UpdateAddress(
+            new(
+                province!.Name,
+                province.Id,
+                district!.Name,
+                district.Id,
+                commune?.Name,
+                commune?.Id,
+                command.UpdateData.Street!
+            )
+        );
 
         string? key = mediaUpdateService.GetKey(avatar);
         user.Avatar = await mediaUpdateService.UploadAvatarAsync(avatar, key);
