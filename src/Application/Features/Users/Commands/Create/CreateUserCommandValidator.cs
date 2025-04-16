@@ -102,7 +102,8 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                 Messager
                     .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Gender!)
-                    .Message(MessageType.OuttaOption)
+                    .Negative()
+                    .Message(MessageType.AmongTheAllowedOptions)
                     .Build()
             );
 
@@ -121,7 +122,8 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                 Messager
                     .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Status!)
-                    .Message(MessageType.OuttaOption)
+                    .Negative()
+                    .Message(MessageType.AmongTheAllowedOptions)
                     .Build()
             );
 

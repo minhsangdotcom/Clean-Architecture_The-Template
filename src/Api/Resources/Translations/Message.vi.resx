@@ -240,15 +240,15 @@
     <comment> </comment>
   </data>
   <data name="Integer" xml:space="preserve">
-    <value>kiểu số thực</value>
+    <value>là kiểu số thực</value>
     <comment> </comment>
   </data>
   <data name="Datetime" xml:space="preserve">
-    <value>kiểu ngày giờ</value>
+    <value>là kiểu ngày giờ</value>
     <comment> </comment>
   </data>
   <data name="Ulid" xml:space="preserve">
-    <value>kiếu ulid</value>
+    <value>là kiếu ulid</value>
     <comment> </comment>
   </data>
   <data name="FilterValue" xml:space="preserve">
@@ -282,5 +282,9 @@
   <data name="InOperator" xml:space="preserve">
     <value>phương thứ In</value>
     <comment>  </comment>
+  </data>
+  <data name="TheCurrentOne" xml:space="preserve">
+    <value>mã làm mới hiện tại</value>
+    <comment>    </comment>
   </data>
 </root>

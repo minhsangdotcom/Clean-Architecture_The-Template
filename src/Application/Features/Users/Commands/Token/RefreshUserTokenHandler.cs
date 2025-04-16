@@ -61,8 +61,8 @@ public class RefreshUserTokenHandler(
                         .Create<UserToken>(nameof(User))
                         .Property(x => x.RefreshToken!)
                         .Negative()
-                        .Message(MessageType.Matching)
-                        .ObjectName("CurrentToken")
+                        .Message(MessageType.Identical)
+                        .ObjectName("TheCurrentOne")
                         .BuildMessage()
                 )
             );
