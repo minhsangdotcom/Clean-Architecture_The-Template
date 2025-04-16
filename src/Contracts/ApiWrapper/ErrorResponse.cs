@@ -25,7 +25,7 @@ public class ErrorResponse : ApiBaseResponse
         int? statusCode = StatusCodes.Status500InternalServerError
     )
     {
-        StatusCode = statusCode!.Value;
+        Status = statusCode!.Value;
         Exception = exception;
         Message = message;
         Trace = trace;
@@ -44,7 +44,7 @@ public class ErrorResponse : ApiBaseResponse
         int? statusCode = StatusCodes.Status400BadRequest
     )
     {
-        StatusCode = statusCode!.Value;
+        Status = statusCode!.Value;
         Errors = badRequestErrors?.ToList();
         Message = message ?? "One or several errors have occured";
         Type = type ?? "BadRequestException";

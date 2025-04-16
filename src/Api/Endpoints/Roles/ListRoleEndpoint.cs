@@ -4,6 +4,7 @@ using Api.common.Results;
 using Api.common.Routers;
 using Application.Features.Roles.Queries.List;
 using Contracts.ApiWrapper;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,10 @@ public class ListRoleEndpoint : IEndpoint
                     "Retrieves a list of all available roles in the system, along with their basic information (e.g., name, assigned permissions, etc.).",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
                 Parameters = operation.AddDocs(),
-            });
+            })
+            .RequireAuth(
+                permissions: Permission.Generate(PermissionAction.List, PermissionResource.Role)
+            );
     }
 
     private async Task<

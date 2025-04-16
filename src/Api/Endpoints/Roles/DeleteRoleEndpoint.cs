@@ -3,6 +3,7 @@ using Api.common.Results;
 using Api.common.Routers;
 using Application.Features.Roles.Commands.Delete;
 using Contracts.ApiWrapper;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,10 @@ public class DeleteRoleEndpoint : IEndpoint
                 Description =
                     "Deletes an existing role by its unique ID. Once deleted, the role and its associated claims/permission will no longer be available",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
-            });
+            })
+            .RequireAuth(
+                permissions: Permission.Generate(PermissionAction.Delete, PermissionResource.Role)
+            );
     }
 
     private async Task<Results<NoContent, ProblemHttpResult>> HandleAsync(

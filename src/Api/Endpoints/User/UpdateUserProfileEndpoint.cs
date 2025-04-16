@@ -23,7 +23,8 @@ public class UpdateUserProfileEndpoint : IEndpoint
                 Description = "Updates profile information for the currently authenticated user.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
-            .WithRequestValidation<UpdateUserProfileCommand>();
+            .WithRequestValidation<UpdateUserProfileCommand>()
+            .RequireAuth();
     }
 
     private async Task<

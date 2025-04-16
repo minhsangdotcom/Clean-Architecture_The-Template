@@ -5,6 +5,7 @@ using Api.common.Routers;
 using Application.Features.Users.Queries.List;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,10 @@ public class ListUserEndpoint : IEndpoint
                 Description = "Retrieves a list of all registered users in the system.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
                 Parameters = operation.AddDocs(),
-            });
+            })
+            .RequireAuth(
+                permissions: Permission.Generate(PermissionAction.List, PermissionResource.User)
+            );
     }
 
     private async Task<

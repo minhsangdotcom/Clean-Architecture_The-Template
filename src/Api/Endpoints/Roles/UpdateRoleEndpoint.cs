@@ -3,6 +3,7 @@ using Api.common.Results;
 using Api.common.Routers;
 using Application.Features.Roles.Commands.Update;
 using Contracts.ApiWrapper;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,10 @@ public class UpdateRoleEndpoint : IEndpoint
                     "Updates an existing role's information. You can modify the name and add or remove claims/permissions. This endpoint helps ensure your authorization model stays current with your users' needs.",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
             })
-            .WithRequestValidation<RoleUpdateRequest>();
+            .WithRequestValidation<RoleUpdateRequest>()
+            .RequireAuth(
+                permissions: Permission.Generate(PermissionAction.Update, PermissionResource.Role)
+            );
     }
 
     private async Task<Results<Ok<ApiResponse<UpdateRoleResponse>>, ProblemHttpResult>> HandleAsync(

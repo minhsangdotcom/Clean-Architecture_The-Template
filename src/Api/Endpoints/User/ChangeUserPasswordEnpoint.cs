@@ -1,7 +1,6 @@
 using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
-using Application.Common.Auth;
 using Application.Features.Users.Commands.ChangePassword;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -23,7 +22,8 @@ public class ChangeUserPasswordEnpoint : IEndpoint
                 Description =
                     "Allows an authenticated user to change their current password by providing the old and new password.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-            });
+            })
+            .RequireAuth();
     }
 
     private async Task<Results<NoContent, ProblemHttpResult>> HandleAsync(

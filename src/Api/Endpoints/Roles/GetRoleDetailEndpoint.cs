@@ -3,6 +3,7 @@ using Api.common.Results;
 using Api.common.Routers;
 using Application.Features.Roles.Queries.Detail;
 using Contracts.ApiWrapper;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,10 @@ public class GetRoleDetailEndpoint : IEndpoint
                 Description =
                     "Retrieves detailed information about a specific role, including its name and associated claims/permissions. Use this to review or audit the role’s configurations.",
                 Tags = [new OpenApiTag() { Name = Router.RoleRoute.Tags }],
-            });
+            })
+            .RequireAuth(
+                permissions: Permission.Generate(PermissionAction.Detail, PermissionResource.Role)
+            );
     }
 
     private async Task<Results<Ok<ApiResponse<RoleDetailResponse>>, ProblemHttpResult>> HandleAsync(

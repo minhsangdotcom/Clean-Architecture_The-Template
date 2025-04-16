@@ -3,6 +3,7 @@ using Api.common.Results;
 using Api.common.Routers;
 using Application.Features.Users.Queries.Detail;
 using Contracts.ApiWrapper;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,9 @@ public class GetUserDetailEndpoint : IEndpoint
                 Summary = "Get user by ID 🧾",
                 Description = "Retrieves detailed information of a user based on their unique ID.",
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
-            });
+            }).RequireAuth(
+                permissions: Permission.Generate(PermissionAction.Detail, PermissionResource.User)
+            );
     }
 
     private async Task<
