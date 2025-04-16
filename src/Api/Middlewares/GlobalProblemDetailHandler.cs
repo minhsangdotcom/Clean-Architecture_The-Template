@@ -19,7 +19,7 @@ public class GlobalProblemDetailHandler(
         string? traceId = activityFeature?.Activity?.TraceId.ToString();
         string? spanId = activityFeature?.Activity?.SpanId.ToString();
         logger.Error(
-            "\n\n{exception} error's occured having tracing identifier [traceId:{traceId}, spanId:{spanId}] with message '{Message}' {StackTrace}\n",
+            "\n\n{exception} error's occured having tracing identifier [traceId:{traceId}, spanId:{spanId}]\nwith message '{Message}'\n{StackTrace}\n",
             exception.GetType().Name,
             traceId,
             spanId,

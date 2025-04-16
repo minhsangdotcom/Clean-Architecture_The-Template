@@ -27,7 +27,8 @@ public class UpdateUserEndpoint : IEndpoint
             .WithRequestValidation<UserUpdateRequest>()
             .RequireAuth(
                 permissions: Permission.Generate(PermissionAction.Update, PermissionResource.User)
-            );
+            )
+            .DisableAntiforgery();
     }
 
     private async Task<Results<Ok<ApiResponse<UpdateUserResponse>>, ProblemHttpResult>> HandleAsync(

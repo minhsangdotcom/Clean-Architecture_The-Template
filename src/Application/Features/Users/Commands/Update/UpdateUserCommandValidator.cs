@@ -7,7 +7,7 @@ using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.Update;
 
-public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
+public class UpdateUserCommandValidator : AbstractValidator<UserUpdateRequest>
 {
     public UpdateUserCommandValidator(
         IUnitOfWork unitOfWork,
@@ -15,20 +15,9 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
     )
     {
         _ = Ulid.TryParse(accessorService.Id, out Ulid id);
+        Include(new UserValidator(unitOfWork, accessorService)!);
 
-        RuleFor(x => x.UpdateData)
-            .NotEmpty()
-            .WithState(x =>
-                Messager
-                    .Create<UpdateUserCommand>()
-                    .Property(x => x.UpdateData!)
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            )
-            .SetValidator(new UserValidator(unitOfWork, accessorService)!);
-
-        RuleFor(x => x.UpdateData!.Roles)
+        RuleFor(x => x.Roles)
             .NotEmpty()
             .WithState(x =>
                 Messager
@@ -40,10 +29,10 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
             );
 
         When(
-            x => x.UpdateData!.UserClaims != null,
+            x => x.UserClaims != null,
             () =>
             {
-                RuleForEach(x => x.UpdateData!.UserClaims).SetValidator(new UserClaimValidator());
+                RuleForEach(x => x!.UserClaims).SetValidator(new UserClaimValidator());
             }
         );
     }
