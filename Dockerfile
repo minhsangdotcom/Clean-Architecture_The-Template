@@ -1,9 +1,5 @@
-# Use the official .NET runtime image as a base for production
-FROM mcr.microsoft.com/dotnet/aspnet:8.0.12 AS base
-WORKDIR /app
-EXPOSE 8080
+FROM mcr.microsoft.com/dotnet/aspnet:8.0.15 AS base
 
-# Copy the published application from the workflow
 FROM base AS final
 WORKDIR /app
 COPY app/publish .
