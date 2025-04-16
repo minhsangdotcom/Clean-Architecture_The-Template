@@ -326,7 +326,6 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
         return userClaims.Exists(x => claims.Contains(new(x.ClaimType, x.ClaimValue)));
     }
 
-    //! benchmark
     public async Task<bool> HasUserPermissionAsync(Ulid id, IEnumerable<string> claims)
     {
         List<string> permissions = await UserClaims
@@ -335,15 +334,18 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
             .ToListAsync();
 
         var claimsSet = new HashSet<string>(claims);
-        if (permissions.Any(claimsSet.Contains))
+        if (permissions.Exists(claimsSet.Contains))
         {
             return true;
         }
 
         var permissionsSet = new HashSet<string>(permissions);
         return Credential
-            .permissions[typeof(Permission).FullName!]
-            .Any(x => permissionsSet.Contains(x.Key) && x.Value.Exists(p => claimsSet.Contains(p)));
+            .permissions.SelectMany(group => group)
+            .Any(permissions =>
+                permissionsSet.Contains(permissions.Key)
+                && permissions.Value.Distinct().Any(p => claimsSet.Contains(p))
+            );
     }
 
     public async Task<bool> HasUserClaimsAndRolesAsync(

@@ -1,6 +1,4 @@
 using CaseConverter;
-using Domain.Aggregates.Roles;
-using Domain.Aggregates.Users;
 
 namespace Infrastructure.Constants;
 
@@ -14,17 +12,13 @@ public static class Credential
     public const string ADMIN_ROLE_ID = "01J79JQZRWAKCTCQV64VYKMZ56";
     public const string MANAGER_ROLE_ID = "01JB19HK30BGYJBZGNETQY8905";
 
-    public static readonly Dictionary<string, Dictionary<string, List<string>>> permissions =
-        new()
-        {
-            { nameof(User), Permission.CreatebasicPermissions(PermissionResource.User) },
-            { nameof(Role), Permission.CreatebasicPermissions(PermissionResource.Role) },
-        };
-
-    public static readonly List<string> ADMIN_CLAIMS =
+    public static readonly List<Dictionary<string, List<string>>> permissions =
     [
-        .. permissions.SelectMany(x => x.Value.Keys),
+        Permission.CreatebasicPermissions(PermissionResource.User),
+        Permission.CreatebasicPermissions(PermissionResource.Role),
     ];
+
+    public static readonly List<string> ADMIN_CLAIMS = [.. permissions.SelectMany(x => x.Keys)];
 
     public static readonly List<string> MANAGER_CLAIMS =
     [
@@ -80,7 +74,8 @@ public class PermissionAction
     public const string Delete = nameof(Delete);
     public const string Detail = nameof(Detail);
     public const string List = nameof(List);
-    public const string Testa = nameof(Testa);
+    public const string Test = nameof(Test);
+    public const string Testing = nameof(Testing);
 }
 
 public class PermissionResource
