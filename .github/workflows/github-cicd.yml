@@ -8,9 +8,9 @@ on:
     branches:
       - main
 
-env:
-  DOTNET_INSTALL_DIR: "./.dotnet"
-  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+#env:
+#DOTNET_INSTALL_DIR: "./.dotnet"
+#NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
 
 jobs:
   build-and-deploy:
@@ -27,9 +27,17 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.406"
-          cache: true
-          cache-dependency-path: "**/packages.lock.json"
+          dotnet-version: "8.0.408"
+          #cache: true
+          #cache-dependency-path: "src/**/packages.lock.json"
+      - name: Cache NuGet packages
+        id: cache-nuget
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
       - name: Install dependencies
         run: dotnet restore --locked-mode
       - name: Build
@@ -40,7 +48,7 @@ jobs:
         run: dotnet publish -c Release -o app/publish
       - uses: actions/upload-artifact@v4
         with:
-          name: my-artifact
+          name: dotnet-app
           path: |
             app/publish
             app/output/test-results
