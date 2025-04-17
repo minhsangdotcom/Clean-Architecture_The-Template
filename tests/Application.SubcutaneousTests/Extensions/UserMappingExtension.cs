@@ -11,21 +11,21 @@ public static class UserMappingExtension
         new()
         {
             UserId = user.Id.ToString(),
-            User = new UpdateUser()
+            UpdateData = new UserUpdateRequest()
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
                 DayOfBirth = user.DayOfBirth,
                 PhoneNumber = user.PhoneNumber,
-                ProvinceId = user.Address!.Province!.Id,
-                DistrictId = user.Address!.District!.Id,
-                CommuneId = user.Address!.Commune!.Id,
+                ProvinceId = user.Address!.ProvinceId,
+                DistrictId = user.Address!.DistrictId,
+                CommuneId = user.Address!.CommuneId,
                 Street = user.Address.Street,
                 Roles = [.. user.UserRoles!.Select(x => x.RoleId)],
                 UserClaims =
                 [
-                    .. user.UserClaims!.Where(x => x.Type == KindaUserClaimType.Custom)
+                    .. user.UserClaims!.Where(x => x.Type == UserClaimType.Custom)
                         .Select(x => new UserClaimModel()
                         {
                             ClaimType = x.ClaimType,
