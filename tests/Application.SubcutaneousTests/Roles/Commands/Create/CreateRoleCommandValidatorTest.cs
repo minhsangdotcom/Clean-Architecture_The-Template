@@ -6,6 +6,7 @@ using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
 using Contracts.ApiWrapper;
 using FluentAssertions;
+using Infrastructure.Constants;
 
 namespace Application.SubcutaneousTests.Roles.Commands.Create;
 
@@ -55,7 +56,10 @@ public class CreateRoleCommandValidatorTest : IAsyncLifetime
     [Fact]
     public async Task CreateRole_WhenDuplicatedName_ShouldReturnDuplicatedMessage()
     {
-        command.Name = "admin";
+        command.Name = Credential.ADMIN_ROLE;
+        UserAddress address = await testingFixture.SeedingRegionsAsync();
+        await testingFixture.CreateAdminUserAsync(address);
+
         HttpResponseMessage response = await testingFixture.MakeRequestAsync(
             "roles",
             HttpMethod.Post,
@@ -107,14 +111,7 @@ public class CreateRoleCommandValidatorTest : IAsyncLifetime
             .ThrowAsync<ValidationException>();
     }
 
-    public async Task DisposeAsync()
-    {
-        await Task.CompletedTask;
-    }
+    public async Task DisposeAsync() => await Task.CompletedTask;
 
-    public async Task InitializeAsync()
-    {
-        await testingFixture.ResetAsync();
-        await testingFixture.SeedingUserAsync();
-    }
+    public async Task InitializeAsync() => await testingFixture.ResetAsync();
 }

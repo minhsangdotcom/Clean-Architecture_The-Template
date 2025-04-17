@@ -4,7 +4,9 @@ using Application.Features.Users.Commands.Update;
 using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
 using Contracts.ApiWrapper;
+using Domain.Aggregates.Users;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.SubcutaneousTests.Users.Update;
 
@@ -27,7 +29,9 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenInvalidLengthOfFirstName_ShouldReturnValidationException()
     {
-        updateUserCommand.UpdateData.FirstName = new string(fixture.CreateMany<char>(257).ToArray());
+        updateUserCommand.UpdateData.FirstName = new string(
+            fixture.CreateMany<char>(257).ToArray()
+        );
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
             .Should()
@@ -54,11 +58,11 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
             .ThrowAsync<ValidationException>();
     }
 
-    [Theory]
-    [InlineData("admin.admin@admin.com.vn")]
-    public async Task UpdateUser_WhenDuplicatedEmail_ShouldReturnValidationException(string name)
+    [Fact]
+    public async Task UpdateUser_WhenDuplicatedEmail_ShouldReturnValidationException()
     {
-        updateUserCommand.UpdateData.Email = name;
+        User user = await testingFixture.CreateAdminUserAsync();
+        updateUserCommand.UpdateData!.Email = user.Email;
 
         var response = await testingFixture.MakeRequestAsync(
             "users",
@@ -124,7 +128,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenNotFoundProvince_ShouldReturnValidationException()
     {
-        updateUserCommand.UpdateData.ProvinceId = Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NN");
+        updateUserCommand.UpdateData!.ProvinceId = Ulid.NewUlid();
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
             .Should()
@@ -144,7 +148,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenNotFoundDistrict_ShouldReturnValidationException()
     {
-        updateUserCommand.UpdateData.DistrictId = Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QQ");
+        updateUserCommand.UpdateData!.DistrictId = Ulid.NewUlid();
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
@@ -155,7 +159,7 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task UpdateUser_WhenNotFoundCommune_ShouldReturnValidationException()
     {
-        updateUserCommand.UpdateData.CommuneId = Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAVV");
+        updateUserCommand.UpdateData!.CommuneId = Ulid.NewUlid();
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(updateUserCommand))
@@ -196,16 +200,19 @@ public class UpdateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
             .ThrowAsync<ValidationException>();
     }
 
-    public async Task DisposeAsync()
-    {
-        await Task.CompletedTask;
-    }
+    public async Task DisposeAsync() => await Task.CompletedTask;
 
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        await testingFixture.SeedingRegionsAsync();
-        await testingFixture.SeedingUserAsync();
-        updateUserCommand = await testingFixture.CreateUserAsync();
+        UserAddress address = await testingFixture.SeedingRegionsAsync();
+
+        IFormFile file = FileHelper.GenerateIFormfile(
+            Path.Combine(Directory.GetCurrentDirectory(), "Files", "avatar_cute_2.jpg")
+        );
+
+        updateUserCommand = UserMappingExtension.ToUpdateUserCommand(
+            await testingFixture.CreateManagerUserAsync(address, file)
+        );
     }
 }

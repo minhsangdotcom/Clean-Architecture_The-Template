@@ -55,6 +55,19 @@
         "resolved": "2.0.1",
         "contentHash": "asjS7JV9U1NdnO+AzyNJzCENFUp+l2Fn4u7Ub8iOCEf43IEaGbH3rlHJzxKRM5xfwFEAxcijJzBFY7lG1gFHNA=="
       },
+      "Castle.Core": {
+        "type": "Transitive",
+        "resolved": "5.1.1",
+        "contentHash": "rpYtIczkzGpf+EkZgDr9CClTdemhsrwA/W5hMoPjLkRFnXzH44zDLoovXeKtmxb1ykXK9aJVODSpiJml8CTw2g==",
+        "dependencies": {
+          "System.Diagnostics.EventLog": "6.0.0"
+        }
+      },
+      "CliWrap": {
+        "type": "Transitive",
+        "resolved": "3.8.2",
+        "contentHash": "FTfHUYVt69M0wzcCfQQok3JnmaPQzrqKIB8xBiyTwzocGmG7N3MpDbMC9+qeeAvPclRgUDj3EpMvXwJBwY4/mw=="
+      },
       "Elastic.Clients.Elasticsearch": {
         "type": "Transitive",
         "resolved": "8.17.1",
@@ -67,6 +80,39 @@
         "type": "Transitive",
         "resolved": "0.5.7",
         "contentHash": "0VQhS6RauOqydF1bUs7nqpk9u8X2Sa2O7djiioD5b/jWf/cX6S7GcmlWzqvm2j1a+np1Q79B2SwEFOI2zMkcbw=="
+      },
+      "Fare": {
+        "type": "Transitive",
+        "resolved": "2.1.1",
+        "contentHash": "HaI8puqA66YU7/9cK4Sgbs1taUTP1Ssa4QT2PIzqJ7GvAbN1QgkjbRsjH+FSbMh1MJdvS0CIwQNLtFT+KF6KpA==",
+        "dependencies": {
+          "NETStandard.Library": "1.6.1"
+        }
+      },
+      "FluentEmail.Core": {
+        "type": "Transitive",
+        "resolved": "3.0.2",
+        "contentHash": "uQFFbJgMhhCFUti7pfMi429fMNi7fLGMj+7uDtD7POlQzLxlhXJ6tmt4Y1SI51sZsA36GO5b7+o29eY/dKiICQ==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "5.0.0"
+        }
+      },
+      "FluentEmail.Razor": {
+        "type": "Transitive",
+        "resolved": "3.0.2",
+        "contentHash": "XdZS2n9jjrx2qzyBGvgstYFIm2laYo1j7YMUZI0rylZhpZHIic3taWqe78xF5dcsXpJvucmxRCshhF6hl02Dmw==",
+        "dependencies": {
+          "FluentEmail.Core": "3.0.2",
+          "RazorLight": "2.0.0-rc.3"
+        }
+      },
+      "FluentEmail.Smtp": {
+        "type": "Transitive",
+        "resolved": "3.0.2",
+        "contentHash": "Y5pZKS/mXSl7D5WJWecvfo1kpIMDc6U0VRU6wRbE9wEv2IqMH3cQXa/97Pwi+m31COepIqc6dMhGMtAJ2Qh7rw==",
+        "dependencies": {
+          "FluentEmail.Core": "3.0.2"
+        }
       },
       "FluentValidation": {
         "type": "Transitive",
@@ -610,10 +656,15 @@
           "System.Runtime": "4.3.0"
         }
       },
-      "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": {
+      "Microsoft.Win32.SystemEvents": {
         "type": "Transitive",
-        "resolved": "1.0.1-alpha",
-        "contentHash": "oqzZX0iyIA6jM7p3tgIanoJrQBpEouZx/1OJmBCY+Zv5R9VcCOq5Ymi8c3TICoejv7T2AkMC8WEEtTB+XZdjFA==",
+        "resolved": "6.0.0",
+        "contentHash": "hqTM5628jSsQiv+HGpiq3WKBl2c8v1KZfby2J6Pr7pEPlK9waPdgEO6b8A/+/xn/yZ9ulv8HuqK71ONy2tg67A=="
+      },
+      "MimeKit": {
+        "type": "Transitive",
+        "resolved": "4.10.0",
+        "contentHash": "GQofI17cH55XSh109hJmHaYMtSFqTX/eUek3UcV7hTnYayAIXZ6eHlv345tfdc+bQ/BrEnYOSZVzx9I3wpvvpg==",
         "dependencies": {
           "CaseConverter": "2.0.1",
           "Elastic.Clients.Elasticsearch": "8.17.1"
@@ -1046,6 +1097,19 @@
           "Microsoft.NETCore.Targets": "1.1.0",
           "System.Runtime": "4.3.0"
         }
+      },
+      "System.Drawing.Common": {
+        "type": "Transitive",
+        "resolved": "6.0.0",
+        "contentHash": "NfuoKUiP2nUWwKZN6twGqXioIe1zVD0RIj2t976A+czLHr2nY454RwwXs6JU9Htc6mwqL6Dn/nEL3dpVf2jOhg==",
+        "dependencies": {
+          "Microsoft.Win32.SystemEvents": "6.0.0"
+        }
+      },
+      "System.Formats.Asn1": {
+        "type": "Transitive",
+        "resolved": "8.0.1",
+        "contentHash": "XqKba7Mm/koKSjKMfW82olQdmfbI5yqeoLV/tidRp7fbh5rmHAQ5raDI/7SU0swTzv+jgqtUGkzmFxuUg0it1A=="
       },
       "System.Globalization": {
         "type": "Transitive",

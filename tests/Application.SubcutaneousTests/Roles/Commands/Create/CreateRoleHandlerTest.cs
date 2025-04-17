@@ -75,13 +75,7 @@ public class CreateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         createdRole.RoleClaims.Should().HaveCount(roleClaims.Count);
     }
 
-    public async Task InitializeAsync()
-    {
-        await testingFixture.ResetAsync();
-    }
+    public async Task InitializeAsync() => await testingFixture.ResetAsync();
 
-    public async Task DisposeAsync()
-    {
-        await Task.CompletedTask;
-    }
+    public async Task DisposeAsync() => await Task.CompletedTask;
 }

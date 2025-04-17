@@ -5,8 +5,11 @@ using Application.Features.Users.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
 using Contracts.ApiWrapper;
+using Domain.Aggregates.Roles;
+using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using FluentAssertions;
+using SharedKernel.Common.Messages;
 
 namespace Application.SubcutaneousTests.Users.Create;
 
@@ -30,7 +33,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenInvalidLengthOfFirstName_ShouldReturnValidationException()
     {
-        command.FirstName = new string(fixture.CreateMany<char>(257).ToArray());
+        command.FirstName = new string([.. fixture.CreateMany<char>(257)]);
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
             .Should()
@@ -50,7 +53,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenInvalidLengthOfLastName_ShouldReturnValidationException()
     {
-        command.LastName = new string(fixture.CreateMany<char>(257).ToArray());
+        command.LastName = new string([.. fixture.CreateMany<char>(257)]);
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
             .Should()
@@ -60,7 +63,8 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenDuplicatedEmail_ShouldReturnValidationException()
     {
-        command.Email = "admin.admin@admin.com.vn";
+        User user = await testingFixture.CreateAdminUserAsync();
+        command.Email = user.Email;
 
         var response = await testingFixture.MakeRequestAsync(
             "users",
@@ -76,10 +80,19 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
 
         InvalidParam firstElement = badRequestErrors[0];
 
-        firstElement.PropertyName.Should().Be("Email");
+        firstElement.PropertyName.Should().Be(nameof(User.Email));
         List<ErrorReason> reasons = [.. firstElement.Reasons];
 
-        reasons[0].Message.Should().Be("user_email_existence");
+        reasons[0]
+            .Message.Should()
+            .Be(
+                Messager
+                    .Create<User>()
+                    .Property(x => x.Email)
+                    .Message(MessageType.Existence)
+                    .Build()
+                    .Message
+            );
     }
 
     [Theory]
@@ -126,7 +139,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenNotFoundProvince_ShouldReturnValidationException()
     {
-        command.ProvinceId = Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NN");
+        command.ProvinceId = Ulid.NewUlid();
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
             .Should()
@@ -146,7 +159,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenNotFoundDistrict_ShouldReturnValidationException()
     {
-        command.DistrictId = Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QQ");
+        command.DistrictId = Ulid.NewUlid();
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
@@ -157,7 +170,7 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenNotFoundCommune_ShouldReturnValidationException()
     {
-        command.CommuneId = Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAVV");
+        command.CommuneId = Ulid.NewUlid();
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
@@ -195,7 +208,8 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     [Fact]
     public async Task CreateUser_WhenDuplicatedUsername_ShouldReturnValidationException()
     {
-        command.Username = "admin";
+        User user = await testingFixture.CreateAdminUserAsync();
+        command.Username = user.Username;
 
         await FluentActions
             .Invoking(() => testingFixture.SendAsync(command))
@@ -343,24 +357,24 @@ public class CreateUserCommandValidatorTest(TestingFixture testingFixture) : IAs
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        await testingFixture.SeedingRegionsAsync();
-        var response = await testingFixture.CreateRoleAsync("adminTest");
-        roleId = response.Id;
-        await testingFixture.SeedingUserAsync();
+        UserAddress address = await testingFixture.SeedingRegionsAsync();
+        Role role = await testingFixture.CreateManagerRoleAsync();
+        roleId = role.Id;
+
         command = fixture
             .Build<CreateUserCommand>()
-            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
-            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
-            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
+            .With(x => x.ProvinceId, address.ProvinceId)
+            .With(x => x.DistrictId, address.DistrictId)
+            .With(x => x.CommuneId, address.CommuneId)
             .Without(x => x.Avatar)
             .With(
                 x => x.UserClaims,
                 [new UserClaimModel() { ClaimType = "test", ClaimValue = "test.value" }]
             )
             .With(x => x.Roles, [roleId])
-            .With(x => x.Email, "super.admin@gmail.com")
-            .With(x => x.PhoneNumber, "0925123123")
-            .With(x => x.Username, "super.admin")
+            .With(x => x.Email, "admin@gmail.com")
+            .With(x => x.PhoneNumber, "0123456789")
+            .With(x => x.Username, "admin.super")
             .Create();
     }
 }

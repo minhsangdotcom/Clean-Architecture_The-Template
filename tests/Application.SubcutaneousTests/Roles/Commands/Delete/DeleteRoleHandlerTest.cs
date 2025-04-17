@@ -1,7 +1,5 @@
 using Application.Common.Exceptions;
 using Application.Features.Roles.Commands.Delete;
-using Application.Features.Roles.Commands.Update;
-using AutoFixture;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Roles;
 using FluentAssertions;
@@ -12,8 +10,6 @@ namespace Application.SubcutaneousTests.Roles.Commands.Delete;
 [Collection(nameof(TestingCollectionFixture))]
 public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
-    private readonly Fixture fixture = new();
-
     private Ulid id;
 
     [Fact]
@@ -48,16 +44,12 @@ public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .NotThrowAsync();
     }
 
-    public async Task DisposeAsync()
-    {
-        await Task.CompletedTask;
-    }
+    public async Task DisposeAsync() => await Task.CompletedTask;
 
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        Role role = await testingFixture.CreateRoleAsync("admin");
-        UpdateRoleCommand response = testingFixture.ToUpdateRoleCommand(role);
-        id = Ulid.Parse(response.RoleId);
+        Role role = await testingFixture.CreateAdminRoleAsync();
+        id = role.Id;
     }
 }

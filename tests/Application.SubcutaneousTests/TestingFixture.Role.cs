@@ -1,11 +1,10 @@
 using Application.Common.Interfaces.Services.Identity;
 using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Create;
-using Application.Features.Roles.Commands.Update;
 using Application.SubcutaneousTests.Extensions;
 using Contracts.ApiWrapper;
-using Contracts.Constants;
 using Domain.Aggregates.Roles;
+using Infrastructure.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.Constants;
 
@@ -29,52 +28,67 @@ public partial class TestingFixture
         return await roleManagerService.FindByIdAsync(id);
     }
 
-    public async Task<Role> CreateRoleAsync(string roleName)
+    public async Task<Role> CreateAdminRoleAsync()
     {
-        CreateRoleCommand role =
-            new()
+        List<RoleClaimModel> roleClaimModels =
+        [
+            .. Credential.ADMIN_CLAIMS.Select(permission => new RoleClaimModel()
             {
-                Name = roleName,
-                Description = null,
-                RoleClaims =
-                [
-                    new RoleClaimModel()
-                    {
-                        ClaimType = ClaimTypes.Permission,
-                        ClaimValue = "create:user",
-                    },
-                    new RoleClaimModel()
-                    {
-                        ClaimType = ClaimTypes.Permission,
-                        ClaimValue = "detail:user",
-                    },
-                ],
-            };
+                ClaimType = ClaimTypes.Permission,
+                ClaimValue = permission,
+            }),
+        ];
+
+        return await CreateRoleAsync(Credential.ADMIN_ROLE, roleClaimModels);
+    }
+
+    public async Task<Role> CreateManagerRoleAsync()
+    {
+        List<RoleClaimModel> roleClaimModels =
+        [
+            .. Credential.MANAGER_CLAIMS.Select(permission => new RoleClaimModel()
+            {
+                ClaimType = ClaimTypes.Permission,
+                ClaimValue = permission,
+            }),
+        ];
+
+        return await CreateRoleAsync(Credential.MANAGER_ROLE, roleClaimModels);
+    }
+
+    public async Task<Role> CreateNormalRoleAsync() =>
+        await CreateRoleAsync("user", DefaultUserClaims());
+
+    public async Task<Role> CreateRoleAsync(string roleName, List<RoleClaimModel> roleClaims)
+    {
+        CreateRoleCommand role = new() { Name = roleName, RoleClaims = roleClaims };
         factory.ThrowIfNull();
         Result<CreateRoleResponse> result = await SendAsync(role);
         CreateRoleResponse response = result.Value!;
-        using var scope = factory!.Services.CreateScope();
-        var roleManagerService = scope.ServiceProvider.GetRequiredService<IRoleManagerService>();
-        return (await roleManagerService.FindByIdAsync(response.Id))!;
+        return (await FindRoleByIdIncludeRoleClaimsAsync(response.Id))!;
     }
 
-    public UpdateRoleCommand ToUpdateRoleCommand(Role role)
-    {
-        return new()
-        {
-            RoleId = role.Id.ToString(),
-            UpdateData = new RoleUpdateRequest()
+    public static List<RoleClaimModel> DefaultUserClaims() =>
+        [
+            new RoleClaimModel()
             {
-                Name = role.Name,
-                Description = role.Description,
-                RoleClaims = role.RoleClaims!.Select(x => new RoleClaimModel()
-                    {
-                        ClaimType = x.ClaimType,
-                        ClaimValue = x.ClaimValue,
-                        Id = x.Id,
-                    })
-                    .ToList(),
+                ClaimType = ClaimTypes.Permission,
+                ClaimValue = $"{PermissionAction.List}:{PermissionResource.Role}",
             },
-        };
-    }
+            new RoleClaimModel()
+            {
+                ClaimType = ClaimTypes.Permission,
+                ClaimValue = $"{PermissionAction.Detail}:{PermissionResource.Role}",
+            },
+            new RoleClaimModel()
+            {
+                ClaimType = ClaimTypes.Permission,
+                ClaimValue = $"{PermissionAction.List}:{PermissionResource.User}",
+            },
+            new RoleClaimModel()
+            {
+                ClaimType = ClaimTypes.Permission,
+                ClaimValue = $"{PermissionAction.Detail}:{PermissionResource.User}",
+            },
+        ];
 }

@@ -1,6 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Update;
+using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
 using CaseConverter;
 using Contracts.ApiWrapper;
@@ -23,7 +24,6 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .Build<RoleUpdateRequest>()
             .Without(x => x.RoleClaims)
             .Create();
-
         Ulid ulid = Ulid.NewUlid();
         UpdateRoleCommand updateRoleCommand = fixture
             .Build<UpdateRoleCommand>()
@@ -40,6 +40,7 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .Invoking(() => testingFixture.SendAsync(updateRoleCommand))
             .Should()
             .ThrowAsync<NotFoundException>(becauseArgs: messageResults);
+
         ErrorReason error = result.And.Errors.First().Reasons.First();
         MessageResult messageResult = messageResults[0];
         error.Should().NotBeNull();
@@ -74,16 +75,13 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
 
         Result<UpdateRoleResponse> result = await testingFixture.SendAsync(updateRoleCommand);
         UpdateRoleResponse updateRoleResponse = result.Value!;
-
         Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
             updateRoleResponse.Id
         );
         createdRole.Should().NotBeNull();
         RoleUpdateRequest RoleUpdateRequest = updateRoleCommand.UpdateData;
         createdRole!.Name.Should().Be(RoleUpdateRequest.Name!.ToSnakeCase().ToUpper());
-        createdRole
-            .RoleClaims.Should()
-            .HaveCount(updateRoleCommand.UpdateData.RoleClaims!.Count);
+        createdRole.RoleClaims.Should().HaveCount(updateRoleCommand.UpdateData.RoleClaims!.Count);
         createdRole!.Description.Should().BeNull();
     }
 
@@ -100,7 +98,6 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
 
         Result<UpdateRoleResponse> result = await testingFixture.SendAsync(updateRoleCommand);
         UpdateRoleResponse updateRoleResponse = result.Value!;
-
         Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
             updateRoleResponse.Id
         );
@@ -116,12 +113,10 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        Role role = await testingFixture.CreateRoleAsync("admin");
-        updateRoleCommand = testingFixture.ToUpdateRoleCommand(role);
+        updateRoleCommand = RoleMappingExtension.ToUpdateRoleCommand(
+            await testingFixture.CreateAdminRoleAsync()
+        );
     }
 
-    public async Task DisposeAsync()
-    {
-        await Task.CompletedTask;
-    }
+    public async Task DisposeAsync() => await Task.CompletedTask;
 }
