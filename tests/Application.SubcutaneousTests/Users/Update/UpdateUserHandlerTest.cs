@@ -159,10 +159,6 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         {
             user!.DayOfBirth!.Value.Date.Should().Be(UserUpdateRequest.DayOfBirth.Value.Date);
         }
-        else
-        {
-            user.DayOfBirth.Should().BeNull();
-        }
 
         if (UserUpdateRequest.CommuneId != null || UserUpdateRequest.CommuneId != Ulid.Empty)
         {

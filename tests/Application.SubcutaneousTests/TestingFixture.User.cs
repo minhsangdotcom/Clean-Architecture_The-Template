@@ -44,7 +44,7 @@ public partial class TestingFixture
 
         Province province = provinces?.FirstOrDefault(x => x.Code == "79")!;
         District district = districts?.FirstOrDefault(x => x.Code == "783")!;
-        Commune commune = communes?.FirstOrDefault(x => x.Code == "27508")!;
+        Commune commune = communes?.FirstOrDefault(x => x.Code == "27496")!;
 
         //HCM
         await unitOfWork.Repository<Province>().AddAsync(province);
@@ -184,9 +184,9 @@ public partial class TestingFixture
 
     private static UserAddress GetDefaultAddress() =>
         new(
-            Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"),
-            Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"),
-            Ulid.Parse("01JAZDXEATWDPJTD9DBS9MHB7M")
+            Ulid.Parse("01JRQHWS3RQR1N0J84EV1DQXR1"),
+            Ulid.Parse("01JRQHWSNPR3Z8Z20GBSB22CSJ"),
+            Ulid.Parse("01JRQHWTCGG2Q7FFRP4XP2N7SD")
         );
 
     private static List<T>? Read<T>(string path)

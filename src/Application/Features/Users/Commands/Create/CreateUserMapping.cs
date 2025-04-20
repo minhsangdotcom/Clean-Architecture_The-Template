@@ -17,6 +17,7 @@ public static class CreateUserMapping
         {
             Gender = command.Gender,
             Status = command.Status,
+            DayOfBirth = command.DayOfBirth,
         };
     }
 
