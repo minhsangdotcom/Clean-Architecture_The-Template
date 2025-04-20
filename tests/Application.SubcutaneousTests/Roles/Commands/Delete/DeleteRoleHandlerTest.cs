@@ -14,24 +14,19 @@ public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     [Fact]
     public async Task DeleteRole_WhenInvalidId_ShouldReturnNotFoundException()
     {
-        // List<MessageResult> messageResults =
-        // [
-        //     Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage(),
-        // ];
-        // Ulid notFoundId = Ulid.NewUlid();
+        Ulid notFoundId = Ulid.NewUlid();
 
-        // var result = await FluentActions
-        //     .Invoking(() => testingFixture.SendAsync(new DeleteRoleCommand(notFoundId)))
-        //     .Should()
-        //     .ThrowAsync<NotFoundException>(becauseArgs: messageResults);
+        Result<string> result = await testingFixture.SendAsync(new DeleteRoleCommand(notFoundId));
 
-        // ErrorReason error = result.And.Errors.First().Reasons.First();
-        // MessageResult messageResult = messageResults[0];
-        // error.Should().NotBeNull();
+        var expectedMessage = Messager
+            .Create<Role>()
+            .Message(MessageType.Found)
+            .Negative()
+            .BuildMessage();
 
-        // error.Message.Should().Be(messageResult.Message);
-        // error.En.Should().Be(messageResult.En);
-        // error.Vi.Should().Be(messageResult.Vi);
+        result.Error.Should().NotBeNull();
+        result.Error.Status.Should().Be(404);
+        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
     }
 
     [Fact]

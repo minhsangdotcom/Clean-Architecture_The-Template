@@ -1,4 +1,3 @@
-using Application.Common.Exceptions;
 using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Update;
 using Application.SubcutaneousTests.Extensions;
@@ -20,34 +19,29 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     [Fact]
     public async Task UpdateRole_WhenIdNotFound_ShouldReturnNotFoundException()
     {
-        // RoleUpdateRequest updatedRole = fixture
-        //     .Build<RoleUpdateRequest>()
-        //     .Without(x => x.RoleClaims)
-        //     .Create();
-        // Ulid ulid = Ulid.NewUlid();
-        // UpdateRoleCommand updateRoleCommand = fixture
-        //     .Build<UpdateRoleCommand>()
-        //     .With(x => x.RoleId, ulid.ToString())
-        //     .With(x => x.UpdateData, updatedRole)
-        //     .Create();
+        RoleUpdateRequest updatedRole = fixture
+            .Build<RoleUpdateRequest>()
+            .Without(x => x.RoleClaims)
+            .Create();
+        Ulid ulid = Ulid.NewUlid();
+        UpdateRoleCommand updateRoleCommand = fixture
+            .Build<UpdateRoleCommand>()
+            .With(x => x.RoleId, ulid.ToString())
+            .With(x => x.UpdateData, updatedRole)
+            .Create();
+        //act
+        Result<UpdateRoleResponse> result = await testingFixture.SendAsync(updateRoleCommand);
 
-        // List<MessageResult> messageResults =
-        // [
-        //     Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage(),
-        // ];
+        //assert
+        var expectedMessage = Messager
+            .Create<Role>()
+            .Message(MessageType.Found)
+            .Negative()
+            .BuildMessage();
 
-        // var result = await FluentActions
-        //     .Invoking(() => testingFixture.SendAsync(updateRoleCommand))
-        //     .Should()
-        //     .ThrowAsync<NotFoundException>(becauseArgs: messageResults);
-
-        // ErrorReason error = result.And.Errors.First().Reasons.First();
-        // MessageResult messageResult = messageResults[0];
-        // error.Should().NotBeNull();
-
-        // error.Message.Should().Be(messageResult.Message);
-        // error.En.Should().Be(messageResult.En);
-        // error.Vi.Should().Be(messageResult.Vi);
+        result.Error.Should().NotBeNull();
+        result.Error.Status.Should().Be(404);
+        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
     }
 
     [Fact]
@@ -96,7 +90,10 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         RoleUpdateRequest.Name = $"name{Guid.NewGuid()}";
         RoleUpdateRequest.Description = $"description{Guid.NewGuid()}";
 
+        //act
         Result<UpdateRoleResponse> result = await testingFixture.SendAsync(updateRoleCommand);
+
+        //assert
         UpdateRoleResponse updateRoleResponse = result.Value!;
         Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
             updateRoleResponse.Id

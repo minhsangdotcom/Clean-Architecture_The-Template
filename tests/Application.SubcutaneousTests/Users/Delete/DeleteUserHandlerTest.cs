@@ -1,8 +1,10 @@
 using Application.Common.Exceptions;
 using Application.Features.Users.Commands.Delete;
 using AutoFixture;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using FluentAssertions;
+using SharedKernel.Common.Messages;
 
 namespace Application.SubcutaneousTests.Users.Delete;
 
@@ -16,10 +18,17 @@ public class DeleteUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     [Fact]
     private async Task DeleteUser_WhenIdNotfound_ShouldThrowNotFoundException()
     {
-        // await FluentActions
-        //     .Invoking(() => testingFixture.SendAsync(new DeleteUserCommand(Ulid.NewUlid())))
-        //     .Should()
-        //     .ThrowAsync<NotFoundException>();
+        Result<string> result = await testingFixture.SendAsync(
+            new DeleteUserCommand(Ulid.NewUlid())
+        );
+        var expectedMessage = Messager
+            .Create<User>()
+            .Message(MessageType.Found)
+            .Negative()
+            .BuildMessage();
+        result.Error.Should().NotBeNull();
+        result.Error.Status.Should().Be(404);
+        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
     }
 
     [Fact]

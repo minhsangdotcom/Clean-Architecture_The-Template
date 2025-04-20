@@ -1,26 +1,13 @@
-using Application.Features.Common.Mapping.Roles;
-using CaseConverter;
 using Domain.Aggregates.Roles;
+using SharedKernel.Extensions;
 
 namespace Application.Features.Roles.Commands.Update;
-
-// public class UpdateRoleMapping : Profile
-// {
-//     public UpdateRoleMapping()
-//     {
-//         CreateMap<RoleUpdateRequest, Role>()
-//             .ForMember(dest => dest.RoleClaims, opt => opt.Ignore())
-//             .IncludeBase<RoleModel, Role>();
-
-//         CreateMap<Role, UpdateRoleResponse>();
-//     }
-// }
 
 public static class UpdateRoleMapping
 {
     public static Role FromUpdateRole(this Role role, RoleUpdateRequest RoleUpdateRequest)
     {
-        role.Name = RoleUpdateRequest.Name!;
+        role.Name = RoleUpdateRequest.Name.ToScreamingSnakeCase();
         role.Description = RoleUpdateRequest.Description;
         return role;
     }

@@ -8,6 +8,7 @@ using Domain.Aggregates.Users;
 using FluentAssertions;
 using Infrastructure.Constants;
 using Microsoft.AspNetCore.Http;
+using SharedKernel.Common.Messages;
 using SharedKernel.Constants;
 
 namespace Application.SubcutaneousTests.Users.Create;
@@ -20,7 +21,67 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private CreateUserCommand command = new();
 
     [Fact]
-    private async Task CreateUser_WhenNoCustomClaim_ShouldCreateSuccess()
+    private async Task CreateUser_WhenProvinceNotFound_ShouldReturnNotFoundResult()
+    {
+        command.ProvinceId = Ulid.NewUlid();
+        //act
+        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
+
+        //assert
+        var expectedMessage = Messager
+            .Create<User>()
+            .Property(nameof(CreateUserCommand.ProvinceId))
+            .Message(MessageType.Existence)
+            .Negative()
+            .Build();
+
+        result.Error.Should().NotBeNull();
+        result.Error.Status.Should().Be(404);
+        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
+    }
+
+    [Fact]
+    private async Task CreateUser_WhenDistrictNotFound_ShouldReturnNotFoundResult()
+    {
+        command.DistrictId = Ulid.NewUlid();
+        //act
+        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
+
+        //assert
+        var expectedMessage = Messager
+            .Create<User>()
+            .Property(nameof(CreateUserCommand.DistrictId))
+            .Message(MessageType.Existence)
+            .Negative()
+            .Build();
+
+        result.Error.Should().NotBeNull();
+        result.Error.Status.Should().Be(404);
+        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
+    }
+
+    [Fact]
+    private async Task CreateUser_WhenCommuneNotFound_ShouldReturnNotFoundResult()
+    {
+        command.CommuneId = Ulid.NewUlid();
+        //act
+        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
+
+        //assert
+        var expectedMessage = Messager
+            .Create<User>()
+            .Property(nameof(CreateUserCommand.CommuneId))
+            .Message(MessageType.Existence)
+            .Negative()
+            .Build();
+
+        result.Error.Should().NotBeNull();
+        result.Error.Status.Should().Be(404);
+        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
+    }
+
+    [Fact]
+    private async Task CreateUser_WhenCustomClaimNull_ShouldCreateSuccess()
     {
         command.UserClaims = null;
 
@@ -32,7 +93,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     }
 
     [Fact]
-    private async Task CreateUser_WhenNoAvatar_ShouldCreateSuccess()
+    private async Task CreateUser_WhenAvatarNull_ShouldCreateSuccess()
     {
         command.Avatar = null;
         Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
@@ -43,7 +104,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     }
 
     [Fact]
-    private async Task CreateUser_WhenNoGender_ShouldCreateSuccess()
+    private async Task CreateUser_WhenGenderNull_ShouldCreateSuccess()
     {
         command.Gender = null;
         Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
@@ -54,7 +115,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     }
 
     [Fact]
-    private async Task CreateUser_WhenNoDayOfBirth_ShouldCreateSuccess()
+    private async Task CreateUser_WhenDayOfBirthNull_ShouldCreateSuccess()
     {
         command.DayOfBirth = null;
         Result<CreateUserResponse> result = await testingFixture.SendAsync(command);

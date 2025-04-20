@@ -1,4 +1,3 @@
-using Application.Common.Exceptions;
 using Application.Features.Users.Commands.Update;
 using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
@@ -6,6 +5,7 @@ using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using SharedKernel.Common.Messages;
 
 namespace Application.SubcutaneousTests.Users.Update;
 
@@ -16,13 +16,79 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private UpdateUserCommand updateUserCommand = new();
 
     [Fact]
-    private async Task UpdateUser_WhenIdNotfound_ShouldThrowNotfoundException()
+    private async Task CreateUser_WhenProvinceNotFound_ShouldReturnNotFoundResult()
     {
-        // updateUserCommand.UserId = Ulid.NewUlid().ToString();
-        // await FluentActions
-        //     .Invoking(() => testingFixture.SendAsync(updateUserCommand))
-        //     .Should()
-        //     .ThrowAsync<NotFoundException>();
+        updateUserCommand.UpdateData.ProvinceId = Ulid.NewUlid();
+        //act
+        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
+
+        //assert
+        var expectedMessage = Messager
+            .Create<User>()
+            .Property(nameof(UserUpdateRequest.ProvinceId))
+            .Message(MessageType.Existence)
+            .Negative()
+            .Build();
+
+        result.Error.Should().NotBeNull();
+        result.Error.Status.Should().Be(404);
+        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
+    }
+
+    [Fact]
+    private async Task CreateUser_WhenDistrictNotFound_ShouldReturnNotFoundResult()
+    {
+        updateUserCommand.UpdateData.DistrictId = Ulid.NewUlid();
+        //act
+        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
+
+        //assert
+        var expectedMessage = Messager
+            .Create<User>()
+            .Property(nameof(UserUpdateRequest.DistrictId))
+            .Message(MessageType.Existence)
+            .Negative()
+            .Build();
+
+        result.Error.Should().NotBeNull();
+        result.Error.Status.Should().Be(404);
+        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
+    }
+
+    [Fact]
+    private async Task CreateUser_WhenCommuneNotFound_ShouldReturnNotFoundResult()
+    {
+        updateUserCommand.UpdateData.CommuneId = Ulid.NewUlid();
+        //act
+        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
+
+        //assert
+        var expectedMessage = Messager
+            .Create<User>()
+            .Property(nameof(UserUpdateRequest.CommuneId))
+            .Message(MessageType.Existence)
+            .Negative()
+            .Build();
+
+        result.Error.Should().NotBeNull();
+        result.Error.Status.Should().Be(404);
+        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
+    }
+
+    [Fact]
+    private async Task UpdateUser_WhenIdNotfound_ShouldReturnNotFoundResult()
+    {
+        updateUserCommand.UserId = Ulid.NewUlid().ToString();
+        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
+        var expectMessage = Messager
+            .Create<User>()
+            .Message(MessageType.Found)
+            .Negative()
+            .BuildMessage();
+
+        result.Error.Should().NotBeNull();
+        result.Error.Status.Should().Be(404);
+        result.Error.ErrorMessage.Should().BeEquivalentTo(expectMessage);
     }
 
     [Fact]
