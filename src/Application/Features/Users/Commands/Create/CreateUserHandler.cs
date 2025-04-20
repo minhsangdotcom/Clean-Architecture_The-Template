@@ -1,3 +1,4 @@
+using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Users.Commands.Update;
@@ -7,6 +8,7 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.Create;
 
@@ -26,9 +28,38 @@ public class CreateUserHandler(
         Province? province = await unitOfWork
             .Repository<Province>()
             .FindByIdAsync(command.ProvinceId, cancellationToken);
+        if (province == null)
+        {
+            return Result<CreateUserResponse>.Failure<NotFoundError>(
+                new(
+                    "Resource is not found",
+                    Messager
+                        .Create<User>()
+                        .Property(nameof(CreateUserCommand.ProvinceId))
+                        .Message(MessageType.Existence)
+                        .Negative()
+                        .Build()
+                )
+            );
+        }
+
         District? district = await unitOfWork
             .Repository<District>()
             .FindByIdAsync(command.DistrictId, cancellationToken);
+        if (district == null)
+        {
+            return Result<CreateUserResponse>.Failure<NotFoundError>(
+                new(
+                    "Resource is not found",
+                    Messager
+                        .Create<User>()
+                        .Property(nameof(CreateUserCommand.DistrictId))
+                        .Message(MessageType.Existence)
+                        .Negative()
+                        .Build()
+                )
+            );
+        }
 
         Commune? commune = null;
         if (command.CommuneId.HasValue)
@@ -36,6 +67,21 @@ public class CreateUserHandler(
             commune = await unitOfWork
                 .Repository<Commune>()
                 .FindByIdAsync(command.CommuneId.Value, cancellationToken);
+
+            if (commune == null)
+            {
+                return Result<CreateUserResponse>.Failure<NotFoundError>(
+                    new(
+                        "Resource is not found",
+                        Messager
+                            .Create<User>()
+                            .Property(nameof(CreateUserCommand.CommuneId))
+                            .Message(MessageType.Existence)
+                            .Negative()
+                            .Build()
+                    )
+                );
+            }
         }
 
         //* creating new user address

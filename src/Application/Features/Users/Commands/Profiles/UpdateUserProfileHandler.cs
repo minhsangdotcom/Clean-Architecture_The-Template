@@ -48,9 +48,38 @@ public class UpdateUserProfileHandler(
         Province? province = await unitOfWork
             .Repository<Province>()
             .FindByIdAsync(command.ProvinceId, cancellationToken);
+        if (province == null)
+        {
+            return Result<UpdateUserProfileResponse>.Failure<NotFoundError>(
+                new(
+                    "Resource is not found",
+                    Messager
+                        .Create<User>()
+                        .Property(nameof(UpdateUserProfileCommand.ProvinceId))
+                        .Message(MessageType.Existence)
+                        .Negative()
+                        .Build()
+                )
+            );
+        }
+
         District? district = await unitOfWork
             .Repository<District>()
             .FindByIdAsync(command.DistrictId, cancellationToken);
+        if (district == null)
+        {
+            return Result<UpdateUserProfileResponse>.Failure<NotFoundError>(
+                new(
+                    "Resource is not found",
+                    Messager
+                        .Create<User>()
+                        .Property(nameof(UpdateUserProfileCommand.DistrictId))
+                        .Message(MessageType.Existence)
+                        .Negative()
+                        .Build()
+                )
+            );
+        }
 
         Commune? commune = null;
         if (command.CommuneId.HasValue)
@@ -58,6 +87,21 @@ public class UpdateUserProfileHandler(
             commune = await unitOfWork
                 .Repository<Commune>()
                 .FindByIdAsync(command.CommuneId.Value, cancellationToken);
+
+            if (commune == null)
+            {
+                return Result<UpdateUserProfileResponse>.Failure<NotFoundError>(
+                    new(
+                        "Resource is not found",
+                        Messager
+                            .Create<User>()
+                            .Property(nameof(UpdateUserProfileCommand.CommuneId))
+                            .Message(MessageType.Existence)
+                            .Negative()
+                            .Build()
+                    )
+                );
+            }
         }
         user.UpdateAddress(
             new(

@@ -40,24 +40,70 @@ public class UpdateUserHandler(
             );
         }
 
-        IFormFile? avatar = command.UpdateData!.Avatar;
+        UserUpdateRequest updateData = command.UpdateData;
+
+        IFormFile? avatar = updateData.Avatar;
         string? oldAvatar = user.Avatar;
 
-        user.FromUpdateUser(command.UpdateData);
+        user.FromUpdateUser(updateData);
 
         Province? province = await unitOfWork
             .Repository<Province>()
-            .FindByIdAsync(command.UpdateData.ProvinceId, cancellationToken);
+            .FindByIdAsync(updateData.ProvinceId, cancellationToken);
+        if (province == null)
+        {
+            return Result<UpdateUserResponse>.Failure<NotFoundError>(
+                new(
+                    "Resource is not found",
+                    Messager
+                        .Create<User>()
+                        .Property(nameof(UserUpdateRequest.ProvinceId))
+                        .Message(MessageType.Existence)
+                        .Negative()
+                        .Build()
+                )
+            );
+        }
+
         District? district = await unitOfWork
             .Repository<District>()
-            .FindByIdAsync(command.UpdateData.DistrictId, cancellationToken);
+            .FindByIdAsync(updateData.DistrictId, cancellationToken);
+        if (district == null)
+        {
+            return Result<UpdateUserResponse>.Failure<NotFoundError>(
+                new(
+                    "Resource is not found",
+                    Messager
+                        .Create<User>()
+                        .Property(nameof(updateData.DistrictId))
+                        .Message(MessageType.Existence)
+                        .Negative()
+                        .Build()
+                )
+            );
+        }
 
         Commune? commune = null;
-        if (command.UpdateData.CommuneId.HasValue)
+        if (updateData.CommuneId.HasValue)
         {
             commune = await unitOfWork
                 .Repository<Commune>()
-                .FindByIdAsync(command.UpdateData.CommuneId.Value, cancellationToken);
+                .FindByIdAsync(updateData.CommuneId.Value, cancellationToken);
+
+            if (commune == null)
+            {
+                return Result<UpdateUserResponse>.Failure<NotFoundError>(
+                    new(
+                        "Resource is not found",
+                        Messager
+                            .Create<User>()
+                            .Property(nameof(UserUpdateRequest.CommuneId))
+                            .Message(MessageType.Existence)
+                            .Negative()
+                            .Build()
+                    )
+                );
+            }
         }
         //* replace address
         user.UpdateAddress(
@@ -87,8 +133,8 @@ public class UpdateUserHandler(
 
             //* update custom claims of user like permissions ...
             List<UserClaim> customUserClaims =
-                command.UpdateData.UserClaims?.ToListUserClaim(UserClaimType.Custom, user.Id) ?? [];
-            await userManagerService.UpdateAsync(user, command.UpdateData.Roles!, customUserClaims);
+                updateData.UserClaims?.ToListUserClaim(UserClaimType.Custom, user.Id) ?? [];
+            await userManagerService.UpdateAsync(user, updateData.Roles!, customUserClaims);
 
             await unitOfWork.CommitAsync(cancellationToken);
 

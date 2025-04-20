@@ -23,6 +23,8 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
     private readonly DbSet<UserClaim> userClaimsContext = context.Set<UserClaim>();
     public DbSet<UserClaim> UserClaims => userClaimsContext;
 
+    public DbSet<User> User => userContext;
+
     private readonly DbSet<User> userContext = context.Set<User>();
 
     public async Task CreateAsync(

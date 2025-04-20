@@ -12,6 +12,8 @@ public interface IUserManagerService
 
     public DbSet<UserClaim> UserClaims { get; }
 
+    public DbSet<User> User { get; }
+
     Task CreateAsync(User user, IEnumerable<Ulid> roleIds, IEnumerable<UserClaim>? claims = null);
 
     Task UpdateAsync(User user, IEnumerable<Ulid>? roleIds, IEnumerable<UserClaim>? claims = null);

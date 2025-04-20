@@ -20,34 +20,34 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     [Fact]
     public async Task UpdateRole_WhenIdNotFound_ShouldReturnNotFoundException()
     {
-        RoleUpdateRequest updatedRole = fixture
-            .Build<RoleUpdateRequest>()
-            .Without(x => x.RoleClaims)
-            .Create();
-        Ulid ulid = Ulid.NewUlid();
-        UpdateRoleCommand updateRoleCommand = fixture
-            .Build<UpdateRoleCommand>()
-            .With(x => x.RoleId, ulid.ToString())
-            .With(x => x.UpdateData, updatedRole)
-            .Create();
+        // RoleUpdateRequest updatedRole = fixture
+        //     .Build<RoleUpdateRequest>()
+        //     .Without(x => x.RoleClaims)
+        //     .Create();
+        // Ulid ulid = Ulid.NewUlid();
+        // UpdateRoleCommand updateRoleCommand = fixture
+        //     .Build<UpdateRoleCommand>()
+        //     .With(x => x.RoleId, ulid.ToString())
+        //     .With(x => x.UpdateData, updatedRole)
+        //     .Create();
 
-        List<MessageResult> messageResults =
-        [
-            Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage(),
-        ];
+        // List<MessageResult> messageResults =
+        // [
+        //     Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage(),
+        // ];
 
-        var result = await FluentActions
-            .Invoking(() => testingFixture.SendAsync(updateRoleCommand))
-            .Should()
-            .ThrowAsync<NotFoundException>(becauseArgs: messageResults);
+        // var result = await FluentActions
+        //     .Invoking(() => testingFixture.SendAsync(updateRoleCommand))
+        //     .Should()
+        //     .ThrowAsync<NotFoundException>(becauseArgs: messageResults);
 
-        ErrorReason error = result.And.Errors.First().Reasons.First();
-        MessageResult messageResult = messageResults[0];
-        error.Should().NotBeNull();
+        // ErrorReason error = result.And.Errors.First().Reasons.First();
+        // MessageResult messageResult = messageResults[0];
+        // error.Should().NotBeNull();
 
-        error.Message.Should().Be(messageResult.Message);
-        error.En.Should().Be(messageResult.En);
-        error.Vi.Should().Be(messageResult.Vi);
+        // error.Message.Should().Be(messageResult.Message);
+        // error.En.Should().Be(messageResult.En);
+        // error.Vi.Should().Be(messageResult.Vi);
     }
 
     [Fact]

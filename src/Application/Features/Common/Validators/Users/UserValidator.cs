@@ -1,8 +1,7 @@
 using System.Text.RegularExpressions;
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Services.Identity;
 using Application.Features.Common.Projections.Users;
-using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -12,13 +11,16 @@ namespace Application.Features.Common.Validators.Users;
 
 public partial class UserValidator : AbstractValidator<UserModel>
 {
-    private readonly IUnitOfWork unitOfWork;
     private readonly IActionAccessorService accessorService;
+    private readonly IUserManagerService userManagerService;
 
-    public UserValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
+    public UserValidator(
+        IUserManagerService userManagerService,
+        IActionAccessorService accessorService
+    )
     {
-        this.unitOfWork = unitOfWork;
         this.accessorService = accessorService;
+        this.userManagerService = userManagerService;
         ApplyRules();
     }
 
@@ -65,6 +67,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
             );
 
         RuleFor(x => x.Email)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithState(x =>
                 Messager
@@ -118,6 +121,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
             );
 
         RuleFor(x => x.PhoneNumber)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithState(x =>
                 Messager
@@ -150,15 +154,6 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
-            )
-            .MustAsync(IsProvinceAvailableAsync)
-            .WithState(x =>
-                Messager
-                    .Create<User>()
-                    .Property(nameof(x.ProvinceId))
-                    .Message(MessageType.Existence)
-                    .Negative()
-                    .Build()
             );
 
         RuleFor(x => x.DistrictId)
@@ -168,30 +163,6 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Create<User>()
                     .Property(nameof(UserModel.DistrictId))
                     .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            )
-            .MustAsync(IsDistrictAvailableAsync)
-            .WithState(x =>
-                Messager
-                    .Create<User>()
-                    .Property(nameof(x.DistrictId))
-                    .Message(MessageType.Existence)
-                    .Negative()
-                    .Build()
-            );
-
-        RuleFor(x => x.CommuneId)
-            .MustAsync(
-                (communeId, cancellationToken) =>
-                    IsCommuneAvailableAsync(communeId!.Value, cancellationToken)
-            )
-            .When(x => x.CommuneId != null, ApplyConditionTo.CurrentValidator)
-            .WithState(x =>
-                Messager
-                    .Create<User>()
-                    .Property(nameof(x.CommuneId))
-                    .Message(MessageType.Existence)
                     .Negative()
                     .Build()
             );
@@ -213,33 +184,10 @@ public partial class UserValidator : AbstractValidator<UserModel>
         Ulid? id = null,
         CancellationToken cancellationToken = default
     ) =>
-        !await unitOfWork
-            .Repository<User>()
-            .AnyAsync(
-                x => (!id.HasValue && x.Email == email) || (x.Id != id && x.Email == email),
-                cancellationToken
-            );
-
-    private async Task<bool> IsProvinceAvailableAsync(
-        Ulid provinceId,
-        CancellationToken cancellationToken
-    ) =>
-        await unitOfWork
-            .Repository<Province>()
-            .AnyAsync(x => x.Id == provinceId, cancellationToken);
-
-    private async Task<bool> IsDistrictAvailableAsync(
-        Ulid districtId,
-        CancellationToken cancellationToken
-    ) =>
-        await unitOfWork
-            .Repository<District>()
-            .AnyAsync(x => x.Id == districtId, cancellationToken);
-
-    private async Task<bool> IsCommuneAvailableAsync(
-        Ulid communeId,
-        CancellationToken cancellationToken
-    ) => await unitOfWork.Repository<Commune>().AnyAsync(x => x.Id == communeId, cancellationToken);
+        !await userManagerService.User.AnyAsync(
+            x => (!id.HasValue && x.Email == email) || (x.Id != id && x.Email == email),
+            cancellationToken
+        );
 
     [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
     private static partial Regex EmailValidationRegex();
