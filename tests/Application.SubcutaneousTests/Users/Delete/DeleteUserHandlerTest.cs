@@ -1,18 +1,15 @@
-using Application.Common.Exceptions;
 using Application.Features.Users.Commands.Delete;
-using AutoFixture;
+using Application.SubcutaneousTests.Extensions;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
-using FluentAssertions;
 using SharedKernel.Common.Messages;
+using Shouldly;
 
 namespace Application.SubcutaneousTests.Users.Delete;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class DeleteUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
-    private readonly Fixture fixture = new();
-
     private Ulid? id;
 
     [Fact]
@@ -26,18 +23,16 @@ public class DeleteUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .Message(MessageType.Found)
             .Negative()
             .BuildMessage();
-        result.Error.Should().NotBeNull();
-        result.Error.Status.Should().Be(404);
-        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
+        result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]
     private async Task DeleteUser_WhenIdNotfound_ShouldDeleteSuccess()
     {
-        await FluentActions
-            .Invoking(() => testingFixture.SendAsync(new DeleteUserCommand(id!.Value)))
-            .Should()
-            .NotThrowAsync();
+        var result = await testingFixture.SendAsync(new DeleteUserCommand(id!.Value));
+        result.Error.ShouldBeNull();
     }
 
     public async Task DisposeAsync()

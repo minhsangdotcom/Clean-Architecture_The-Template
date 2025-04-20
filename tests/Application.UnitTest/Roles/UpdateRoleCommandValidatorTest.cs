@@ -4,7 +4,6 @@ using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Update;
 using AutoFixture;
 using Domain.Aggregates.Roles;
-using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Moq;
@@ -53,11 +52,10 @@ public sealed class UpdateRoleCommandValidatorTest
             .Message(MessageType.Null)
             .Build();
 
-        var failure = result.Errors.FirstOrDefault(e =>
-            e.PropertyName == nameof(RoleUpdateRequest.Name)
-        );
-        failure.Should().NotBeNull();
-        failure.CustomState.As<MessageResult>().Message.Should().Be(expectedState.Message);
+        result
+            .ShouldHaveValidationErrorFor(x => x.Name)
+            .WithCustomState(expectedState, new MessageResultComparer())
+            .Only();
     }
 
     [Fact]
@@ -76,11 +74,10 @@ public sealed class UpdateRoleCommandValidatorTest
             .Message(MessageType.MaximumLength)
             .Build();
 
-        var failure = result.Errors.FirstOrDefault(e =>
-            e.PropertyName == nameof(RoleUpdateRequest.Name)
-        );
-        failure.Should().NotBeNull();
-        failure.CustomState.As<MessageResult>().Message.Should().Be(expectedState.Message);
+        result
+            .ShouldHaveValidationErrorFor(x => x.Name)
+            .WithCustomState(expectedState, new MessageResultComparer())
+            .Only();
     }
 
     [Fact]
@@ -104,11 +101,10 @@ public sealed class UpdateRoleCommandValidatorTest
         // act
         var result = await mockValidator.TestValidateAsync(command);
         //assert
-        var failure = result.Errors.FirstOrDefault(e =>
-            e.PropertyName == nameof(RoleUpdateRequest.Name)
-        );
-        failure.Should().NotBeNull();
-        failure.CustomState.Should().Be(expectedState);
+        result
+            .ShouldHaveValidationErrorFor(x => x.Name)
+            .WithCustomState(expectedState, new MessageResultComparer())
+            .Only();
     }
 
     [Fact]
@@ -127,11 +123,10 @@ public sealed class UpdateRoleCommandValidatorTest
             .Message(MessageType.MaximumLength)
             .Build();
 
-        var failure = result.Errors.FirstOrDefault(e =>
-            e.PropertyName == nameof(RoleUpdateRequest.Description)
-        );
-        failure.Should().NotBeNull();
-        failure.CustomState.As<MessageResult>().Message.Should().Be(expectedState.Message);
+        result
+            .ShouldHaveValidationErrorFor(x => x.Description)
+            .WithCustomState(expectedState, new MessageResultComparer())
+            .Only();
     }
 
     [Fact]
@@ -150,14 +145,12 @@ public sealed class UpdateRoleCommandValidatorTest
             .Message(MessageType.Null)
             .Negative()
             .Build();
-        var failures = result.Errors.FindAll(e =>
-            e.PropertyName.Contains(nameof(RoleClaimModel.ClaimType))
-        );
 
-        failures.Count.Should().Be(roleClaims.Count);
-        failures
-            .Should()
-            .OnlyContain(f => f.CustomState.As<MessageResult>().Message == expectedState.Message);
+        result
+            .ShouldHaveValidationErrorFor(
+                $"{nameof(RoleUpdateRequest.RoleClaims)}[0].{nameof(RoleClaimModel.ClaimType)}"
+            )
+            .WithCustomState(expectedState, new MessageResultComparer());
     }
 
     [Fact]
@@ -176,14 +169,11 @@ public sealed class UpdateRoleCommandValidatorTest
             .Message(MessageType.Null)
             .Negative()
             .Build();
-        var failures = result.Errors.FindAll(e =>
-            e.PropertyName.Contains(nameof(RoleClaimModel.ClaimType))
-        );
-
-        failures.Count.Should().Be(roleClaims.Count);
-        failures
-            .Should()
-            .OnlyContain(f => f.CustomState.As<MessageResult>().Message == expectedState.Message);
+        result
+            .ShouldHaveValidationErrorFor(
+                $"{nameof(RoleUpdateRequest.RoleClaims)}[0].{nameof(RoleClaimModel.ClaimType)}"
+            )
+            .WithCustomState(expectedState, new MessageResultComparer());
     }
 
     [Fact]
@@ -199,14 +189,11 @@ public sealed class UpdateRoleCommandValidatorTest
             .Message(MessageType.Null)
             .Negative()
             .Build();
-        var failures = result.Errors.FindAll(e =>
-            e.PropertyName.Contains(nameof(RoleClaimModel.ClaimValue))
-        );
-
-        failures.Count.Should().Be(roleClaims.Count);
-        failures
-            .Should()
-            .OnlyContain(f => f.CustomState.As<MessageResult>().Message == expectedState.Message);
+        result
+            .ShouldHaveValidationErrorFor(
+                $"{nameof(RoleUpdateRequest.RoleClaims)}[0].{nameof(RoleClaimModel.ClaimValue)}"
+            )
+            .WithCustomState(expectedState, new MessageResultComparer());
     }
 
     [Fact]
@@ -222,13 +209,10 @@ public sealed class UpdateRoleCommandValidatorTest
             .Message(MessageType.Null)
             .Negative()
             .Build();
-        var failures = result.Errors.FindAll(e =>
-            e.PropertyName.Contains(nameof(RoleClaimModel.ClaimValue))
-        );
-
-        failures.Count.Should().Be(roleClaims.Count);
-        failures
-            .Should()
-            .OnlyContain(f => f.CustomState.As<MessageResult>().Message == expectedState.Message);
+        result
+            .ShouldHaveValidationErrorFor(
+                $"{nameof(RoleUpdateRequest.RoleClaims)}[0].{nameof(RoleClaimModel.ClaimValue)}"
+            )
+            .WithCustomState(expectedState, new MessageResultComparer());
     }
 }

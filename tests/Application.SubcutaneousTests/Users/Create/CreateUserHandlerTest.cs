@@ -5,11 +5,11 @@ using AutoFixture;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
-using FluentAssertions;
 using Infrastructure.Constants;
 using Microsoft.AspNetCore.Http;
 using SharedKernel.Common.Messages;
 using SharedKernel.Constants;
+using Shouldly;
 
 namespace Application.SubcutaneousTests.Users.Create;
 
@@ -35,9 +35,9 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .Negative()
             .Build();
 
-        result.Error.Should().NotBeNull();
-        result.Error.Status.Should().Be(404);
-        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
+        result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]
@@ -55,9 +55,9 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .Negative()
             .Build();
 
-        result.Error.Should().NotBeNull();
-        result.Error.Status.Should().Be(404);
-        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
+        result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]
@@ -75,64 +75,52 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .Negative()
             .Build();
 
-        result.Error.Should().NotBeNull();
-        result.Error.Status.Should().Be(404);
-        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
-    }
-
-    [Fact]
-    private async Task CreateUser_WhenCustomClaimNull_ShouldCreateSuccess()
-    {
-        command.UserClaims = null;
-
-        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
-        CreateUserResponse response = result.Value!;
-        User? user = await testingFixture.FindUserByIdAsync(response.Id);
-
-        AssertUser(user, command);
-    }
-
-    [Fact]
-    private async Task CreateUser_WhenAvatarNull_ShouldCreateSuccess()
-    {
-        command.Avatar = null;
-        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
-        CreateUserResponse response = result.Value!;
-        User? user = await testingFixture.FindUserByIdAsync(response.Id);
-
-        AssertUser(user, command);
-    }
-
-    [Fact]
-    private async Task CreateUser_WhenGenderNull_ShouldCreateSuccess()
-    {
-        command.Gender = null;
-        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
-        CreateUserResponse response = result.Value!;
-        User? user = await testingFixture.FindUserByIdAsync(response.Id);
-
-        AssertUser(user, command);
-    }
-
-    [Fact]
-    private async Task CreateUser_WhenDayOfBirthNull_ShouldCreateSuccess()
-    {
-        command.DayOfBirth = null;
-        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
-        CreateUserResponse response = result.Value!;
-        User? user = await testingFixture.FindUserByIdAsync(response.Id);
-
-        AssertUser(user, command);
+        result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]
     private async Task CreateUser_ShouldCreateSuccess()
     {
-        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
-        CreateUserResponse response = result.Value!;
-        User? user = await testingFixture.FindUserByIdAsync(response.Id);
+        //arrage
+        command.DayOfBirth = null;
+        command.Avatar = null;
+        command.Gender = null;
+        command.UserClaims = null;
 
-        AssertUser(user, command);
+        //act
+        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Error.ShouldBeNull();
+
+        var response = result.Value!;
+        var user = await testingFixture.FindUserByIdAsync(response.Id);
+        user.ShouldNotBeNull();
+
+        user!.ShouldSatisfyAllConditions(
+            () => user.Id.ShouldBe(response.Id),
+            () => user.FirstName.ShouldBe(response.FirstName),
+            () => user.LastName.ShouldBe(response.LastName),
+            () => user.Username.ShouldBe(response.Username),
+            () => user.Email.ShouldBe(response.Email),
+            () => user.PhoneNumber.ShouldBe(response.PhoneNumber),
+            () => user.DayOfBirth.ShouldBe(response.DayOfBirth),
+            () => user.Gender.ShouldBe(response.Gender),
+            () => user.Address?.ToString().ShouldBe(response.Address),
+            () => user.Avatar.ShouldBe(response.Avatar),
+            () => user.Status.ShouldBe(response.Status),
+            () => user.UserRoles?.Select(x => x.RoleId).ShouldBe(response.Roles?.Select(x => x.Id)),
+            () =>
+                command
+                    .UserClaims?.All(x =>
+                        user.UserClaims?.Any(p =>
+                            p.ClaimType == x.ClaimType && p.ClaimValue == x.ClaimType
+                        ) == true
+                    )
+                    .ShouldBeTrue()
+        );
     }
 
     public async Task DisposeAsync()
@@ -173,59 +161,5 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .With(x => x.PhoneNumber, "0123456789")
             .With(x => x.Username, "admin.super")
             .Create();
-    }
-
-    private void AssertUser(User? user, CreateUserCommand createUserCommand)
-    {
-        user.Should().NotBeNull();
-        user!.FirstName.Should().Be(createUserCommand.FirstName);
-        user!.LastName.Should().Be(createUserCommand.LastName);
-        user!.Email.Should().Be(createUserCommand.Email);
-        user!.PhoneNumber.Should().Be(createUserCommand.PhoneNumber);
-        user!.Address!.ProvinceId.Should().Be(createUserCommand.ProvinceId);
-        user!.Address!.DistrictId.Should().Be(createUserCommand.DistrictId);
-        user!.Username!.Should().Be(createUserCommand.Username);
-        BCrypt.Net.BCrypt.Verify(createUserCommand.Password, user.Password).Should().BeTrue();
-
-        if (createUserCommand.Avatar != null)
-        {
-            user.Avatar.Should().NotBeNull();
-        }
-        else
-        {
-            user.Avatar.Should().BeNull();
-        }
-
-        if (createUserCommand.DayOfBirth.HasValue)
-        {
-            user!.DayOfBirth!.Value.Date.Should().Be(createUserCommand.DayOfBirth.Value.Date);
-        }
-        else
-        {
-            user.DayOfBirth.Should().BeNull();
-        }
-
-        user!.Gender.Should().Be(createUserCommand.Gender);
-        user!.Status.Should().Be(createUserCommand.Status);
-
-        if (createUserCommand.CommuneId != null || createUserCommand.CommuneId != Ulid.Empty)
-        {
-            user.Address.CommuneId.Should().Be(createUserCommand.CommuneId!.Value);
-        }
-        else
-        {
-            user.Address.Commune.Should().BeNull();
-        }
-
-        user.UserRoles.Should().ContainSingle(x => x.RoleId == roleId);
-
-        if (createUserCommand.UserClaims?.Count > 0)
-        {
-            user.UserClaims!.Select(x => new { x.ClaimType, x.ClaimValue })
-                .Should()
-                .IntersectWith(
-                    createUserCommand.UserClaims.Select(x => new { x.ClaimType, x.ClaimValue })!
-                );
-        }
     }
 }

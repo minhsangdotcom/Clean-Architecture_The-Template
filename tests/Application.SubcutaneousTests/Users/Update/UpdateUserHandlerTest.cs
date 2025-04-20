@@ -1,18 +1,16 @@
 using Application.Features.Users.Commands.Update;
 using Application.SubcutaneousTests.Extensions;
-using AutoFixture;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
-using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using SharedKernel.Common.Messages;
+using Shouldly;
 
 namespace Application.SubcutaneousTests.Users.Update;
 
 [Collection(nameof(TestingCollectionFixture))]
 public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
-    private readonly Fixture fixture = new();
     private UpdateUserCommand updateUserCommand = new();
 
     [Fact]
@@ -30,9 +28,9 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .Negative()
             .Build();
 
-        result.Error.Should().NotBeNull();
-        result.Error.Status.Should().Be(404);
-        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
+        result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]
@@ -50,9 +48,9 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .Negative()
             .Build();
 
-        result.Error.Should().NotBeNull();
-        result.Error.Status.Should().Be(404);
-        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
+        result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]
@@ -70,9 +68,9 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .Negative()
             .Build();
 
-        result.Error.Should().NotBeNull();
-        result.Error.Status.Should().Be(404);
-        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
+        result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]
@@ -80,105 +78,58 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     {
         updateUserCommand.UserId = Ulid.NewUlid().ToString();
         Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
-        var expectMessage = Messager
+        var expectedMessage = Messager
             .Create<User>()
             .Message(MessageType.Found)
             .Negative()
             .BuildMessage();
 
-        result.Error.Should().NotBeNull();
-        result.Error.Status.Should().Be(404);
-        result.Error.ErrorMessage.Should().BeEquivalentTo(expectMessage);
-    }
-
-    [Fact]
-    private async Task UpdateUser_WhenNoCustomClaim_ShouldUpdateSuccess()
-    {
-        updateUserCommand.UpdateData!.UserClaims = null;
-
-        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
-        UpdateUserResponse response = result.Value!;
-        User? user = await testingFixture.FindUserByIdAsync(response.Id);
-
-        AssertUser(user, updateUserCommand);
-    }
-
-    [Fact]
-    private async Task UpdateUser_WhenNoAvatar_ShouldUpdateSuccess()
-    {
-        updateUserCommand.UpdateData!.Avatar = null;
-        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
-        UpdateUserResponse response = result.Value!;
-        User? user = await testingFixture.FindUserByIdAsync(response.Id);
-
-        AssertUser(user, updateUserCommand);
-    }
-
-    [Fact]
-    private async Task UpdateUser_WhenNoDayOfBirth_ShouldUpdateSuccess()
-    {
-        updateUserCommand.UpdateData!.DayOfBirth = null;
-        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
-        UpdateUserResponse response = result.Value!;
-        User? user = await testingFixture.FindUserByIdAsync(response.Id);
-
-        AssertUser(user, updateUserCommand);
+        result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]
     private async Task UpdateUser_ShouldUpdateSuccess()
     {
+        //arrage
+        var updateData = updateUserCommand.UpdateData;
+        updateData.DayOfBirth = null;
+        updateData.Avatar = null;
+        updateData.UserClaims = null;
+        //act
         Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
-        UpdateUserResponse response = result.Value!;
-        User? user = await testingFixture.FindUserByIdAsync(response.Id);
 
-        AssertUser(user, updateUserCommand);
-    }
+        result.IsSuccess.ShouldBeTrue();
+        result.Error.ShouldBeNull();
 
-    private static void AssertUser(User? user, UpdateUserCommand updateUserCommand)
-    {
-        UserUpdateRequest UserUpdateRequest = updateUserCommand.UpdateData!;
-        user.Should().NotBeNull();
-        user!.FirstName.Should().Be(UserUpdateRequest.FirstName);
-        user!.LastName.Should().Be(UserUpdateRequest.LastName);
-        user!.Email.Should().Be(UserUpdateRequest.Email);
-        user!.PhoneNumber.Should().Be(UserUpdateRequest.PhoneNumber);
-        user!.Address!.ProvinceId.Should().Be(UserUpdateRequest.ProvinceId);
-        user!.Address!.DistrictId.Should().Be(UserUpdateRequest.DistrictId);
+        var response = result.Value!;
+        var user = await testingFixture.FindUserByIdAsync(response.Id);
+        user.ShouldNotBeNull();
 
-        if (UserUpdateRequest.Avatar != null)
-        {
-            user.Avatar.Should().NotBeNull();
-        }
-        else
-        {
-            user.Avatar.Should().BeNull();
-        }
-
-        if (UserUpdateRequest.DayOfBirth.HasValue)
-        {
-            user!.DayOfBirth!.Value.Date.Should().Be(UserUpdateRequest.DayOfBirth.Value.Date);
-        }
-
-        if (UserUpdateRequest.CommuneId != null || UserUpdateRequest.CommuneId != Ulid.Empty)
-        {
-            user.Address.CommuneId.Should().Be(UserUpdateRequest.CommuneId!.Value);
-        }
-        else
-        {
-            user.Address.Commune.Should().BeNull();
-        }
-
-        user.UserRoles!.Select(x => x.RoleId).Should().Contain(UserUpdateRequest.Roles);
-
-        if (UserUpdateRequest.UserClaims?.Count > 0)
-        {
-            user.UserClaims!.Select(x => new { x.ClaimType, x.ClaimValue })
-                .Should()
-                .IntersectWith(
-                    UserUpdateRequest.UserClaims.Select(x => new { x.ClaimType, x.ClaimValue })!
-                );
-        }
+        user!.ShouldSatisfyAllConditions(
+            () => user.Id.ShouldBe(response.Id),
+            () => user.FirstName.ShouldBe(response.FirstName),
+            () => user.LastName.ShouldBe(response.LastName),
+            () => user.Username.ShouldBe(response.Username),
+            () => user.Email.ShouldBe(response.Email),
+            () => user.PhoneNumber.ShouldBe(response.PhoneNumber),
+            () => user.Gender.ShouldBe(response.Gender),
+            () => user.Address?.ToString().ShouldBe(response.Address),
+            () => user.Status.ShouldBe(response.Status),
+            () =>
+                user
+                    .UserRoles?.All(x => updateData.Roles?.Any(p => p == x.RoleId) == true)
+                    .ShouldBeTrue(),
+            () =>
+                updateData
+                    .UserClaims?.All(x =>
+                        user.UserClaims?.Any(p =>
+                            p.ClaimType == x.ClaimType && p.ClaimValue == x.ClaimType
+                        ) == true
+                    )
+                    .ShouldBeTrue()
+        );
     }
 
     public async Task DisposeAsync() => await Task.CompletedTask;

@@ -1,8 +1,9 @@
 using Application.Features.Roles.Commands.Delete;
+using Application.SubcutaneousTests.Extensions;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Roles;
-using FluentAssertions;
 using SharedKernel.Common.Messages;
+using Shouldly;
 
 namespace Application.SubcutaneousTests.Roles.Commands.Delete;
 
@@ -24,18 +25,16 @@ public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .Negative()
             .BuildMessage();
 
-        result.Error.Should().NotBeNull();
-        result.Error.Status.Should().Be(404);
-        result.Error.ErrorMessage.Should().BeEquivalentTo(expectedMessage);
+        result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]
     public async Task DeleteRole_WhenValidId_ShouldDeleteRole()
     {
-        await FluentActions
-            .Invoking(() => testingFixture.SendAsync(new DeleteRoleCommand(id)))
-            .Should()
-            .NotThrowAsync();
+        var result = await testingFixture.SendAsync(new DeleteRoleCommand(id));
+        result.Error.ShouldBeNull();
     }
 
     public async Task DisposeAsync() => await Task.CompletedTask;
