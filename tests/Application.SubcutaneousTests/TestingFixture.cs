@@ -12,6 +12,8 @@ public partial class TestingFixture : IAsyncLifetime
     private const string BASE_URL = "http://localhost:8080/api/";
     private HttpClient? Client;
 
+    private static Ulid UserId;
+
     public TestingFixture()
     {
         database = new();
@@ -90,6 +92,10 @@ public partial class TestingFixture : IAsyncLifetime
         factory.ThrowIfNull();
         Client = factory!.CreateClient();
     }
+
+    public static Ulid GetUserId() => UserId;
+
+    public static void RemoveUserId() => UserId = Ulid.Empty;
 }
 
 record LoginResponse(string Token, string Refresh);

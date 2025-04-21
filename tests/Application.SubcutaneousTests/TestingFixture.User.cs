@@ -90,7 +90,9 @@ public partial class TestingFixture
                 ],
             };
 
-        return await CreateUserAsync(command);
+        var user = await CreateUserAsync(command);
+        UserId = user.Id;
+        return user;
     }
 
     public async Task<User> CreateManagerUserAsync(
@@ -126,7 +128,10 @@ public partial class TestingFixture
                 ],
             };
 
-        return await CreateUserAsync(command);
+        
+        var user = await CreateUserAsync(command);
+        UserId = user.Id;
+        return user;
     }
 
     public async Task<User> CreateNormalUserAsync(
@@ -162,7 +167,9 @@ public partial class TestingFixture
                 ],
             };
 
-        return await CreateUserAsync(command);
+        var user = await CreateUserAsync(command);
+        UserId = user.Id;
+        return user;
     }
 
     public async Task<User> CreateUserAsync(CreateUserCommand command)

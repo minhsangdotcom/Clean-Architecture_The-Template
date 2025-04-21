@@ -1,4 +1,4 @@
-using Application.Features.Users.Commands.Update;
+using Application.Features.Users.Commands.Profiles;
 using Application.SubcutaneousTests.Extensions;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
@@ -6,24 +6,27 @@ using Microsoft.AspNetCore.Http;
 using SharedKernel.Common.Messages;
 using Shouldly;
 
-namespace Application.SubcutaneousTests.Users.Update;
+namespace Application.SubcutaneousTests.Users.Profie;
 
 [Collection(nameof(TestingCollectionFixture))]
-public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
+public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
-    private UpdateUserCommand updateUserCommand = new();
+    private UpdateUserProfileCommand updateUserCommand = new();
 
     [Fact]
-    private async Task UpdateUser_WhenProvinceNotFound_ShouldReturnNotFoundResult()
+    private async Task UpdateProfile_WhenProvinceNotFound_ShouldReturnNotFoundResult()
     {
-        updateUserCommand.UpdateData.ProvinceId = Ulid.NewUlid();
+        var a = TestingFixture.GetUserId();
+        updateUserCommand.ProvinceId = Ulid.NewUlid();
         //act
-        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
+        Result<UpdateUserProfileResponse> result = await testingFixture.SendAsync(
+            updateUserCommand
+        );
 
         //assert
         var expectedMessage = Messager
             .Create<User>()
-            .Property(nameof(UserUpdateRequest.ProvinceId))
+            .Property(nameof(UpdateUserProfileCommand.ProvinceId))
             .Message(MessageType.Existence)
             .Negative()
             .Build();
@@ -34,16 +37,18 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     }
 
     [Fact]
-    private async Task UpdateUser_WhenDistrictNotFound_ShouldReturnNotFoundResult()
+    private async Task UpdateProfile_WhenDistrictNotFound_ShouldReturnNotFoundResult()
     {
-        updateUserCommand.UpdateData.DistrictId = Ulid.NewUlid();
+        updateUserCommand.DistrictId = Ulid.NewUlid();
         //act
-        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
+        Result<UpdateUserProfileResponse> result = await testingFixture.SendAsync(
+            updateUserCommand
+        );
 
         //assert
         var expectedMessage = Messager
             .Create<User>()
-            .Property(nameof(UserUpdateRequest.DistrictId))
+            .Property(nameof(UpdateUserProfileCommand.DistrictId))
             .Message(MessageType.Existence)
             .Negative()
             .Build();
@@ -54,16 +59,18 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     }
 
     [Fact]
-    private async Task UpdateUser_WhenCommuneNotFound_ShouldReturnNotFoundResult()
+    private async Task UpdateProfile_WhenCommuneNotFound_ShouldReturnNotFoundResult()
     {
-        updateUserCommand.UpdateData.CommuneId = Ulid.NewUlid();
+        updateUserCommand.CommuneId = Ulid.NewUlid();
         //act
-        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
+        Result<UpdateUserProfileResponse> result = await testingFixture.SendAsync(
+            updateUserCommand
+        );
 
         //assert
         var expectedMessage = Messager
             .Create<User>()
-            .Property(nameof(UserUpdateRequest.CommuneId))
+            .Property(nameof(UpdateUserProfileCommand.CommuneId))
             .Message(MessageType.Existence)
             .Negative()
             .Build();
@@ -74,10 +81,12 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     }
 
     [Fact]
-    private async Task UpdateUser_WhenIdNotfound_ShouldReturnNotFoundResult()
+    private async Task UpdateProfile_WhenIdNotfound_ShouldReturnNotFoundResult()
     {
-        updateUserCommand.UserId = Ulid.NewUlid().ToString();
-        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
+        TestingFixture.RemoveUserId();
+        Result<UpdateUserProfileResponse> result = await testingFixture.SendAsync(
+            updateUserCommand
+        );
         var expectedMessage = Messager
             .Create<User>()
             .Message(MessageType.Found)
@@ -93,12 +102,12 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     private async Task UpdateProfile_ShouldUpdateSuccess()
     {
         //arrage
-        var updateData = updateUserCommand.UpdateData;
-        updateData.DayOfBirth = null;
-        updateData.Avatar = null;
-        updateData.UserClaims = null;
+        updateUserCommand.DayOfBirth = null;
+        updateUserCommand.Avatar = null;
         //act
-        Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
+        Result<UpdateUserProfileResponse> result = await testingFixture.SendAsync(
+            updateUserCommand
+        );
 
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();
@@ -116,19 +125,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             () => user.PhoneNumber.ShouldBe(response.PhoneNumber),
             () => user.Gender.ShouldBe(response.Gender),
             () => user.Address?.ToString().ShouldBe(response.Address),
-            () => user.Status.ShouldBe(response.Status),
-            () =>
-                user
-                    .UserRoles?.All(x => updateData.Roles?.Any(p => p == x.RoleId) == true)
-                    .ShouldBeTrue(),
-            () =>
-                updateData
-                    .UserClaims?.All(x =>
-                        user.UserClaims?.Any(p =>
-                            p.ClaimType == x.ClaimType && p.ClaimValue == x.ClaimType
-                        ) == true
-                    )
-                    .ShouldBeTrue()
+            () => user.Status.ShouldBe(response.Status)
         );
     }
 
@@ -143,8 +140,8 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             Path.Combine(Directory.GetCurrentDirectory(), "Files", "avatar_cute_2.jpg")
         );
 
-        updateUserCommand = UserMappingExtension.ToUpdateUserCommand(
-            await testingFixture.CreateManagerUserAsync(address, file)
+        updateUserCommand = UserMappingExtension.ToUpdateUserProfileCommand(
+            await testingFixture.CreateNormalUserAsync(address, file)
         );
     }
 }

@@ -41,7 +41,7 @@ services.AddDatabaseHealthCheck(configuration);
 #endregion
 
 #region layers dependencies
-services.AddInfrastructureDependencies(configuration, builder.Environment.EnvironmentName);
+services.AddInfrastructureDependencies(configuration);
 services.AddApplicationDependencies();
 #endregion
 

@@ -1,4 +1,5 @@
 using Application.Features.Common.Projections.Users;
+using Application.Features.Users.Commands.Profiles;
 using Application.Features.Users.Commands.Update;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -33,5 +34,19 @@ public static class UserMappingExtension
                         }),
                 ],
             },
+        };
+
+    public static UpdateUserProfileCommand ToUpdateUserProfileCommand(User user) =>
+        new()
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            DayOfBirth = user.DayOfBirth,
+            PhoneNumber = user.PhoneNumber,
+            ProvinceId = user.Address!.ProvinceId,
+            DistrictId = user.Address!.DistrictId,
+            CommuneId = user.Address!.CommuneId,
+            Street = user.Address.Street,
         };
 }

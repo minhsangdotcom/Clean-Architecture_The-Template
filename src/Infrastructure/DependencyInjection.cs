@@ -27,8 +27,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureDependencies(
         this IServiceCollection services,
-        IConfiguration configuration,
-        string? environmentName = "Development"
+        IConfiguration configuration
     )
     {
         services.AddDetection();
