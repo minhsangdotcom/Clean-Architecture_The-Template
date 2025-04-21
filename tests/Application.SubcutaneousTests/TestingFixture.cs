@@ -10,6 +10,7 @@ public partial class TestingFixture : IAsyncLifetime
     private readonly PostgreSqlDatabase database;
 
     private const string BASE_URL = "http://localhost:8080/api/";
+    public const string DEFAULT_USER_PASSWORD = "Admin@123";
     private HttpClient? Client;
 
     private static Ulid UserId;
