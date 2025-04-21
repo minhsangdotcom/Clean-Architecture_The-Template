@@ -128,7 +128,6 @@ public partial class TestingFixture
                 ],
             };
 
-        
         var user = await CreateUserAsync(command);
         UserId = user.Id;
         return user;
