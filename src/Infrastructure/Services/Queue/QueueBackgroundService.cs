@@ -10,7 +10,7 @@ using Serilog;
 namespace Infrastructure.Services.Queue;
 
 public class QueueBackgroundService(
-    IQueueService queueService,
+    //IQueueService queueService,
     IServiceProvider serviceProvider,
     IOptions<QueueSettings> options
 ) : BackgroundService
