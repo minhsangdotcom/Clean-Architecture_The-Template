@@ -10,7 +10,6 @@ public static class CreateQueueLogMapping
         {
             RequestId = queueLogCommand.RequestId,
             Request = queueLogCommand.Request,
-            ProcessedBy = queueLogCommand.ProcessedBy,
             ErrorDetail = queueLogCommand.ErrorDetail,
             RetryCount = queueLogCommand.RetryCount,
         };

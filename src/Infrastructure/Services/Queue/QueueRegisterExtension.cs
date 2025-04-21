@@ -23,23 +23,14 @@ public static class QueueRegisterExtension
                 .Configure<QueueSettings>(options =>
                     configuration.GetSection(nameof(QueueSettings)).Bind(options)
                 )
-                .AddSingleton<QueueService>()
-                .AddSingleton<IQueueService, QueueService>(provider =>
-                    provider.GetService<QueueService>()!
-                )
-                .AddSingleton<DeadLetterQueueService>()
-                .AddSingleton<IQueueService, DeadLetterQueueService>(provider =>
-                    provider.GetService<DeadLetterQueueService>()!
-                )
+                .AddSingleton<IQueueService, QueueService>()
                 .Configure<HostOptions>(options =>
                 {
                     options.ServicesStartConcurrently = true;
                     options.ServicesStopConcurrently = true;
                 })
                 .AddHostedService<QueueBackgroundService>()
-                .AddHostedService<DeadletterQueueBackgroundService>()
-                .AddSingleton<IQueueService, QueueService>()
-                .AddSingleton<IQueueService, DeadLetterQueueService>();
+                .AddSingleton<IQueueService, QueueService>();
         }
 
         return services;
