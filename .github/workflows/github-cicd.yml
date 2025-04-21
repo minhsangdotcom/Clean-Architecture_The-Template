@@ -35,7 +35,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/packages.lock.json') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/packages.lock.json','tests/**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
       - name: Install dependencies
