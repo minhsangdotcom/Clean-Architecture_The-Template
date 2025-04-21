@@ -1,14 +1,19 @@
 using Application.Common.Interfaces.Services.Identity;
-using AutoMapper;
+using Contracts.ApiWrapper;
+using Domain.Aggregates.Roles;
 using Mediator;
 
 namespace Application.Features.Roles.Queries.List;
 
-public class ListRoleHandler(IRoleManagerService roleManagerService, IMapper mapper)
-    : IRequestHandler<ListRoleQuery, IEnumerable<ListRoleResponse>>
+public class ListRoleHandler(IRoleManagerService roleManagerService)
+    : IRequestHandler<ListRoleQuery, Result<IEnumerable<ListRoleResponse>>>
 {
-    public async ValueTask<IEnumerable<ListRoleResponse>> Handle(
+    public async ValueTask<Result<IEnumerable<ListRoleResponse>>> Handle(
         ListRoleQuery query,
         CancellationToken cancellationToken
-    ) => mapper.Map<IEnumerable<ListRoleResponse>>(await roleManagerService.ListAsync());
+    )
+    {
+        List<Role> roles = await roleManagerService.ListAsync();
+        return Result<IEnumerable<ListRoleResponse>>.Success(roles.ToListRoleResponse());
+    }
 }

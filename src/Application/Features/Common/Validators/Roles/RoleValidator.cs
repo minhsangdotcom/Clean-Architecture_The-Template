@@ -2,10 +2,10 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Features.Common.Projections.Roles;
 using CaseConverter;
-using Contracts.Common.Messages;
 using Domain.Aggregates.Roles;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Common.Validators.Roles;
 
@@ -82,7 +82,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
             .WithState(x =>
                 Messager
                     .Create<RoleModel>(nameof(Role))
-                    .Property(x => x.Name!)
+                    .Property(x => x.Description!)
                     .Message(MessageType.MaximumLength)
                     .Build()
             );
@@ -104,9 +104,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
     {
         string caseName = name.ToSnakeCase();
         return !await roleManagerService.Roles.AnyAsync(
-            x =>
-                (!id.HasValue && EF.Functions.ILike(x.Name, caseName))
-                || (x.Id != id && EF.Functions.ILike(x.Name, caseName)),
+            x => (!id.HasValue && x.Name == caseName) || (x.Id != id && x.Name == caseName),
             cancellationToken
         );
     }

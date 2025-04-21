@@ -1,23 +1,31 @@
-using Application.Common.Exceptions;
+using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
-using AutoMapper;
-using Contracts.Common.Messages;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Roles;
 using Mediator;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Roles.Queries.Detail;
 
-public class GetRoleDetailHandler(IRoleManagerService roleManagerService, IMapper mapper)
-    : IRequestHandler<GetRoleDetailQuery, RoleDetailResponse>
+public class GetRoleDetailHandler(IRoleManagerService roleManagerService)
+    : IRequestHandler<GetRoleDetailQuery, Result<RoleDetailResponse>>
 {
-    public async ValueTask<RoleDetailResponse> Handle(
+    public async ValueTask<Result<RoleDetailResponse>> Handle(
         GetRoleDetailQuery query,
         CancellationToken cancellationToken
-    ) =>
-        mapper.Map<RoleDetailResponse>(
-            await roleManagerService.FindByIdAsync(query.Id)
-                ?? throw new NotFoundException(
-                    [Messager.Create<Role>().Message(MessageType.Found).Negative().Build()]
+    )
+    {
+        Role? role = await roleManagerService.FindByIdAsync(query.Id);
+
+        if (role == null)
+        {
+            return Result<RoleDetailResponse>.Failure(
+                new NotFoundError(
+                    "Your resource is not found",
+                    Messager.Create<Role>().Message(MessageType.Found).Negative().Build()
                 )
-        );
+            );
+        }
+        return Result<RoleDetailResponse>.Success(role.ToRoleDetailResponse());
+    }
 }

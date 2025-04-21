@@ -1,15 +1,15 @@
 using System.Security.Claims;
 using Application.Common.Interfaces.Services.Token;
 using Contracts.Dtos.Responses;
-using Contracts.Extensions;
 using JWT;
 using JWT.Algorithms;
 using JWT.Builder;
 using Microsoft.Extensions.Options;
+using SharedKernel.Extensions;
 
 namespace Infrastructure.Services.Token;
 
-public class TokenFactoryService(IOptions<JwtSettings> jwtSettings) : ITokenFactory
+public class TokenFactoryService(IOptions<JwtSettings> jwtSettings) : ITokenFactoryService
 {
     private readonly JwtSettings settings = jwtSettings.Value;
 

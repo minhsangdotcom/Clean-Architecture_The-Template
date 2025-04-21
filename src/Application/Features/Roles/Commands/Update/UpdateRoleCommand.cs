@@ -1,17 +1,14 @@
 using Application.Features.Common.Projections.Roles;
-using Contracts.Routers;
+using Contracts.ApiWrapper;
 using Mediator;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Features.Roles.Commands.Update;
 
-public class UpdateRoleCommand : IRequest<UpdateRoleResponse>
+public class UpdateRoleCommand : IRequest<Result<UpdateRoleResponse>>
 {
-    [FromRoute(Name = Router.Id)]
     public string RoleId { get; set; } = string.Empty;
 
-    [FromBody]
-    public UpdateRole Role { get; set; } = null!;
+    public RoleUpdateRequest UpdateData { get; set; } = null!;
 }
 
-public class UpdateRole : RoleModel;
+public class RoleUpdateRequest : RoleModel;

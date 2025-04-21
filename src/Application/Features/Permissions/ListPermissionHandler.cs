@@ -1,26 +1,26 @@
 using Application.Common.Interfaces.Services.Identity;
-using Contracts.Constants;
+using Contracts.ApiWrapper;
+using Domain.Aggregates.Roles;
 using Mediator;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Permissions;
 
 public class ListPermissionHandler(IRoleManagerService roleManagerService)
-    : IRequestHandler<ListPermissionQuery, IEnumerable<ListPermissionResponse>>
+    : IRequestHandler<ListPermissionQuery, Result<IEnumerable<ListPermissionResponse>>>
 {
-    public async ValueTask<IEnumerable<ListPermissionResponse>> Handle(
+    public async ValueTask<Result<IEnumerable<ListPermissionResponse>>> Handle(
         ListPermissionQuery request,
         CancellationToken cancellationToken
     )
     {
-        return (
-            await roleManagerService
-                .RoleClaims.Where(x => x.ClaimType == ClaimTypes.Permission)
-                .ToListAsync(cancellationToken)
-        ).Select(x => new ListPermissionResponse()
-        {
-            ClaimType = x.ClaimType,
-            ClaimValue = x.ClaimValue,
-        });
+        IList<RoleClaim> roleClaims = await roleManagerService.GetRolePermissionClaimsAsync();
+        IEnumerable<ListPermissionResponse> responses = roleClaims.Select(
+            claim => new ListPermissionResponse()
+            {
+                ClaimType = claim.ClaimType,
+                ClaimValue = claim.ClaimValue,
+            }
+        );
+        return Result<IEnumerable<ListPermissionResponse>>.Success(responses);
     }
 }

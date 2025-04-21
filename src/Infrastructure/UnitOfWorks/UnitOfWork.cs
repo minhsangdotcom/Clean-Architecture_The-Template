@@ -1,72 +1,98 @@
 using System.Data.Common;
+using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
-using Domain.Common;
 using Infrastructure.UnitOfWorks.CachedRepositories;
 using Infrastructure.UnitOfWorks.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 
 namespace Infrastructure.UnitOfWorks;
 
-public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache, ILogger logger)
-    : IUnitOfWork
+public class UnitOfWork(
+    IDbContext dbContext,
+    ILogger logger,
+    IMemoryCacheService memoryCacheService
+) : IUnitOfWork
 {
     public DbTransaction? CurrentTransaction { get; set; }
 
     private readonly Dictionary<string, object?> repositories = [];
+
     private bool disposed = false;
 
-    public IRepository<TEntity> Repository<TEntity>()
+    public IAsyncRepository<TEntity> Repository<TEntity>(bool isCached = false)
         where TEntity : class
     {
-        typeof(TEntity).IsValidBaseType();
-        string type = typeof(TEntity).FullName!;
+        string key = GetKey(typeof(TEntity).FullName!, nameof(Repository), isCached);
+        Type repositoryType = typeof(AsyncRepository<>);
+        object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
 
-        if (!repositories.TryGetValue(type, out object? value))
+        if (!repositories.TryGetValue(key, out object? value))
         {
-            Type repositoryType = typeof(Repository<>);
-            object? repositoryInstance = Activator.CreateInstance(
-                repositoryType.MakeGenericType(typeof(TEntity)),
-                [dbContext, mapper]
-            );
-            value = repositoryInstance;
-            repositories.Add(type, value);
+            value = isCached
+                ? CreateInstance<TEntity>(
+                    typeof(CachedAsyncRepository<>),
+                    repositoryInstance!,
+                    logger,
+                    memoryCacheService
+                )
+                : repositoryInstance;
+            repositories.Add(key, value);
         }
 
-        return (IRepository<TEntity>)value!;
+        return (IAsyncRepository<TEntity>)value!;
     }
 
-    public IRepository<TEntity> CachedRepository<TEntity>()
+    public IDynamicSpecificationRepository<TEntity> DynamicReadOnlyRepository<TEntity>(
+        bool isCached = false
+    )
         where TEntity : class
     {
-        typeof(TEntity).IsValidBaseType();
-        string type = $"{typeof(TEntity).FullName}-cached";
+        string key = GetKey(typeof(TEntity).FullName!, nameof(DynamicReadOnlyRepository), isCached);
+        Type repositoryType = typeof(DynamicSpecificationRepository<>);
+        object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
 
-        if (!repositories.TryGetValue(type, out object? value))
+        if (!repositories.TryGetValue(key, out object? value))
         {
-            Type cachedRepositoryType = typeof(CachedRepository<>);
-            Type repositoryType = typeof(Repository<>);
-
-            object? repositoryInstance = Activator.CreateInstance(
-                repositoryType.MakeGenericType(typeof(TEntity)),
-                [dbContext, mapper]
-            );
-            // proxy design pattern
-            object? cachedRepositoryInstance = Activator.CreateInstance(
-                cachedRepositoryType.MakeGenericType(typeof(TEntity)),
-                [repositoryInstance, cache, logger]
-            );
-            value = cachedRepositoryInstance;
-            repositories.Add(type, value);
+            value = isCached
+                ? CreateInstance<TEntity>(
+                    typeof(CachedDynamicSpecRepository<>),
+                    repositoryInstance!,
+                    logger,
+                    memoryCacheService
+                )
+                : repositoryInstance;
+            repositories.Add(key, value);
         }
 
-        return (IRepository<TEntity>)value!;
+        return (IDynamicSpecificationRepository<TEntity>)repositoryInstance!;
     }
 
-    public async Task<DbTransaction> CreateTransactionAsync(
+    public ISpecificationRepository<TEntity> ReadOnlyRepository<TEntity>(bool isCached = false)
+        where TEntity : class
+    {
+        string key = GetKey(typeof(TEntity).FullName!, nameof(ReadOnlyRepository), isCached);
+        Type repositoryType = typeof(SpecificationRepository<>);
+        object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
+
+        if (!repositories.TryGetValue(key, out object? value))
+        {
+            value = isCached
+                ? CreateInstance<TEntity>(
+                    typeof(CachedSpecificationRepository<>),
+                    repositoryInstance!,
+                    logger,
+                    memoryCacheService
+                )
+                : repositoryInstance;
+            repositories.Add(key, value);
+        }
+
+        return (ISpecificationRepository<TEntity>)repositoryInstance!;
+    }
+
+    public async Task<DbTransaction> BeginTransactionAsync(
         CancellationToken cancellationToken = default
     )
     {
@@ -135,7 +161,7 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
     public void Dispose()
     {
         Dispose(true);
-
+        repositories.Clear();
         GC.SuppressFinalize(this);
     }
 
@@ -143,7 +169,6 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
     {
         if (!disposed && disposing)
         {
-            repositories?.Clear();
             dbContext.Dispose();
         }
 
@@ -157,5 +182,20 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
             await CurrentTransaction.DisposeAsync();
             CurrentTransaction = null;
         }
+    }
+
+    private static object? CreateInstance<T>(Type genericType, params object?[]? args)
+        where T : class => Activator.CreateInstance(genericType.MakeGenericType(typeof(T)), args);
+
+    private static string GetKey(string baseKey, string method, bool isCached = false)
+    {
+        string key = $"{baseKey}-{method}";
+
+        if (isCached)
+        {
+            key += "cached";
+        }
+
+        return key;
     }
 }

@@ -1,8 +1,6 @@
-using Application.Common.Interfaces.Registers;
-
 namespace Application.Common.Interfaces.Services;
 
-public interface IActionAccessorService : ISingleton
+public interface IActionAccessorService
 {
     public string? Id { get; }
 

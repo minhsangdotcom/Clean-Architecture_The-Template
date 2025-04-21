@@ -1,12 +1,12 @@
-using Application.Common.Exceptions;
 using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Update;
+using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
 using CaseConverter;
-using Contracts.ApiWrapper;
-using Contracts.Common.Messages;
 using Domain.Aggregates.Roles;
-using FluentAssertions;
+using SharedKernel.Common.Messages;
+using SharedKernel.Extensions;
+using Shouldly;
 
 namespace Application.SubcutaneousTests.Roles.Commands.Update;
 
@@ -19,98 +19,111 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     [Fact]
     public async Task UpdateRole_WhenIdNotFound_ShouldReturnNotFoundException()
     {
-        UpdateRole updatedRole = fixture.Build<UpdateRole>().Without(x => x.RoleClaims).Create();
+        // Arrange
+        var updatedRole = fixture.Build<RoleUpdateRequest>().Without(x => x.RoleClaims).Create();
 
-        Ulid ulid = Ulid.NewUlid();
-        UpdateRoleCommand updateRoleCommand = fixture
+        var ulid = Ulid.NewUlid();
+        var updateRoleCommand = fixture
             .Build<UpdateRoleCommand>()
             .With(x => x.RoleId, ulid.ToString())
-            .With(x => x.Role, updatedRole)
+            .With(x => x.UpdateData, updatedRole)
             .Create();
 
-        List<MessageResult> messageResults =
-        [
-            Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage(),
-        ];
+        // Act
+        var result = await testingFixture.SendAsync(updateRoleCommand);
 
-        var result = await FluentActions
-            .Invoking(() => testingFixture.SendAsync(updateRoleCommand))
-            .Should()
-            .ThrowAsync<NotFoundException>(becauseArgs: messageResults);
-        ReasonTranslation error = result.And.Errors.First().Reasons.First();
-        MessageResult messageResult = messageResults[0];
-        error.Should().NotBeNull();
+        // Assert
+        var expectedMessage = Messager
+            .Create<Role>()
+            .Message(MessageType.Found)
+            .Negative()
+            .BuildMessage();
 
-        error.Message.Should().Be(messageResult.Message);
-        error.En.Should().Be(messageResult.En);
-        error.Vi.Should().Be(messageResult.Vi);
+        result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]
     public async Task UpdateRole_WhenNoRoleClaims_ShouldUpdateRole()
     {
-        updateRoleCommand.Role.RoleClaims = null;
-        var createRoleResponse = await testingFixture.SendAsync(updateRoleCommand);
+        // Arrange
+        updateRoleCommand.UpdateData.RoleClaims = null;
 
-        Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
-            createRoleResponse.Id
-        );
-        createdRole.Should().NotBeNull();
-        UpdateRole updateRole = updateRoleCommand.Role;
-        createdRole!.Name.Should().Be(updateRole.Name!.ToSnakeCase().ToUpper());
-        createdRole!.Description.Should().Be(updateRole.Description);
-        createdRole.RoleClaims.Should().HaveCount(0);
+        // Act
+        var result = await testingFixture.SendAsync(updateRoleCommand);
+        var response = result.Value!;
+
+        // Assert
+        var createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(response.Id);
+        createdRole.ShouldNotBeNull();
+
+        var requestData = updateRoleCommand.UpdateData;
+        createdRole!.Name.ShouldBe(requestData.Name!.ToScreamingSnakeCase());
+        createdRole.Description.ShouldBe(requestData.Description);
+        createdRole.RoleClaims?.Count.ShouldBe(0);
     }
 
     [Fact]
     public async Task UpdateRole_WhenNoDescription_ShouldUpdateRole()
     {
-        updateRoleCommand.Role.Description = null;
-        var createRoleResponse = await testingFixture.SendAsync(updateRoleCommand);
+        // Arrange
+        updateRoleCommand.UpdateData.Description = null;
 
-        Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
-            createRoleResponse.Id
-        );
-        createdRole.Should().NotBeNull();
-        UpdateRole updateRole = updateRoleCommand.Role;
-        createdRole!.Name.Should().Be(updateRole.Name!.ToSnakeCase().ToUpper());
-        createdRole.RoleClaims.Should().HaveCount(updateRoleCommand.Role.RoleClaims!.Count);
-        createdRole!.Description.Should().BeNull();
+        // Act
+        var result = await testingFixture.SendAsync(updateRoleCommand);
+        var response = result.Value!;
+
+        // Assert
+        var createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(response.Id);
+        createdRole.ShouldNotBeNull();
+
+        var requestData = updateRoleCommand.UpdateData;
+        createdRole!.Name.ShouldBe(requestData.Name!.ToScreamingSnakeCase());
+        createdRole.RoleClaims?.Count.ShouldBe(requestData.RoleClaims!.Count);
+        createdRole.Description.ShouldBeNull();
     }
 
     [Fact]
     public async Task UpdateRole_ShouldUpdateRole()
     {
-        UpdateRole updateRole = updateRoleCommand.Role;
-        List<RoleClaimModel> roleClaims = updateRole.RoleClaims!;
-        roleClaims.RemoveAt(1);
-        roleClaims.Add(new RoleClaimModel() { ClaimType = "permission", ClaimValue = "list.user" });
-        roleClaims[0].ClaimValue = "create.users";
-        updateRole.Name = $"name{Guid.NewGuid()}";
-        updateRole.Description = $"description{Guid.NewGuid()}";
-        var createRoleResponse = await testingFixture.SendAsync(updateRoleCommand);
+        // Arrange
+        var requestData = updateRoleCommand.UpdateData;
+        var roleClaims = requestData.RoleClaims!;
 
-        Role? createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(
-            createRoleResponse.Id
-        );
-        createdRole.Should().NotBeNull();
-        createdRole!.Name.Should().Be(updateRole.Name!.ToSnakeCase().ToUpper());
-        createdRole
+        // modify the claims collection
+        roleClaims.RemoveAt(1);
+        roleClaims.Add(new RoleClaimModel { ClaimType = "permission", ClaimValue = "list.user" });
+        roleClaims[0].ClaimValue = "create.users";
+
+        requestData.Name = $"name{Guid.NewGuid()}";
+        requestData.Description = $"description{Guid.NewGuid()}";
+
+        // Act
+        var result = await testingFixture.SendAsync(updateRoleCommand);
+
+        // Assert
+        var response = result.Value!;
+        var createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(response.Id);
+        createdRole.ShouldNotBeNull();
+
+        createdRole!.Name.ShouldBe(requestData.Name!.ToScreamingSnakeCase());
+
+        var expectedClaims = roleClaims.Select(rc => new { rc.ClaimType, rc.ClaimValue }).ToList();
+        var actualClaims = createdRole
             .RoleClaims!.Select(rc => new { rc.ClaimType, rc.ClaimValue })
-            .Should()
-            .IntersectWith(roleClaims.Select(rc => new { rc.ClaimType, rc.ClaimValue })!);
-        createdRole!.Description.Should().Be(updateRole.Description);
+            .ToList();
+        actualClaims.ShouldBe(expectedClaims!, ignoreOrder: true);
+        createdRole.Description.ShouldBe(requestData.Description);
     }
 
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        Role role = await testingFixture.CreateRoleAsync("admin");
-        updateRoleCommand = testingFixture.ToUpdateRoleCommand(role);
+        updateRoleCommand = RoleMappingExtension.ToUpdateRoleCommand(
+            await testingFixture.CreateAdminRoleAsync()
+        );
     }
 
-    public async Task DisposeAsync()
-    {
-        await Task.CompletedTask;
-    }
+    public async Task DisposeAsync() => await Task.CompletedTask;
 }

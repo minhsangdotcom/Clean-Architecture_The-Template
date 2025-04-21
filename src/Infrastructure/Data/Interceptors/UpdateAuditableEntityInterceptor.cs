@@ -3,6 +3,7 @@ using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using SharedKernel.Common;
 
 namespace Infrastructure.Data.Interceptors;
 

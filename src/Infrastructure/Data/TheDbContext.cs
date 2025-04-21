@@ -1,11 +1,7 @@
-using System.Data;
-using System.Data.Common;
 using System.Reflection;
 using Application.Common.Interfaces.UnitOfWorks;
-using Ardalis.GuardClauses;
 using Domain.Common;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Infrastructure.Data;
@@ -16,25 +12,6 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(op
 
     public override DbSet<TEntity> Set<TEntity>()
         where TEntity : class => base.Set<TEntity>();
-
-    public async Task UseTransactionAsync(DbTransaction transaction)
-    {
-        DbConnection dbConnection = Database.GetDbConnection();
-
-        if (dbConnection.State == ConnectionState.Closed)
-        {
-            dbConnection.Open();
-        }
-
-        Guard.Against.Null(transaction, nameof(transaction), "transaction is not null");
-
-        if (transaction.Connection != dbConnection)
-        {
-            throw new Exception("Cannot share transaction with difference connections");
-        }
-
-        await Database.UseTransactionAsync(transaction);
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,10 +1,13 @@
 using System.Data.Common;
+using Application.Common.Interfaces.Services;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Moq;
 
 namespace Application.SubcutaneousTests;
 
@@ -31,6 +34,12 @@ public class CustomWebApplicationFactory<TProgram>(
             services.AddDbContext<TheDbContext>(
                 (container, options) => options.UseNpgsql(dbConnection)
             );
+
+            services
+                .RemoveAll<ICurrentUser>()
+                .AddTransient(provider =>
+                    Mock.Of<ICurrentUser>(x => x.Id == TestingFixture.GetUserId())
+                );
         });
         builder.UseEnvironment(environmentName);
     }

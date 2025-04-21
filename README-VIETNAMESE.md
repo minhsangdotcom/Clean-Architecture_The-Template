@@ -4,11 +4,48 @@
 
 #
 
+![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?style=for-the-badge&color=orange)
+![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?style=for-the-badge&color=pink)
+![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?style=for-the-badge&color=%23f61d9c)
+
+# Bảng nội dung
+
+- [Ngôn ngữ](#)
+- [Nhãn](#)
+- [Bảng nội dung](#Bảng-nội-dung)
+- [Mô Hình Kiến Trúc Sạch (Clean Architecture)](#mô-hình-kiến-trúc-sạch-clean-architecture)
+- [Cho mình 1 ⭐ nhé](#cho-minh-1sao-nhe)
+- [Định Nghĩa](#định-nghĩa)
+  - [Lợi ích](#lợi-ích)
+  - [Nhược điểm](#nhược-điểm)
+- [Tính năng :rocket:](#tinh-nang)
+- [Nhá hàng cho các tính năng :fire:](#nha-hang-cho-cac-tinh-nang)
+  - [Authentication](#authentication)
+  - [Dynamic search and sort](#dynamic-search-and-sort)
+  - [Cross-cutting concerns](#cross-cutting-concerns)
+  - [Lưu trử file media bằng Minio](#lưu-trử-file-media-bằng-minio)
+  - [Tự động dịch message](#tự-động-dịch-message)
+- [Sơ lượt về Cấu trúc :mag_right:](#so-luot-ve-cau-truc)
+- [Bắt đầu thôi nào](#bắt-đầu-thôi-nào)
+  - [Cách để chạy ứng dụng](#cách-để-chạy-ứng-dụng)
+  - [Hướng dẫn sử dụng](#hướng-dẫn-sử-dụng)
+    - [Authorize](#authorize)
+    - [Thêm một quyền mới vào ứng dụng](#thêm-một-quyền-mới-vào-ứng-dụng)
+    - [Bộ lọc](#bộ-lọc)
+    - [Phân trang](#phân-trang)
+- [Công nghệ](#công-nghệ)
+- [Hỗ trợ](#hỗ-trợ)
+- [Lời cảm ơn](#lời-cảm-ơn)
+- [Cấp phép](#cấp-phép)
+
 # Mô Hình Kiến Trúc Sạch (Clean Architecture)
 
 Template này được thiết kế dành cho các bạn backend làm việc với ASP.NET Core. Nó cung cấp một cách hiệu quả để xây dựng các ứng dụng enterprise một cách đơn giản bằng cách tận dụng lợi thế từ kiến trúc Clean Architecture và .NET Core framework.
 
 Với template này, bạn sẽ có được zero configuration, không cần quan tâm đến cấu trúc, cài đặt, môi trường hoặc các thông lệ tốt nhất cho web API, vì tất cả đã được thiết lập :smiley:.
+
+<div id='cho-minh-1sao-nhe'/>
 
 # Cho mình 1 ⭐ nhé
 
@@ -43,7 +80,9 @@ Quy tắc phụ thuộc nói rằng các thành phần phụ thuộc hướng t�
 - **_Nguy cơ về cấu trúc quá phức tạp_**: Đối với các ứng dụng nhỏ, các tầng bổ sung có thể không cần thiết và dẫn đến sự phức tạp hóa.
 - **_Hiệu năng bị suy giảm_**: Sự trích dẫn và trừa tượng(interface) giữa các tầng có thể giảm hiệu năng, tuy nhiên thường là không đáng kể.
 
-# Features :rocket:
+<div id='tinh-nang'/>
+
+# Tính năng :rocket:
 
 Có gì đặc biệt khiến cho template này trở nên khác biệt so với những template khác có trên Github?
 
@@ -68,6 +107,8 @@ Nào hãy cùng mình khám phá nha :
 1. [Subcutaneous Test](tests/Application.SubcutaneousTests/)
 1. [Tự động dịch message](src/Contracts/Common/Messages/)
 1. [Mã nguồn mở và Cấp phép MIT](#license)
+
+<div id= 'nha-hang-cho-cac-tinh-nang'/>
 
 # Nhá hàng cho các tính năng :fire:
 
@@ -146,6 +187,8 @@ http://localhost:8080/api/Users?PageSize=2&Search.Keyword=N%E1%BA%B5ng&Search.Ta
   "message": "One or several errors have occured"
 }
 ```
+
+<div id='so-luot-ve-cau-truc'/>
 
 # Sơ lượt về Cấu trúc :mag_right:
 
@@ -259,7 +302,7 @@ _Phụ thuộc vào tầng Application và Domain_
 
 _Phụ thuộc vào tầng Application and Infrastructure_
 
-**_Contract_** : Chứa shared components qua các tầng
+**_Contract_** : Chứa shared components cho các tầng Application, Infrastructure and API.
 
 # Bắt đầu thôi nào
 
@@ -556,7 +599,7 @@ Các bạn có thể tìm hiểu thêm ỏ một số link sau đây
 
 Mình thiết kế input đầu vào dựa trên [Strapi filter](https://docs.strapi.io/dev-docs/api/rest/filters-locale-publication)
 
-Mình đã nhúng sẳn filter tự động vào tất cả các hàm lấy danh sách ở  lớp Repository
+Mình đã nhúng sẳn filter tự động vào tất cả các hàm lấy danh sách ở lớp Repository
 
 ```csharp
     await unitOfWork
@@ -566,6 +609,7 @@ Mình đã nhúng sẳn filter tự động vào tất cả các hàm lấy danh
             query.ValidateQuery().ValidateFilter(typeof(ListUserResponse))
         );
 ```
+
 <div id='pagination'/>
 
 ### Phân trang
@@ -681,9 +725,12 @@ Offset and cursor pagination được tích hợp sẳn trong template.
 - Medator
 - XUnit, FluentAssertion, Respawn
 - OpenTelemetry
+- PostgreSQL
 - Redis
 - ElasticSearch
 - Serilog
+- Docker
+- Github Workflow
 
 # Hỗ trợ
 

@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
-using Contracts.Dtos.Models;
 using Domain.Aggregates.Users.Enums;
+using SharedKernel.Models;
 
 namespace Application.Features.Common.Projections.Users;
 
@@ -11,5 +11,5 @@ public class UserClaimDetailProjection : DefaultBaseResponse
     public string? ClaimValue { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-    public KindaUserClaimType Type { get; set; }
+    public UserClaimType Type { get; set; }
 }

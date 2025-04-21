@@ -1,41 +1,47 @@
-using Application.Common.Exceptions;
+using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Common.Messages;
+using Contracts.ApiWrapper;
 using Contracts.Dtos.Models;
 using Contracts.Dtos.Requests;
-using Contracts.Extensions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.Extensions.Configuration;
+using SharedKernel.Common.Messages;
+using SharedKernel.Extensions;
 
 namespace Application.Features.Users.Commands.RequestResetPassword;
 
 public class RequestResetUserPasswordHandler(
     IUnitOfWork unitOfWork,
     IConfiguration configuration,
-    IMailer mailer
-) : IRequestHandler<RequestResetUserPasswordCommand>
+    IMailService mailService
+) : IRequestHandler<RequestResetUserPasswordCommand, Result<string>>
 {
-    public async ValueTask<Unit> Handle(
+    public async ValueTask<Result<string>> Handle(
         RequestResetUserPasswordCommand command,
         CancellationToken cancellationToken
     )
     {
-        User user =
-            await unitOfWork
-                .CachedRepository<User>()
-                .FindByConditionAsync(
-                    new GetUserByEmailSpecification(command.Email),
-                    cancellationToken
-                )
-            ?? throw new NotFoundException(
-                [Messager.Create<User>().Message(MessageType.Found).Negative().Build()]
+        User? user = await unitOfWork
+            .DynamicReadOnlyRepository<User>()
+            .FindByConditionAsync(
+                new GetUserByEmailSpecification(command.Email),
+                cancellationToken
             );
 
-        string token = StringExtension.GenerateRandomString(40);
+        if (user == null)
+        {
+            return Result<string>.Failure(
+                new NotFoundError(
+                    "the resource is not found",
+                    Messager.Create<User>().Message(MessageType.Found).Negative().Build()
+                )
+            );
+        }
 
+        string token = StringExtension.GenerateRandomString(40);
         DateTimeOffset expiredTime = DateTimeOffset.UtcNow.AddHours(
             configuration.GetValue<int>("ForgotPasswordExpiredTimeInHour")
         );
@@ -57,20 +63,18 @@ public class RequestResetUserPasswordHandler(
         var link = new UriBuilder(domain) { Query = $"token={token}&id={user.Id}" };
         string expiry = expiredTime.ToLocalTime().ToString("dd/MM/yyyy hh:mm:ss");
 
-        _ = await mailer
-            .Email()
-            .SendWithTemplateAsync(
-                new TemplateMailMetaData()
-                {
-                    DisplayName = "The template Reset password",
-                    Subject = "Reset password",
-                    To = [user.Email],
-                    Template = new(
-                        "ForgotPassword",
-                        new ResetPasswordModel() { ResetLink = link.ToString(), Expiry = expiry }
-                    ),
-                }
-            );
-        return Unit.Value;
+        _ = await mailService.SendWithTemplateAsync(
+            new MailTemplateData()
+            {
+                DisplayName = "The template Reset password",
+                Subject = "Reset password",
+                To = [user.Email],
+                Template = new(
+                    "ForgotPassword",
+                    new ResetPasswordModel() { ResetLink = link.ToString(), Expiry = expiry }
+                ),
+            }
+        );
+        return Result<string>.Success();
     }
 }

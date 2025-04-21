@@ -1,27 +1,45 @@
-using Application.Common.Auth;
+using Api.common.EndpointConfigurations;
+using Api.common.Results;
+using Api.common.Routers;
 using Application.Features.Users.Queries.Detail;
-using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
-using Contracts.RouteResults;
-using Contracts.Routers;
 using Infrastructure.Constants;
 using Mediator;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.User;
 
-public class GetUserDetailEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<string>.WithActionResult<ApiResponse>
+public class GetUserDetailEndpoint : IEndpoint
 {
-    [HttpGet(Router.UserRoute.GetUpdateDelete, Name = Router.UserRoute.GetRouteName)]
-    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Detail User")]
-    [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(
-        [FromRoute(Name = Router.Id)] string userId,
+    public EndpointVersion Version => EndpointVersion.One;
+
+    public void MapEndpoint(IEndpointRouteBuilder app)
+    {
+        app.MapGet(Router.UserRoute.GetUpdateDelete, HandleAsync)
+            .WithName(Router.UserRoute.GetRouteName)
+            .WithOpenApi(operation => new OpenApiOperation(operation)
+            {
+                Summary = "Get user by ID 🧾",
+                Description = "Retrieves detailed information of a user based on their unique ID.",
+                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
+            })
+            .RequireAuth(
+                permissions: Permission.Generate(PermissionAction.Detail, PermissionResource.User)
+            );
+    }
+
+    private async Task<
+        Results<Ok<ApiResponse<GetUserDetailResponse>>, ProblemHttpResult>
+    > HandleAsync(
+        [FromRoute] string id,
+        [FromServices] ISender sender,
         CancellationToken cancellationToken = default
-    ) =>
-        this.Ok200(
-            await sender.Send(new GetUserDetailQuery(Ulid.Parse(userId)), cancellationToken)
-        );
+    )
+    {
+        var command = new GetUserDetailQuery(Ulid.Parse(id));
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToResult();
+    }
 }

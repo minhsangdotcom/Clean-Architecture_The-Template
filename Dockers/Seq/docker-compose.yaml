@@ -11,8 +11,8 @@ services:
     ports:
       - 5341:80
     networks:
-      - the-teplate-network
+      - the-template-network
 
 networks: 
-  the-teplate-network:
+  the-template-network:
     external: true

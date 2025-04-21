@@ -17,7 +17,7 @@ namespace Infrastructure.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "citext");
@@ -41,10 +41,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<object>("ErrorDetail")
                         .HasColumnType("jsonb")
                         .HasColumnName("error_detail");
-
-                    b.Property<int>("ProcessedBy")
-                        .HasColumnType("integer")
-                        .HasColumnName("processed_by");
 
                     b.Property<object>("Request")
                         .HasColumnType("jsonb")
@@ -386,25 +382,25 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("character varying(26)")
                         .HasColumnName("district_id");
 
+                    b.Property<string>("EnglishFullName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("english_full_name");
+
+                    b.Property<string>("EnglishName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("english_name");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("full_name");
 
-                    b.Property<string>("FullNameEn")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("full_name_en");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
-
-                    b.Property<string>("NameEn")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name_en");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -451,25 +447,25 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("custom_name");
 
+                    b.Property<string>("EnglishFullName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("english_full_name");
+
+                    b.Property<string>("EnglishName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("english_name");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("full_name");
 
-                    b.Property<string>("FullNameEn")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("full_name_en");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
-
-                    b.Property<string>("NameEn")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name_en");
 
                     b.Property<string>("ProvinceId")
                         .IsRequired()
@@ -521,25 +517,25 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("custom_name");
 
+                    b.Property<string>("EnglishFullName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("english_full_name");
+
+                    b.Property<string>("EnglishName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("english_name");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("full_name");
 
-                    b.Property<string>("FullNameEn")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("full_name_en");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
-
-                    b.Property<string>("NameEn")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name_en");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -755,9 +751,6 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasDatabaseName("ix_user_email");
-
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_user_id");
 
                     b.HasIndex("Username")
                         .IsUnique()
@@ -1045,15 +1038,31 @@ namespace Infrastructure.Data.Migrations
                                 .HasColumnType("character varying(26)")
                                 .HasColumnName("id");
 
+                            b1.Property<string>("Commune")
+                                .HasColumnType("text")
+                                .HasColumnName("address_commune");
+
                             b1.Property<string>("CommuneId")
                                 .HasColumnType("character varying(26)")
                                 .HasColumnName("address_commune_id");
 
+                            b1.Property<string>("District")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("address_district");
+
                             b1.Property<string>("DistrictId")
+                                .IsRequired()
                                 .HasColumnType("character varying(26)")
                                 .HasColumnName("address_district_id");
 
+                            b1.Property<string>("Province")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("address_province");
+
                             b1.Property<string>("ProvinceId")
+                                .IsRequired()
                                 .HasColumnType("character varying(26)")
                                 .HasColumnName("address_province_id");
 
@@ -1064,41 +1073,11 @@ namespace Infrastructure.Data.Migrations
 
                             b1.HasKey("UserId");
 
-                            b1.HasIndex("CommuneId")
-                                .HasDatabaseName("ix_user_address_commune_id");
-
-                            b1.HasIndex("DistrictId")
-                                .HasDatabaseName("ix_user_address_district_id");
-
-                            b1.HasIndex("ProvinceId")
-                                .HasDatabaseName("ix_user_address_province_id");
-
                             b1.ToTable("user");
-
-                            b1.HasOne("Domain.Aggregates.Regions.Commune", "Commune")
-                                .WithMany()
-                                .HasForeignKey("CommuneId")
-                                .HasConstraintName("fk_user_commune_address_commune_id");
-
-                            b1.HasOne("Domain.Aggregates.Regions.District", "District")
-                                .WithMany()
-                                .HasForeignKey("DistrictId")
-                                .HasConstraintName("fk_user_district_address_district_id");
-
-                            b1.HasOne("Domain.Aggregates.Regions.Province", "Province")
-                                .WithMany()
-                                .HasForeignKey("ProvinceId")
-                                .HasConstraintName("fk_user_province_address_province_id");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId")
                                 .HasConstraintName("fk_user_user_id");
-
-                            b1.Navigation("Commune");
-
-                            b1.Navigation("District");
-
-                            b1.Navigation("Province");
                         });
 
                     b.Navigation("Address");

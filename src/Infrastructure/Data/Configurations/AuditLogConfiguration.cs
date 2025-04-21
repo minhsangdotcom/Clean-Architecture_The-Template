@@ -1,14 +1,14 @@
 using Domain.Aggregates.AuditLogs;
-using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch.Analysis;
+using FluentConfiguration.Configurations;
 
 namespace Infrastructure.Data.Configurations;
 
 public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
 {
-    public void Configure(ref ElasticsearchConfigBuilder<AuditLog> buider)
+    public void Configure(ref ElasticsearchConfigBuilder<AuditLog> buider, string? prefix = null)
     {
-        buider.ToIndex();
+        buider.ToIndex(prefix);
         buider.HasKey(key => key.Id);
 
         buider.Settings(setting =>
@@ -146,63 +146,6 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                                 .Date(d => d.Agent!.DayOfBirth!)
                                 .ByteNumber(b => b.Agent!.Gender!)
                                 .Keyword(x => x.Agent!.CreatedAt)
-                                .Nested(
-                                    n => n.Agent!.Role!,
-                                    config =>
-                                        config.Properties(p =>
-                                            p.Text(
-                                                    t => t.Agent!.Role!.Name!,
-                                                    config =>
-                                                        config
-                                                            .Fields(f =>
-                                                                f.Keyword(
-                                                                    ElsIndexExtension.GetKeywordName<RoleTest>(
-                                                                        n => n.Name!
-                                                                    )
-                                                                )
-                                                            )
-                                                            .Analyzer("myTokenizer")
-                                                            .SearchAnalyzer("standardAnalyzer")
-                                                )
-                                                .Text(
-                                                    t => t.Agent!.Role!.Guard!,
-                                                    config =>
-                                                        config
-                                                            .Fields(f =>
-                                                                f.Keyword(
-                                                                    ElsIndexExtension.GetKeywordName<RoleTest>(
-                                                                        n => n.Guard!
-                                                                    )
-                                                                )
-                                                            )
-                                                            .Analyzer("myTokenizer")
-                                                            .SearchAnalyzer("standardAnalyzer")
-                                                )
-                                                .Nested(
-                                                    n => n.Agent!.Role!.Permissions!,
-                                                    config =>
-                                                        config.Properties(p =>
-                                                            p.Text(
-                                                                t =>
-                                                                    t.Agent!.Role!.Permissions!.First().Name!,
-                                                                config =>
-                                                                    config
-                                                                        .Fields(f =>
-                                                                            f.Keyword(
-                                                                                ElsIndexExtension.GetKeywordName<PermissionTest>(
-                                                                                    n => n.Name!
-                                                                                )
-                                                                            )
-                                                                        )
-                                                                        .Analyzer("myTokenizer")
-                                                                        .SearchAnalyzer(
-                                                                            "standardAnalyzer"
-                                                                        )
-                                                            )
-                                                        )
-                                                )
-                                        )
-                                )
                         )
                 )
         );

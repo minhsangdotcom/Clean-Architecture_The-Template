@@ -1,7 +1,7 @@
 using Application.Features.Common.Projections.Users;
-using Contracts.Common.Messages;
 using Domain.Aggregates.Users;
 using FluentValidation;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Common.Validators.Users;
 
@@ -10,7 +10,6 @@ public class UserClaimValidator : AbstractValidator<UserClaimModel>
     public UserClaimValidator()
     {
         RuleFor(x => x.ClaimType)
-            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithState(x =>
                 Messager
@@ -22,7 +21,6 @@ public class UserClaimValidator : AbstractValidator<UserClaimModel>
             );
 
         RuleFor(x => x.ClaimValue)
-            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithState(x =>
                 Messager

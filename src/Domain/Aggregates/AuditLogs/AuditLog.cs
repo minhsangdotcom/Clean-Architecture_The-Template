@@ -1,4 +1,3 @@
-using Domain.Aggregates.AuditLogs.Enums;
 using Domain.Common;
 
 namespace Domain.Aggregates.AuditLogs;

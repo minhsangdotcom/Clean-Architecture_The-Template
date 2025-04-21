@@ -1,6 +1,5 @@
 using Ardalis.GuardClauses;
-using CSharpFunctionalExtensions;
-using Domain.Aggregates.Regions;
+using SharedKernel.Common;
 
 namespace Domain.Aggregates.Users.ValueObjects;
 
@@ -8,42 +7,56 @@ public class Address : ValueObject
 {
     public string? Street { get; set; }
 
-    public Province? Province { get; set; }
+    public Ulid ProvinceId { get; set; }
+    public string Province { get; set; } = string.Empty;
 
-    public District? District { get; set; }
+    public Ulid DistrictId { get; set; }
+    public string District { get; set; } = string.Empty;
 
-    public Commune? Commune { get; set; }
+    public Ulid? CommuneId { get; set; }
+    public string? Commune { get; set; }
 
     private Address() { }
 
-    public Address(Province province, District district, Commune? commune, string street)
+    public Address(
+        string province,
+        Ulid provinceId,
+        string district,
+        Ulid districtId,
+        string? commune,
+        Ulid? communeId,
+        string street
+    )
     {
+        Province = Guard.Against.NullOrEmpty(province);
+        District = Guard.Against.NullOrEmpty(district);
         Street = Guard.Against.NullOrEmpty(street);
-        Province = Guard.Against.Null(province);
-        District = Guard.Against.Null(district);
+        ProvinceId = Guard.Against.Null(provinceId);
+        DistrictId = Guard.Against.Null(districtId);
+        CommuneId = communeId;
         Commune = commune;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return Street!;
-        yield return Province!.Id;
-        yield return District!.Id;
+        yield return ProvinceId;
+        yield return DistrictId;
 
         if (Commune != null)
         {
-            yield return Commune!.Id;
+            yield return CommuneId!;
         }
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is Address other)
         {
             return Street == other.Street
-                && Province!.Id == other.Province!.Id
-                && District!.Id == other.District!.Id
-                && Commune?.Id == other.Commune?.Id;
+                && ProvinceId == other.ProvinceId
+                && DistrictId == other.DistrictId
+                && CommuneId == other.CommuneId;
         }
         return false;
     }
@@ -55,9 +68,7 @@ public class Address : ValueObject
 
     public override string ToString()
     {
-        return string.Join(
-            ",",
-            [Street, Commune?.Name ?? string.Empty, District!.Name, Province!.Name]
-        );
+        string? commune = $"{Commune}," ?? null;
+        return $"{Street},{commune}{District},{Province}";
     }
 }

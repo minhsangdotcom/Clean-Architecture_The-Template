@@ -2,21 +2,17 @@ using System.Collections;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Mime;
-using System.Reflection;
 using System.Text;
-using Contracts.Extensions;
-using Contracts.Extensions.Reflections;
-using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using SharedKernel.Extensions;
+using SharedKernel.Extensions.Reflections;
 
 namespace Application.SubcutaneousTests.Extensions;
 
 public static class ClientExtension
 {
-    public static async Task<T?> ToResponse<T>(this HttpResponseMessage responseMessage)
-    {
-        return await responseMessage.Content.ReadFromJsonAsync<T>();
-    }
+    public static async Task<T?> ToResponse<T>(this HttpResponseMessage responseMessage) =>
+        await responseMessage.Content.ReadFromJsonAsync<T>();
 
     public static async Task<HttpResponseMessage> CreateRequestAsync(
         this HttpClient client,

@@ -1,23 +1,41 @@
-using Application.Common.Auth;
+using Api.common.EndpointConfigurations;
+using Api.common.Results;
+using Api.common.Routers;
 using Application.Features.Users.Commands.Profiles;
-using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
-using Contracts.RouteResults;
-using Contracts.Routers;
 using Mediator;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.User;
 
-public class UpdateUserProfileEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<UpdateUserProfileCommand>.WithActionResult<ApiResponse>
+public class UpdateUserProfileEndpoint : IEndpoint
 {
-    [HttpPut(Router.UserRoute.Profile)]
-    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Update Profile User")]
-    [AuthorizeBy]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(
+    public EndpointVersion Version => EndpointVersion.One;
+
+    public void MapEndpoint(IEndpointRouteBuilder app)
+    {
+        app.MapPut(Router.UserRoute.Profile, HandleAsync)
+            .WithOpenApi(operation => new OpenApiOperation(operation)
+            {
+                Summary = "Update user profile 🛠️ 👨 📋",
+                Description = "Updates profile information for the currently authenticated user.",
+                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
+            })
+            .WithRequestValidation<UpdateUserProfileCommand>()
+            .RequireAuth();
+    }
+
+    private async Task<
+        Results<Ok<ApiResponse<UpdateUserProfileResponse>>, ProblemHttpResult>
+    > HandleAsync(
         [FromForm] UpdateUserProfileCommand request,
+        [FromServices] ISender sender,
         CancellationToken cancellationToken = default
-    ) => this.Ok200(await sender.Send(request, cancellationToken));
+    )
+    {
+        var result = await sender.Send(request, cancellationToken);
+        return result.ToResult();
+    }
 }

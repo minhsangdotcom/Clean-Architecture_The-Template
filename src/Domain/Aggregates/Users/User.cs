@@ -1,12 +1,12 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Ardalis.GuardClauses;
-using Contracts.Constants;
-using Contracts.Extensions.Reflections;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Events;
 using Domain.Aggregates.Users.ValueObjects;
 using Domain.Common;
 using Mediator;
+using SharedKernel.Constants;
+using SharedKernel.Extensions.Reflections;
 
 namespace Domain.Aggregates.Users;
 
@@ -78,6 +78,37 @@ public class User : AggregateRoot
     public void SetPassword(string password) =>
         Password = Guard.Against.NullOrWhiteSpace(password, nameof(password));
 
+    public void Update(
+        string? firstName,
+        string? lastName,
+        string? email,
+        string? phoneNumber,
+        DateTime? dayOfBirth
+    )
+    {
+        if (!string.IsNullOrWhiteSpace(firstName))
+        {
+            FirstName = firstName;
+        }
+        if (!string.IsNullOrWhiteSpace(lastName))
+        {
+            LastName = lastName;
+        }
+        if (!string.IsNullOrWhiteSpace(email))
+        {
+            Email = email;
+        }
+        if (!string.IsNullOrWhiteSpace(phoneNumber))
+        {
+            PhoneNumber = phoneNumber;
+        }
+
+        if (dayOfBirth != null)
+        {
+            DayOfBirth = dayOfBirth;
+        }
+    }
+
     public void UpdateAddress(Address address) => Address = address;
 
     public void UpdateDefaultUserClaims() =>
@@ -144,9 +175,7 @@ public class User : AggregateRoot
             return;
         }
 
-        UserClaim[] defaultClaims = UserClaims
-            .Where(x => x.Type == KindaUserClaimType.Default)
-            .ToArray();
+        UserClaim[] defaultClaims = [.. UserClaims.Where(x => x.Type == UserClaimType.Default)];
         Span<UserClaim> currentUserClaims = defaultClaims.AsSpan();
 
         List<UserClaim> userClaims = GetUserClaims();

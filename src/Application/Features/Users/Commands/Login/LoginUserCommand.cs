@@ -1,8 +1,9 @@
+using Contracts.ApiWrapper;
 using Mediator;
 
 namespace Application.Features.Users.Commands.Login;
 
-public class LoginUserCommand : IRequest<LoginUserResponse>
+public class LoginUserCommand : IRequest<Result<LoginUserResponse>>
 {
     public string? Username { get; set; }
 

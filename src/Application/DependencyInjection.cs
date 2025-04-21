@@ -20,13 +20,10 @@ public static class DependencyInjection
 
         return services
             .AddMediator(option => option.ServiceLifetime = ServiceLifetime.Scoped)
-            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ErrorLoggingBehaviour<,>))
             .AddSingleton(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>))
-            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>))
-            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(PerformaceBehavior<,>))
             .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ProcessImagePathBehavior<,>))
+            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(PerformaceBehavior<,>))
             .AddValidatorsFromAssembly(currentAssembly)
-            .AddAutoMapper(currentAssembly)
             .AddSingleton<IAuthorizationPolicyProvider, AuthorizePolicyProvider>()
             .AddSingleton<IAuthorizationHandler, AuthorizeHandler>();
     }

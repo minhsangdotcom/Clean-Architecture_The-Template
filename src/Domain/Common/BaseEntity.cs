@@ -1,4 +1,4 @@
-using Contracts.Dtos.Models;
+using SharedKernel.Models;
 
 namespace Domain.Common;
 

@@ -1,72 +1,88 @@
-using Application.Common.Exceptions;
+using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Common.Messages;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.ResetPassword;
 
 public class ResetUserPasswordHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<ResetUserPasswordCommand>
+    : IRequestHandler<ResetUserPasswordCommand, Result<string>>
 {
-    public async ValueTask<Unit> Handle(
+    public async ValueTask<Result<string>> Handle(
         ResetUserPasswordCommand command,
         CancellationToken cancellationToken
     )
     {
-        User user =
-            await unitOfWork
-                .Repository<User>()
-                .FindByConditionAsync(
-                    new GetUserByIdIncludeResetPassword(command.UserId),
-                    cancellationToken
-                )
-            ?? throw new NotFoundException(
-                [Messager.Create<User>().Message(MessageType.Found).Negative().Build()]
+        User? user = await unitOfWork
+            .DynamicReadOnlyRepository<User>()
+            .FindByConditionAsync(
+                new GetUserByIdIncludeResetPassword(command.UserId),
+                cancellationToken
             );
 
-        IEnumerable<UserResetPassword> resetPasswords = user.UserResetPasswords ?? [];
-        UserResetPassword? resetPassword =
-            resetPasswords.FirstOrDefault(x => x.Token == command.Token)
-            ?? throw new BadRequestException(
-                [
+        if (user == null)
+        {
+            return Result<string>.Failure(
+                new NotFoundError(
+                    "The resource is not found",
+                    Messager.Create<User>().Message(MessageType.Found).Negative().Build()
+                )
+            );
+        }
+
+        UserResetPassword? resetPassword = user.UserResetPasswords?.FirstOrDefault(x =>
+            x.Token == command.Token
+        );
+
+        if (resetPassword == null)
+        {
+            return Result<string>.Failure(
+                new BadRequestError(
+                    "Error has occured with reset password token",
                     Messager
                         .Create<UserResetPassword>()
                         .Property(x => x.Token)
                         .Message(MessageType.Correct)
                         .Negative()
-                        .Build(),
-                ]
+                        .Build()
+                )
             );
+        }
 
         if (resetPassword.Expiry <= DateTimeOffset.UtcNow)
         {
-            throw new BadRequestException(
-                [
+            return Result<string>.Failure(
+                new BadRequestError(
+                    "Error has occured with reset password token",
                     Messager
                         .Create<UserResetPassword>()
                         .Property(x => x.Token)
                         .Message(MessageType.Expired)
-                        .Build(),
-                ]
+                        .Build()
+                )
             );
         }
 
         if (user.Status == UserStatus.Inactive)
         {
-            throw new BadRequestException(
-                [Messager.Create<User>().Message(MessageType.Active).Negative().Build()]
+            return Result<string>.Failure(
+                new BadRequestError(
+                    "Error has occured with current user",
+                    Messager.Create<User>().Message(MessageType.Active).Negative().Build()
+                )
             );
         }
 
         user.SetPassword(HashPassword(command.Password));
 
-        await unitOfWork.Repository<UserResetPassword>().DeleteRangeAsync(resetPasswords);
+        await unitOfWork.Repository<UserResetPassword>().DeleteAsync(resetPassword);
         await unitOfWork.Repository<User>().UpdateAsync(user);
         await unitOfWork.SaveAsync(cancellationToken);
 
-        return Unit.Value;
+        return Result<string>.Success();
     }
 }

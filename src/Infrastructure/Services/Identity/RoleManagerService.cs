@@ -5,6 +5,7 @@ using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Microsoft.EntityFrameworkCore;
+using SharedKernel.Constants;
 
 namespace Infrastructure.Services.Identity;
 
@@ -20,13 +21,13 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
 
     private const string NOT_FOUND_MESSAGE = $"{nameof(Role)} is not found";
 
-    public async Task DeleteRoleAsync(Role role)
+    public async Task DeleteAsync(Role role)
     {
         roleContext.Remove(role);
         await context.SaveChangesAsync();
     }
 
-    public async Task<Role> CreateRoleAsync(Role role)
+    public async Task<Role> CreateAsync(Role role)
     {
         await roleContext.AddAsync(role);
         await context.SaveChangesAsync();
@@ -34,14 +35,14 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         return role;
     }
 
-    public async Task<IList<Role>> CreateRangeRoleAsync(IEnumerable<Role> roles)
+    public async Task<IList<Role>> CreateRangeAsync(IEnumerable<Role> roles)
     {
         await roleContext.AddRangeAsync(roles);
         await context.SaveChangesAsync();
         return [.. roles];
     }
 
-    public async Task<Role> UpdateRoleAsync(Role role, IEnumerable<RoleClaim>? roleClaims)
+    public async Task<Role> UpdateAsync(Role role, IEnumerable<RoleClaim>? roleClaims)
     {
         try
         {
@@ -52,7 +53,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
 
             if (roleClaims?.Any() == true)
             {
-                await UpdateRoleClaimAsync(roleClaims, role);
+                await UpdateRoleClaimsAsync(roleClaims, role);
             }
             else
             {
@@ -87,7 +88,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
 
     public async Task<List<Role>> ListAsync() => await roleContext.ToListAsync();
 
-    public async Task UpdateRoleClaimAsync(IEnumerable<RoleClaim> roleClaims, Role role)
+    public async Task UpdateRoleClaimsAsync(IEnumerable<RoleClaim> roleClaims, Role role)
     {
         Role currentRole = Guard.Against.NotFound(
             $"{role.Id}",
@@ -139,10 +140,10 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             x.ClaimValue
         ));
         // insert
-        await AddClaimsToRoleAsync(role, keyValuePairClaims);
+        await AssignClaimsToRoleAsync(role, keyValuePairClaims);
     }
 
-    public async Task AddClaimsToRoleAsync(
+    public async Task AssignClaimsToRoleAsync(
         Role role,
         IEnumerable<KeyValuePair<string, string>> claims
     )
@@ -193,7 +194,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
                     ClaimValue = roleClaim.ClaimValue,
                     RoleClaimId = roleClaim.Id,
                     UserId = userId,
-                    Type = KindaUserClaimType.Custom,
+                    Type = UserClaimType.Custom,
                 }
             );
             userClaims.AddRange(additionUserClaims);
@@ -239,27 +240,29 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         await context.SaveChangesAsync();
     }
 
-    public Task<List<RoleClaim>> GetClaimsByRoleAsync(Ulid roleId) =>
-        GetClaimsByRolesAsync([roleId]);
+    public async Task<IList<RoleClaim>> GetRolePermissionClaimsAsync() =>
+        await RoleClaims.Where(claim => claim.ClaimType == ClaimTypes.Permission).ToListAsync();
 
-    public async Task<List<RoleClaim>> GetClaimsByRolesAsync(IEnumerable<Ulid> roleIds) =>
+    public Task<List<RoleClaim>> GetRoleClaimsAsync(Ulid roleId) => GetRoleClaimsAsync([roleId]);
+
+    public async Task<List<RoleClaim>> GetRoleClaimsAsync(IEnumerable<Ulid> roleIds) =>
         await roleClaimContext.Where(x => roleIds.Contains(x.RoleId)).ToListAsync();
 
-    public async Task<bool> HasClaimInRoleAsync(Ulid roleId, Ulid claimId) =>
+    public async Task<bool> HasRoleClaimAsync(Ulid roleId, Ulid claimId) =>
         await roleContext.AnyAsync(x => x.Id == roleId && x.RoleClaims!.Any(p => p.Id == claimId));
 
-    public async Task<bool> HasClaimInRoleAsync(Ulid roleId, string claimName) =>
+    public async Task<bool> HasRoleClaimAsync(Ulid roleId, string claimName) =>
         await roleContext.AnyAsync(x =>
             x.Id == roleId && x.RoleClaims!.Any(p => p.ClaimType == claimName)
         );
 
-    public async Task<bool> HasClaimInRoleAsync(Ulid roleId, string claimName, string claimValue) =>
+    public async Task<bool> HasRoleClaimAsync(Ulid roleId, string claimName, string claimValue) =>
         await roleContext.AnyAsync(x =>
             x.Id == roleId
             && x.RoleClaims!.Any(p => p.ClaimType == claimName && p.ClaimValue == claimValue)
         );
 
-    public async Task<bool> HasClaimInRoleAsync(
+    public async Task<bool> HasRoleClaimAsync(
         Ulid roleId,
         IEnumerable<KeyValuePair<string, string>> claims
     )
@@ -271,9 +274,6 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
 
         return roleClaims.Any(x => claims.Contains(new(x.ClaimType, x.ClaimValue)));
     }
-
-    private async Task<Role> GetAsync(Ulid id) =>
-        Guard.Against.NotFound($"{id}", await GetByIdAsync(id), NOT_FOUND_MESSAGE);
 
     private static IEnumerable<UserClaim> ProcessUserClaimUpdate(
         IEnumerable<RoleClaim> roleClaimsToModify,

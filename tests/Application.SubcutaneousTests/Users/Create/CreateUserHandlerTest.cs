@@ -2,10 +2,14 @@ using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
 using AutoFixture;
+using Contracts.ApiWrapper;
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
-using FluentAssertions;
 using Infrastructure.Constants;
 using Microsoft.AspNetCore.Http;
+using SharedKernel.Common.Messages;
+using SharedKernel.Constants;
+using Shouldly;
 
 namespace Application.SubcutaneousTests.Users.Create;
 
@@ -13,59 +17,110 @@ namespace Application.SubcutaneousTests.Users.Create;
 public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifetime
 {
     private readonly Fixture fixture = new();
-
     private Ulid roleId;
-
     private CreateUserCommand command = new();
 
     [Fact]
-    private async Task CreateUser_WhenNoCustomClaim_ShouldCreateSuccess()
+    private async Task CreateUser_WhenProvinceNotFound_ShouldReturnNotFoundResult()
     {
-        command.UserClaims = null;
+        command.ProvinceId = Ulid.NewUlid();
+        //act
+        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
 
-        CreateUserResponse response = await testingFixture.SendAsync(command);
-        User? user = await testingFixture.FindUserByIdAsync(response.Id);
+        //assert
+        var expectedMessage = Messager
+            .Create<User>()
+            .Property(nameof(CreateUserCommand.ProvinceId))
+            .Message(MessageType.Existence)
+            .Negative()
+            .Build();
 
-        AssertUser(user, command);
+        result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]
-    private async Task CreateUser_WhenNoAvatar_ShouldCreateSuccess()
+    private async Task CreateUser_WhenDistrictNotFound_ShouldReturnNotFoundResult()
     {
-        command.Avatar = null;
-        CreateUserResponse response = await testingFixture.SendAsync(command);
-        User? user = await testingFixture.FindUserByIdAsync(response.Id);
+        command.DistrictId = Ulid.NewUlid();
+        //act
+        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
 
-        AssertUser(user, command);
+        //assert
+        var expectedMessage = Messager
+            .Create<User>()
+            .Property(nameof(CreateUserCommand.DistrictId))
+            .Message(MessageType.Existence)
+            .Negative()
+            .Build();
+
+        result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]
-    private async Task CreateUser_WhenNoGender_ShouldCreateSuccess()
+    private async Task CreateUser_WhenCommuneNotFound_ShouldReturnNotFoundResult()
     {
-        command.Gender = null;
-        CreateUserResponse response = await testingFixture.SendAsync(command);
-        User? user = await testingFixture.FindUserByIdAsync(response.Id);
+        command.CommuneId = Ulid.NewUlid();
+        //act
+        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
 
-        AssertUser(user, command);
-    }
+        //assert
+        var expectedMessage = Messager
+            .Create<User>()
+            .Property(nameof(CreateUserCommand.CommuneId))
+            .Message(MessageType.Existence)
+            .Negative()
+            .Build();
 
-    [Fact]
-    private async Task CreateUser_WhenNoDayOfBirth_ShouldCreateSuccess()
-    {
-        command.DayOfBirth = null;
-        CreateUserResponse response = await testingFixture.SendAsync(command);
-        User? user = await testingFixture.FindUserByIdAsync(response.Id);
-
-        AssertUser(user, command);
+        result.Error.ShouldNotBeNull();
+        result.Error.Status.ShouldBe(404);
+        result.Error.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
     }
 
     [Fact]
     private async Task CreateUser_ShouldCreateSuccess()
     {
-        CreateUserResponse response = await testingFixture.SendAsync(command);
-        User? user = await testingFixture.FindUserByIdAsync(response.Id);
+        //arrage
+        command.DayOfBirth = null;
+        command.Avatar = null;
+        command.Gender = null;
+        command.UserClaims = null;
 
-        AssertUser(user, command);
+        //act
+        Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Error.ShouldBeNull();
+
+        var response = result.Value!;
+        var user = await testingFixture.FindUserByIdAsync(response.Id);
+        user.ShouldNotBeNull();
+
+        user!.ShouldSatisfyAllConditions(
+            () => user.Id.ShouldBe(response.Id),
+            () => user.FirstName.ShouldBe(response.FirstName),
+            () => user.LastName.ShouldBe(response.LastName),
+            () => user.Username.ShouldBe(response.Username),
+            () => user.Email.ShouldBe(response.Email),
+            () => user.PhoneNumber.ShouldBe(response.PhoneNumber),
+            () => user.DayOfBirth.ShouldBe(response.DayOfBirth),
+            () => user.Gender.ShouldBe(response.Gender),
+            () => user.Address?.ToString().ShouldBe(response.Address),
+            () => user.Avatar.ShouldBe(response.Avatar),
+            () => user.Status.ShouldBe(response.Status),
+            () => user.UserRoles?.Select(x => x.RoleId).ShouldBe(response.Roles?.Select(x => x.Id)),
+            () =>
+                command
+                    .UserClaims?.All(x =>
+                        user.UserClaims?.Any(p =>
+                            p.ClaimType == x.ClaimType && p.ClaimValue == x.ClaimType
+                        ) == true
+                    )
+                    .ShouldBeTrue()
+        );
     }
 
     public async Task DisposeAsync()
@@ -76,88 +131,35 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task InitializeAsync()
     {
         await testingFixture.ResetAsync();
-        await testingFixture.SeedingRegionsAsync();
-        var response = await testingFixture.CreateRoleAsync("adminTest");
-        roleId = response.Id;
-        await testingFixture.SeedingUserAsync();
+        UserAddress address = await testingFixture.SeedingRegionsAsync();
+        Role role = await testingFixture.CreateAdminRoleAsync();
+        roleId = role.Id;
 
         IFormFile file = FileHelper.GenerateIFormfile(
             Path.Combine(Directory.GetCurrentDirectory(), "Files", "avatar_cute_2.jpg")
         );
         command = fixture
             .Build<CreateUserCommand>()
-            .With(x => x.ProvinceId, Ulid.Parse("01JAZDXCWY3Z9K3XS0AYZ733NF"))
-            .With(x => x.DistrictId, Ulid.Parse("01JAZDXDGSP0J0XF10836TR3QY"))
-            .With(x => x.CommuneId, Ulid.Parse("01JAZDXEAV440AJHTVEV0QTAV5"))
+            .With(x => x.ProvinceId, address.ProvinceId)
+            .With(x => x.DistrictId, address.DistrictId)
+            .With(x => x.CommuneId, address.CommuneId)
             .With(x => x.Avatar, file)
             .With(
                 x => x.UserClaims,
-                Credential
-                    .MANAGER_CLAIMS.Select(x => new UserClaimModel()
-                    {
-                        ClaimType = x.Key,
-                        ClaimValue = x.Value,
-                    })
-                    .ToList()
+                [
+                    .. Credential
+                        .MANAGER_CLAIMS.Select(x => new UserClaimModel()
+                        {
+                            ClaimType = ClaimTypes.Permission,
+                            ClaimValue = x,
+                        })
+                        .ToList(),
+                ]
             )
             .With(x => x.Roles, [roleId])
-            .With(x => x.Email, "super.admin@gmail.com")
-            .With(x => x.PhoneNumber, "0925123123")
-            .With(x => x.Username, "super.admin")
+            .With(x => x.Email, "admin@gmail.com")
+            .With(x => x.PhoneNumber, "0123456789")
+            .With(x => x.Username, "admin.super")
             .Create();
-    }
-
-    private void AssertUser(User? user, CreateUserCommand createUserCommand)
-    {
-        user.Should().NotBeNull();
-        user!.FirstName.Should().Be(createUserCommand.FirstName);
-        user!.LastName.Should().Be(createUserCommand.LastName);
-        user!.Email.Should().Be(createUserCommand.Email);
-        user!.PhoneNumber.Should().Be(createUserCommand.PhoneNumber);
-        user!.Address!.Province!.Id.Should().Be(createUserCommand.ProvinceId);
-        user!.Address!.District!.Id.Should().Be(createUserCommand.DistrictId);
-        user!.Username!.Should().Be(createUserCommand.Username);
-        BCrypt.Net.BCrypt.Verify(createUserCommand.Password, user.Password).Should().BeTrue();
-
-        if (createUserCommand.Avatar != null)
-        {
-            user.Avatar.Should().NotBeNull();
-        }
-        else
-        {
-            user.Avatar.Should().BeNull();
-        }
-
-        if (createUserCommand.DayOfBirth.HasValue)
-        {
-            user!.DayOfBirth!.Value.Date.Should().Be(createUserCommand.DayOfBirth.Value.Date);
-        }
-        else
-        {
-            user.DayOfBirth.Should().BeNull();
-        }
-
-        user!.Gender.Should().Be(createUserCommand.Gender);
-        user!.Status.Should().Be(createUserCommand.Status);
-
-        if (createUserCommand.CommuneId != null || createUserCommand.CommuneId != Ulid.Empty)
-        {
-            user.Address.Commune!.Id.Should().Be(createUserCommand.CommuneId!.Value);
-        }
-        else
-        {
-            user.Address.Commune.Should().BeNull();
-        }
-
-        user.UserRoles.Should().ContainSingle(x => x.RoleId == roleId);
-
-        if (createUserCommand.UserClaims?.Count > 0)
-        {
-            user.UserClaims!.Select(x => new { x.ClaimType, x.ClaimValue })
-                .Should()
-                .IntersectWith(
-                    createUserCommand.UserClaims.Select(x => new { x.ClaimType, x.ClaimValue })!
-                );
-        }
     }
 }

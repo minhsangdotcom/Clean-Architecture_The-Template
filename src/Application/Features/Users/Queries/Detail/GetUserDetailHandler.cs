@@ -1,26 +1,39 @@
-using Application.Common.Exceptions;
+using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Common.Messages;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Queries.Detail;
 
 public class GetUserDetailHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<GetUserDetailQuery, GetUserDetailResponse>
+    : IRequestHandler<GetUserDetailQuery, Result<GetUserDetailResponse>>
 {
-    public async ValueTask<GetUserDetailResponse> Handle(
+    public async ValueTask<Result<GetUserDetailResponse>> Handle(
         GetUserDetailQuery query,
         CancellationToken cancellationToken
-    ) =>
-        await unitOfWork
-            .Repository<User>()
-            .FindByConditionAsync<GetUserDetailResponse>(
+    )
+    {
+        GetUserDetailResponse? user = await unitOfWork
+            .DynamicReadOnlyRepository<User>()
+            .FindByConditionAsync(
                 new GetUserByIdSpecification(query.UserId),
+                x => x.ToGetUserDetailResponse(),
                 cancellationToken
-            )
-        ?? throw new NotFoundException(
-            [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
-        );
+            );
+
+        if (user == null)
+        {
+            return Result<GetUserDetailResponse>.Failure(
+                new NotFoundError(
+                    "",
+                    Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()
+                )
+            );
+        }
+
+        return Result<GetUserDetailResponse>.Success(user);
+    }
 }

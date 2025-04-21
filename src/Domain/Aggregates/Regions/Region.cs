@@ -8,11 +8,11 @@ public class Region : BaseEntity
 
     public string Name { get; set; } = string.Empty;
 
-    public string NameEn { get; set; } = string.Empty;
+    public string EnglishName { get; set; } = string.Empty;
 
     public string FullName { get; set; } = string.Empty;
 
-    public string FullNameEn { get; set; } = string.Empty;
+    public string EnglishFullName { get; set; } = string.Empty;
 
     public string? CustomName { get; set; }
 }

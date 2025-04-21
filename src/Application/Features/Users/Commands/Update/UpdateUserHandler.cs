@@ -1,93 +1,145 @@
-using System.Data.Common;
-using Application.Common.Exceptions;
+using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
-using Contracts.Common.Messages;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.AspNetCore.Http;
+using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.Update;
 
 public class UpdateUserHandler(
     IUnitOfWork unitOfWork,
-    IMapper mapper,
     IMediaUpdateService<User> mediaUpdateService,
     IUserManagerService userManagerService
-) : IRequestHandler<UpdateUserCommand, UpdateUserResponse>
+) : IRequestHandler<UpdateUserCommand, Result<UpdateUserResponse>>
 {
-    public async ValueTask<UpdateUserResponse> Handle(
+    public async ValueTask<Result<UpdateUserResponse>> Handle(
         UpdateUserCommand command,
         CancellationToken cancellationToken
     )
     {
-        User user =
-            await unitOfWork
-                .Repository<User>()
-                .FindByConditionAsync(
-                    new GetUserByIdSpecification(Ulid.Parse(command.UserId)),
-                    cancellationToken
-                )
-            ?? throw new NotFoundException(
-                [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
+        User? user = await unitOfWork
+            .DynamicReadOnlyRepository<User>()
+            .FindByConditionAsync(
+                new GetUserByIdSpecification(Ulid.Parse(command.UserId)),
+                cancellationToken
             );
 
-        IFormFile? avatar = command.User!.Avatar;
+        if (user == null)
+        {
+            return Result<UpdateUserResponse>.Failure(
+                new NotFoundError(
+                    "Your resource is not found",
+                    Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()
+                )
+            );
+        }
+
+        UserUpdateRequest updateData = command.UpdateData;
+
+        IFormFile? avatar = updateData.Avatar;
         string? oldAvatar = user.Avatar;
 
-        mapper.Map(command.User, user);
+        user.FromUpdateUser(updateData);
 
         Province? province = await unitOfWork
             .Repository<Province>()
-            .FindByIdAsync(command.User.ProvinceId, cancellationToken);
+            .FindByIdAsync(updateData.ProvinceId, cancellationToken);
+        if (province == null)
+        {
+            return Result<UpdateUserResponse>.Failure<NotFoundError>(
+                new(
+                    "Resource is not found",
+                    Messager
+                        .Create<User>()
+                        .Property(nameof(UserUpdateRequest.ProvinceId))
+                        .Message(MessageType.Existence)
+                        .Negative()
+                        .Build()
+                )
+            );
+        }
+
         District? district = await unitOfWork
             .Repository<District>()
-            .FindByIdAsync(command.User.DistrictId, cancellationToken);
+            .FindByIdAsync(updateData.DistrictId, cancellationToken);
+        if (district == null)
+        {
+            return Result<UpdateUserResponse>.Failure<NotFoundError>(
+                new(
+                    "Resource is not found",
+                    Messager
+                        .Create<User>()
+                        .Property(nameof(updateData.DistrictId))
+                        .Message(MessageType.Existence)
+                        .Negative()
+                        .Build()
+                )
+            );
+        }
 
         Commune? commune = null;
-        if (command.User.CommuneId.HasValue)
+        if (updateData.CommuneId.HasValue)
         {
             commune = await unitOfWork
                 .Repository<Commune>()
-                .FindByIdAsync(command.User.CommuneId.Value, cancellationToken);
+                .FindByIdAsync(updateData.CommuneId.Value, cancellationToken);
+
+            if (commune == null)
+            {
+                return Result<UpdateUserResponse>.Failure<NotFoundError>(
+                    new(
+                        "Resource is not found",
+                        Messager
+                            .Create<User>()
+                            .Property(nameof(UserUpdateRequest.CommuneId))
+                            .Message(MessageType.Existence)
+                            .Negative()
+                            .Build()
+                    )
+                );
+            }
         }
-        user.UpdateAddress(new(province!, district!, commune, command.User.Street!));
+        //* replace address
+        user.UpdateAddress(
+            new(
+                province!.FullName,
+                province.Id,
+                district!.FullName,
+                district.Id,
+                commune?.FullName,
+                commune?.Id,
+                command.UpdateData.Street!
+            )
+        );
 
         string? key = mediaUpdateService.GetKey(avatar);
         user.Avatar = await mediaUpdateService.UploadAvatarAsync(avatar, key);
-        // update default claim
+
+        //* trigger event to update default claims -  that's infomation of user
         user.UpdateDefaultUserClaims();
 
         try
         {
-            DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+            _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
             await unitOfWork.Repository<User>().UpdateAsync(user);
             await unitOfWork.SaveAsync(cancellationToken);
 
-            List<UserClaim> customUserClaims = mapper.Map<List<UserClaim>>(
-                command.User.UserClaims,
-                opt =>
-                {
-                    opt.Items[nameof(UserClaim.Type)] = KindaUserClaimType.Custom;
-                    opt.Items[nameof(UserClaim.UserId)] = user.Id;
-                }
-            );
+            //* update custom claims of user like permissions ...
+            List<UserClaim> customUserClaims =
+                updateData.UserClaims?.ToListUserClaim(UserClaimType.Custom, user.Id) ?? [];
+            await userManagerService.UpdateAsync(user, updateData.Roles!, customUserClaims);
 
-            await userManagerService.UpdateUserAsync(
-                user,
-                command.User.Roles!,
-                customUserClaims,
-                transaction
-            );
             await unitOfWork.CommitAsync(cancellationToken);
 
             await mediaUpdateService.DeleteAvatarAsync(oldAvatar);
-            return mapper.Map<UpdateUserResponse>(user);
+            return Result<UpdateUserResponse>.Success(user.ToUpdateUserResponse());
         }
         catch (Exception)
         {

@@ -1,24 +1,41 @@
+using Api.common.Documents;
+using Api.common.EndpointConfigurations;
+using Api.common.Results;
+using Api.common.Routers;
 using Application.Features.Permissions;
-using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
-using Contracts.RouteResults;
-using Contracts.Routers;
 using Mediator;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.Permissions;
 
-public class ListPermissionEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<ListPermissionQuery>.WithActionResult<ApiResponse>
+public class ListPermissionEndpoint : IEndpoint
 {
-    [HttpGet(Router.PermissionRoute.Permissions)]
-    [SwaggerOperation(Tags = [Router.PermissionRoute.Tags], Summary = "List permissions")]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(
-        [FromQuery] ListPermissionQuery request,
+    public EndpointVersion Version => EndpointVersion.One;
+
+    public void MapEndpoint(IEndpointRouteBuilder app)
+    {
+        app.MapGet(Router.PermissionRoute.Permissions, HandleAsync)
+            .WithOpenApi(operation => new OpenApiOperation(operation)
+            {
+                Summary = "Get list of Permissions in Application 📄",
+                Description = "Retrieves a list of permissions in Application.",
+                Tags = [new OpenApiTag() { Name = Router.PermissionRoute.Tags }],
+                Parameters = operation.AddDocs(),
+            });
+    }
+
+    private async Task<
+        Results<Ok<ApiResponse<IEnumerable<ListPermissionResponse>>>, ProblemHttpResult>
+    > HandleAsync(
+        ListPermissionQuery request,
+        [FromServices] ISender sender,
         CancellationToken cancellationToken = default
     )
     {
-        return this.Ok200(await sender.Send(request, cancellationToken));
+        var result = await sender.Send(request, cancellationToken);
+        return result.ToResult();
     }
 }

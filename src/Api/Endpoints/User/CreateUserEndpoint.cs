@@ -1,29 +1,45 @@
-using Application.Common.Auth;
+using Api.common.EndpointConfigurations;
+using Api.common.Results;
+using Api.common.Routers;
 using Application.Features.Users.Commands.Create;
-using Ardalis.ApiEndpoints;
-using CaseConverter;
 using Contracts.ApiWrapper;
-using Contracts.RouteResults;
-using Contracts.Routers;
 using Infrastructure.Constants;
 using Mediator;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.User;
 
-public class CreateUserEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<CreateUserCommand>.WithActionResult<ApiResponse>
+public class CreateUserEndpoint : IEndpoint
 {
-    [HttpPost(Router.UserRoute.Users)]
-    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "create User")]
-    [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(
+    public EndpointVersion Version => EndpointVersion.One;
+
+    public void MapEndpoint(IEndpointRouteBuilder app)
+    {
+        app.MapPost(Router.UserRoute.Users, HandleAsync)
+            .WithOpenApi(operation => new OpenApiOperation(operation)
+            {
+                Summary = "Create user 🧑",
+                Description = "Creates a new user and returns the created user details.",
+                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
+            })
+            .WithRequestValidation<CreateUserCommand>()
+            .RequireAuth(
+                permissions: Permission.Generate(PermissionAction.Create, PermissionResource.User)
+            )
+            .DisableAntiforgery();
+    }
+
+    private async Task<
+        Results<CreatedAtRoute<ApiResponse<CreateUserResponse>>, ProblemHttpResult>
+    > HandleAsync(
         [FromForm] CreateUserCommand request,
+        [FromServices] ISender sender,
         CancellationToken cancellationToken = default
     )
     {
-        CreateUserResponse user = await sender.Send(request, cancellationToken);
-        return this.Created201(Router.UserRoute.GetRouteName, user.Id, user);
+        var result = await sender.Send(request, cancellationToken);
+        return result.ToCreatedResult(result.Value!.Id, Router.UserRoute.GetRouteName);
     }
 }

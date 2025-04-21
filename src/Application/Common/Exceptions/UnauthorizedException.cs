@@ -1,9 +1,12 @@
-using Domain.Exceptions;
+using Contracts.ApiWrapper;
 using Microsoft.AspNetCore.Http;
 
 namespace Application.Common.Exceptions;
 
-public class UnauthorizedException(string message) : CustomException(message)
-{
-    public int HttpStatusCode { get; private set; } = StatusCodes.Status401Unauthorized;
-}
+public class UnauthorizedError(string title)
+    : ErrorDetails(
+        title,
+        "You need to log in first to access this resource",
+        nameof(UnauthorizedError),
+        StatusCodes.Status401Unauthorized
+    );

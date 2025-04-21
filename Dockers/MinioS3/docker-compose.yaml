@@ -29,7 +29,7 @@ services:
       - data1-1:/data1
       - data1-2:/data2
     networks:
-      - the-teplate-network
+      - the-template-network
 
   minio2:
     <<: *minio-common
@@ -38,7 +38,7 @@ services:
       - data2-1:/data1
       - data2-2:/data2
     networks:
-      - the-teplate-network
+      - the-template-network
 
   nginx:
     image: nginx:1.19.2-alpine
@@ -52,7 +52,7 @@ services:
       - minio1
       - minio2
     networks:
-      - the-teplate-network
+      - the-template-network
 
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.
@@ -63,5 +63,5 @@ volumes:
   data2-2:
 
 networks: 
-  the-teplate-network:
+  the-template-network:
     external: true
