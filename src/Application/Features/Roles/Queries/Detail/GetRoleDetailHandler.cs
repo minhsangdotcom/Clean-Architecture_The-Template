@@ -1,5 +1,4 @@
 using Application.Common.Errors;
-using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Roles;
