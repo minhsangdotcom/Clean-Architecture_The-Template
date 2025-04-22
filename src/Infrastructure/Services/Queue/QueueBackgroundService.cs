@@ -33,7 +33,7 @@ public class QueueBackgroundService(
 
             if (!await queueService.PingAsync())
             {
-                logger.Warning("Redis server is unavailable");
+                logger.Warning("Redis server is unavailable!");
                 continue;
             }
 
