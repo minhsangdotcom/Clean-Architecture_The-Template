@@ -23,7 +23,6 @@ public static class QueueRegisterExtension
                 .Configure<QueueSettings>(options =>
                     configuration.GetSection(nameof(QueueSettings)).Bind(options)
                 )
-                .AddSingleton<IQueueService, QueueService>()
                 .Configure<HostOptions>(options =>
                 {
                     options.ServicesStartConcurrently = true;

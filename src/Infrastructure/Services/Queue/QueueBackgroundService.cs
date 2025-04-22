@@ -10,7 +10,7 @@ using Serilog;
 namespace Infrastructure.Services.Queue;
 
 public class QueueBackgroundService(
-    //IQueueService queueService,
+    IQueueService queueService,
     IServiceProvider serviceProvider,
     IOptions<QueueSettings> options
 ) : BackgroundService
@@ -29,6 +29,12 @@ public class QueueBackgroundService(
             //     PayCartPayload,
             //     PayCartRequest
             // >();
+
+            if (!await queueService.PingAsync())
+            {
+                logger.Warning("Redis server is unavailable!");
+                continue;
+            }
 
             // if (request != null)
             // {
