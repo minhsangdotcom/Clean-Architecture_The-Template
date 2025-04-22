@@ -1,26 +1,37 @@
-using Application.Common.Interfaces.Services.DistributedCache;
+using Api.common.EndpointConfigurations;
+using Api.common.Routers;
+using Application.Common.Interfaces.Services.Queue;
 using Application.Features.Tickets.Carts.Pays;
-using Ardalis.ApiEndpoints;
-using Contracts.ApiWrapper;
-using Contracts.RouteResults;
-using Contracts.Routers;
-using Domain.Aggregates.QueueLogs;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.Tickets.Carts;
 
-public class PayCartEndpoint(IQueueFactory queueFactory)
-    : EndpointBaseAsync.WithRequest<PayCartRequest>.WithActionResult<ApiResponse>
+public class PayCartEndpoint : IEndpoint
 {
-    [HttpPost(Router.CartRoute.Pay)]
-    [SwaggerOperation(Tags = [Router.CartRoute.Tags], Summary = "pay cart")]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(
-        PayCartRequest request,
+    public EndpointVersion Version => EndpointVersion.One;
+
+    public void MapEndpoint(IEndpointRouteBuilder app)
+    {
+        app.MapPost(Router.CartRoute.Pay, HandleAsync)
+            .WithOpenApi(x => new OpenApiOperation(x)
+            {
+                Summary = "Pay cart",
+                Tags = [new OpenApiTag() { Name = Router.CartRoute.Carts }],
+            });
+    }
+
+    private async Task<Results<NoContent, ProblemHttpResult>> HandleAsync(
+        [FromRoute] string id,
+        [FromBody] CartData data,
+        [FromServices] IQueueService queueService,
         CancellationToken cancellationToken = default
     )
     {
-        bool result = await queueFactory.GetQueue(QueueType.OriginQueue).EnqueueAsync(request);
-        return this.Ok200(result);
+        _ = await queueService.EnqueueAsync(
+            new PayCartRequest() { CartId = id, CustomerId = data.CustomerId }
+        );
+        return TypedResults.NoContent();
     }
 }

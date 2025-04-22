@@ -1,23 +1,31 @@
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Carts;
+using Domain.Aggregates.Carts.Specifications;
 using Mediator;
 
 namespace Application.Features.Tickets.Carts.Create;
 
-public class CreateCartHandler(IUnitOfWork unitOfWork, IMapper mapper)
-    : IRequestHandler<CreateCartCommand, CreateCartResponse>
+public class CreateCartHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<CreateCartCommand, Result<CreateCartResponse>>
 {
-    public async ValueTask<CreateCartResponse> Handle(
+    public async ValueTask<Result<CreateCartResponse>> Handle(
         CreateCartCommand command,
         CancellationToken cancellationToken
     )
     {
-        var mappingCart = mapper.Map<Cart>(command);
+        var mappingCart = command.ToCart();
 
-        Cart cart = await unitOfWork.Repository<Cart>().AddAsync(mappingCart, cancellationToken);
+        Cart createdCart = await unitOfWork
+            .Repository<Cart>()
+            .AddAsync(mappingCart, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
-
-        return mapper.Map<CreateCartResponse>(cart);
+        Cart? cart = await unitOfWork
+            .DynamicReadOnlyRepository<Cart>()
+            .FindByConditionAsync(
+                new FindCartByIdIncludeSpecification(createdCart.Id),
+                cancellationToken
+            );
+        return Result<CreateCartResponse>.Success(cart!.ToCreateCartResponse());
     }
 }

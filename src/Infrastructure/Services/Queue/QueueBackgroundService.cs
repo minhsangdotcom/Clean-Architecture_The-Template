@@ -1,4 +1,6 @@
+using Application.Common.Interfaces.Services.Queue;
 using Application.Features.QueueLogs;
+using Application.Features.Tickets.Carts.Pays;
 using Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +11,7 @@ using Serilog;
 namespace Infrastructure.Services.Queue;
 
 public class QueueBackgroundService(
-    //IQueueService queueService,
+    IQueueService queueService,
     IServiceProvider serviceProvider,
     IOptions<QueueSettings> options
 ) : BackgroundService
@@ -24,20 +26,26 @@ public class QueueBackgroundService(
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            // PayCartPayload? request = await queueService.DequeueAsync<
-            //     PayCartPayload,
-            //     PayCartRequest
-            // >();
+            PayCartPayload? request = await queueService.DequeueAsync<
+                PayCartPayload,
+                PayCartRequest
+            >();
 
-            // if (request != null)
-            // {
-            //     await ProcessWithRetryAsync<PayCartPayload, PayCartResponse>(
-            //         request,
-            //         sender,
-            //         logger,
-            //         stoppingToken
-            //     );
-            // }
+            if (!await queueService.PingAsync())
+            {
+                logger.Warning("Redis server is unavailable");
+                continue;
+            }
+
+            if (request != null)
+            {
+                await ProcessWithRetryAsync<PayCartPayload, PayCartResponse>(
+                    request,
+                    sender,
+                    logger,
+                    stoppingToken
+                );
+            }
 
             await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
         }

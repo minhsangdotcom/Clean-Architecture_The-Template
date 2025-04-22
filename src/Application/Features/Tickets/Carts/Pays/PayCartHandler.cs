@@ -1,5 +1,4 @@
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Carts;
 using Domain.Aggregates.Carts.Enums;
@@ -10,7 +9,7 @@ using Mediator;
 
 namespace Application.Features.Tickets.Carts.Pays;
 
-public class PayCartHandler(IUnitOfWork unitOfWork, IMapper mapper)
+public class PayCartHandler(IUnitOfWork unitOfWork)
     : IRequestHandler<PayCartPayload, QueueResponse<PayCartResponse>>
 {
     public async ValueTask<QueueResponse<PayCartResponse>> Handle(
@@ -19,7 +18,7 @@ public class PayCartHandler(IUnitOfWork unitOfWork, IMapper mapper)
     )
     {
         Cart? cart = await unitOfWork
-            .Repository<Cart>()
+            .DynamicReadOnlyRepository<Cart>()
             .FindByConditionAsync(
                 new FindCartByIdIncludeSpecification(Ulid.Parse(request.Payload!.CartId)),
                 cancellationToken
@@ -115,12 +114,12 @@ public class PayCartHandler(IUnitOfWork unitOfWork, IMapper mapper)
         Order order =
             new()
             {
-                CustomerId = request.Payload.Body!.CustomerId,
+                CustomerId = request.Payload.CustomerId,
                 PhoneNumber = cart.PhoneNumber,
                 ShippingAddress = cart.ShippingAddress,
                 ShippingFee = cart.ShippingFee,
                 TotalAmount = cart.Total,
-                OrderItems = mapper.Map<List<OrderItem>>(cartItems),
+                OrderItems = cartItems.ToListOrderItem(),
             };
         await unitOfWork.Repository<Order>().AddAsync(order, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
@@ -129,7 +128,7 @@ public class PayCartHandler(IUnitOfWork unitOfWork, IMapper mapper)
         {
             IsSuccess = true,
             PayloadId = request.PayloadId,
-            ResponseData = mapper.Map<PayCartResponse>(cart),
+            ResponseData = cart.ToPayCartResponse(),
         };
     }
 }

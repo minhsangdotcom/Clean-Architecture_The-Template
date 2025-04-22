@@ -1,8 +1,9 @@
+using Contracts.ApiWrapper;
 using Mediator;
 
 namespace Application.Features.Tickets.Carts.Create;
 
-public class CreateCartCommand : IRequest<CreateCartResponse>
+public class CreateCartCommand : IRequest<Result<CreateCartResponse>>
 {
     // i'm so lazy to build another login logic for customer
     public Ulid CustomerId { get; set; }

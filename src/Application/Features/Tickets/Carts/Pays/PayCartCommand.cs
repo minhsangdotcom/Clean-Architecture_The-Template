@@ -1,23 +1,19 @@
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
-using Contracts.Routers;
 using Mediator;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Features.Tickets.Carts.Pays;
 
-public class PayCartCommand
+public class PayCartRequest
 {
+    public string? CartId { get; set; }
+
     public Ulid CustomerId { get; set; }
 }
 
-public class PayCartRequest
+public class CartData
 {
-    [FromRoute(Name = nameof(Router.Id))]
-    public string? CartId { get; set; }
-
-    [FromBody]
-    public PayCartCommand? Body { get; set; }
+    public Ulid CustomerId { get; set; }
 }
 
 public class PayCartPayload

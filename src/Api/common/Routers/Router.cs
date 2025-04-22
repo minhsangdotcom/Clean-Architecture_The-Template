@@ -53,4 +53,12 @@ public static class Router
         public const string Communes = nameof(Communes);
         public const string Tags = $"{nameof(RegionRoute)} endpoint";
     }
+
+    public static class CartRoute
+    {
+        public const string Carts = nameof(Carts);
+        public const string Pay =
+            $"{nameof(Carts)}/" + "{" + RoutePath.Id + "}" + $"/{nameof(Pay)}";
+        public const string Tags = $"{nameof(Carts)} endpoint";
+    }
 }

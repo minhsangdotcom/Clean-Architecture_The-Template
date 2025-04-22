@@ -1,5 +1,5 @@
-using Domain.Aggregates.Carts.Enums;
-using Domain.Common.Specs;
+using Specification;
+using Specification.Builders;
 
 namespace Domain.Aggregates.Carts.Specifications;
 
