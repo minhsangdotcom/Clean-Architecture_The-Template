@@ -21,9 +21,8 @@
   - [Nhược điểm](#nhược-điểm)
 - [Tính năng :rocket:](#tinh-nang)
 - [Nhá hàng cho các tính năng :fire:](#nha-hang-cho-cac-tinh-nang)
-  - [Authentication](#authentication)
-  - [Dynamic search and sort](#dynamic-search-and-sort)
-  - [Cross-cutting concerns](#cross-cutting-concerns)
+  - [Api](#api)
+  - [Truy vết](#truy-vết)
   - [Lưu trử file media bằng Minio](#lưu-trử-file-media-bằng-minio)
   - [Tự động dịch message](#tự-động-dịch-message)
 - [Sơ lượt về Cấu trúc :mag_right:](#so-luot-ve-cau-truc)
@@ -43,7 +42,7 @@
 
 Template này được thiết kế dành cho các bạn backend làm việc với ASP.NET Core. Nó cung cấp một cách hiệu quả để xây dựng các ứng dụng enterprise một cách đơn giản bằng cách tận dụng lợi thế từ kiến trúc Clean Architecture và .NET Core framework.
 
-Với template này, bạn sẽ có được zero configuration, không cần quan tâm đến cấu trúc, cài đặt, môi trường hoặc các thông lệ tốt nhất cho web API, vì tất cả đã được thiết lập :smiley:.
+Với template này, tất cả đã được thiết lập sẵn :smiley:.
 
 <div id='cho-minh-1sao-nhe'/>
 
@@ -55,22 +54,16 @@ Sự hỗ trợ của bạn là động lực giúp mình mang đến những t�
 
 # Định Nghĩa
 
-Clean Architecture là một triết lý thiết kế phần mềm được giới thiệu bởi Robert C. Martin (Uncle Bob). Nó nhấn mạnh việc tách biệt các mối quan tâm và khuyến khích việc tổ chức mã thành các lớp, mỗi lớp có trách nhiệm riêng biệt. Mục tiêu chính của kiến trúc là tạo ra các hệ thống không phụ thuộc vào framework, giao diện người dùng, cơ sở dữ liệu và các cơ quan bên ngoài, đảm bảo tính linh hoạt, khả năng mở rộng và dễ dàng kiểm thử.
-
-Tại phần trung tâm, Clean Architecture tổ chức mã thành các vòng tròn đồng tâm, với mỗi lớp đều có mục đích cụ thể.
+Kiến trúc Sạch (Clean Architecture) là một phương pháp thiết kế phần mềm do Robert C. Martin (Uncle Bob) giới thiệu, nhấn mạnh vào thuật ngữ "Tách biệt các chức năng",các tầng ngoài cùng sẽ phụ thuộc vào các tầng ở trong như hình. Tầng core sẽ không phụ thuộc vào các framework bên ngoài, cơ sở dữ liệu hay giao diện người dùng, từ đó giúp hệ thống dễ bảo trì, kiểm thử và phát triển theo thời gian.
 
 ![Alt text](Screenshots/clean-architecture.png "Cấu trúc chung của Clean Architecture")
 
-Quy tắc phụ thuộc nói rằng các thành phần phụ thuộc hướng từ ngoài vào trong, đảm bảo rằng các tầng bên trong vẫn tách biệt với các tầng bên ngoài.
-
 ### Lợi ích
 
-- **_Các thành phần tách biệt_**: Mỗi một tầng chịu trách nhiệm cho một khía cạnh của ứng dụng, giúp mã dễ hiểu và bảo trì.
-- **_Dễ dàng kiểm thử_**: Các business logic được tách biệt khỏi framework và UI, việc kiểm thử đơn vị trở nên đơn giản và đáng tin cậy hơn.
-- **_Linh hoạt và Thích nghi_**: Khi thay đổi framework, cơ sở dữ liệu hoặc các hệ thống bên ngoài ít ảnh hưởng đến logic của phần core.
-- **_Tái sử dụng_**: Các Business rules có thể được tái sử dụng trong các ứng dụng hoặc hệ thống khác mà không phải thay đổi quá nhiều code.
-- **_Khả năng mở rộng_**: Cấu trúc rõ ràng hỗ trợ việc phát triển và thêm tính năng mới mà không cần tái cơ cấu lại.
-- **_Không phụ thuộc vào framework_**: Không bị phụ thuộc nhiều vào framework, rất dễ dàng để thanh đổi công nghệ mới.
+- **Dễ dàng bảo trì**: Việc tách biệt các tầng cho phép dễ dàng nâng cấp và bảo trì
+- **Khả năng mở rộng**: Cấu trúc rõ ràng hỗ trợ việc phát triển và thêm tính năng mới mà không cần tái cấu trúc.
+- **Khả năng kiểm thử**: Các thành phần tách rời giúp dễ dàng kiểm thử một cách độc lập.
+- **Tính linh hoạt**: Không bị phụ thuộc nhiều vào framework, rất dễ dàng để thanh đổi công nghệ mới.
 
 ### Nhược điểm
 
@@ -86,78 +79,42 @@ Quy tắc phụ thuộc nói rằng các thành phần phụ thuộc hướng t�
 
 Có gì đặc biệt khiến cho template này trở nên khác biệt so với những template khác có trên Github?
 
-Nó không chỉ có một cấu trúc rất hiện đại dễ dàng mở rộng và duy trì, mà còn có một loại các tính năng, design pattern vô cùng cực hữa ích đặc biệt là cho .NET Core Web API,
+### Tính năng cần thiết cho mọi dự án:
 
-Giúp cho bạn làm project của mình mà ít tốn công sức nhất.
+- Đăng nhập :closed_lock_with_key:
+- Refresh token :arrows_counterclockwise:
+- Đổi mật khẩu :repeat:
+- Quên mật khẩu :unlock:
+- Xem và cập nhật profile người dùng :man_with_gua_pi_mao:
+- User CRUD :family:
+- Role CRUD 🛡️
 
-Nào hãy cùng mình khám phá nha :
+### Một số tính năng hữu ích khác:
 
-1. [Authentication với JWT](src/Infrastructure/Services/Identity/)
-1. [Authorization bằng Vai trò và quyền](#authorize)
-1. [Dynamic Search](src/Contracts/Extensions/QueryExtensions/SearchExtensions.cs), [Dynamic Sort](src/Contracts/Extensions/QueryExtensions/SortExtension.cs), [Dynamic Filter](#filtering),[Offset and Cursor Pagination](#pagination)
-1. [Lưu trữ media bằng AWS S3](src/Infrastructure/Services/Aws/)
-1. [Tích hợp sẳn Elastic Search](src/Infrastructure/Services/Elastics/)
-1. [Tích Hợp Domain Event](src/Application//Common/DomainEventHandlers/)
-1. [Cross-cutting Concerns](src/Application/Common/Behaviors/)
-1. [Distributed cache by Redis](src/Infrastructure/Services/DistributedCache/RedisCacheService.cs)
-1. [Xử lý bất đồng bộ nhiều Request cùng lúc bằng hàng đợi (ví dụ ở nhánh feature/TicketSale)](src/Infrastructure/Services/DistributedCache/)
-1. [Gửi Email](src/Infrastructure/Services/Mail/)
-1. [Tích hợp Schedule jobs bằng Hangfire](src/Infrastructure/Services/Hangfires/)
-1. [Specification Pattern](src/Domain/Common/Specs/), [Uit of work and Repository pattern](src/Infrastructure/UnitOfWorks/), [Cached repository with decorator design pattern](src/Infrastructure/UnitOfWorks/CachedRepositories/)
-1. [Subcutaneous Test](tests/Application.SubcutaneousTests/)
-1. [Tự động dịch message](src/Contracts/Common/Messages/)
-1. [Mã nguồn mở và Cấp phép MIT](#license)
+1. [DDD (Domain Driven Design)](/src/Domain/Aggregates/) :brain:
+1. [CQRS & Mediator](/src/Application/Features/) :twisted_rightwards_arrows:
+1. [Cross-cutting concern](/src/Application/Common/Behaviors/) :scissors:
+1. [Mail Sender](/src/Infrastructure/Services/Mail/) :mailbox:
+1. [Cached Repository](/src/Infrastructure/UnitOfWorks/CachedRepositories/) :computer:
+1. [Queue](/src/Infrastructure/Services/Queue/) :walking:
+1. [Logging](/src/Api/Extensions/SerialogExtension.cs) :pencil:
+1. [Tracing](/src/Api/Extensions/OpenTelemetryExtensions.cs) :chart_with_upwards_trend:
+1. [Automatical translatable messages](https://github.com/minhsangdotcom/the-template_shared-kernel) :globe_with_meridians:
+1. [S3 AWS](/src/Infrastructure/Services/Aws/) :cloud:
 
 <div id= 'nha-hang-cho-cac-tinh-nang'/>
 
 # Nhá hàng cho các tính năng :fire:
 
-### Authentication
+### API
 
-```json
-{
-  "results": {
-    "user": {
-      "firstName": "Chloe",
-      "lastName": "Kim",
-      "username": "chloe.kim",
-      "email": "chloe.kim@gmail.com",
-      "phoneNumber": "0925123123",
-      "dayOfBirth": "1990-09-30T17:00:00Z",
-      "gender": 2,
-      "province": null,
-      "district": null,
-      "commune": null,
-      "street": "132 Ham Nghi",
-      "avatar": null,
-      "status": 1,
-      "createdBy": "SYSTEM",
-      "updatedBy": null,
-      "updatedAt": null,
-      "id": "01JD936AXSDNMQ713P5XMVRQDV",
-      "createdAt": "2024-12-31T08:15:50Z"
-    },
-    "tokenType": "Bearer",
-    "accessTokenExpiredIn": 3600,
-    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMUpEOTM2QVhTRE5NUTcxM1A1WE1WUlFEViIsImV4cCI6MTczNzYxMjk4NH0.GMrQKpoaHcCHoKgV4WDeDPAZy_IEj7kUjh7PQRwTNG8",
-    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmYW1pbHlfaWQiOiJaNmI2M3hQSFUxRUsyVkl5R0YyOGJpWUdNTlh1REFrdiIsInN1YiI6IjAxSkQ5MzZBWFNETk1RNzEzUDVYTVZSUURWIiwiZXhwIjoxNzM3Njk1Nzg0fQ.jZgUpT7hQ0icP7FIp3TUzXfl2I4-O5MWEZ78RlBdCiI"
-  },
-  "statusCode": 200,
-  "message": "SUCCESS"
-}
-```
+![User Apis](/Screenshots/user-api.png)
 
-### Dynamic search and sort
+![Role Apis](/Screenshots/role-api.png)
 
-```
-http://localhost:8080/api/Users?PageSize=2&Search.Keyword=N%E1%BA%B5ng&Search.Targets=province.name&Sort=dayOfBirth
-```
+### Truy Vết
 
-![search and sort feature](Screenshots/search-sort.png)
-
-### Cross-cutting concerns
-
-![Cross-cutting Concerns feature](Screenshots/crosscutting-concern.png)
+![Tracing](/Screenshots/trace.png)
 
 ### Lưu trử file media bằng Minio
 
@@ -167,24 +124,18 @@ http://localhost:8080/api/Users?PageSize=2&Search.Keyword=N%E1%BA%B5ng&Search.Ta
 
 ```json
 {
-  "type": "BadRequestException",
-  "trace": {
-    "traceId": "a8ad0670028620121f51850ce5b6cab5",
-    "spanId": "fbf21a1849fdadac"
+  "type": "BadRequestError",
+  "title": "Error has occured with password",
+  "status": 400,
+  "instance": "POST /api/v1/Users/Login",
+  "ErrorDetail": {
+    "message": "user_password_incorrect",
+    "en": "Password of user is incorrect",
+    "vi": "Mật khẩu của Người dùng không đúng"
   },
-  "errors": [
-    {
-      "reasons": [
-        {
-          "message": "user_password_incorrect",
-          "en": "Password of user is incorrect",
-          "vi": "Mật khẩu của Người dùng không đúng"
-        }
-      ]
-    }
-  ],
-  "statusCode": 400,
-  "message": "One or several errors have occured"
+  "requestId": "0HNC1ERHD53E2:00000001",
+  "traceId": "fa7b365b49f1b554a9cfabd978d858c8",
+  "spanId": "8623dbe038a6dede"
 }
 ```
 
@@ -192,117 +143,104 @@ http://localhost:8080/api/Users?PageSize=2&Search.Keyword=N%E1%BA%B5ng&Search.Ta
 
 # Sơ lượt về Cấu trúc :mag_right:
 
-**_Domain_**: Tầng Domain đóng vai trò như phần trung tâm trong Clean Architecture, các thành phần bao gồm:
+```
+/Domain
+  ├── /Aggregates/           # Domain aggregates (entities with business rules)
+  └── /Common/               # Shared domain logic and base types
+       ├── AggregateRoot.cs       # Base class for aggregate roots
+       ├── BaseEntity.cs          # Base class for entities
+       └── UlidToStringConverter.cs  # Value converter for ULIDs
+```
 
-- Aggregates : Là nhóm các entity có mối liên quan với nhau, các value object, enum, interface và Specification pattern (tùy chọn) các bạn có thể đọc thêm ở [https://github.com/ardalis/Specification](https://github.com/ardalis/Specification). Nó có một số nguyên tắc bắt buộc trong quá trình tương tác giữa các root và các thành phần quan hệ của nó và còn nhiều thức khác.
-- Exceptions : Tạo ra custom exception cho tầng Domain
+```
+/Application
+  ├── /Common
+  │     ├── /Auth/                   # custom authorization & policies in .NET Core
+  │     ├── /Behaviors/              # MediatR pipeline behaviors (CQRS cross‑cutting)
+  │     ├── /DomainEventHandlers/    # handlers for raising/domain events
+  │     ├── /Errors/                 # error types for Result‑pattern responses
+  │     ├── /Exceptions/             # domain/application exception definitions
+  │     ├── /Extensions/             # helper methods (pagination, “[ ]→object” parsing, etc.)
+  │     ├── /Interfaces/             # application‑level contracts & abstractions
+  │     ├── /QueryStringProcessing/  # validation logic for query‑string params
+  │     └── /Security/               # security attributes (e.g. [Authorize], roles)
+  ├── /Features/                     # CQRS + MediatR pattern modules
+  │     ├── AuditLogs/               # commands & queries for audit‑trail
+  │     ├── Common/                  # shared feature utilities
+  │     ├── Permissions/             # manage app permissions
+  │     ├── QueueLogs/               # logging for background/queued jobs
+  │     ├── Regions/                 # region‑related commands & queries
+  │     ├── Roles/                   # role management (CRUD, assignments)
+  │     └── Users/                   # user‑centric commands & queries
+  └── DependencyInjection.cs         # registers MediatR, pipeline behaviors, auth & query‑string services
 
-  📁 Domain\
-   ├── 📁 Aggregates\
-   &emsp;&emsp;&emsp;├── 📁 AuditLogs\
-   &emsp;&emsp;&emsp;├── 📁 Regions\
-   &emsp;&emsp;&emsp;├── 📁 Roles\
-   &emsp;&emsp;&emsp;├── 📁 Users\
-   ├── 📁 Common\
-   &emsp;&emsp;&emsp;├── 📁 ElasticConfigurations\
-   &emsp;&emsp;&emsp;├── 📁 Specs\
-   ├── 📁 Exceptions
+```
 
-_Nó không hề phụ thuộc vào bất kể layer nào_
+```
+/Infrastructure
+  ├── /Constants/                    # application‑wide constants & credential definitions
+  │     └── Credential.cs            # strongly‑typed credentials (keys, secrets, etc.)
+  │
+  ├── /Data/                               # EF Core data layer: context, migrations, seeding, configs
+  │     ├── /Configurations/               # IEntityTypeConfiguration<> implementations
+  │     ├── /Interceptors/                 # DbCommand/SaveChanges interceptors (logging, auditing)
+  │     ├── /Migrations/                   # EF Core migration files
+  │     ├── /Seeds/                        # seed-data providers for initial data
+  │     ├── DatabaseSettings.cs            # POCO for database connection/settings
+  │     ├── DbInitializer.cs               # ensures DB is created & seeded on startup
+  │     ├── DesignTimeDbContextFactory.cs  # design‑time factory for `dotnet ef` commands
+  │     ├── RegionDataSeeding.cs           # specific seed logic for Regions table
+  │     ├── TheDbContext.cs                # your `DbContext` implementation
+  │     └── ValidateDatabaseSetting.cs     # runtime validation of DB settings
+  │
+  ├── /Services/                             # external/infrastructure services & integrations
+  │     ├── /Aws/                            # AWS SDK wrappers (S3, SNS, etc.)
+  │     ├── /Cache/                          # caching implementations (Redis, MemoryCache)
+  │     ├── /ElasticSearch/                  # Elasticsearch client & indexing/search logic
+  │     ├── /Hangfire/                       # background‑job scheduler configuration
+  │     ├── /Identity/                       # identity provider integrations (JWT, OAuth)
+  │     ├── /Mail/                           # SMTP, SendGrid, or other mail-sending services
+  │     ├── /Queue/                          # message‑queue integrations (RabbitMQ, Azure Queue)
+  │     └── /Token/                          # token‑related services and helpers
+  │           ├── ActionAccessorService.cs   # grabs current `HttpContext` action info
+  │           └── CurrentUserService.cs      # resolves authenticated user details
+  │
+  ├── /UnitOfWorks/                  # Unit‑of‑Work & repository abstractions
+  │     ├── /CachedRepositories/     # repositories with built‑in caching layers
+  │     ├── /Repositories/           # concrete repository implementations
+  │     ├── RepositoryExtension.cs   # extension methods for IRepository<T>
+  │     └── UnitOfWork.cs            # coordinates multiple repository commits
+  │
+  └── DependencyInjection.cs         # root‑level registration of all Infrastructure services into DI
+```
 
-**_Application_**: Tầng ứng dụng đóng vai trò quang trọng trong clean architecture, Nó chứa các business logic, business rule cho ứng dụng và có các thành phần cấu thành như sau:
-
-- <ins>Thư mục Common</ins>:
-  - Behaviors : Nơi chứa các cross-cutting concern có thể kể đến như : error logging, validation, performance logging...
-  - DomainEventHandler: Nơi implemnet các logic cho gửi event nội bộ.
-  - Exceptions: Chứa các exception cho tầng Application.
-  - Interfaces: Tạo ra các interfaces cho repositories và các services bên ngoài.
-  - Mapping: Chứa các mapping object.
-- <ins>Thư mục Features</ins>: Gom nhóm các modules với command/queries sử dụng CQRS pattern và MediaR
-
-  - Common : Đây là nơi mà mình đặt những thứ chung của tất cả các module lại với nhau để dễ dàng cho việc tái sử dụng như là Mapping với Automapper, Request, Response
-
-    📁 Application\
-     ├── 📁 Common\
-     &emsp;&emsp;&emsp;├── 📁 Auth\
-     &emsp;&emsp;&emsp;├── 📁 Behaviors\
-     &emsp;&emsp;&emsp;├── 📁 DomainEventHandler\
-     &emsp;&emsp;&emsp;├── 📁 Exceptions\
-     &emsp;&emsp;&emsp;├── 📁 Interface\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Registers\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Services\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 UnitofWorks\
-     &emsp;&emsp;&emsp;├── 📁 Mapping\
-     &emsp;&emsp;&emsp;├── 📁 QueryStringProcessing\
-     &emsp;&emsp;&emsp;├── 📁 Security\
-     ├── 📁 Features\
-     &emsp;&emsp;&emsp;├── 📁 AuditLogs\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Commands\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Queries\
-     &emsp;&emsp;&emsp;├── 📁 Common\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Mapping\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Projections\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Validators\
-     &emsp;&emsp;&emsp;├── 📁 Permissions\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Commands\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Queries\
-     &emsp;&emsp;&emsp;├── 📁 Regions\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Commands\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Queries\
-     &emsp;&emsp;&emsp;├── 📁 Roles\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Commands\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Queries\
-     &emsp;&emsp;&emsp;├── 📁 Users\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Commands\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Queries\
-
-_Chỉ phụ thuộc vào tầng Domain_
-
-**_Infrastucture_** : Tầng Infrastucture là nơi chứa các kết nối với database và các server bên thứ 3, nó có chứa một số thành phần sau đây:
-
-- <ins>Thư mục Data</ins>:
-  - Configurations : Chứa các tùy chỉnh cho các entity ở tầng Domain.
-  - Interceptors : Nơi chứa các hành động trước và sau khi EF Core thực hiện lưu các thay đổi
-  - Migrations: Chứa các file migration cho các tiếp cận bằng code first trong EF.
-- Services : Nơi implement các interface ở tầng Application.
-- UnitOfWorks: Nơi implement các repository interface ở tầng Application.
-
-  📁 Infrastructure\
-   ├── 📁 Constants\
-   ├── 📁 Data\
-   &emsp;&emsp;&emsp;├── 📁 Configurations\
-   &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Identity\
-   &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Regions\
-   &emsp;&emsp;&emsp;&emsp;&emsp;├── :page_facing_up: AuditLogConfiguration.cs\
-   &emsp;&emsp;&emsp;&emsp;&emsp;├── :page_facing_up: DeadLetterQueueConfiguration.cs\
-   &emsp;&emsp;&emsp;├── 📁 Interceptors\
-   &emsp;&emsp;&emsp;├── 📁 Migrations\
-   &emsp;&emsp;&emsp;├── 📁 Seeds\
-   &emsp;&emsp;&emsp;├── :page_facing_up: DatabaseSettings.cs\
-   &emsp;&emsp;&emsp;├── :page_facing_up: DbInitializer.cs\
-   &emsp;&emsp;&emsp;├── :page_facing_up: DesignTimeDbContextFactory.cs\
-   &emsp;&emsp;&emsp;├── :page_facing_up: RegionDataSeeding.cs\
-   &emsp;&emsp;&emsp;├── :page_facing_up: TheDbContext.cs\
-   &emsp;&emsp;&emsp;├── :page_facing_up: ValidateDatabaseSetting.cs\
-   ├── 📁 Services\
-   ├── 📁 UnitofWork\
-
-_Phụ thuộc vào tầng Application và Domain_
-
-**_Api_**: Chứa các Api endpoint.
-
-    📁 Api\
-        ├── 📁 Converters\
-        ├── 📁 Endpoints\
-        ├── 📁 Extensions\
-        ├── 📁 Middlewares\
-        ├── 📁 Resources\
-        ├── 📁 Settings\
-        ├── 📁 wwwroot\
-
-_Phụ thuộc vào tầng Application and Infrastructure_
-
-**_Contract_** : Chứa shared components cho các tầng Application, Infrastructure and API.
+```
+/Api
+  ├── /common/                         # shared helpers, configurations for API layer
+  │
+  ├── /Converters/                     # JSON/string converters for date types
+  │     ├── DateTimeConverter.cs           # custom converter for System.DateTime
+  │     └── DateTimeOffsetConverter.cs     # custom converter for System.DateTimeOffset
+  │
+  ├── /Endpoints/                      # minimal‑API endpoint definitions
+  │
+  ├── /Extensions/                     # extension methods (IServiceCollection, HttpContext, etc.)
+  │
+  ├── /Middlewares/                    # custom middleware (error handling, logging, auth, etc.)
+  │
+  ├── /Resources/                      # static resource files
+  │     └── /Translations/               # localization .resx files
+  │           ├── Message.en.resx           # English resource strings
+  │           └── Message.vi.resx           # Vietnamese resource strings
+  │
+  ├── /Settings/                       # POCOs bound to appsettings.json sections
+  │     ├── OpenApiSettings.cs             # swagger/OpenAPI configuration
+  │     ├── OpenTelemetrySettings.cs       # OTEL exporter/tracing settings
+  │     └── SerilogSettings.cs             # Serilog sink & logging configuration
+  │
+  └── /wwwroot/                        # publicly served static content
+        └── /Templates/                   # email/html templates, static assets
+```
 
 # Bắt đầu thôi nào
 
@@ -325,33 +263,6 @@ Chỉnh sửa connection string của PostgreSQL (Bởi vì template này đang 
 },
 ```
 
-Nếu các bạn muốn sử dụng các database khác thì chỉ cần chỉnh lại một số đoạn code nhỏ ở DependencyInjection.cs trong Infrastructure.
-
-```csharp
-    services.AddDbContextPool<TheDbContext>(
-            (sp, options) =>
-            {
-                NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
-                options
-                    .UseNpgsql(npgsqlDataSource)
-                    .AddInterceptors(
-                        sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
-                        sp.GetRequiredService<DispatchDomainEventInterceptor>()
-                    );
-            }
-    );
-```
-
-Chỉ cần thay thế UseNpgsql với bất kể database nào mà bạn muốn :smile:.
-
-Sau đó đi tới Data, vào file DesignTimeDbContextFactory
-
-```
-builder.UseNpgsql(connectionString);
-```
-
-Thay thế như file DependencyInjection.cs ở trên :point_up_2:.
-
 Bước tiếp theo nha :point_right::
 
 ```
@@ -363,7 +274,7 @@ cd Dockers/MinioS3
 
 ```
 MINIO_ROOT_USER=the_template_storage
-MINIO_ROOT_PASSWORD=storage@the_template1`
+MINIO_ROOT_PASSWORD=storage@the_template1
 
 ```
 
@@ -374,9 +285,13 @@ docker-compose up -d
 
 ```
 
-Đây là một cách khá hay để sử dụng AWS miễn phí với máy tính của bạn :dollar: Tui đã học được cách này lúc còn ở công ty cũ :pray:
+Truy cập http://localhost:9001 và đăng nhập
 
-_Mà nè nếu mấy fen đã có sẳn con AWS rồi thì khỏi cần làm mấy cái này nha_
+![S3 login](/Screenshots/S3-login.png)
+
+Tạo ra cặp key
+
+![S3 keys](/Screenshots/create-key-s3.PNG)
 
 Chỉnh lại setting ở your appsettings.json
 
@@ -392,8 +307,6 @@ Chỉnh lại setting ở your appsettings.json
     },
 ```
 
-Các bạn có thể tạo ra cặp access và Secret key bằng giao diện ở [http://localhost:9001](http://localhost:9001)
-
 Bước cuối nha
 
 ```
@@ -402,7 +315,7 @@ dotnet run
 
 ```
 
-vào swagger ui ở "localhost:8080/docs"
+vào swagger ui ở http://localhost:8080/docs
 
 Xong rồi đó :tada: :tada: :tada: :clap:
 
@@ -410,20 +323,22 @@ Xong rồi đó :tada: :tada: :tada: :clap:
 
 ### Authorize
 
-Để phân quyền cho nó sử dụng AuthorizeBy nha gắn nó vô trên đầu Endpoint (Controller)
+Để phân quyền cho nó sử dụng RequireAuth vào minimal api,
+tham số permission là kiểu string, các quyền được phân tách bởi dấu phẩy.
 
 ```csharp
-    [HttpPost(Router.UserRoute.Users)]
-    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "create User")]
-    [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(
-        [FromForm] CreateUserCommand request,
-        CancellationToken cancellationToken = default
-    )
+app.MapPost(Router.UserRoute.Users, HandleAsync)
+    .WithOpenApi(operation => new OpenApiOperation(operation)
     {
-        CreateUserResponse user = await sender.Send(request, cancellationToken);
-        return this.Created201(Router.UserRoute.GetRouteName, user.Id, user);
-    }
+        Summary = "Create user 🧑",
+        Description = "Creates a new user and returns the created user details.",
+        Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
+    })
+    .WithRequestValidation<CreateUserCommand>()
+    .RequireAuth(
+        permissions: Permission.Generate(PermissionAction.Create, PermissionResource.User)
+    )
+    .DisableAntiforgery();
 ```
 
 **_Tạo ra role kèm theo permission_**
@@ -447,37 +362,17 @@ Xong rồi đó :tada: :tada: :tada: :clap:
 
 ### Thêm một quyền mới vào ứng dụng
 
-Vào thư mục Constants trong Infrastructure mở file Credential.cs và chú ý tới PermissionGroups
+Vào thư mục Constants trong Infrastructure mở file Credential.cs và chú ý tới permissions
 
 ```csharp
-    public static readonly Dictionary<string, string[]> PermissionGroups =
-        new()
-        {
-            {
-                nameof(User) + "s",
-
-                [
-                    CreatePermission(ActionPermission.create, ObjectPermission.user),
-                    CreatePermission(ActionPermission.update, ObjectPermission.user),
-                    CreatePermission(ActionPermission.delete, ObjectPermission.user),
-                    CreatePermission(ActionPermission.list, ObjectPermission.user),
-                    CreatePermission(ActionPermission.detail, ObjectPermission.user),
-                ]
-            },
-            {
-                nameof(Role) + "s",
-
-                [
-                    CreatePermission(ActionPermission.create, ObjectPermission.role),
-                    CreatePermission(ActionPermission.update, ObjectPermission.role),
-                    CreatePermission(ActionPermission.delete, ObjectPermission.role),
-                    CreatePermission(ActionPermission.list, ObjectPermission.role),
-                    CreatePermission(ActionPermission.detail, ObjectPermission.role),
-                ]
-            },
+public static readonly List<Dictionary<string, List<string>>> permissions =
+    [
+        Permission.CreatebasicPermissions(PermissionResource.User),
+        Permission.CreatebasicPermissions(PermissionResource.Role),
+    ];
 ```
 
-Chú ý rằng, key là tên của entity cộng thêm "s" và value là danh sách các permission cho entity đó.
+Chú ý rằng, key là quyền chính còn value là danh sách quyền liên quan của nó
 
 Permission được gộp từ hành động và tên entity.
 VD:
@@ -486,27 +381,28 @@ VD:
 create:user
 ```
 
-Đây là nơi để tạo ra các permission từ lớp ActionPermission và ObjectPermission.
+Đây là nơi để tạo ra các PermissionAction từ lớp ActionPermission và PermissionResource.
 
 ```csharp
-public static class ActionPermission
+public class PermissionAction
 {
-    public const string create = nameof(create);
-    public const string update = nameof(update);
-    public const string delete = nameof(delete);
-    public const string detail = nameof(detail);
-    public const string list = nameof(list);
-    public const string testa = nameof(testa);
+    public const string Create = nameof(Create);
+    public const string Update = nameof(Update);
+    public const string Delete = nameof(Delete);
+    public const string Detail = nameof(Detail);
+    public const string List = nameof(List);
+    public const string Test = nameof(Test);
+    public const string Testing = nameof(Testing);
 }
 
-public static class ObjectPermission
+public class PermissionResource
 {
-    public const string user = nameof(user);
-    public const string role = nameof(role);
+    public const string User = nameof(User);
+    public const string Role = nameof(Role);
 }
 ```
 
-Tạo ra permission mới sau đó thêm nó vào PermissionGroups dictionary và chạy lại ứng dụng.
+Tạo ra permission mới sau đó thêm nó vào permission, tắt và chạy lại ứng dụng.
 
 <div id='filtering'/>
 
@@ -599,15 +495,10 @@ Các bạn có thể tìm hiểu thêm ỏ một số link sau đây
 
 Mình thiết kế input đầu vào dựa trên [Strapi filter](https://docs.strapi.io/dev-docs/api/rest/filters-locale-publication)
 
-Mình đã nhúng sẳn filter tự động vào tất cả các hàm lấy danh sách ở lớp Repository
+Mình đã nhúng sẳn filter tự động vào tất cả các hàm lấy danh sách chỉ cần gọi
 
 ```csharp
-    await unitOfWork
-        .Repository<User>()
-        .CursorPagedListAsync<ListUserResponse>(
-            new ListUserSpecification(),
-            query.ValidateQuery().ValidateFilter(typeof(ListUserResponse))
-        );
+unitOfWork.DynamicReadOnlyRepository<User>()
 ```
 
 <div id='pagination'/>
@@ -619,24 +510,27 @@ Offset and cursor pagination được tích hợp sẳn trong template.
 Để sử dựng offset pagination thêm dòng sau vào code
 
 ```csharp
-    await unitOfWork
-      .Repository<User>()
-      .PagedListAsync<ListUserResponse>(
-          new ListUserSpecification(),
-          query.ValidateQuery().ValidateFilter(typeof(ListUserResponse)),
-          cancellationToken
-      );
+var response = await unitOfWork
+    .DynamicReadOnlyRepository<User>(true)
+    .PagedListAsync(
+        new ListUserSpecification(),
+        query,
+        ListUserMapping.Selector(),
+        cancellationToken: cancellationToken
+    );
 ```
 
 Để sử dụng cursor pagination thêm dòng sau vào code
 
 ```csharp
-     await unitOfWork
-        .Repository<User>()
-        .CursorPagedListAsync<ListUserResponse>(
-            new ListUserSpecification(),
-            query.ValidateQuery().ValidateFilter(typeof(ListUserResponse))
-        );
+var response = await unitOfWork
+    .DynamicReadOnlyRepository<User>(true)
+    .CursorPagedListAsync(
+        new ListUserSpecification(),
+        query,
+        ListUserMapping.Selector(),
+        cancellationToken: cancellationToken
+    );
 ```
 
 ```json
@@ -644,75 +538,34 @@ Offset and cursor pagination được tích hợp sẳn trong template.
   "results": {
     "data": [
       {
-        "firstName": "Sang",
-        "lastName": "Tran",
-        "username": "sang.tran",
-        "email": "sang.tran@gmail.com",
-        "phoneNumber": "0925123123",
-        "dayOfBirth": "2024-12-31T17:00:00Z",
-        "gender": 1,
-        "province": {
-          "code": "79",
-          "name": "Hồ Chí Minh",
-          "nameEn": "Ho Chi Minh",
-          "fullName": "Thành phố Hồ Chí Minh",
-          "fullNameEn": "Ho Chi Minh City",
-          "customName": "Thành phố Hồ Chí Minh",
-          "createdBy": "SYSTEM",
-          "updatedBy": "01JD936AXSDNMQ713P5XMVRQDV",
-          "updatedAt": "2024-11-24T05:50:26Z",
-          "id": "01JAZDXCWY3Z9K3XS0AYZ733NF",
-          "createdAt": "2024-11-09T13:13:27Z"
-        },
-        "district": {
-          "code": "783",
-          "name": "Củ Chi",
-          "nameEn": "Cu Chi",
-          "fullName": "Huyện Củ Chi",
-          "fullNameEn": "Cu Chi District",
-          "customName": null,
-          "createdBy": "SYSTEM",
-          "updatedBy": null,
-          "updatedAt": null,
-          "id": "01JAZDXDGSP0J0XF10836TR3QY",
-          "createdAt": "2024-11-09T13:13:27Z"
-        },
-        "commune": {
-          "code": "27505",
-          "name": "Trung Lập Thượng",
-          "nameEn": "Trung Lap Thuong",
-          "fullName": "Xã Trung Lập Thượng",
-          "fullNameEn": "Trung Lap Thuong Commune",
-          "customName": null,
-          "createdBy": "SYSTEM",
-          "updatedBy": null,
-          "updatedAt": null,
-          "id": "01JAZDXEAS1A1RJ4FSTWKW7RJA",
-          "createdAt": "2024-11-09T13:13:27Z"
-        },
-        "street": "abc",
-        "avatar": "http:localhost:9000/the-template-project/Users/avatarcute2.1737642177170.jpg?AWSAccessKeyId=bAWMwoigEBePW8tyS4et&Expires=1737896145&Signature=X9c8uoe%2FiGmYZkixo4MdEsXaeog%3D",
+        "firstName": "sang",
+        "lastName": "minh",
+        "username": "sang.minh123",
+        "email": "sang.minh123@gmail.com",
+        "phoneNumber": "0925123320",
+        "dayOfBirth": "1990-01-09T17:00:00Z",
+        "gender": 2,
+        "address": "abcdef,Xã Phước Vĩnh An,Huyện Củ Chi,Thành phố Hồ Chí Minh",
+        "avatar": null,
         "status": 1,
         "createdBy": "01JD936AXSDNMQ713P5XMVRQDV",
-        "updatedBy": null,
-        "updatedAt": null,
-        "id": "01JJ9RPW9B0FJV39JSNNT5ZKSB",
-        "createdAt": "2025-01-23T14:22:56Z"
+        "updatedBy": "01JD936AXSDNMQ713P5XMVRQDV",
+        "updatedAt": "2025-04-16T14:26:01Z",
+        "id": "01JRZFDA1F7ZV4P7CFS5WSHW8A",
+        "createdAt": "2025-04-16T14:17:54Z"
       }
     ],
     "paging": {
       "pageSize": 1,
-      "totalPage": 21,
+      "totalPage": 3,
       "hasNextPage": true,
       "hasPreviousPage": false,
-      "cursor": {
-        "before": null,
-        "after": "9x1HiQ0V+K5Dadbuh3QjfggTc3Ap7o9dgd5FbAJlEsWEyBO33wPBu66g+D0sb26sUncnOcmKHAWlQD5RHDiE44qCV+K11jKIjwOVSFY8XD3OsiA8biRl6dKTNvWNaoYhNh30nNwhHzWTAXQVYunsg0k9gykJWKbSzrI="
-      }
+      "before": null,
+      "after": "q+blUlBQci5KTSxJTXEsUbJSUDIyMDLVNTDRNTQLMTK0MjS3MjXRMzG3tDAx1DYwtzIwUNIB6/FMASk2MPQKinJzcTR0M48KMwkwd3YLNg0P9gi3cFTi5aoFAA=="
     }
   },
-  "statusCode": 200,
-  "message": "SUCCESS"
+  "status": 200,
+  "message": "Success"
 }
 ```
 

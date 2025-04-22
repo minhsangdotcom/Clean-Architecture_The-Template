@@ -3,28 +3,29 @@
 [English](README.md) | [Vietnamese](README-VIETNAMESE.md)
 
 #
+
 ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?style=for-the-badge&color=orange)
 ![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?style=for-the-badge&color=pink)
 ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?style=for-the-badge&color=%23f61d9c)
 
 # Table of Contents
+
 - [1. Language](#1-languages)
 - [2. Badges](#2-badge)
 - [3. Table of Contents](#3-table-of-contents)
 - [2. .NET Core Clean Architecture The Template Introduction](#2-net-core-clean-architecture-the-template-introduction)
-- [3. Give a Star! ⭐](#3-give-a-star-)
+- [3. Give a Star! ⭐](#3-give-a-star)
 - [4. What is Clean Architecture?](#4-what-is-clean-architecture)
-    - [4.0.1 Advandtage](#401-advandtage)
-    - [4.0.2. Disadvandtage](402-disadvandtage)
-- [5. Features :rocket:](#5-features-rocket)
-- [6. Demo :fire:](#6-demo-fire)
-    - [6.0.1. Authentication](#601-authentication)
-    - [6.0.2. Dynamic search and sort](#602-dynamic-search-and-sort)
-    - [6.0.3. Cross-cutting concerns](#603-cross-cutting-concerns)
-    - [6.0.4. AWS S3 by Minio](#604-aws-s3-by-minio)
-    - [6.0.5. Automatic Translatable Message](#605-automatic-translatable-message)
-- [7. Structure Overview :mag\_right:](#7-structure-overview-mag_right)
+  - [4.0.1. Pros](#401-pros)
+  - [4.0.2. Cons](#402-cons)
+- [5. Features :rocket:](#5-features)
+- [6. Demo :fire:](#6-demo)
+  - [6.0.1. Apis](#601-api)
+  - [6.0.2. Tracing](#602-tracing)
+  - [6.0.3. AWS S3 Cloud](#603-aws-s3-by-minio)
+  - [6.0.4. Message](#604-automatic-translatable-message)
+- [7. Structure Overview :mag_right:](#7-structure-overview)
 - [8. Getting started](#8-getting-started)
   - [8.1. Run .NET Core Clean Architecture Project](#81-run-net-core-clean-architecture-project)
   - [8.2. Basic Usage](#82-basic-usage)
@@ -38,263 +39,199 @@
 - [11. Credits](#11-credits)
 - [12. Licence](#12-licence)
 
-
 # 2. .NET Core Clean Architecture The Template Introduction
 
 This template is designed for backend developer working with ASP.NET Core. It provides you an efficient way to build enterprise applications effortlessly by leveraging advantages of clean architecture structre and .NET Core framework.
 
-With this template, You'll benefit from zero configuration, and don't need to worry about struture, settings, environments or best practices for web APIs, because everything is already set up :smiley:.
+With this template, everything is already set up :smiley:.
 
-# 3. Give a Star! ⭐
+# 3. Give a Star
 
 If you find this template helpful and learn something from it, please consider giving it a :star:.
 
-Your support motivates me to deliver even better features and improvements in future versions.
-
 # 4. What is Clean Architecture?
 
-Clean Architecture is a software design philosophy introduced by Robert C. Martin (Uncle Bob). It emphasizes the separation of concerns and promotes the organization of code into layers, each with distinct responsibilities. The architecture's primary goal is to create systems that are independent of frameworks, UI, databases, and external agencies, allowing flexibility, scalability, and testability.
-
-At its core, Clean Architecture organizes code into concentric circles, with each layer having a specific purpose.
+Clean Architecture is a software design approach introduced by Robert C. Martin (Uncle Bob) that emphasizes the separation of concerns by organizing code into concentric layers. The core idea is to keep business logic independent from external frameworks, databases, and user interfaces, promoting a system that's easier to maintain, test, and evolve over time.
 
 ![Alt text](Screenshots/clean-architecture.png "clean architecture common structure")
 
-The dependency rule states that code dependencies should only point inward, ensuring that inner layers remain isolated from external layers.
+### 4.0.1 Pros
 
-### 4.0.1 Advandtage
+- **Maintainability**: Clear separation allows for easier updates and refactoring.
+- **Scalability**: Modular design supports growth and integration of new features.
+- **Testability**: Decoupled components facilitate isolated testing.
+- **Flexibility**: Easier to swap out technologies (e.g., databases, UI frameworks) without affecting core logic.
 
-- **_Seperation of Concerns_**: Each layer is responsible for a specific aspect of the application, making the code easier to understand and maintain.
-- **_Testability_**: Since business logic is decoupled from frameworks and UI, unit testing becomes simpler and more reliable.
-- **_Flexibility and Adaptability_**: Changes to the framework, database, or external systems have minimal impact on the core logic.
-- **_Reusability_**: Business rules can be reused across different applications or systems with minimal changes.
-- **_Scalability_**: The clear structure supports growth and the addition of new features without significant refactoring.
-- **_Framework Independence_**: Avoids being locked into a specific framework, making it easier to migrate to newer technologies.
+### 4.0.2 Cons
 
-### 4.0.2. Disadvandtage
+- **Complexity**: The layered structure can add complexity, especially for smaller projects where simpler architectures might suffice.
+- **Initial Overhead**: Setting up Clean Architecture requires additional effort to organize layers and follow strict design principles.
+- **Learning Curve**: Developers unfamiliar with the principles may take time to grasp the structure and its benefits.
+- **Over-Engineering Risk**: For small-scale applications, the additional layers might be unnecessary and lead to over-complication.
+- **Performance Overhead**: The abstraction and indirection between layers can introduce slight performance trade-offs, though typically negligible.
 
-- **_Complexity_**: The layered structure can add complexity, especially for smaller projects where simpler architectures might suffice.
-- **_Initial Overhead_**: Setting up Clean Architecture requires additional effort to organize layers and follow strict design principles.
-- **_Learning Curve_**: Developers unfamiliar with the principles may take time to grasp the structure and its benefits.
-- **_Over-Engineering Risk_**: For small-scale applications, the additional layers might be unnecessary and lead to over-complication.
-- **_Performance Overhead_**: The abstraction and indirection between layers can introduce slight performance trade-offs, though typically negligible.
-
-# 5. Features :rocket:
+# 5. Features
 
 What makes this Clean Architecture template stand out from the rest?
 
-It not only features a scalable and maintainable structure but also includes a wide range of useful features, design patterns specifically designed for .NET Core Web API.
+### Most common features:
 
-It helps you to do everything effortlessly.
+- Login :closed_lock_with_key:
+- Refresh token :arrows_counterclockwise:
+- Changing user password :repeat:
+- Password reset :unlock:
+- Retrieving and Updating user profile :man_with_gua_pi_mao:
+- User CRUD :family:
+- Role CRUD 🛡️
 
-Let's explore the features:
+### Other awesome features:
 
-1. [Authentication with JWT for .NET Core](src/Infrastructure/Services/Identity/)
-1. [Authorization by Roles and Permissions](#authorize)
-1. [Dynamic Search](src/Contracts/Extensions/QueryExtensions/SearchExtensions.cs), [Dynamic Sort](src/Contracts/Extensions/QueryExtensions/SortExtension.cs) , [Dynamic Filter](#filtering),[Offset and Cursor Pagination](#pagination)
-1. [AWS S3 Storage](src/Infrastructure/Services/Aws/)
-1. [Elastic Search](src/Infrastructure/Services/Elastics/)
-1. [Domain Event](src/Application//Common/DomainEventHandlers/)
-1. [Cross-cutting Concerns](src/Application/Common/Behaviors/)
-1. [Distributed cache by Redis](src/Infrastructure/Services/DistributedCache/RedisCacheService.cs)
-1. [Handling concurrent requests with Queue (example at feature/TicketSale)](src/Infrastructure/Services/DistributedCache/)
-1. [Sending Email](src/Infrastructure/Services/Mail/)
-1. [Schedule jobs by Hangfire](src/Infrastructure/Services/Hangfires/)
-1. [Specification Pattern](src/Domain/Common/Specs/), [Uit of work and Repository pattern](src/Infrastructure/UnitOfWorks/), [Cached repository with decorator design pattern](src/Infrastructure/UnitOfWorks/CachedRepositories/)
-1. [Subcutaneous Test](tests/Application.SubcutaneousTests/)
-1. [Automactic translatable message](src/Contracts/Common/Messages/)
-1. [Open source and MIT license](#licence)
+1. [DDD (Domain Driven Design)](/src/Domain/Aggregates/) :brain:
+1. [CQRS & Mediator](/src/Application/Features/) :twisted_rightwards_arrows:
+1. [Cross-cutting concern](/src/Application/Common/Behaviors/) :scissors:
+1. [Mail Sender](/src/Infrastructure/Services/Mail/) :mailbox:
+1. [Cached Repository](/src/Infrastructure/UnitOfWorks/CachedRepositories/) :computer:
+1. [Queue](/src/Infrastructure/Services/Queue/) :walking:
+1. [Logging](/src/Api/Extensions/SerialogExtension.cs) :pencil:
+1. [Tracing](/src/Api/Extensions/OpenTelemetryExtensions.cs) :chart_with_upwards_trend:
+1. [Automatical translatable messages](https://github.com/minhsangdotcom/the-template_shared-kernel) :globe_with_meridians:
+1. [S3 AWS](/src/Infrastructure/Services/Aws/) :cloud:
 
-# 6. Demo :fire:
+# 6. Demo
 
-### 6.0.1. Authentication
+### 6.0.1. API
 
-```json
-{
-  "results": {
-    "user": {
-      "firstName": "Chloe",
-      "lastName": "Kim",
-      "username": "chloe.kim",
-      "email": "chloe.kim@gmail.com",
-      "phoneNumber": "0925123123",
-      "dayOfBirth": "1990-09-30T17:00:00Z",
-      "gender": 2,
-      "province": null,
-      "district": null,
-      "commune": null,
-      "street": "132 Ham Nghi",
-      "avatar": null,
-      "status": 1,
-      "createdBy": "SYSTEM",
-      "updatedBy": null,
-      "updatedAt": null,
-      "id": "01JD936AXSDNMQ713P5XMVRQDV",
-      "createdAt": "2024-12-31T08:15:50Z"
-    },
-    "tokenType": "Bearer",
-    "accessTokenExpiredIn": 3600,
-    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMUpEOTM2QVhTRE5NUTcxM1A1WE1WUlFEViIsImV4cCI6MTczNzYxMjk4NH0.GMrQKpoaHcCHoKgV4WDeDPAZy_IEj7kUjh7PQRwTNG8",
-    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmYW1pbHlfaWQiOiJaNmI2M3hQSFUxRUsyVkl5R0YyOGJpWUdNTlh1REFrdiIsInN1YiI6IjAxSkQ5MzZBWFNETk1RNzEzUDVYTVZSUURWIiwiZXhwIjoxNzM3Njk1Nzg0fQ.jZgUpT7hQ0icP7FIp3TUzXfl2I4-O5MWEZ78RlBdCiI"
-  },
-  "statusCode": 200,
-  "message": "SUCCESS"
-}
-```
+![User Apis](/Screenshots/user-api.png)
 
-### 6.0.2. Dynamic search and sort
+![Role Apis](/Screenshots/role-api.png)
 
-```
-http://localhost:8080/api/Users?PageSize=2&Search.Keyword=N%E1%BA%B5ng&Search.Targets=province.name&Sort=dayOfBirth
-```
+### 6.0.2. Tracing
 
-![search and sort feature](Screenshots/search-sort.png)
+![Tracing](/Screenshots/trace.png)
 
-### 6.0.3. Cross-cutting concerns
-
-![Cross-cutting Concerns feature](Screenshots/crosscutting-concern.png)
-
-### 6.0.4. AWS S3 by Minio
+### 6.0.3. AWS S3 by Minio
 
 ![AWS s3 feature](Screenshots/AWS_S3_Feature.png)
 
-### 6.0.5. Automatic Translatable Message
+### 6.0.4. Automatic Translatable Message
 
 ```json
 {
-  "type": "BadRequestException",
-  "trace": {
-    "traceId": "a8ad0670028620121f51850ce5b6cab5",
-    "spanId": "fbf21a1849fdadac"
+  "type": "BadRequestError",
+  "title": "Error has occured with password",
+  "status": 400,
+  "instance": "POST /api/v1/Users/Login",
+  "ErrorDetail": {
+    "message": "user_password_incorrect",
+    "en": "Password of user is incorrect",
+    "vi": "Mật khẩu của Người dùng không đúng"
   },
-  "errors": [
-    {
-      "reasons": [
-        {
-          "message": "user_password_incorrect",
-          "en": "Password of user is incorrect",
-          "vi": "Mật khẩu của Người dùng không đúng"
-        }
-      ]
-    }
-  ],
-  "statusCode": 400,
-  "message": "One or several errors have occured"
+  "requestId": "0HNC1ERHD53E2:00000001",
+  "traceId": "fa7b365b49f1b554a9cfabd978d858c8",
+  "spanId": "8623dbe038a6dede"
 }
 ```
 
-# 7. Structure Overview :mag_right:
+# 7. Structure Overview
 
-**_Domain_**: Domain layer serves as the core of clean architecture application and contains key elements such as:
+```
+/Domain
+  ├── /Aggregates/           # Domain aggregates (entities with business rules)
+  └── /Common/               # Shared domain logic and base types
+       ├── AggregateRoot.cs       # Base class for aggregate roots
+       ├── BaseEntity.cs          # Base class for entities
+       └── UlidToStringConverter.cs  # Value converter for ULIDs
+```
 
-- Aggregates : It's a way to group together related entities, value objects, enums, repository interfaces and Specfication (optional) you can learn about it at [https://github.com/ardalis/Specification](https://github.com/ardalis/Specification). With principles are established to govern the interactions between the aggregate root and its relationship and more.
-- Exceptions : Create custom exceptions for Domain layer.
+```
+/Application
+  ├── /Common
+  │     ├── /Auth/                   # custom authorization & policies in .NET Core
+  │     ├── /Behaviors/              # MediatR pipeline behaviors (CQRS cross‑cutting)
+  │     ├── /DomainEventHandlers/    # handlers for raising/domain events
+  │     ├── /Errors/                 # error types for Result‑pattern responses
+  │     ├── /Exceptions/             # domain/application exception definitions
+  │     ├── /Extensions/             # helper methods (pagination, “[ ]→object” parsing, etc.)
+  │     ├── /Interfaces/             # application‑level contracts & abstractions
+  │     ├── /QueryStringProcessing/  # validation logic for query‑string params
+  │     └── /Security/               # security attributes (e.g. [Authorize], roles)
+  ├── /Features/                     # CQRS + MediatR pattern modules
+  │     ├── AuditLogs/               # commands & queries for audit‑trail
+  │     ├── Common/                  # shared feature utilities
+  │     ├── Permissions/             # manage app permissions
+  │     ├── QueueLogs/               # logging for background/queued jobs
+  │     ├── Regions/                 # region‑related commands & queries
+  │     ├── Roles/                   # role management (CRUD, assignments)
+  │     └── Users/                   # user‑centric commands & queries
+  └── DependencyInjection.cs         # registers MediatR, pipeline behaviors, auth & query‑string services
 
-  📁 Domain\
-   ├── 📁 Aggregates\
-   &emsp;&emsp;&emsp;├── 📁 AuditLogs\
-   &emsp;&emsp;&emsp;├── 📁 Regions\
-   &emsp;&emsp;&emsp;├── 📁 Roles\
-   &emsp;&emsp;&emsp;├── 📁 Users\
-   ├── 📁 Common\
-   &emsp;&emsp;&emsp;├── 📁 ElasticConfigurations\
-   &emsp;&emsp;&emsp;├── 📁 Specs\
-   ├── 📁 Exceptions
+```
 
-_it is independent of any external dependencies_
+```
+/Infrastructure
+  ├── /Constants/                    # application‑wide constants & credential definitions
+  │     └── Credential.cs            # strongly‑typed credentials (keys, secrets, etc.)
+  │
+  ├── /Data/                               # EF Core data layer: context, migrations, seeding, configs
+  │     ├── /Configurations/               # IEntityTypeConfiguration<> implementations
+  │     ├── /Interceptors/                 # DbCommand/SaveChanges interceptors (logging, auditing)
+  │     ├── /Migrations/                   # EF Core migration files
+  │     ├── /Seeds/                        # seed-data providers for initial data
+  │     ├── DatabaseSettings.cs            # POCO for database connection/settings
+  │     ├── DbInitializer.cs               # ensures DB is created & seeded on startup
+  │     ├── DesignTimeDbContextFactory.cs  # design‑time factory for `dotnet ef` commands
+  │     ├── RegionDataSeeding.cs           # specific seed logic for Regions table
+  │     ├── TheDbContext.cs                # your `DbContext` implementation
+  │     └── ValidateDatabaseSetting.cs     # runtime validation of DB settings
+  │
+  ├── /Services/                             # external/infrastructure services & integrations
+  │     ├── /Aws/                            # AWS SDK wrappers (S3, SNS, etc.)
+  │     ├── /Cache/                          # caching implementations (Redis, MemoryCache)
+  │     ├── /ElasticSearch/                  # Elasticsearch client & indexing/search logic
+  │     ├── /Hangfire/                       # background‑job scheduler configuration
+  │     ├── /Identity/                       # identity provider integrations (JWT, OAuth)
+  │     ├── /Mail/                           # SMTP, SendGrid, or other mail-sending services
+  │     ├── /Queue/                          # message‑queue integrations (RabbitMQ, Azure Queue)
+  │     └── /Token/                          # token‑related services and helpers
+  │           ├── ActionAccessorService.cs   # grabs current `HttpContext` action info
+  │           └── CurrentUserService.cs      # resolves authenticated user details
+  │
+  ├── /UnitOfWorks/                  # Unit‑of‑Work & repository abstractions
+  │     ├── /CachedRepositories/     # repositories with built‑in caching layers
+  │     ├── /Repositories/           # concrete repository implementations
+  │     ├── RepositoryExtension.cs   # extension methods for IRepository<T>
+  │     └── UnitOfWork.cs            # coordinates multiple repository commits
+  │
+  └── DependencyInjection.cs         # root‑level registration of all Infrastructure services into DI
+```
 
-**_Application_**: Application layer play a important role in clean architecture, it contains business logics and rules for your application and consist of key elements such as:
-
-- <ins>Common folder</ins>:
-  - Behaviors : Create cross-cutting concerns such as : error logging, validation, performance logging...
-  - DomainEventHandler: the implementations of sending domain events.
-  - Exceptions: Contain exceptions for use case.
-  - Interfaces: Define interfaces for repositories and external services.
-  - Mapping: Create mapping objects.
-- <ins>Features folder</ins>: where I group command and query handlers together for using CQRS pattern and MediaR.
-
-  - Common : It's my own style, I place common things of those modules such as Mapping, validations, requests and responses and reuse it across modules.
-
-    📁 Application\
-     ├── 📁 Common\
-     &emsp;&emsp;&emsp;├── 📁 Auth\
-     &emsp;&emsp;&emsp;├── 📁 Behaviors\
-     &emsp;&emsp;&emsp;├── 📁 DomainEventHandler\
-     &emsp;&emsp;&emsp;├── 📁 Exceptions\
-     &emsp;&emsp;&emsp;├── 📁 Interface\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Registers\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Services\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 UnitofWorks\
-     &emsp;&emsp;&emsp;├── 📁 Mapping\
-     &emsp;&emsp;&emsp;├── 📁 QueryStringProcessing\
-     &emsp;&emsp;&emsp;├── 📁 Security\
-     ├── 📁 Features\
-     &emsp;&emsp;&emsp;├── 📁 AuditLogs\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Commands\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Queries\
-     &emsp;&emsp;&emsp;├── 📁 Common\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Mapping\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Projections\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Validators\
-     &emsp;&emsp;&emsp;├── 📁 Permissions\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Commands\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Queries\
-     &emsp;&emsp;&emsp;├── 📁 Regions\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Commands\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Queries\
-     &emsp;&emsp;&emsp;├── 📁 Roles\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Commands\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Queries\
-     &emsp;&emsp;&emsp;├── 📁 Users\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Commands\
-     &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Queries\
-
-_It only depends on Domain leyer_
-
-**_Infrastucture_** : The Infrastucture layer is responsible for handling data from external sources, such as databases and web services and Consists of some key elements such as:
-
-- <ins>Data folder</ins>:
-  - Configurations : contain configurations for entity at Domain layer.
-  - Interceptors : Where I do logic before and after entity framework apply changes, it's an awesome feature that EF Core bring to us.
-  - Migrations: contain migration files for code first approach in EF.
-- Services : Implement external services
-- UnitOfWorks: Do implementations for unit of work and repository at Application layer.
-
-  📁 Infrastructure\
-   ├── 📁 Constants\
-   ├── 📁 Data\
-   &emsp;&emsp;&emsp;├── 📁 Configurations\
-   &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Identity\
-   &emsp;&emsp;&emsp;&emsp;&emsp;├── 📁 Regions\
-   &emsp;&emsp;&emsp;&emsp;&emsp;├── :page_facing_up: AuditLogConfiguration.cs\
-   &emsp;&emsp;&emsp;&emsp;&emsp;├── :page_facing_up: DeadLetterQueueConfiguration.cs\
-   &emsp;&emsp;&emsp;├── 📁 Interceptors\
-   &emsp;&emsp;&emsp;├── 📁 Migrations\
-   &emsp;&emsp;&emsp;├── 📁 Seeds\
-   &emsp;&emsp;&emsp;├── :page_facing_up: DatabaseSettings.cs\
-   &emsp;&emsp;&emsp;├── :page_facing_up: DbInitializer.cs\
-   &emsp;&emsp;&emsp;├── :page_facing_up: DesignTimeDbContextFactory.cs\
-   &emsp;&emsp;&emsp;├── :page_facing_up: RegionDataSeeding.cs\
-   &emsp;&emsp;&emsp;├── :page_facing_up: TheDbContext.cs\
-   &emsp;&emsp;&emsp;├── :page_facing_up: ValidateDatabaseSetting.cs\
-   ├── 📁 Services\
-   ├── 📁 UnitofWork
-
-_It depends on Application and Domain layer_
-
-**_Api_**: contains api endpoints and represents for main running project in application.
-
-    📁 Api
-        ├── 📁 Converters
-        ├── 📁 Endpoints
-        ├── 📁 Extensions
-        ├── 📁 Middlewares
-        ├── 📁 Resources
-        ├── 📁 Settings
-        ├── 📁 wwwroot
-
-_It depends on Application and Infrastructure layer_
-
-**_Contract_** : Contains shared components for Application, Infrastructure and API layer.
+```
+/Api
+  ├── /common/                         # shared helpers, configurations for API layer
+  │
+  ├── /Converters/                     # JSON/string converters for date types
+  │     ├── DateTimeConverter.cs           # custom converter for System.DateTime
+  │     └── DateTimeOffsetConverter.cs     # custom converter for System.DateTimeOffset
+  │
+  ├── /Endpoints/                      # minimal‑API endpoint definitions
+  │
+  ├── /Extensions/                     # extension methods (IServiceCollection, HttpContext, etc.)
+  │
+  ├── /Middlewares/                    # custom middleware (error handling, logging, auth, etc.)
+  │
+  ├── /Resources/                      # static resource files
+  │     └── /Translations/               # localization .resx files
+  │           ├── Message.en.resx           # English resource strings
+  │           └── Message.vi.resx           # Vietnamese resource strings
+  │
+  ├── /Settings/                       # POCOs bound to appsettings.json sections
+  │     ├── OpenApiSettings.cs             # swagger/OpenAPI configuration
+  │     ├── OpenTelemetrySettings.cs       # OTEL exporter/tracing settings
+  │     └── SerilogSettings.cs             # Serilog sink & logging configuration
+  │
+  └── /wwwroot/                        # publicly served static content
+        └── /Templates/                   # email/html templates, static assets
+```
 
 # 8. Getting started
 
@@ -317,33 +254,6 @@ Modify PostgreSQL connection string (this template is using PostgreSQL currently
 },
 ```
 
-If you want to use difference database then just customize a few things at DependencyInjection.cs in Infrastructure layer
-
-```csharp
-    services.AddDbContextPool<TheDbContext>(
-            (sp, options) =>
-            {
-                NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
-                options
-                    .UseNpgsql(npgsqlDataSource)
-                    .AddInterceptors(
-                        sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
-                        sp.GetRequiredService<DispatchDomainEventInterceptor>()
-                    );
-            }
-    );
-```
-
-Simply Replace UseNpgsql with whatever database you want :smile:.
-
-Navigate to Data folder, and then open DesignTimeDbContextFactory file
-
-```
-builder.UseNpgsql(connectionString);
-```
-
-Replace it as you did above :point_up_2:.
-
 The next step :point_right::
 
 ```
@@ -355,7 +265,7 @@ change mino username and password at .env if needed and you're gonna use it for 
 
 ```
 MINIO_ROOT_USER=the_template_storage
-MINIO_ROOT_PASSWORD=storage@the_template1`
+MINIO_ROOT_PASSWORD=storage@the_template1
 
 ```
 
@@ -366,11 +276,15 @@ docker-compose up -d
 
 ```
 
-This is a really good trick for using AWS for free :dollar: that I learned from my previous company :pray:
+Access Minio S3 Web UI at http://localhost:9001 and login
 
-_Note that If you already have similar one You can skip this step._
+![S3 login](/Screenshots/S3-login.png)
 
-Modify this json setting at your appsettings.json
+Create a pairs of key like
+
+![S3 keys](/Screenshots/create-key-s3.PNG)
+
+input the keys at your appsettings.json
 
 ```json
 "S3AwsSettings": {
@@ -384,8 +298,6 @@ Modify this json setting at your appsettings.json
     },
 ```
 
-You can create access and secret key pair with Web UI manager at [http://localhost:9001](http://localhost:9001)
-
 The final step
 
 ```
@@ -393,7 +305,7 @@ cd src/Api
 dotnet run
 ```
 
-"localhost:8080/docs" is swagger UI path
+http://localhost:8080/docs is swagger UI path
 
 Congrat! you are all set up :tada: :tada: :tada: :clap:
 
@@ -401,20 +313,21 @@ Congrat! you are all set up :tada: :tada: :tada: :clap:
 
 ### 8.2.1. Authorize
 
-To Achieve this, let's add AuthorizeBy attribute on controller
+To Achieve this, let's add RequireAuth on minimal api, permissions parameter is string and seperate each permission by comma "create:user,update:use".
 
 ```csharp
-    [HttpPost(Router.UserRoute.Users)]
-    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "create User")]
-    [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(
-        [FromForm] CreateUserCommand request,
-        CancellationToken cancellationToken = default
-    )
+app.MapPost(Router.UserRoute.Users, HandleAsync)
+    .WithOpenApi(operation => new OpenApiOperation(operation)
     {
-        CreateUserResponse user = await sender.Send(request, cancellationToken);
-        return this.Created201(Router.UserRoute.GetRouteName, user.Id, user);
-    }
+        Summary = "Create user 🧑",
+        Description = "Creates a new user and returns the created user details.",
+        Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
+    })
+    .WithRequestValidation<CreateUserCommand>()
+    .RequireAuth(
+        permissions: Permission.Generate(PermissionAction.Create, PermissionResource.User)
+    )
+    .DisableAntiforgery();
 ```
 
 ### 8.2.2. Create role with permissions:
@@ -440,38 +353,17 @@ Json payload is like
 
 ### 8.2.3. How to add new permissions in your app
 
-To get this, let's navigate to constants folder in Infrastructure layer, then open Credential.cs file and pay your attention on PermissionGroups Dictionary
+To get this, let's navigate to constants folder in Infrastructure layer, then open Credential.cs file and pay your attention on permissions dictionary
 
 ```csharp
-    public static readonly Dictionary<string, string[]> PermissionGroups =
-        new()
-        {
-            {
-                nameof(User) + "s",
-
-                [
-                    CreatePermission(ActionPermission.create, ObjectPermission.user),
-                    CreatePermission(ActionPermission.update, ObjectPermission.user),
-                    CreatePermission(ActionPermission.delete, ObjectPermission.user),
-                    CreatePermission(ActionPermission.list, ObjectPermission.user),
-                    CreatePermission(ActionPermission.detail, ObjectPermission.user),
-                ]
-            },
-            {
-                nameof(Role) + "s",
-
-                [
-                    CreatePermission(ActionPermission.create, ObjectPermission.role),
-                    CreatePermission(ActionPermission.update, ObjectPermission.role),
-                    CreatePermission(ActionPermission.delete, ObjectPermission.role),
-                    CreatePermission(ActionPermission.list, ObjectPermission.role),
-                    CreatePermission(ActionPermission.detail, ObjectPermission.role),
-                ]
-            },
-        };
+public static readonly List<Dictionary<string, List<string>>> permissions =
+    [
+        Permission.CreatebasicPermissions(PermissionResource.User),
+        Permission.CreatebasicPermissions(PermissionResource.Role),
+    ];
 ```
 
-Notice that, the key is your entity name plus "s" and the value is list of permission for that entity.
+Notice that, the key is **primary permission** and value is **list of relative permissions**
 
 Permission combibes from action and entity name.
 For example:
@@ -480,27 +372,28 @@ For example:
 create:user
 ```
 
-Let's take a look at ActionPermission and ObjectPermission class
+Let's take a look at PermissionAction and PermissionResource class
 
 ```csharp
-public static class ActionPermission
+public class PermissionAction
 {
-    public const string create = nameof(create);
-    public const string update = nameof(update);
-    public const string delete = nameof(delete);
-    public const string detail = nameof(detail);
-    public const string list = nameof(list);
-    public const string testa = nameof(testa);
+    public const string Create = nameof(Create);
+    public const string Update = nameof(Update);
+    public const string Delete = nameof(Delete);
+    public const string Detail = nameof(Detail);
+    public const string List = nameof(List);
+    public const string Test = nameof(Test);
+    public const string Testing = nameof(Testing);
 }
 
-public static class ObjectPermission
+public class PermissionResource
 {
-    public const string user = nameof(user);
-    public const string role = nameof(role);
+    public const string User = nameof(User);
+    public const string Role = nameof(Role);
 }
 ```
 
-Define your new one, then push it into PermissionGroups dictionary, and restart application.
+Define your new one at permissions dictionary then stop and start application again
 
 ### 8.2.4. Filtering
 
@@ -591,15 +484,10 @@ For more examples and get better understand, you can visit
 
 'Cause I designed filter input based on [Strapi filter](https://docs.strapi.io/dev-docs/api/rest/filters-locale-publication)
 
-To Apply dynamic filter, you just call any list method at Repository class
+To Apply dynamic filter, you just call any list method at
 
 ```csharp
-    await unitOfWork
-        .Repository<User>()
-        .CursorPagedListAsync<ListUserResponse>(
-            new ListUserSpecification(),
-            query.ValidateQuery().ValidateFilter(typeof(ListUserResponse))
-        );
+unitOfWork.DynamicReadOnlyRepository<User>()
 ```
 
 ### 8.2.5. Pagination
@@ -609,24 +497,27 @@ This template supports offset pagination and cursor pagination.
 To Enable offset pagination just add this line
 
 ```csharp
-    await unitOfWork
-      .Repository<User>()
-      .PagedListAsync<ListUserResponse>(
-          new ListUserSpecification(),
-          query.ValidateQuery().ValidateFilter(typeof(ListUserResponse)),
-          cancellationToken
-      );
+var response = await unitOfWork
+    .DynamicReadOnlyRepository<User>(true)
+    .PagedListAsync(
+        new ListUserSpecification(),
+        query,
+        ListUserMapping.Selector(),
+        cancellationToken: cancellationToken
+    );
 ```
 
 To Enable cursor pagination just add this line
 
 ```csharp
-     await unitOfWork
-        .Repository<User>()
-        .CursorPagedListAsync<ListUserResponse>(
-            new ListUserSpecification(),
-            query.ValidateQuery().ValidateFilter(typeof(ListUserResponse))
-        );
+var response = await unitOfWork
+    .DynamicReadOnlyRepository<User>(true)
+    .CursorPagedListAsync(
+        new ListUserSpecification(),
+        query,
+        ListUserMapping.Selector(),
+        cancellationToken: cancellationToken
+    );
 ```
 
 ```json
@@ -634,92 +525,49 @@ To Enable cursor pagination just add this line
   "results": {
     "data": [
       {
-        "firstName": "Sang",
-        "lastName": "Tran",
-        "username": "sang.tran",
-        "email": "sang.tran@gmail.com",
-        "phoneNumber": "0925123123",
-        "dayOfBirth": "2024-12-31T17:00:00Z",
-        "gender": 1,
-        "province": {
-          "code": "79",
-          "name": "Hồ Chí Minh",
-          "nameEn": "Ho Chi Minh",
-          "fullName": "Thành phố Hồ Chí Minh",
-          "fullNameEn": "Ho Chi Minh City",
-          "customName": "Thành phố Hồ Chí Minh",
-          "createdBy": "SYSTEM",
-          "updatedBy": "01JD936AXSDNMQ713P5XMVRQDV",
-          "updatedAt": "2024-11-24T05:50:26Z",
-          "id": "01JAZDXCWY3Z9K3XS0AYZ733NF",
-          "createdAt": "2024-11-09T13:13:27Z"
-        },
-        "district": {
-          "code": "783",
-          "name": "Củ Chi",
-          "nameEn": "Cu Chi",
-          "fullName": "Huyện Củ Chi",
-          "fullNameEn": "Cu Chi District",
-          "customName": null,
-          "createdBy": "SYSTEM",
-          "updatedBy": null,
-          "updatedAt": null,
-          "id": "01JAZDXDGSP0J0XF10836TR3QY",
-          "createdAt": "2024-11-09T13:13:27Z"
-        },
-        "commune": {
-          "code": "27505",
-          "name": "Trung Lập Thượng",
-          "nameEn": "Trung Lap Thuong",
-          "fullName": "Xã Trung Lập Thượng",
-          "fullNameEn": "Trung Lap Thuong Commune",
-          "customName": null,
-          "createdBy": "SYSTEM",
-          "updatedBy": null,
-          "updatedAt": null,
-          "id": "01JAZDXEAS1A1RJ4FSTWKW7RJA",
-          "createdAt": "2024-11-09T13:13:27Z"
-        },
-        "street": "abc",
-        "avatar": "http:localhost:9000/the-template-project/Users/avatarcute2.1737642177170.jpg?AWSAccessKeyId=bAWMwoigEBePW8tyS4et&Expires=1737896145&Signature=X9c8uoe%2FiGmYZkixo4MdEsXaeog%3D",
+        "firstName": "sang",
+        "lastName": "minh",
+        "username": "sang.minh123",
+        "email": "sang.minh123@gmail.com",
+        "phoneNumber": "0925123320",
+        "dayOfBirth": "1990-01-09T17:00:00Z",
+        "gender": 2,
+        "address": "abcdef,Xã Phước Vĩnh An,Huyện Củ Chi,Thành phố Hồ Chí Minh",
+        "avatar": null,
         "status": 1,
         "createdBy": "01JD936AXSDNMQ713P5XMVRQDV",
-        "updatedBy": null,
-        "updatedAt": null,
-        "id": "01JJ9RPW9B0FJV39JSNNT5ZKSB",
-        "createdAt": "2025-01-23T14:22:56Z"
+        "updatedBy": "01JD936AXSDNMQ713P5XMVRQDV",
+        "updatedAt": "2025-04-16T14:26:01Z",
+        "id": "01JRZFDA1F7ZV4P7CFS5WSHW8A",
+        "createdAt": "2025-04-16T14:17:54Z"
       }
     ],
     "paging": {
       "pageSize": 1,
-      "totalPage": 21,
+      "totalPage": 3,
       "hasNextPage": true,
       "hasPreviousPage": false,
-      "cursor": {
-        "before": null,
-        "after": "9x1HiQ0V+K5Dadbuh3QjfggTc3Ap7o9dgd5FbAJlEsWEyBO33wPBu66g+D0sb26sUncnOcmKHAWlQD5RHDiE44qCV+K11jKIjwOVSFY8XD3OsiA8biRl6dKTNvWNaoYhNh30nNwhHzWTAXQVYunsg0k9gykJWKbSzrI="
-      }
+      "before": null,
+      "after": "q+blUlBQci5KTSxJTXEsUbJSUDIyMDLVNTDRNTQLMTK0MjS3MjXRMzG3tDAx1DYwtzIwUNIB6/FMASk2MPQKinJzcTR0M48KMwkwd3YLNg0P9gi3cFTi5aoFAA=="
     }
   },
-  "statusCode": 200,
-  "message": "SUCCESS"
+  "status": 200,
+  "message": "Success"
 }
 ```
-
 
 # 9. Technology
 
 - .NET 8
 - EntityFramework core 8
-- AutoMapper
-- Fluent validation
-- Medator
-- XUnit, FluentAssertion, Respawn
-- OpenTelemetry
 - PostgreSQL
+- Fluent validation
+- Mediator
+- XUnit, Shouldly, Respawn
+- OpenTelemetry
+- Serilog
 - Redis
 - ElasticSearch
-- Serilog
 - Docker
 - Github Workflow
 
