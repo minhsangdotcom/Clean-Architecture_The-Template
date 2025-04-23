@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-DOTNET_INSTALL_DIR: "./.dotnet"
+ DOTNET_INSTALL_DIR: "./.dotnet"
 
 jobs:
   build-and-deploy:
