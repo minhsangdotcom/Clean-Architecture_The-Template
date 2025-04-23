@@ -4,10 +4,7 @@
 
 #
 
-![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?style=for-the-badge&color=orange)
-![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?style=for-the-badge&color=pink)
-![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?style=for-the-badge&color=%23f61d9c)
+![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?logo=visual-studio-code&logoColor=white) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?color=orange) ![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?color=pink) ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?color=%23f61d9c) ![NuGet Version](https://img.shields.io/nuget/v/minhsangdotcom.TheTemplate.SharedKernel?label=SharedKernel&color=red) ![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.SpecificationPattern?style=flat&label=SpecificationPattern&color=red) ![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)
 
 # Table of Contents
 
@@ -57,10 +54,12 @@ Clean Architecture is a software design approach introduced by Robert C. Martin 
 
 ### 4.0.1 Pros
 
-- **Maintainability**: Clear separation allows for easier updates and refactoring.
-- **Scalability**: Modular design supports growth and integration of new features.
-- **Testability**: Decoupled components facilitate isolated testing.
-- **Flexibility**: Easier to swap out technologies (e.g., databases, UI frameworks) without affecting core logic.
+- **Separation of Concerns**: Each layer is responsible for a specific aspect of the application, making the code easier to understand and maintain.
+- **Testability**: Since business logic is decoupled from frameworks and UI, unit testing becomes simpler and more reliable.
+- **Flexibility and Adaptability**: Changes to the framework, database, or external systems have minimal impact on the core logic.
+- **Reusability**: Business rules can be reused across different applications or systems with minimal changes.
+- **Scalability**: The clear structure supports growth and the addition of new features without significant refactoring.
+- **Framework Independence**: Avoids being locked into a specific framework, making it easier to migrate to newer technologies.
 
 ### 4.0.2 Cons
 
@@ -151,7 +150,7 @@ What makes this Clean Architecture template stand out from the rest?
   │     ├── /DomainEventHandlers/    # handlers for raising/domain events
   │     ├── /Errors/                 # error types for Result‑pattern responses
   │     ├── /Exceptions/             # domain/application exception definitions
-  │     ├── /Extensions/             # helper methods (pagination, “[ ]→object” parsing, etc.)
+  │     ├── /Extensions/             # helper methods (pagination, LHS parsing, etc.)
   │     ├── /Interfaces/             # application‑level contracts & abstractions
   │     ├── /QueryStringProcessing/  # validation logic for query‑string params
   │     └── /Security/               # security attributes (e.g. [Authorize], roles)
@@ -169,40 +168,40 @@ What makes this Clean Architecture template stand out from the rest?
 
 ```
 /Infrastructure
-  ├── /Constants/                    # application‑wide constants & credential definitions
-  │     └── Credential.cs            # strongly‑typed credentials (keys, secrets, etc.)
+  ├── /Constants/                    # application-wide constants & credential definitions
+  │     └── Credential.cs            # strongly-typed credentials (keys, secrets, etc.)
   │
-  ├── /Data/                               # EF Core data layer: context, migrations, seeding, configs
-  │     ├── /Configurations/               # IEntityTypeConfiguration<> implementations
-  │     ├── /Interceptors/                 # DbCommand/SaveChanges interceptors (logging, auditing)
-  │     ├── /Migrations/                   # EF Core migration files
-  │     ├── /Seeds/                        # seed-data providers for initial data
-  │     ├── DatabaseSettings.cs            # POCO for database connection/settings
-  │     ├── DbInitializer.cs               # ensures DB is created & seeded on startup
-  │     ├── DesignTimeDbContextFactory.cs  # design‑time factory for `dotnet ef` commands
+  ├── /Data/                         # EF Core data layer: context, migrations, seeding, configs
+  │     ├── /Configurations/         # IEntityTypeConfiguration<> implementations
+  │     ├── /Interceptors/           # DbCommand/SaveChanges interceptors (logging, auditing)
+  │     ├── /Migrations/             # EF Core migration files
+  │     ├── /Seeds/                  # seed-data providers for initial data
+  │     ├── DatabaseSettings.cs      # POCO for database connection/settings
+  │     ├── DbInitializer.cs         # ensures DB is created & seeded on startup
+  │     ├── DesignTimeDbContextFactory.cs  # design-time factory for `dotnet ef` commands
   │     ├── RegionDataSeeding.cs           # specific seed logic for Regions table
   │     ├── TheDbContext.cs                # your `DbContext` implementation
   │     └── ValidateDatabaseSetting.cs     # runtime validation of DB settings
   │
-  ├── /Services/                             # external/infrastructure services & integrations
-  │     ├── /Aws/                            # AWS SDK wrappers (S3, SNS, etc.)
-  │     ├── /Cache/                          # caching implementations (Redis, MemoryCache)
-  │     ├── /ElasticSearch/                  # Elasticsearch client & indexing/search logic
-  │     ├── /Hangfire/                       # background‑job scheduler configuration
-  │     ├── /Identity/                       # identity provider integrations (JWT, OAuth)
-  │     ├── /Mail/                           # SMTP, SendGrid, or other mail-sending services
-  │     ├── /Queue/                          # message‑queue integrations (RabbitMQ, Azure Queue)
-  │     └── /Token/                          # token‑related services and helpers
-  │           ├── ActionAccessorService.cs   # grabs current `HttpContext` action info
-  │           └── CurrentUserService.cs      # resolves authenticated user details
+  ├── /Services/                     # external/infrastructure services & integrations
+  │     ├── /Aws/                    # AWS SDK wrappers (S3, SNS, etc.)
+  │     ├── /Cache/                  # caching implementations (Redis, MemoryCache)
+  │     ├── /ElasticSearch/          # Elasticsearch client & indexing/search logic
+  │     ├── /Hangfire/               # background-job scheduler configuration
+  │     ├── /Identity/               # identity provider integrations (JWT, OAuth)
+  │     ├── /Mail/                   # SMTP, SendGrid, or other mail-sending services
+  │     ├── /Queue/                  # Request queueing with Redis
+  │     ├── /Token/                  # token-related services and helpers
+  │     ├── ActionAccessorService.cs # grabs current `HttpContext` action info
+  │     └── CurrentUserService.cs    # resolves authenticated user details
   │
-  ├── /UnitOfWorks/                  # Unit‑of‑Work & repository abstractions
-  │     ├── /CachedRepositories/     # repositories with built‑in caching layers
+  ├── /UnitOfWorks/                  # Unit-of-Work & repository abstractions
+  │     ├── /CachedRepositories/     # repositories with built-in caching layers
   │     ├── /Repositories/           # concrete repository implementations
   │     ├── RepositoryExtension.cs   # extension methods for IRepository<T>
   │     └── UnitOfWork.cs            # coordinates multiple repository commits
   │
-  └── DependencyInjection.cs         # Registration of all Infrastructure services into DI
+  └── DependencyInjection.cs         # registration of all Infrastructure services into DI
 ```
 
 ```

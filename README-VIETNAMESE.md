@@ -4,10 +4,7 @@
 
 #
 
-![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?style=for-the-badge&color=orange)
-![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?style=for-the-badge&color=pink)
-![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?style=for-the-badge&color=%23f61d9c)
+![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?logo=visual-studio-code&logoColor=white) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?color=orange) ![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?color=pink) ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?color=%23f61d9c) ![NuGet Version](https://img.shields.io/nuget/v/minhsangdotcom.TheTemplate.SharedKernel?label=SharedKernel&color=red) ![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.SpecificationPattern?style=flat&label=SpecificationPattern&color=red) ![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)
 
 # Bảng nội dung
 
@@ -54,16 +51,18 @@ Sự hỗ trợ của bạn là động lực giúp mình mang đến những t�
 
 # Định Nghĩa
 
-Kiến trúc Sạch (Clean Architecture) là một phương pháp thiết kế phần mềm do Robert C. Martin (Uncle Bob) giới thiệu, nhấn mạnh vào thuật ngữ "Tách biệt các chức năng",các tầng ngoài cùng sẽ phụ thuộc vào các tầng ở trong như hình. Tầng core sẽ không phụ thuộc vào các framework bên ngoài, cơ sở dữ liệu hay giao diện người dùng, từ đó giúp hệ thống dễ bảo trì, kiểm thử và phát triển theo thời gian.
+Kiến trúc Sạch (Clean Architecture) là một phương pháp thiết kế phần mềm do Robert C. Martin (Uncle Bob) giới thiệu, nhấn mạnh vào thuật ngữ "Tách biệt các thành phần",các tầng ngoài cùng sẽ phụ thuộc vào các tầng ở trong như hình. Tầng core sẽ không phụ thuộc vào các framework bên ngoài, cơ sở dữ liệu hay giao diện người dùng, từ đó giúp hệ thống dễ bảo trì, kiểm thử và phát triển theo thời gian.
 
 ![Alt text](Screenshots/clean-architecture.png "Cấu trúc chung của Clean Architecture")
 
 ### Lợi ích
 
-- **Dễ dàng bảo trì**: Việc tách biệt các tầng cho phép dễ dàng nâng cấp và bảo trì
-- **Khả năng mở rộng**: Cấu trúc rõ ràng hỗ trợ việc phát triển và thêm tính năng mới mà không cần tái cấu trúc.
-- **Khả năng kiểm thử**: Các thành phần tách rời giúp dễ dàng kiểm thử một cách độc lập.
-- **Tính linh hoạt**: Không bị phụ thuộc nhiều vào framework, rất dễ dàng để thanh đổi công nghệ mới.
+- **Các thành phần tách biệt**: Mỗi một tầng chịu trách nhiệm cho một khía cạnh của ứng dụng, giúp mã dễ hiểu và bảo trì.
+- **Dễ dàng kiểm thử**: Các business logic được tách biệt khỏi framework và UI, việc kiểm thử đơn vị trở nên đơn giản và đáng tin cậy hơn.
+- **Linh hoạt và Thích nghi**: Khi thay đổi framework, cơ sở dữ liệu hoặc các hệ thống bên ngoài ít ảnh hưởng đến logic của phần core.
+- **Tái sử dụng**: Các Business rules có thể được tái sử dụng trong các ứng dụng hoặc hệ thống khác mà không phải thay đổi quá nhiều code.
+- **Khả năng mở rộng**: Cấu trúc rõ ràng hỗ trợ việc phát triển và thêm tính năng mới mà không cần tái cơ cấu lại.
+- **Không phụ thuộc vào framework**: Không bị phụ thuộc nhiều vào framework, rất dễ dàng để thanh đổi công nghệ mới.
 
 ### Nhược điểm
 
@@ -160,7 +159,7 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
   │     ├── /DomainEventHandlers/    # handlers for raising/domain events
   │     ├── /Errors/                 # error types for Result‑pattern responses
   │     ├── /Exceptions/             # domain/application exception definitions
-  │     ├── /Extensions/             # helper methods (pagination, “[ ]→object” parsing, etc.)
+  │     ├── /Extensions/             # helper methods (pagination, LHS parsing, etc.)
   │     ├── /Interfaces/             # application‑level contracts & abstractions
   │     ├── /QueryStringProcessing/  # validation logic for query‑string params
   │     └── /Security/               # security attributes (e.g. [Authorize], roles)
@@ -178,40 +177,40 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
 
 ```
 /Infrastructure
-  ├── /Constants/                    # application‑wide constants & credential definitions
-  │     └── Credential.cs            # strongly‑typed credentials (keys, secrets, etc.)
+  ├── /Constants/                    # application-wide constants & credential definitions
+  │     └── Credential.cs            # strongly-typed credentials (keys, secrets, etc.)
   │
-  ├── /Data/                               # EF Core data layer: context, migrations, seeding, configs
-  │     ├── /Configurations/               # IEntityTypeConfiguration<> implementations
-  │     ├── /Interceptors/                 # DbCommand/SaveChanges interceptors (logging, auditing)
-  │     ├── /Migrations/                   # EF Core migration files
-  │     ├── /Seeds/                        # seed-data providers for initial data
-  │     ├── DatabaseSettings.cs            # POCO for database connection/settings
-  │     ├── DbInitializer.cs               # ensures DB is created & seeded on startup
-  │     ├── DesignTimeDbContextFactory.cs  # design‑time factory for `dotnet ef` commands
+  ├── /Data/                         # EF Core data layer: context, migrations, seeding, configs
+  │     ├── /Configurations/         # IEntityTypeConfiguration<> implementations
+  │     ├── /Interceptors/           # DbCommand/SaveChanges interceptors (logging, auditing)
+  │     ├── /Migrations/             # EF Core migration files
+  │     ├── /Seeds/                  # seed-data providers for initial data
+  │     ├── DatabaseSettings.cs      # POCO for database connection/settings
+  │     ├── DbInitializer.cs         # ensures DB is created & seeded on startup
+  │     ├── DesignTimeDbContextFactory.cs  # design-time factory for `dotnet ef` commands
   │     ├── RegionDataSeeding.cs           # specific seed logic for Regions table
   │     ├── TheDbContext.cs                # your `DbContext` implementation
   │     └── ValidateDatabaseSetting.cs     # runtime validation of DB settings
   │
-  ├── /Services/                             # external/infrastructure services & integrations
-  │     ├── /Aws/                            # AWS SDK wrappers (S3, SNS, etc.)
-  │     ├── /Cache/                          # caching implementations (Redis, MemoryCache)
-  │     ├── /ElasticSearch/                  # Elasticsearch client & indexing/search logic
-  │     ├── /Hangfire/                       # background‑job scheduler configuration
-  │     ├── /Identity/                       # identity provider integrations (JWT, OAuth)
-  │     ├── /Mail/                           # SMTP, SendGrid, or other mail-sending services
-  │     ├── /Queue/                          # message‑queue integrations (RabbitMQ, Azure Queue)
-  │     └── /Token/                          # token‑related services and helpers
-  │           ├── ActionAccessorService.cs   # grabs current `HttpContext` action info
-  │           └── CurrentUserService.cs      # resolves authenticated user details
+  ├── /Services/                     # external/infrastructure services & integrations
+  │     ├── /Aws/                    # AWS SDK wrappers (S3, SNS, etc.)
+  │     ├── /Cache/                  # caching implementations (Redis, MemoryCache)
+  │     ├── /ElasticSearch/          # Elasticsearch client & indexing/search logic
+  │     ├── /Hangfire/               # background-job scheduler configuration
+  │     ├── /Identity/               # identity provider integrations (JWT, OAuth)
+  │     ├── /Mail/                   # SMTP, SendGrid, or other mail-sending services
+  │     ├── /Queue/                  # Request queueing with Redis
+  │     ├── /Token/                  # token-related services and helpers
+  │     ├── ActionAccessorService.cs # grabs current `HttpContext` action info
+  │     └── CurrentUserService.cs    # resolves authenticated user details
   │
-  ├── /UnitOfWorks/                  # Unit‑of‑Work & repository abstractions
-  │     ├── /CachedRepositories/     # repositories with built‑in caching layers
+  ├── /UnitOfWorks/                  # Unit-of-Work & repository abstractions
+  │     ├── /CachedRepositories/     # repositories with built-in caching layers
   │     ├── /Repositories/           # concrete repository implementations
   │     ├── RepositoryExtension.cs   # extension methods for IRepository<T>
   │     └── UnitOfWork.cs            # coordinates multiple repository commits
   │
-  └── DependencyInjection.cs         # Registration of all Infrastructure services into DI
+  └── DependencyInjection.cs         # registration of all Infrastructure services into DI
 ```
 
 ```
