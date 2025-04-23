@@ -10,7 +10,6 @@ public class RoleClaimValidator : AbstractValidator<RoleClaimModel>
     public RoleClaimValidator()
     {
         RuleFor(x => x.ClaimType)
-            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithState(x =>
                 Messager
@@ -22,7 +21,6 @@ public class RoleClaimValidator : AbstractValidator<RoleClaimModel>
             );
 
         RuleFor(x => x.ClaimValue)
-            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithState(x =>
                 Messager

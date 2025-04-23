@@ -1,25 +1,39 @@
-using Api.common.RouteResults;
+using Api.common.EndpointConfigurations;
+using Api.common.Results;
 using Api.common.Routers;
 using Application.Features.Users.Commands.Token;
-using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Mediator;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.User;
 
-public class RefreshUserTokenEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<RefreshUserTokenCommand>.WithActionResult<
-        ApiResponse<RefreshUserTokenResponse>
-    >
+public class RefreshUserTokenEndpoint() : IEndpoint
 {
-    private readonly ISender sender = sender;
+    public EndpointVersion Version => EndpointVersion.One;
 
-    [HttpPost(Router.UserRoute.RefreshToken)]
-    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "refresh token")]
-    public override async Task<ActionResult<ApiResponse<RefreshUserTokenResponse>>> HandleAsync(
-        RefreshUserTokenCommand request,
+    public void MapEndpoint(IEndpointRouteBuilder app)
+    {
+        app.MapPost(Router.UserRoute.RefreshToken, HandleAsync)
+            .WithOpenApi(operation => new OpenApiOperation(operation)
+            {
+                Summary = "Refresh Access Token 🔄 🔐",
+                Description = "obtains a new pair of token by providing a valid refresh token.",
+                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
+            });
+    }
+
+    private async Task<
+        Results<Ok<ApiResponse<RefreshUserTokenResponse>>, ProblemHttpResult>
+    > HandleAsync(
+        [FromBody] RefreshUserTokenCommand request,
+        ISender sender,
         CancellationToken cancellationToken = default
-    ) => this.Ok200(await sender.Send(request, cancellationToken));
+    )
+    {
+        var result = await sender.Send(request, cancellationToken);
+        return result.ToResult();
+    }
 }

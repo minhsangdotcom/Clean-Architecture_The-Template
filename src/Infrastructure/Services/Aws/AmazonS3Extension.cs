@@ -1,4 +1,5 @@
 using Amazon.S3;
+using Application.Common.Interfaces.Services.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -17,6 +18,7 @@ public static class AmazonS3Extension
             configuration.GetSection(nameof(S3AwsSettings)).Bind(options)
         );
         services.TryAddSingleton<IValidateOptions<S3AwsSettings>, ValidateS3AwsSettings>();
+        services.AddSingleton<IStorageService, AwsAmazonService>();
 
         S3AwsSettings s3AwsSettings =
             configuration.GetSection(nameof(S3AwsSettings)).Get<S3AwsSettings>() ?? new();

@@ -9,7 +9,7 @@ using SharedKernel.Extensions;
 
 namespace Infrastructure.Services.Token;
 
-public class TokenFactoryService(IOptions<JwtSettings> jwtSettings) : ITokenFactory
+public class TokenFactoryService(IOptions<JwtSettings> jwtSettings) : ITokenFactoryService
 {
     private readonly JwtSettings settings = jwtSettings.Value;
 

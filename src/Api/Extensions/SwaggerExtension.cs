@@ -18,7 +18,6 @@ public static class SwaggerExtension
 
         return services.AddSwaggerGen(option =>
         {
-            option.EnableAnnotations();
             option.AddSecurityDefinition(
                 JwtBearerDefaults.AuthenticationScheme,
                 new OpenApiSecurityScheme
@@ -50,11 +49,11 @@ public static class SwaggerExtension
             );
 
             option.SwaggerDoc(
-                openApiSettings?.Version,
+                "v1",
                 new OpenApiInfo()
                 {
                     Title = $"{openApiSettings?.ApplicationName} Documentation",
-                    Version = openApiSettings?.Version,
+                    Version = "v1",
                     Description = $"Well come to the {openApiSettings?.ApplicationName} API",
                     Contact = new OpenApiContact()
                     {

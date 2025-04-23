@@ -8,9 +8,19 @@ namespace Application.Common.Interfaces.Services.Elastics;
 public interface IElasticsearchService<T>
     where T : class
 {
+    Task<T?> GetAsync(object id);
+
     Task<IEnumerable<T>> ListAsync();
 
-    Task<T?> GetAsync(object id);
+    Task<SearchResponse<T>> ListAsync(
+        QueryParamRequest request,
+        Action<QueryDescriptor<T>>? filter = null
+    );
+
+    Task<PaginationResponse<T>> PaginatedListAsync(
+        QueryParamRequest request,
+        Action<QueryDescriptor<T>>? filter = null
+    );
 
     Task<T> AddAsync(T entity);
 
@@ -31,13 +41,4 @@ public interface IElasticsearchService<T>
     Task<bool> AnyAsync(Action<BoolQueryDescriptor<T>> selector);
 
     Task<long> CountAsync(CountRequestDescriptor<T> selector);
-
-    Task<PaginationResponse<TResult>> PaginatedListAsync<TResult>(
-        QueryParamRequest request,
-        Action<QueryDescriptor<T>>? filter = null
-    );
-    Task<PaginationResponse<T>> PaginatedListAsync(
-        QueryParamRequest request,
-        Action<QueryDescriptor<T>>? filter = null
-    );
 }

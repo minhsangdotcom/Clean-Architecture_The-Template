@@ -10,7 +10,7 @@ using Serilog;
 namespace Infrastructure.Services.Queue;
 
 public class QueueBackgroundService(
-    IQueueFactory queueFactory,
+    IQueueService queueService,
     IServiceProvider serviceProvider,
     IOptions<QueueSettings> options
 ) : BackgroundService
@@ -25,17 +25,16 @@ public class QueueBackgroundService(
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            // IQueueService deadLetterQueue = queueFactory.GetQueue(QueueType.DeadLetterQueue);
+            // PayCartPayload? request = await queueService.DequeueAsync<
+            //     PayCartPayload,
+            //     PayCartRequest
+            // >();
 
-            // if (!await deadLetterQueue.PingAsync())
-            // {
-            //     logger.Warning("Redis server has shut down");
-            //     continue;
-            // }
-
-            // PayCartPayload? request = await queueFactory
-            //     .GetQueue(QueueType.OriginQueue)
-            //     .DequeueAsync<PayCartPayload, PayCartRequest>();
+            if (!await queueService.PingAsync())
+            {
+                logger.Warning("Redis server is unavailable!");
+                continue;
+            }
 
             // if (request != null)
             // {
@@ -43,7 +42,6 @@ public class QueueBackgroundService(
             //         request,
             //         sender,
             //         logger,
-            //         deadLetterQueue,
             //         stoppingToken
             //     );
             // }
@@ -56,7 +54,6 @@ public class QueueBackgroundService(
         TRequest request,
         ISender sender,
         ILogger logger,
-        IQueueService queueService,
         CancellationToken cancellationToken
     )
         where TRequest : class
@@ -122,22 +119,12 @@ public class QueueBackgroundService(
 
         if (!queueResponse.IsSuccess && queueResponse.ErrorType == QueueErrorType.Transient)
         {
-            // if it still fail after many attempts then push it into dead letter queue
-            logger.Warning(
-                "Push request {payloadId} into dead letter queue for maximum attempts",
-                queueResponse.PayloadId
-            );
-            await queueService.EnqueueAsync(request);
+            // if it still fail after many attempts then logging into db
             await sender.Send(
                 new CreateQueueLogCommand()
                 {
                     RequestId = queueResponse.PayloadId!.Value,
-                    ErrorDetail = new
-                    {
-                        queueResponse.ErrorType,
-                        queueResponse.Error,
-                        Message = $"Push request {queueResponse.PayloadId} into dead letter queue for maximum attempts",
-                    },
+                    ErrorDetail = queueResponse.Error,
                     Request = request,
                     RetryCount = queueResponse.RetryCount,
                 },

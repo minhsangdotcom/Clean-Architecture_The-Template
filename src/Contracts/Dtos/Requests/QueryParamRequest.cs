@@ -1,6 +1,5 @@
-using System.Text.Json.Serialization;
 using Contracts.Binds;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace Contracts.Dtos.Requests;
 
@@ -19,9 +18,16 @@ public class QueryParamRequest
     /// <summary>
     /// Cursor pagination
     /// </summary>
-    public Cursor? Cursor { get; set; }
+    public string? Before { get; set; }
 
-    public Search? Search { get; set; }
+    public string? After { get; set; }
+
+    public string? Keyword { get; set; }
+
+    /// <summary>
+    /// Fields want to search for
+    /// </summary>
+    public List<string>? Targets { get; set; }
 
     /// <summary>
     /// example : Sort=Age:desc,Name:asc
@@ -29,29 +35,54 @@ public class QueryParamRequest
     /// </summary>
     public string? Sort { get; set; }
 
-    public Dictionary<string, string>? Filter { get; set; }
+    public object? Filter { get; set; } = null;
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-    public object? DynamicFilter { get; set; }
-
-    [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-    [ModelBinder(BinderType = typeof(FilterModelBinder))]
     public string[]? OriginFilters { get; set; }
 }
 
-public class Cursor
+public static class QueryParamRequestExtension
 {
-    public string? Before { get; set; }
+    public static T Bind<T>(HttpContext context)
+        where T : QueryParamRequest, new()
+    {
+        string? before = context.Request.Query["before"];
+        string? after = context.Request.Query["after"];
+        string? keyword = context.Request.Query["keyword"];
+        string? sort = context.Request.Query["sort"];
+        if (!int.TryParse(context.Request.Query["page"], out int page))
+        {
+            page = 1;
+        }
+        if (!int.TryParse(context.Request.Query["pageSize"], out int pageSize))
+        {
+            pageSize = 100;
+        }
 
-    public string? After { get; set; }
-}
+        string[] queryString = GetQueryParams(context);
+        var query = context.Request.Query["targets"];
+        var targets = query.Count > 0 ? query.ToList() : null;
+        return new()
+        {
+            Page = page,
+            PageSize = pageSize,
+            Before = before,
+            After = after,
+            Keyword = keyword,
+            Sort = sort,
+            OriginFilters = queryString,
+            Targets = targets!,
+        };
+    }
 
-public class Search
-{
-    public string? Keyword { get; set; }
+    private static string[] GetQueryParams(HttpContext httpContext)
+    {
+        string? queryStringValue = httpContext?.Request.QueryString.Value;
 
-    /// <summary>
-    /// Fields want to search for
-    /// </summary>
-    public List<string>? Targets { get; set; }
+        if (string.IsNullOrEmpty(queryStringValue))
+        {
+            return [];
+        }
+
+        return ModelBindingExtension.GetFilterQueries(queryStringValue);
+    }
 }

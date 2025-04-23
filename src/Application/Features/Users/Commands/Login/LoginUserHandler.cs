@@ -1,10 +1,10 @@
 using System.IdentityModel.Tokens.Jwt;
-using Application.Common.Exceptions;
+using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Features.Common.Projections.Users;
-using AutoMapper;
+using Application.Features.Common.Mapping.Users;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
@@ -18,39 +18,43 @@ namespace Application.Features.Users.Commands.Login;
 
 public class LoginUserHandler(
     IUnitOfWork unitOfWork,
-    ITokenFactory tokenFactory,
+    ITokenFactoryService tokenFactory,
     IDetectionService detectionService,
-    ICurrentUser currentUser,
-    IMapper mapper
-) : IRequestHandler<LoginUserCommand, LoginUserResponse>
+    ICurrentUser currentUser
+) : IRequestHandler<LoginUserCommand, Result<LoginUserResponse>>
 {
-    public async ValueTask<LoginUserResponse> Handle(
+    public async ValueTask<Result<LoginUserResponse>> Handle(
         LoginUserCommand request,
         CancellationToken cancellationToken
     )
     {
-        User user =
-            await unitOfWork
-                .Repository<User>()
-                .FindByConditionAsync(
-                    new GetUserByUsernameSpecification(request.Username!),
-                    cancellationToken
-                )
-            ?? throw new NotFoundException(
-                [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
+        User? user = await unitOfWork
+            .DynamicReadOnlyRepository<User>()
+            .FindByConditionAsync(
+                new GetUserByUsernameSpecification(request.Username!),
+                cancellationToken
             );
-
+        if (user == null)
+        {
+            return Result<LoginUserResponse>.Failure(
+                new NotFoundError(
+                    "Resource is not found",
+                    Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()
+                )
+            );
+        }
         if (!Verify(request.Password, user.Password))
         {
-            throw new BadRequestException(
-                [
+            return Result<LoginUserResponse>.Failure(
+                new BadRequestError(
+                    "Error has occured with password",
                     Messager
                         .Create<User>()
                         .Property(x => x.Password)
                         .Message(MessageType.Correct)
                         .Negative()
-                        .BuildMessage(),
-                ]
+                        .BuildMessage()
+                )
             );
         }
 
@@ -88,14 +92,16 @@ public class LoginUserHandler(
         await unitOfWork.Repository<UserToken>().AddAsync(userToken, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
 
-        return new()
-        {
-            Token = accessToken,
-            Refresh = refreshToken,
-            AccessTokenExpiredIn = (long)
-                Math.Ceiling((accesstokenExpiredTime - DateTime.UtcNow).TotalSeconds),
-            TokenType = JwtBearerDefaults.AuthenticationScheme,
-            User = mapper.Map<UserProjection>(user),
-        };
+        return Result<LoginUserResponse>.Success(
+            new()
+            {
+                Token = accessToken,
+                Refresh = refreshToken,
+                AccessTokenExpiredIn = (long)
+                    Math.Ceiling((accesstokenExpiredTime - DateTime.UtcNow).TotalSeconds),
+                TokenType = JwtBearerDefaults.AuthenticationScheme,
+                User = user.ToUserProjection(),
+            }
+        );
     }
 }

@@ -8,7 +8,7 @@ using StackExchange.Redis;
 
 namespace Infrastructure.Services.Queue;
 
-public class QueueService(IRedisCacheService redisCache, IOptions<QueueSettings> options)
+public class QueueService(IDistributedCacheService redisCache, IOptions<QueueSettings> options)
     : IQueueService
 {
     private readonly QueueSettings queueSettings = options.Value;
@@ -17,6 +17,12 @@ public class QueueService(IRedisCacheService redisCache, IOptions<QueueSettings>
 
     private long size;
 
+    /// <summary>
+    /// Get queue from redis
+    /// </summary>
+    /// <typeparam name="TResponse">Map to the response</typeparam>
+    /// <typeparam name="TRequest">Type of the input that putting in queue before, treat as part of queue name</typeparam>
+    /// <returns></returns>
     public async Task<TResponse?> DequeueAsync<TResponse, TRequest>()
     {
         string queueName = $"{queueSettings.OriginQueueName}:{typeof(TRequest).Name}";
@@ -32,6 +38,12 @@ public class QueueService(IRedisCacheService redisCache, IOptions<QueueSettings>
         return result.Object!;
     }
 
+    /// <summary>
+    /// Add request in queue
+    /// </summary>
+    /// <typeparam name="T"> type of the request, treat as part of queue name</typeparam>
+    /// <param name="payload"></param>
+    /// <returns></returns>
     public async Task<bool> EnqueueAsync<T>(T payload)
     {
         QueueRequest<T> request = new() { PayloadId = Guid.NewGuid(), Payload = payload };

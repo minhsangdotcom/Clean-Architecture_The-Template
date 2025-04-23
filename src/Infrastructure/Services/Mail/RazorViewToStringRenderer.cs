@@ -26,7 +26,7 @@ public class RazorViewToStringRenderer
         }
     }
 
-    public static string GetPath(string viewName)
+    private static string GetPath(string viewName)
     {
         string root = Path.Join(Directory.GetCurrentDirectory(), "wwwroot");
         return Path.Combine(root, "Templates", $"{viewName}.cshtml");

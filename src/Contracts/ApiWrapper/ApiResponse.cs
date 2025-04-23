@@ -13,7 +13,7 @@ public class ApiResponse<T> : ApiBaseResponse
     {
         Results = result;
 
-        StatusCode = statusCode!.Value;
+        Status = statusCode!.Value;
 
         Message = message;
     }

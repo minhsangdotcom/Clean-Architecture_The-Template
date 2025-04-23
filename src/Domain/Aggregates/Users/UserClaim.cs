@@ -10,7 +10,7 @@ public class UserClaim : DefaultEntity
 
     public string ClaimValue { get; set; } = string.Empty;
 
-    public KindaUserClaimType Type { get; set; } = KindaUserClaimType.Default;
+    public UserClaimType Type { get; set; } = UserClaimType.Default;
 
     public User? User { get; set; }
 

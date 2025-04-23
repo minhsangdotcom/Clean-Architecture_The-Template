@@ -1,9 +1,12 @@
+using Contracts.ApiWrapper;
 using Microsoft.AspNetCore.Http;
-using SharedKernel.Exceptions;
 
 namespace Application.Common.Exceptions;
 
-public class ForbiddenException(string message) : CustomException(message)
-{
-    public int HttpStatusCode { get; private set; } = StatusCodes.Status403Forbidden;
-}
+public class ForbiddenError(string title)
+    : ErrorDetails(
+        title,
+        "You do not have enough permission to access this resource",
+        nameof(ForbiddenError),
+        StatusCodes.Status403Forbidden
+    );

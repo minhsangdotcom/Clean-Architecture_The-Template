@@ -1,5 +1,4 @@
 using Domain.Common;
-using SharedKernel.Common;
 
 namespace Domain.Aggregates.AuditLogs;
 
