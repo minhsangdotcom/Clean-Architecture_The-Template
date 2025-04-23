@@ -1,7 +1,8 @@
 using Application.Common.Exceptions;
-using Contracts.ApiWrapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Services.Token;
 
@@ -9,29 +10,57 @@ public class TokenErrorExtension
 {
     public static async Task ForbiddenException(
         ForbiddenContext httpContext,
-        ForbiddenException exception
+        ForbiddenError forbiddenError
     )
     {
-        int statusCode = exception.HttpStatusCode;
+        var problemDetailsService =
+            httpContext.HttpContext.RequestServices.GetRequiredService<IProblemDetailsService>();
+
+        int statusCode = forbiddenError.Status;
         httpContext.Response.StatusCode = statusCode;
 
-        ErrorResponse error =
-            new(exception.Message, nameof(ForbiddenException), statusCode: statusCode);
+        ProblemDetails problemDetails =
+            new()
+            {
+                Title = forbiddenError.Title,
+                Type = forbiddenError.Type,
+                Status = forbiddenError.Status,
+                Detail = forbiddenError.Detail,
+            };
 
-        await httpContext.Response.WriteAsJsonAsync(error, error.GetOptions());
+        // await httpContext.Response.WriteAsJsonAsync(
+        //     problemDetails,
+        //     SerializerExtension.Options(),
+        //     contentType: "application/problem+json"
+        // );
+
+        await problemDetailsService.TryWriteAsync(
+            new() { ProblemDetails = problemDetails, HttpContext = httpContext.HttpContext }
+        );
     }
 
     public static async Task UnauthorizedException(
         JwtBearerChallengeContext httpContext,
-        UnauthorizedException exception
+        UnauthorizedError unauthorizedError
     )
     {
-        int statusCode = exception.HttpStatusCode;
+        var problemDetailsService =
+            httpContext.HttpContext.RequestServices.GetRequiredService<IProblemDetailsService>();
+
+        int statusCode = unauthorizedError.Status;
         httpContext.Response.StatusCode = statusCode;
 
-        ErrorResponse error =
-            new(exception.Message, nameof(UnauthorizedException), statusCode: statusCode);
+        ProblemDetails problemDetails =
+            new()
+            {
+                Title = unauthorizedError.Title,
+                Type = unauthorizedError.Type,
+                Status = unauthorizedError.Status,
+                Detail = unauthorizedError.Detail,
+            };
 
-        await httpContext.Response.WriteAsJsonAsync(error, error.GetOptions());
+        await problemDetailsService.TryWriteAsync(
+            new() { ProblemDetails = problemDetails, HttpContext = httpContext.HttpContext }
+        );
     }
 }

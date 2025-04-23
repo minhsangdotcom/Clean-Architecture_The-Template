@@ -1,24 +1,37 @@
-using Api.common.RouteResults;
+using Api.common.EndpointConfigurations;
+using Api.common.Results;
 using Api.common.Routers;
 using Application.Features.Users.Commands.ResetPassword;
-using Ardalis.ApiEndpoints;
 using Mediator;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.User;
 
-public class ResetUserPasswordEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<ResetUserPasswordCommand>.WithActionResult
+public class ResetUserPasswordEndpoint : IEndpoint
 {
-    [HttpPut(Router.UserRoute.ResetPassowrd)]
-    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "reset User password")]
-    public override async Task<ActionResult> HandleAsync(
-        ResetUserPasswordCommand request,
+    public EndpointVersion Version => EndpointVersion.One;
+
+    public void MapEndpoint(IEndpointRouteBuilder app)
+    {
+        app.MapPut(Router.UserRoute.ResetPassowrd, HandleAsync)
+            .WithOpenApi(operation => new OpenApiOperation(operation)
+            {
+                Summary = "Reset user password 🔄 🔑",
+                Description =
+                    "Resets a user's password using a valid token from a password reset request.",
+                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
+            });
+    }
+
+    private async Task<Results<NoContent, ProblemHttpResult>> HandleAsync(
+        [FromBody] ResetUserPasswordCommand request,
+        ISender sender,
         CancellationToken cancellationToken = default
     )
     {
-        await sender.Send(request, cancellationToken);
-        return this.NoContent204();
+        var result = await sender.Send(request, cancellationToken);
+        return result.ToNoContentResult();
     }
 }

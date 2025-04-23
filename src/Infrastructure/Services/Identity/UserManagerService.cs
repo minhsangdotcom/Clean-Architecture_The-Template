@@ -1,23 +1,18 @@
 using System.Data;
-using System.Data.Common;
-using System.Runtime.InteropServices;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Ardalis.GuardClauses;
-using Dapper;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
+using Infrastructure.Constants;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
+using SharedKernel.Constants;
 
 namespace Infrastructure.Services.Identity;
 
-public class UserManagerService(
-    IRoleManagerService roleManagerService,
-    IDbContext context,
-    ILogger logger
-) : IUserManagerService
+public class UserManagerService(IRoleManagerService roleManagerService, IDbContext context)
+    : IUserManagerService
 {
     private readonly DbSet<UserRole> userRoleContext = context.Set<UserRole>();
     public DbSet<UserRole> UserRoles => userRoleContext;
@@ -28,102 +23,34 @@ public class UserManagerService(
     private readonly DbSet<UserClaim> userClaimsContext = context.Set<UserClaim>();
     public DbSet<UserClaim> UserClaims => userClaimsContext;
 
+    public DbSet<User> User => userContext;
+
     private readonly DbSet<User> userContext = context.Set<User>();
 
-    public async Task CreateUserAsync(
+    public async Task CreateAsync(
         User user,
         IEnumerable<Ulid> roleIds,
-        IEnumerable<UserClaim>? claims = null,
-        DbTransaction? transaction = null
+        IEnumerable<UserClaim>? claims = null
     )
     {
-        try
-        {
-            if (transaction == null)
-            {
-                await context.DatabaseFacade.BeginTransactionAsync();
-            }
-            else
-            {
-                await context.UseTransactionAsync(transaction);
-            }
-
-            await AddRoleToUserAsync(user, roleIds);
-            await AddClaimsToUserAsync(user, claims ?? []);
-
-            if (transaction == null)
-            {
-                await context.DatabaseFacade.CommitTransactionAsync();
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.Error(
-                ex,
-                "Error in method {MethodName}. Exception Type: {ExceptionType}. Error Message: {ErrorMessage}. StackTrace: {StackTrace}",
-                nameof(CreateUserAsync),
-                ex.GetType().Name,
-                ex.Message,
-                ex.StackTrace
-            );
-
-            if (transaction == null)
-            {
-                await context.DatabaseFacade.RollbackTransactionAsync();
-            }
-            throw;
-        }
+        await AssignRolesToUserAsync(user, roleIds);
+        await AssignClaimsToUserAsync(user, claims ?? []);
     }
 
-    public async Task UpdateUserAsync(
+    public async Task UpdateAsync(
         User user,
         IEnumerable<Ulid>? roleIds,
-        IEnumerable<UserClaim>? claims = null,
-        DbTransaction? transaction = null
+        IEnumerable<UserClaim>? claims = null
     )
     {
-        try
-        {
-            if (transaction == null)
-            {
-                await context.DatabaseFacade.BeginTransactionAsync();
-            }
-            else
-            {
-                await context.UseTransactionAsync(transaction);
-            }
+        // update role for user
+        await UpdateUserRolesAsync(user, roleIds);
 
-            // update role for user
-            await UpdateRolesToUserAsync(user, roleIds);
-
-            // update custom user claim
-            await UpdateClaimsToUserAsync(user, claims);
-
-            if (transaction == null)
-            {
-                await context.DatabaseFacade.CommitTransactionAsync();
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.Error(
-                ex,
-                "Error in method {MethodName}. Exception Type: {ExceptionType}. Error Message: {ErrorMessage}. StackTrace: {StackTrace}",
-                nameof(UpdateUserAsync),
-                ex.GetType().Name,
-                ex.Message,
-                ex.StackTrace
-            );
-
-            if (transaction == null)
-            {
-                await context.DatabaseFacade.RollbackTransactionAsync();
-            }
-            throw;
-        }
+        // update custom user claim
+        await UpdateUserClaimsAsync(user, claims);
     }
 
-    public async Task AddRoleToUserAsync(User user, IEnumerable<Ulid> roleIds)
+    public async Task AssignRolesToUserAsync(User user, IEnumerable<Ulid> roleIds)
     {
         if (!roleIds.Any())
         {
@@ -134,6 +61,7 @@ public class UserManagerService(
             .Where(x => x.Id == user.Id)
             .Include(x => x.UserRoles)
             .Include(x => x.UserClaims)
+            .AsSplitQuery()
             .FirstOrDefaultAsync();
 
         Guard.Against.NotFound($"{user.Id}", currentUser, nameof(user));
@@ -168,14 +96,14 @@ public class UserManagerService(
         await context.SaveChangesAsync();
 
         //derive all role claims for users if user is assigned specific role.
-        List<RoleClaim> roleClaims = await roleManagerService.GetClaimsByRolesAsync(rolesToInsert);
+        List<RoleClaim> roleClaims = await roleManagerService.GetRoleClaimsAsync(rolesToInsert);
         IEnumerable<UserClaim> userClaimsToInsert = roleClaims.Select(x => new UserClaim
         {
             UserId = user.Id,
             ClaimType = x.ClaimType,
             ClaimValue = x.ClaimValue,
             RoleClaimId = x.Id,
-            Type = KindaUserClaimType.Custom,
+            Type = UserClaimType.Custom,
         });
         ICollection<UserClaim> currentUserClaims = currentUser.UserClaims!;
 
@@ -187,7 +115,7 @@ public class UserManagerService(
         await context.SaveChangesAsync();
     }
 
-    public async Task UpdateRolesToUserAsync(User user, IEnumerable<Ulid>? roleIds)
+    public async Task UpdateUserRolesAsync(User user, IEnumerable<Ulid>? roleIds)
     {
         if (roleIds == null || !roleIds.Any())
         {
@@ -222,11 +150,11 @@ public class UserManagerService(
             !currentUserRoles.Any(p => p.RoleId == x)
         );
 
-        await RemoveRoleFromUserAsync(currentUser, rolesToRemove);
-        await AddRoleToUserAsync(currentUser, rolesToInsert);
+        await RemoveRolesFromUserAsync(currentUser, rolesToRemove);
+        await AssignRolesToUserAsync(currentUser, rolesToInsert);
     }
 
-    public async Task RemoveRoleFromUserAsync(User user, IEnumerable<Ulid> roleIds)
+    public async Task RemoveRolesFromUserAsync(User user, IEnumerable<Ulid> roleIds)
     {
         if (!roleIds.Any())
         {
@@ -279,7 +207,7 @@ public class UserManagerService(
         await context.SaveChangesAsync();
     }
 
-    public async Task AddClaimsToUserAsync(User user, IEnumerable<UserClaim> claims)
+    public async Task AssignClaimsToUserAsync(User user, IEnumerable<UserClaim> claims)
     {
         if (claims == null || !claims.Any())
         {
@@ -291,13 +219,13 @@ public class UserManagerService(
         await context.SaveChangesAsync();
     }
 
-    public async Task ReplaceDefaultClaimsToUserAsync(IEnumerable<UserClaim> defaultUserClaims)
+    public async Task UpdateDefaultUserClaimsAsync(IEnumerable<UserClaim> defaultUserClaims)
     {
         userClaimsContext.UpdateRange(defaultUserClaims);
         await context.SaveChangesAsync();
     }
 
-    public async Task UpdateClaimsToUserAsync(User user, IEnumerable<UserClaim>? claims)
+    public async Task UpdateUserClaimsAsync(User user, IEnumerable<UserClaim>? claims)
     {
         if (claims == null || !claims.Any())
         {
@@ -314,7 +242,7 @@ public class UserManagerService(
         );
 
         IEnumerable<UserClaim> customUserClaims = currentUser.UserClaims!.Where(x =>
-            x.Type == KindaUserClaimType.Custom
+            x.Type == UserClaimType.Custom
         );
         IEnumerable<UserClaim> claimsToProcess = claims;
 
@@ -331,15 +259,13 @@ public class UserManagerService(
 
         ProcessUserClaimUpdate(claimsToUpdate, claimsToProcess);
 
-        //await RemoveClaimsToUserAsync(currentUser, claimsToRemove);
         userClaimsContext.RemoveRange(claimsToRemove);
         userClaimsContext.UpdateRange(claimsToUpdate);
         await userClaimsContext.AddRangeAsync(claimsToInsert);
         await context.SaveChangesAsync();
-        //await AddClaimsToUserAsync(currentUser, claimsToInsert);
     }
 
-    public async Task RemoveClaimsToUserAsync(User user, IEnumerable<Ulid> claimIds)
+    public async Task RemoveClaimsFromUserAsync(User user, IEnumerable<Ulid> claimIds)
     {
         if (!claimIds.Any())
         {
@@ -356,7 +282,7 @@ public class UserManagerService(
         );
 
         IEnumerable<UserClaim> currentUserClaims = currentUser.UserClaims!.Where(p =>
-            p.Type == KindaUserClaimType.Custom
+            p.Type == UserClaimType.Custom
         );
         if (claimIds.Any(x => !currentUserClaims.Any(p => p.Id == x)))
         {
@@ -373,44 +299,65 @@ public class UserManagerService(
         await context.SaveChangesAsync();
     }
 
-    public async Task RemoveClaimsToUserAsync(User user, IEnumerable<UserClaim> claims)
+    public async Task RemoveClaimsFromUserAsync(User user, IEnumerable<UserClaim> claims)
     {
         IEnumerable<Ulid> userClaims = claims.Select(x => x.Id);
-        await RemoveClaimsToUserAsync(user, userClaims);
+        await RemoveClaimsFromUserAsync(user, userClaims);
     }
 
-    public async Task<List<Role>> GetRolesInUser(Ulid userId) =>
+    public async Task<List<Role>> GetUserRoles(Ulid userId) =>
         await userRoleContext.Where(x => x.UserId == userId).Select(x => x.Role!).ToListAsync();
 
-    public async Task<List<UserClaim>> GetClaimsInUser(Ulid userId) =>
+    public async Task<List<UserClaim>> GetUserClaims(Ulid userId) =>
         await userClaimsContext.Where(x => x.UserId == userId).ToListAsync();
 
-    public async Task<bool> HasRolesInUserAsync(Ulid id, IEnumerable<string> roleNames) =>
+    public async Task<bool> HasUserRolesAsync(Ulid id, IEnumerable<string> roleNames) =>
         await userContext.AnyAsync(x =>
             x.Id == id && x.UserRoles!.Any(p => roleNames.Contains(p.Role!.Name))
         );
 
-    public async Task<bool> HasClaimsInUserAsync(
+    public async Task<bool> HasUserClaimsAsync(
         Ulid id,
         IEnumerable<KeyValuePair<string, string>> claims
     )
     {
-        List<UserClaim> userClaims = await userContext
-            .Where(x => x.Id == id)
-            .SelectMany(x => x.UserClaims!)
+        List<UserClaim> userClaims = await UserClaims
+            .Where(x => x.UserId == id && x.ClaimType == ClaimTypes.Permission)
             .ToListAsync();
 
-        return userClaims.Any(x => claims.Contains(new(x.ClaimType, x.ClaimValue)));
+        return userClaims.Exists(x => claims.Contains(new(x.ClaimType, x.ClaimValue)));
     }
 
-    public async Task<bool> HasClaimsAndRoleInUserAsync(
+    public async Task<bool> HasUserPermissionAsync(Ulid id, IEnumerable<string> claims)
+    {
+        List<string> permissions = await UserClaims
+            .Where(x => x.UserId == id && x.ClaimType == ClaimTypes.Permission)
+            .Select(x => x.ClaimValue)
+            .ToListAsync();
+
+        var claimsSet = new HashSet<string>(claims);
+        if (permissions.Exists(claimsSet.Contains))
+        {
+            return true;
+        }
+
+        var permissionsSet = new HashSet<string>(permissions);
+        return Credential
+            .permissions.SelectMany(group => group)
+            .Any(permissions =>
+                permissionsSet.Contains(permissions.Key)
+                && permissions.Value.Distinct().Any(p => claimsSet.Contains(p))
+            );
+    }
+
+    public async Task<bool> HasUserClaimsAndRolesAsync(
         Ulid id,
         IEnumerable<string> roles,
         IEnumerable<KeyValuePair<string, string>> claims
     )
     {
-        bool isHaRole = await HasRolesInUserAsync(id, roles);
-        bool isHasClaim = await HasClaimsInUserAsync(id, claims);
+        bool isHaRole = await HasUserRolesAsync(id, roles);
+        bool isHasClaim = await HasUserClaimsAsync(id, claims);
 
         return isHaRole && isHasClaim;
     }

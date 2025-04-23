@@ -1,28 +1,40 @@
-using Api.common.RouteResults;
+using Api.common.EndpointConfigurations;
+using Api.common.Results;
 using Api.common.Routers;
-using Application.Common.Auth;
 using Application.Features.Users.Commands.Delete;
-using Ardalis.ApiEndpoints;
-using Contracts.Constants;
 using Infrastructure.Constants;
 using Mediator;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.OpenApi.Models;
 
 namespace Api.Endpoints.User;
 
-public class DeleteUserEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<string>.WithActionResult
+public class DeleteUserEndpoint : IEndpoint
 {
-    [HttpDelete(Router.UserRoute.GetUpdateDelete)]
-    [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Delete User")]
-    [AuthorizeBy(permissions: $"{ActionPermission.delete}:{ObjectPermission.user}")]
-    public override async Task<ActionResult> HandleAsync(
-        [FromRoute(Name = RoutePath.Id)] string userId,
+    public EndpointVersion Version => EndpointVersion.One;
+
+    public void MapEndpoint(IEndpointRouteBuilder app)
+    {
+        app.MapDelete(Router.UserRoute.GetUpdateDelete, HandleAsync)
+            .WithOpenApi(operation => new OpenApiOperation(operation)
+            {
+                Summary = "Delete user 🗑️",
+                Description = "Deletes an existing user identified by their unique ID.",
+                Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
+            })
+            .RequireAuth(
+                permissions: Permission.Generate(PermissionAction.Delete, PermissionResource.User)
+            );
+    }
+
+    private async Task<Results<NoContent, ProblemHttpResult>> HandleAsync(
+        [FromRoute] string id,
+        [FromServices] ISender sender,
         CancellationToken cancellationToken = default
     )
     {
-        await sender.Send(new DeleteUserCommand(Ulid.Parse(userId)), cancellationToken);
-        return this.NoContent204();
+        var result = await sender.Send(new DeleteUserCommand(Ulid.Parse(id)), cancellationToken);
+        return result.ToNoContentResult();
     }
 }

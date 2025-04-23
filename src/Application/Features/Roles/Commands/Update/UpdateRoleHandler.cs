@@ -1,30 +1,37 @@
-using Application.Common.Exceptions;
+using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
-using AutoMapper;
+using Application.Features.Common.Mapping.Roles;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Roles;
 using Mediator;
 using SharedKernel.Common.Messages;
 
 namespace Application.Features.Roles.Commands.Update;
 
-public class UpdateRoleHandler(IRoleManagerService roleManagerService, IMapper mapper)
-    : IRequestHandler<UpdateRoleCommand, UpdateRoleResponse>
+public class UpdateRoleHandler(IRoleManagerService roleManagerService)
+    : IRequestHandler<UpdateRoleCommand, Result<UpdateRoleResponse>>
 {
-    public async ValueTask<UpdateRoleResponse> Handle(
+    public async ValueTask<Result<UpdateRoleResponse>> Handle(
         UpdateRoleCommand command,
         CancellationToken cancellationToken
     )
     {
-        Role role =
-            await roleManagerService.GetByIdAsync(Ulid.Parse(command.RoleId))
-            ?? throw new NotFoundException(
-                [Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage()]
+        Role? role = await roleManagerService.GetByIdAsync(Ulid.Parse(command.RoleId));
+
+        if (role == null)
+        {
+            return Result<UpdateRoleResponse>.Failure(
+                new NotFoundError(
+                    "Your Resource is not found",
+                    Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage()
+                )
             );
+        }
 
-        mapper.Map(command.Role, role);
+        role.FromUpdateRole(command.UpdateData);
 
-        List<RoleClaim> roleClaims = mapper.Map<List<RoleClaim>>(command.Role.RoleClaims);
-        await roleManagerService.UpdateRoleAsync(role, roleClaims);
-        return mapper.Map<UpdateRoleResponse>(role);
+        List<RoleClaim> roleClaims = command.UpdateData.RoleClaims.ToListRoleClaim() ?? [];
+        await roleManagerService.UpdateAsync(role, roleClaims);
+        return Result<UpdateRoleResponse>.Success(role.ToUpdateRoleResponse());
     }
 }

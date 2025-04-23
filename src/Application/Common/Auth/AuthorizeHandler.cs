@@ -48,45 +48,36 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
 
         if (authorizeModel.Roles?.Count > 0 && authorizeModel.Permissions?.Count > 0)
         {
-            SuccessOrFailiureHandler(
-                context,
-                requirement,
-                await userManagerService.HasClaimsAndRoleInUserAsync(
-                    userId.Value,
-                    authorizeModel.Roles,
-                    authorizeModel.Permissions.Select(permission => new KeyValuePair<
-                        string,
-                        string
-                    >(ClaimTypes.Permission, permission))
-                )
+            bool hasRolesAndClaims = await userManagerService.HasUserClaimsAndRolesAsync(
+                userId.Value,
+                authorizeModel.Roles,
+                authorizeModel.Permissions.Select(permission => new KeyValuePair<string, string>(
+                    ClaimTypes.Permission,
+                    permission
+                ))
             );
+            SuccessOrFailiureHandler(context, requirement, hasRolesAndClaims);
             return;
         }
 
         if (authorizeModel.Roles?.Count > 0)
         {
-            SuccessOrFailiureHandler(
-                context,
-                requirement,
-                await userManagerService.HasRolesInUserAsync(userId.Value, authorizeModel.Roles)
+            bool hasRole = await userManagerService.HasUserRolesAsync(
+                userId.Value,
+                authorizeModel.Roles
             );
+            SuccessOrFailiureHandler(context, requirement, hasRole);
 
             return;
         }
 
         if (authorizeModel.Permissions?.Count > 0)
         {
-            SuccessOrFailiureHandler(
-                context,
-                requirement,
-                await userManagerService.HasClaimsInUserAsync(
-                    userId.Value,
-                    authorizeModel.Permissions.Select(permission => new KeyValuePair<
-                        string,
-                        string
-                    >(ClaimTypes.Permission, permission))
-                )
+            bool hasPermission = await userManagerService.HasUserPermissionAsync(
+                userId.Value,
+                authorizeModel.Permissions
             );
+            SuccessOrFailiureHandler(context, requirement, hasPermission);
 
             return;
         }

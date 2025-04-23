@@ -11,10 +11,8 @@ namespace Application.SubcutaneousTests.Extensions;
 
 public static class ClientExtension
 {
-    public static async Task<T?> ToResponse<T>(this HttpResponseMessage responseMessage)
-    {
-        return await responseMessage.Content.ReadFromJsonAsync<T>();
-    }
+    public static async Task<T?> ToResponse<T>(this HttpResponseMessage responseMessage) =>
+        await responseMessage.Content.ReadFromJsonAsync<T>();
 
     public static async Task<HttpResponseMessage> CreateRequestAsync(
         this HttpClient client,

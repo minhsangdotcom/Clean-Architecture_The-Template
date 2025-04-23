@@ -13,11 +13,9 @@ public class LoggingBehavior<TMessage, TResponse>(ILogger logger, ICurrentUser c
         string requestName = typeof(TMessage).Name;
         Ulid? id = currentUser.Id;
 
-        const string replacePhrase = "is userId {userId}";
+        const string replacePhrase = "for user {userId}";
         string loggingMessage =
-            "\n\n Application logs incomming request: {Name} "
-            + replacePhrase
-            + " with payload \n {@Request} \n";
+            "\n\n Incomming request: {Name} " + replacePhrase + " with payload \n {@Request} \n";
 
         List<object> parameters = [requestName, id, message];
 
@@ -25,7 +23,7 @@ public class LoggingBehavior<TMessage, TResponse>(ILogger logger, ICurrentUser c
         {
             loggingMessage = loggingMessage.Replace(
                 $"{replacePhrase}",
-                "is anonymous",
+                "for anonymous",
                 StringComparison.Ordinal
             );
             parameters.RemoveAt(1);

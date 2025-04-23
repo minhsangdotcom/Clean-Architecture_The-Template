@@ -1,14 +1,23 @@
-using Application.Features.Common.Projections.Roles;
-using AutoMapper;
+using Application.Features.Common.Mapping.Roles;
+using CaseConverter;
 using Domain.Aggregates.Roles;
 
 namespace Application.Features.Roles.Commands.Create;
 
-public class CreateRoleMapping : Profile
+public static class CreateRoleMapping
 {
-    public CreateRoleMapping()
+    public static Role ToRole(this CreateRoleCommand roleCommand) =>
+        new()
+        {
+            Name = roleCommand.Name.ToSnakeCase().ToUpper(),
+            Description = roleCommand.Description,
+            RoleClaims = roleCommand.RoleClaims?.ToListRoleClaim(),
+        };
+
+    public static CreateRoleResponse ToCreateRoleResponse(this Role role)
     {
-        CreateMap<CreateRoleCommand, Role>().IncludeBase<RoleModel, Role>();
-        CreateMap<Role, CreateRoleResponse>();
+        CreateRoleResponse roleResponse = new();
+        roleResponse.MappingFrom(role);
+        return roleResponse;
     }
 }

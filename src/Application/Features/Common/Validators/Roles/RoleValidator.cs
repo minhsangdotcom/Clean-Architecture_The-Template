@@ -82,7 +82,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
             .WithState(x =>
                 Messager
                     .Create<RoleModel>(nameof(Role))
-                    .Property(x => x.Name!)
+                    .Property(x => x.Description!)
                     .Message(MessageType.MaximumLength)
                     .Build()
             );

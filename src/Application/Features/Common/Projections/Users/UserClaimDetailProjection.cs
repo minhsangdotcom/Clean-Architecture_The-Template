@@ -11,5 +11,5 @@ public class UserClaimDetailProjection : DefaultBaseResponse
     public string? ClaimValue { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-    public KindaUserClaimType Type { get; set; }
+    public UserClaimType Type { get; set; }
 }

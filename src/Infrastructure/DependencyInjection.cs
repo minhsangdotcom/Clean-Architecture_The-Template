@@ -1,18 +1,15 @@
-using Application.Common.Interfaces.Registers;
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Identity;
-using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Services;
 using Infrastructure.Services.Aws;
-using Infrastructure.Services.DistributedCache;
-using Infrastructure.Services.Elastics;
-using Infrastructure.Services.Hangfires;
+using Infrastructure.Services.Cache.DistributedCache;
+using Infrastructure.Services.Cache.MemoryCache;
+using Infrastructure.Services.ElasticSeach;
+using Infrastructure.Services.Hangfire;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Mail;
-using Infrastructure.Services.MemoryCache;
 using Infrastructure.Services.Queue;
 using Infrastructure.Services.Token;
 using Infrastructure.UnitOfWorks;
@@ -30,8 +27,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureDependencies(
         this IServiceCollection services,
-        IConfiguration configuration,
-        string? environmentName = "Development"
+        IConfiguration configuration
     )
     {
         services.AddDetection();
@@ -55,72 +51,34 @@ public static class DependencyInjection
             .AddSingleton<UpdateAuditableEntityInterceptor>()
             .AddSingleton<DispatchDomainEventInterceptor>();
 
-        if (environmentName!.CompareTo("Testing") == 0)
-        {
-            services.AddDbContext<TheDbContext>(
-                (sp, options) =>
-                {
-                    NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
-                    options
-                        .UseNpgsql(npgsqlDataSource)
-                        .AddInterceptors(
-                            sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
-                            sp.GetRequiredService<DispatchDomainEventInterceptor>()
-                        );
-                }
-            );
-        }
-        else
-        {
-            services.AddDbContextPool<TheDbContext>(
-                (sp, options) =>
-                {
-                    NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
-                    options
-                        .UseNpgsql(npgsqlDataSource)
-                        .AddInterceptors(
-                            sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
-                            sp.GetRequiredService<DispatchDomainEventInterceptor>()
-                        );
-                }
-            );
-        }
+        services.AddDbContextPool<TheDbContext>(
+            (sp, options) =>
+            {
+                NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
+                options
+                    .UseNpgsql(npgsqlDataSource)
+                    .AddInterceptors(
+                        sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
+                        sp.GetRequiredService<DispatchDomainEventInterceptor>()
+                    );
+            }
+        );
+
+        services.AddOptions<EmailSettings>().Bind(configuration.GetSection(nameof(EmailSettings)));
 
         services
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentUser, CurrentUserService>()
-            .AddSingleton(typeof(IMediaUpdateService<>), typeof(MediaUpdateService<>))
-            .AddTransient<KitMailService>()
-            .AddTransient<IMailService, KitMailService>(provider =>
-                provider.GetService<KitMailService>()!
-            )
-            .AddTransient<FluentMailService>()
-            .AddTransient<IMailService, FluentMailService>(provider =>
-                provider.GetService<FluentMailService>()!
-            )
-            .AddFluentMail(configuration)
-            .Scan(scan =>
-                scan.FromCallingAssembly()
-                    .AddClasses(classes => classes.AssignableTo<IScope>())
-                    .AsImplementedInterfaces()
-                    .WithScopedLifetime()
-                    .AddClasses(classes => classes.AssignableTo<ISingleton>())
-                    .AsImplementedInterfaces()
-                    .WithSingletonLifetime()
-                    .AddClasses(classes => classes.AssignableTo<ITransient>())
-                    .AsImplementedInterfaces()
-                    .WithTransientLifetime()
-            )
             .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
-            .AddJwtAuth(configuration)
-            .AddMemoryCache()
-            .Configure<CacheSettings>(options =>
-                configuration.GetSection(nameof(CacheSettings)).Bind(options)
-            )
-            .AddRedis(configuration)
+            .AddSingleton<IActionAccessorService, ActionAccessorService>()
+            .AddJwt(configuration)
             .AddQueue(configuration)
             .AddHangfireConfiguration(configuration)
-            .AddElasticSearch(configuration);
+            .AddElasticSearch(configuration)
+            .AddIdentity()
+            .AddMail()
+            .AddMemoryCaching(configuration)
+            .AddDistributedCache(configuration);
 
         return services;
     }

@@ -1,17 +1,21 @@
-using Application.Features.Common.Projections.Roles;
-using AutoMapper;
 using Domain.Aggregates.Roles;
+using SharedKernel.Extensions;
 
 namespace Application.Features.Roles.Commands.Update;
 
-public class UpdateRoleMapping : Profile
+public static class UpdateRoleMapping
 {
-    public UpdateRoleMapping()
+    public static Role FromUpdateRole(this Role role, RoleUpdateRequest RoleUpdateRequest)
     {
-        CreateMap<UpdateRole, Role>()
-            .ForMember(dest => dest.RoleClaims, opt => opt.Ignore())
-            .IncludeBase<RoleModel, Role>();
+        role.Name = RoleUpdateRequest.Name.ToScreamingSnakeCase();
+        role.Description = RoleUpdateRequest.Description;
+        return role;
+    }
 
-        CreateMap<Role, UpdateRoleResponse>();
+    public static UpdateRoleResponse ToUpdateRoleResponse(this Role role)
+    {
+        UpdateRoleResponse roleResponse = new();
+        roleResponse.MappingFrom(role);
+        return roleResponse;
     }
 }

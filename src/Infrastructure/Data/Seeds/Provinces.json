@@ -1,570 +1,570 @@
 [
   {
-    "Id": "01JAZDXCCR42R71TJG086SY649",
+    "Id": "01JRQHWRQ5BEEW630AG1ND2QQB",
     "Code": "01",
     "Name": "Hà Nội",
-    "NameEn": "Ha Noi",
+    "EnglishName": "Ha Noi",
     "FullName": "Thành phố Hà Nội",
-    "FullNameEn": "Ha Noi City",
-    "AdministrativeUnitId": "1"
+    "EnglishFullName": "Ha Noi City",
+    "AdministrativeUnitId": 1
   },
   {
-    "Id": "01JAZDXCDSK705Z91ASWQQ9PXF",
+    "Id": "01JRQHWRR5EQNNVK303YMYC32E",
     "Code": "02",
     "Name": "Hà Giang",
-    "NameEn": "Ha Giang",
+    "EnglishName": "Ha Giang",
     "FullName": "Tỉnh Hà Giang",
-    "FullNameEn": "Ha Giang Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Ha Giang Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCE4KAVTEFE48X8XPP32",
+    "Id": "01JRQHWRRDNHGQFHSBGJCBSBV5",
     "Code": "04",
     "Name": "Cao Bằng",
-    "NameEn": "Cao Bang",
+    "EnglishName": "Cao Bang",
     "FullName": "Tỉnh Cao Bằng",
-    "FullNameEn": "Cao Bang Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Cao Bang Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCECA01RBVR5DA1NY1A7",
+    "Id": "01JRQHWRRRS6C3F6MJ28RFY7X6",
     "Code": "06",
     "Name": "Bắc Kạn",
-    "NameEn": "Bac Kan",
+    "EnglishName": "Bac Kan",
     "FullName": "Tỉnh Bắc Kạn",
-    "FullNameEn": "Bac Kan Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Bac Kan Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCEJ2DABTAX4E0XG3Z91",
+    "Id": "01JRQHWRRXEXQ5TXZT9BGEVHKK",
     "Code": "08",
     "Name": "Tuyên Quang",
-    "NameEn": "Tuyen Quang",
+    "EnglishName": "Tuyen Quang",
     "FullName": "Tỉnh Tuyên Quang",
-    "FullNameEn": "Tuyen Quang Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Tuyen Quang Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCESRYPP1X8FHNZ0AA2P",
+    "Id": "01JRQHWRS664WY30QTD1RWVB7C",
     "Code": "10",
     "Name": "Lào Cai",
-    "NameEn": "Lao Cai",
+    "EnglishName": "Lao Cai",
     "FullName": "Tỉnh Lào Cai",
-    "FullNameEn": "Lao Cai Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Lao Cai Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCF3R8ZJVAERK7GF7ZT7",
+    "Id": "01JRQHWRSDK0QYJC4HXPSY0SZH",
     "Code": "11",
     "Name": "Điện Biên",
-    "NameEn": "Dien Bien",
+    "EnglishName": "Dien Bien",
     "FullName": "Tỉnh Điện Biên",
-    "FullNameEn": "Dien Bien Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Dien Bien Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCF9PBWT4HFP8SBZP44N",
+    "Id": "01JRQHWRSPSF09K62YCY2NKGRS",
     "Code": "12",
     "Name": "Lai Châu",
-    "NameEn": "Lai Chau",
+    "EnglishName": "Lai Chau",
     "FullName": "Tỉnh Lai Châu",
-    "FullNameEn": "Lai Chau Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Lai Chau Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCFEX1Z6TW14KMDR1HNC",
+    "Id": "01JRQHWRSVEFEW2T3C86X37FFH",
     "Code": "14",
     "Name": "Sơn La",
-    "NameEn": "Son La",
+    "EnglishName": "Son La",
     "FullName": "Tỉnh Sơn La",
-    "FullNameEn": "Son La Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Son La Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCFTSV41K47BK1HA8P9Z",
+    "Id": "01JRQHWRT88PJ0CZN4PETMSNNP",
     "Code": "15",
     "Name": "Yên Bái",
-    "NameEn": "Yen Bai",
+    "EnglishName": "Yen Bai",
     "FullName": "Tỉnh Yên Bái",
-    "FullNameEn": "Yen Bai Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Yen Bai Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCG7AW6G9KVV7K45FMVJ",
+    "Id": "01JRQHWRTFQ2R4XN9JCGHAKR0J",
     "Code": "17",
     "Name": "Hoà Bình",
-    "NameEn": "Hoa Binh",
+    "EnglishName": "Hoa Binh",
     "FullName": "Tỉnh Hoà Bình",
-    "FullNameEn": "Hoa Binh Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Hoa Binh Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCGE4A1TPZ4FK4F338N1",
+    "Id": "01JRQHWRTSEZF0BRBAVM27W910",
     "Code": "19",
     "Name": "Thái Nguyên",
-    "NameEn": "Thai Nguyen",
+    "EnglishName": "Thai Nguyen",
     "FullName": "Tỉnh Thái Nguyên",
-    "FullNameEn": "Thai Nguyen Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Thai Nguyen Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCGSQWRMHVBT4C29STSH",
+    "Id": "01JRQHWRV0PHQ2WE3W6YVGC8SK",
     "Code": "20",
     "Name": "Lạng Sơn",
-    "NameEn": "Lang Son",
+    "EnglishName": "Lang Son",
     "FullName": "Tỉnh Lạng Sơn",
-    "FullNameEn": "Lang Son Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Lang Son Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCH6DH7H0JRY7NG23WQ7",
+    "Id": "01JRQHWRVC76FKHDNDHF5VE6PT",
     "Code": "22",
     "Name": "Quảng Ninh",
-    "NameEn": "Quang Ninh",
+    "EnglishName": "Quang Ninh",
     "FullName": "Tỉnh Quảng Ninh",
-    "FullNameEn": "Quang Ninh Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Quang Ninh Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCHFY7FA582K4K6ZAAB8",
+    "Id": "01JRQHWRVNDM8VX3VBYFD8GWJ2",
     "Code": "24",
     "Name": "Bắc Giang",
-    "NameEn": "Bac Giang",
+    "EnglishName": "Bac Giang",
     "FullName": "Tỉnh Bắc Giang",
-    "FullNameEn": "Bac Giang Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Bac Giang Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCHVB8RD8MTDCE7KJN8A",
+    "Id": "01JRQHWRVYJR3B02W43M8MSJZY",
     "Code": "25",
     "Name": "Phú Thọ",
-    "NameEn": "Phu Tho",
+    "EnglishName": "Phu Tho",
     "FullName": "Tỉnh Phú Thọ",
-    "FullNameEn": "Phu Tho Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Phu Tho Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCJ9H15MYQQFHX8Z0CJC",
+    "Id": "01JRQHWRWBB49GC35MVM1M0Q0B",
     "Code": "26",
     "Name": "Vĩnh Phúc",
-    "NameEn": "Vinh Phuc",
+    "EnglishName": "Vinh Phuc",
     "FullName": "Tỉnh Vĩnh Phúc",
-    "FullNameEn": "Vinh Phuc Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Vinh Phuc Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCJGYDCJ624PZJHJYB75",
+    "Id": "01JRQHWRWG07BEMEVEYEWK2J1J",
     "Code": "27",
     "Name": "Bắc Ninh",
-    "NameEn": "Bac Ninh",
+    "EnglishName": "Bac Ninh",
     "FullName": "Tỉnh Bắc Ninh",
-    "FullNameEn": "Bac Ninh Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Bac Ninh Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCJSNZ8ERNXZ98VTPJQJ",
+    "Id": "01JRQHWRWR1QVVA96CXVNR591V",
     "Code": "30",
     "Name": "Hải Dương",
-    "NameEn": "Hai Duong",
+    "EnglishName": "Hai Duong",
     "FullName": "Tỉnh Hải Dương",
-    "FullNameEn": "Hai Duong Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Hai Duong Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCK4QGNMCW1286WTY7BD",
+    "Id": "01JRQHWRX1188M0QDQF6FQY0S1",
     "Code": "31",
     "Name": "Hải Phòng",
-    "NameEn": "Hai Phong",
+    "EnglishName": "Hai Phong",
     "FullName": "Thành phố Hải Phòng",
-    "FullNameEn": "Hai Phong City",
-    "AdministrativeUnitId": "1"
+    "EnglishFullName": "Hai Phong City",
+    "AdministrativeUnitId": 1
   },
   {
-    "Id": "01JAZDXCKHDXF5Q1YF496VWVSY",
+    "Id": "01JRQHWRXAQVRTKXMVGS5SXW6P",
     "Code": "33",
     "Name": "Hưng Yên",
-    "NameEn": "Hung Yen",
+    "EnglishName": "Hung Yen",
     "FullName": "Tỉnh Hưng Yên",
-    "FullNameEn": "Hung Yen Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Hung Yen Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCKWSTPAQXX6ZT0W5ZEK",
+    "Id": "01JRQHWRXGF096ZT6AWJTR7XYT",
     "Code": "34",
     "Name": "Thái Bình",
-    "NameEn": "Thai Binh",
+    "EnglishName": "Thai Binh",
     "FullName": "Tỉnh Thái Bình",
-    "FullNameEn": "Thai Binh Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Thai Binh Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCMDQB6749R65KZHAP58",
+    "Id": "01JRQHWRXZG00A1ZVGW00Z83GJ",
     "Code": "35",
     "Name": "Hà Nam",
-    "NameEn": "Ha Nam",
+    "EnglishName": "Ha Nam",
     "FullName": "Tỉnh Hà Nam",
-    "FullNameEn": "Ha Nam Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Ha Nam Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCMJQMA1G3K5AAVQADWC",
+    "Id": "01JRQHWRY36WM2X24ZFKF2E35A",
     "Code": "36",
     "Name": "Nam Định",
-    "NameEn": "Nam Dinh",
+    "EnglishName": "Nam Dinh",
     "FullName": "Tỉnh Nam Định",
-    "FullNameEn": "Nam Dinh Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Nam Dinh Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCMZ35SPD2N8Q5W7BJ3M",
+    "Id": "01JRQHWRYCW4SC0VXAE03H1VM8",
     "Code": "37",
     "Name": "Ninh Bình",
-    "NameEn": "Ninh Binh",
+    "EnglishName": "Ninh Binh",
     "FullName": "Tỉnh Ninh Bình",
-    "FullNameEn": "Ninh Binh Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Ninh Binh Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCN5Q97Z7B7N1NVM353D",
+    "Id": "01JRQHWRYJ0X0PC5AH30B0YW1K",
     "Code": "38",
     "Name": "Thanh Hóa",
-    "NameEn": "Thanh Hoa",
+    "EnglishName": "Thanh Hoa",
     "FullName": "Tỉnh Thanh Hóa",
-    "FullNameEn": "Thanh Hoa Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Thanh Hoa Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCPDK521VXAB0SW5TQAM",
+    "Id": "01JRQHWRZ8PQ5KT0J87WQWA90J",
     "Code": "40",
     "Name": "Nghệ An",
-    "NameEn": "Nghe An",
+    "EnglishName": "Nghe An",
     "FullName": "Tỉnh Nghệ An",
-    "FullNameEn": "Nghe An Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Nghe An Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCQD42HVJ2SP5GN1S30X",
+    "Id": "01JRQHWRZQ6EWE63BRZMK04VS3",
     "Code": "42",
     "Name": "Hà Tĩnh",
-    "NameEn": "Ha Tinh",
+    "EnglishName": "Ha Tinh",
     "FullName": "Tỉnh Hà Tĩnh",
-    "FullNameEn": "Ha Tinh Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Ha Tinh Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCQVT974380H1E3D279C",
+    "Id": "01JRQHWS003N1QQWJYA60GBX66",
     "Code": "44",
     "Name": "Quảng Bình",
-    "NameEn": "Quang Binh",
+    "EnglishName": "Quang Binh",
     "FullName": "Tỉnh Quảng Bình",
-    "FullNameEn": "Quang Binh Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Quang Binh Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCR405GB2Y6HEXEGBY2G",
+    "Id": "01JRQHWS063KE7B2DNZ4SY10Z8",
     "Code": "45",
     "Name": "Quảng Trị",
-    "NameEn": "Quang Tri",
+    "EnglishName": "Quang Tri",
     "FullName": "Tỉnh Quảng Trị",
-    "FullNameEn": "Quang Tri Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Quang Tri Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCRCM6BC4WPQZZ1CSAJT",
+    "Id": "01JRQHWS0BDJ5Z4VVZBHYHN6HT",
     "Code": "46",
-    "Name": "Thừa Thiên Huế",
-    "NameEn": "Thua Thien Hue",
-    "FullName": "Tỉnh Thừa Thiên Huế",
-    "FullNameEn": "Thua Thien Hue Province",
-    "AdministrativeUnitId": "2"
+    "Name": "Huế",
+    "EnglishName": "Hue",
+    "FullName": "Thành phố Huế",
+    "EnglishFullName": "Hue City",
+    "AdministrativeUnitId": 1
   },
   {
-    "Id": "01JAZDXCRMSCJ6PENAQX8RJ6ZA",
+    "Id": "01JRQHWS0GQ5S2WKPVTHHT52X1",
     "Code": "48",
     "Name": "Đà Nẵng",
-    "NameEn": "Da Nang",
+    "EnglishName": "Da Nang",
     "FullName": "Thành phố Đà Nẵng",
-    "FullNameEn": "Da Nang City",
-    "AdministrativeUnitId": "1"
+    "EnglishFullName": "Da Nang City",
+    "AdministrativeUnitId": 1
   },
   {
-    "Id": "01JAZDXCRQDHA5TDMYS2M29MSH",
+    "Id": "01JRQHWS0J0BKV33W5T88WA7TG",
     "Code": "49",
     "Name": "Quảng Nam",
-    "NameEn": "Quang Nam",
+    "EnglishName": "Quang Nam",
     "FullName": "Tỉnh Quảng Nam",
-    "FullNameEn": "Quang Nam Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Quang Nam Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCS7A7D2H9XA02RJHRPE",
+    "Id": "01JRQHWS0X39VAFRR5BQK5KM5P",
     "Code": "51",
     "Name": "Quảng Ngãi",
-    "NameEn": "Quang Ngai",
+    "EnglishName": "Quang Ngai",
     "FullName": "Tỉnh Quảng Ngãi",
-    "FullNameEn": "Quang Ngai Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Quang Ngai Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCSPP77KMKA66EMBJPBB",
+    "Id": "01JRQHWS157Z5DBTJ5AT6JCCMQ",
     "Code": "52",
     "Name": "Bình Định",
-    "NameEn": "Binh Dinh",
+    "EnglishName": "Binh Dinh",
     "FullName": "Tỉnh Bình Định",
-    "FullNameEn": "Binh Dinh Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Binh Dinh Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCT2ABG3D9AP9MTQ9ASM",
+    "Id": "01JRQHWS1C2QCFS89QE2WB840X",
     "Code": "54",
     "Name": "Phú Yên",
-    "NameEn": "Phu Yen",
+    "EnglishName": "Phu Yen",
     "FullName": "Tỉnh Phú Yên",
-    "FullNameEn": "Phu Yen Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Phu Yen Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCT754Y3T763DM4HVAQH",
+    "Id": "01JRQHWS1GAEP93HV56AX28B0N",
     "Code": "56",
     "Name": "Khánh Hòa",
-    "NameEn": "Khanh Hoa",
+    "EnglishName": "Khanh Hoa",
     "FullName": "Tỉnh Khánh Hòa",
-    "FullNameEn": "Khanh Hoa Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Khanh Hoa Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCTC7GJA2DJJQF1XQV3Z",
+    "Id": "01JRQHWS1N2S63ANW9X4HYZ4HW",
     "Code": "58",
     "Name": "Ninh Thuận",
-    "NameEn": "Ninh Thuan",
+    "EnglishName": "Ninh Thuan",
     "FullName": "Tỉnh Ninh Thuận",
-    "FullNameEn": "Ninh Thuan Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Ninh Thuan Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCTJJ911FEXZ7D82E3BB",
+    "Id": "01JRQHWS1RTDE4JY0M76BV8N4T",
     "Code": "60",
     "Name": "Bình Thuận",
-    "NameEn": "Binh Thuan",
+    "EnglishName": "Binh Thuan",
     "FullName": "Tỉnh Bình Thuận",
-    "FullNameEn": "Binh Thuan Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Binh Thuan Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCTRHW0PS3GNKW4T3H0S",
+    "Id": "01JRQHWS1YWZ4BNCDJF475ESWV",
     "Code": "62",
     "Name": "Kon Tum",
-    "NameEn": "Kon Tum",
+    "EnglishName": "Kon Tum",
     "FullName": "Tỉnh Kon Tum",
-    "FullNameEn": "Kon Tum Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Kon Tum Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCTX618N9C9X9PPRM68F",
+    "Id": "01JRQHWS22HGCY7144WZ5XN8A4",
     "Code": "64",
     "Name": "Gia Lai",
-    "NameEn": "Gia Lai",
+    "EnglishName": "Gia Lai",
     "FullName": "Tỉnh Gia Lai",
-    "FullNameEn": "Gia Lai Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Gia Lai Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCVBV7MNPE8GJY7848JD",
+    "Id": "01JRQHWS2B34B19XBP1TQAY49Q",
     "Code": "66",
     "Name": "Đắk Lắk",
-    "NameEn": "Dak Lak",
+    "EnglishName": "Dak Lak",
     "FullName": "Tỉnh Đắk Lắk",
-    "FullNameEn": "Dak Lak Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Dak Lak Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCVRJ493RQWMT0N9S6PT",
+    "Id": "01JRQHWS2M5FWST69Z706ZPVBK",
     "Code": "67",
     "Name": "Đắk Nông",
-    "NameEn": "Dak Nong",
+    "EnglishName": "Dak Nong",
     "FullName": "Tỉnh Đắk Nông",
-    "FullNameEn": "Dak Nong Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Dak Nong Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCVVVJEABBJRSNNZE0JR",
+    "Id": "01JRQHWS2QYR74SSGRADMKDDHW",
     "Code": "68",
     "Name": "Lâm Đồng",
-    "NameEn": "Lam Dong",
+    "EnglishName": "Lam Dong",
     "FullName": "Tỉnh Lâm Đồng",
-    "FullNameEn": "Lam Dong Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Lam Dong Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCW4VDXH15ZYWX5KVMZK",
+    "Id": "01JRQHWS34NHTZTF10EBJ8X858",
     "Code": "70",
     "Name": "Bình Phước",
-    "NameEn": "Binh Phuoc",
+    "EnglishName": "Binh Phuoc",
     "FullName": "Tỉnh Bình Phước",
-    "FullNameEn": "Binh Phuoc Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Binh Phuoc Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCW9KX2XN1RQ6EA8P0HT",
+    "Id": "01JRQHWS38BHETARW436NB01NN",
     "Code": "72",
     "Name": "Tây Ninh",
-    "NameEn": "Tay Ninh",
+    "EnglishName": "Tay Ninh",
     "FullName": "Tỉnh Tây Ninh",
-    "FullNameEn": "Tay Ninh Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Tay Ninh Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCWDXW058WSN6DME2R4P",
+    "Id": "01JRQHWS3BZNNVFRYZ1J0F1AGM",
     "Code": "74",
     "Name": "Bình Dương",
-    "NameEn": "Binh Duong",
+    "EnglishName": "Binh Duong",
     "FullName": "Tỉnh Bình Dương",
-    "FullNameEn": "Binh Duong Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Binh Duong Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCWK70FZJA49TGNGDBM7",
+    "Id": "01JRQHWS3G5EQVDQPZ92AXK0NR",
     "Code": "75",
     "Name": "Đồng Nai",
-    "NameEn": "Dong Nai",
+    "EnglishName": "Dong Nai",
     "FullName": "Tỉnh Đồng Nai",
-    "FullNameEn": "Dong Nai Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Dong Nai Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCWTTDD4M3VNMA0F4BGJ",
+    "Id": "01JRQHWS3PYGEGFWCTBMDRHY1G",
     "Code": "77",
     "Name": "Bà Rịa - Vũng Tàu",
-    "NameEn": "Ba Ria - Vung Tau",
+    "EnglishName": "Ba Ria - Vung Tau",
     "FullName": "Tỉnh Bà Rịa - Vũng Tàu",
-    "FullNameEn": "Ba Ria - Vung Tau Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Ba Ria - Vung Tau Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCWY3Z9K3XS0AYZ733NF",
+    "Id": "01JRQHWS3RQR1N0J84EV1DQXR1",
     "Code": "79",
     "Name": "Hồ Chí Minh",
-    "NameEn": "Ho Chi Minh",
+    "EnglishName": "Ho Chi Minh",
     "FullName": "Thành phố Hồ Chí Minh",
-    "FullNameEn": "Ho Chi Minh City",
+    "EnglishFullName": "Ho Chi Minh City",
     "CustomName": "Thành phố Hồ Chí Minh",
-    "AdministrativeUnitId": "1"
+    "AdministrativeUnitId": 1
   },
   {
-    "Id": "01JAZDXCXD0V1ECBFH2E7EHV19",
+    "Id": "01JRQHWS4443RH1460PP13Q669",
     "Code": "80",
     "Name": "Long An",
-    "NameEn": "Long An",
+    "EnglishName": "Long An",
     "FullName": "Tỉnh Long An",
-    "FullNameEn": "Long An Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Long An Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCXP15PZTEWMGE0TGN14",
+    "Id": "01JRQHWS4ABHE6AD3RPGP2EY66",
     "Code": "82",
     "Name": "Tiền Giang",
-    "NameEn": "Tien Giang",
+    "EnglishName": "Tien Giang",
     "FullName": "Tỉnh Tiền Giang",
-    "FullNameEn": "Tien Giang Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Tien Giang Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCXXKW0ZGP3JQZWGQX8D",
+    "Id": "01JRQHWS4JWRVG9PQDFFF7JB7H",
     "Code": "83",
     "Name": "Bến Tre",
-    "NameEn": "Ben Tre",
+    "EnglishName": "Ben Tre",
     "FullName": "Tỉnh Bến Tre",
-    "FullNameEn": "Ben Tre Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Ben Tre Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCY4X85SA4J5Y3KVF5BJ",
+    "Id": "01JRQHWS4QD1C5X6D5YKSHSNZP",
     "Code": "84",
     "Name": "Trà Vinh",
-    "NameEn": "Tra Vinh",
+    "EnglishName": "Tra Vinh",
     "FullName": "Tỉnh Trà Vinh",
-    "FullNameEn": "Tra Vinh Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Tra Vinh Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCY874ZAHZRXMRPMRTRH",
+    "Id": "01JRQHWS4VRM1FBFC4DAG6VY0P",
     "Code": "86",
     "Name": "Vĩnh Long",
-    "NameEn": "Vinh Long",
+    "EnglishName": "Vinh Long",
     "FullName": "Tỉnh Vĩnh Long",
-    "FullNameEn": "Vinh Long Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Vinh Long Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCYCQNDBYJCXT0S9AX7B",
+    "Id": "01JRQHWS4ZARNDDB1SB1JK878Q",
     "Code": "87",
     "Name": "Đồng Tháp",
-    "NameEn": "Dong Thap",
+    "EnglishName": "Dong Thap",
     "FullName": "Tỉnh Đồng Tháp",
-    "FullNameEn": "Dong Thap Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Dong Thap Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCYJYJ50STDQHADH4CPT",
+    "Id": "01JRQHWS556PR61R4P5FN785VW",
     "Code": "89",
     "Name": "An Giang",
-    "NameEn": "An Giang",
+    "EnglishName": "An Giang",
     "FullName": "Tỉnh An Giang",
-    "FullNameEn": "An Giang Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "An Giang Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCYSQF774XFS9J9TE33E",
+    "Id": "01JRQHWS5A12HSP10DXH21D8XW",
     "Code": "91",
     "Name": "Kiên Giang",
-    "NameEn": "Kien Giang",
+    "EnglishName": "Kien Giang",
     "FullName": "Tỉnh Kiên Giang",
-    "FullNameEn": "Kien Giang Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Kien Giang Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCYZJKPGFCCE1HBPBSAX",
+    "Id": "01JRQHWS5GQW79EBVT4R5V6BT2",
     "Code": "92",
     "Name": "Cần Thơ",
-    "NameEn": "Can Tho",
+    "EnglishName": "Can Tho",
     "FullName": "Thành phố Cần Thơ",
-    "FullNameEn": "Can Tho City",
-    "AdministrativeUnitId": "1"
+    "EnglishFullName": "Can Tho City",
+    "AdministrativeUnitId": 1
   },
   {
-    "Id": "01JAZDXCZ2KVCHAPAJH5C6E99F",
+    "Id": "01JRQHWS5KWN9FB11TYCQD3SXV",
     "Code": "93",
     "Name": "Hậu Giang",
-    "NameEn": "Hau Giang",
+    "EnglishName": "Hau Giang",
     "FullName": "Tỉnh Hậu Giang",
-    "FullNameEn": "Hau Giang Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Hau Giang Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCZ7ZKPBA7JMSTRDHS2S",
+    "Id": "01JRQHWS5P1B16KM3Z945QX9AX",
     "Code": "94",
     "Name": "Sóc Trăng",
-    "NameEn": "Soc Trang",
+    "EnglishName": "Soc Trang",
     "FullName": "Tỉnh Sóc Trăng",
-    "FullNameEn": "Soc Trang Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Soc Trang Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCZCJXMWCB1GYFBV0QA5",
+    "Id": "01JRQHWS5T3EQGNFVGAVEPSDH1",
     "Code": "95",
     "Name": "Bạc Liêu",
-    "NameEn": "Bac Lieu",
+    "EnglishName": "Bac Lieu",
     "FullName": "Tỉnh Bạc Liêu",
-    "FullNameEn": "Bac Lieu Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Bac Lieu Province",
+    "AdministrativeUnitId": 2
   },
   {
-    "Id": "01JAZDXCZEW7EBEMG7XD0GDX8K",
+    "Id": "01JRQHWS5WJWPP8RF26ZGNE7M4",
     "Code": "96",
     "Name": "Cà Mau",
-    "NameEn": "Ca Mau",
+    "EnglishName": "Ca Mau",
     "FullName": "Tỉnh Cà Mau",
-    "FullNameEn": "Ca Mau Province",
-    "AdministrativeUnitId": "2"
+    "EnglishFullName": "Ca Mau Province",
+    "AdministrativeUnitId": 2
   }
 ]
