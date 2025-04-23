@@ -13,12 +13,13 @@ public class ListPermissionHandler(IRoleManagerService roleManagerService)
         CancellationToken cancellationToken
     )
     {
-        IList<RoleClaim> roleClaims = await roleManagerService.GetRolePermissionClaimsAsync();
+        IList<KeyValuePair<string, string>> roleClaims =
+            await roleManagerService.GetRolePermissionClaimsAsync();
         IEnumerable<ListPermissionResponse> responses = roleClaims.Select(
             claim => new ListPermissionResponse()
             {
-                ClaimType = claim.ClaimType,
-                ClaimValue = claim.ClaimValue,
+                ClaimType = claim.Key,
+                ClaimValue = claim.Value,
             }
         );
         return Result<IEnumerable<ListPermissionResponse>>.Success(responses);
