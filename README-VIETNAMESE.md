@@ -172,7 +172,7 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
   │     ├── Regions/                 # region‑related commands & queries
   │     ├── Roles/                   # role management (CRUD, assignments)
   │     └── Users/                   # user‑centric commands & queries
-  └── DependencyInjection.cs         # registers MediatR, pipeline behaviors, auth & query‑string services
+  └── DependencyInjection.cs         # Registration of all Application services into DI
 
 ```
 
@@ -211,7 +211,7 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
   │     ├── RepositoryExtension.cs   # extension methods for IRepository<T>
   │     └── UnitOfWork.cs            # coordinates multiple repository commits
   │
-  └── DependencyInjection.cs         # root‑level registration of all Infrastructure services into DI
+  └── DependencyInjection.cs         # Registration of all Infrastructure services into DI
 ```
 
 ```
@@ -324,7 +324,7 @@ Xong rồi đó :tada: :tada: :tada: :clap:
 ### Authorize
 
 Để phân quyền cho nó sử dụng RequireAuth vào minimal api,
-tham số permission là kiểu string, các quyền được phân tách bởi dấu phẩy.
+tham số permissions là kiểu string, các quyền được phân tách bởi dấu phẩy.
 
 ```csharp
 app.MapPost(Router.UserRoute.Users, HandleAsync)

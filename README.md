@@ -163,7 +163,7 @@ What makes this Clean Architecture template stand out from the rest?
   │     ├── Regions/                 # region‑related commands & queries
   │     ├── Roles/                   # role management (CRUD, assignments)
   │     └── Users/                   # user‑centric commands & queries
-  └── DependencyInjection.cs         # registers MediatR, pipeline behaviors, auth & query‑string services
+  └── DependencyInjection.cs         # Registration of all Application services into DI
 
 ```
 
@@ -202,7 +202,7 @@ What makes this Clean Architecture template stand out from the rest?
   │     ├── RepositoryExtension.cs   # extension methods for IRepository<T>
   │     └── UnitOfWork.cs            # coordinates multiple repository commits
   │
-  └── DependencyInjection.cs         # root‑level registration of all Infrastructure services into DI
+  └── DependencyInjection.cs         # Registration of all Infrastructure services into DI
 ```
 
 ```
