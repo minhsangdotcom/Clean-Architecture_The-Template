@@ -7,7 +7,7 @@ services:
       - S3AwsSettings__AccessKey=${S3_ACCESS_KEY}
       - S3AwsSettings__SecretKey=${S3_SECRET_KEY}
     expose:
-      - "8080"
+      - "8081:8080"
     networks:
       - the-template-network
     healthcheck:
