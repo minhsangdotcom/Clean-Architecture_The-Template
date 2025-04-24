@@ -9,17 +9,15 @@ on:
       - main
 
 env:
- DOTNET_INSTALL_DIR: "./.dotnet"
+  DOTNET_INSTALL_DIR: "./.dotnet"
+  DOCKER_BUILDKIT: "1"
 
 jobs:
-  build-and-deploy:
-    name: Build and Deploy to GHCR
+  build:
+    name: 🛠️ Restore • Build • Test • Publish
     runs-on: self-hosted
     permissions:
       contents: read
-      packages: write
-      attestations: write
-      id-token: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -42,47 +40,73 @@ jobs:
       - name: Test
         run: dotnet dotnet test --no-restore --verbosity normal -e ASPNETCORE_ENVIRONMENT=Deployment
       - name: Publish Application
-        run: dotnet publish -c Release -o app/publish
-      - uses: actions/upload-artifact@v4
+        run: dotnet publish -c Release --property:PublishDir=app/publish
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: dotnet-app
-          path: |
-            app/publish
-            app/output/test-results
-          retention-days: 3
-      - name: Log in to GitHub Container Registry
+          name: app-build
+          path: app/publish
+  docker:
+    name: 🐳 Build & Push Docker Image
+    needs: build
+    runs-on: self-hosted
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      # Download the artifact from the build job
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-build
+          path: app/publish
+      # Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      # Login to GitHub Container Registry
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ vars.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.PWD_TOKEN }}
-      - name: Build and tag Docker image
-        run: >
-          docker build . -t ${{ vars.REGISTRY }}/${{ github.actor }}/${{
-          vars.IMAGE_NAME }}:${{ github.sha }}
-
-          docker tag ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:${{ github.sha }} ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:latest
-      - name: Push Docker image to GHCR
-        run: >
-          docker push ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME
-          }}:${{ github.sha }}
-
-          docker push ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:latest
-      - name: Deploy
+      # add tag for docker sha and latest
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}
+          tags: |
+            type=sha,format=long
+            type=raw,value=latest,enable={{is_default_branch}}
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+  deploy:
+    name: 🚀 Deploy to Production Server
+    needs: docker
+    runs-on: self-hosted
+    permissions:
+      contents: read
+    environment: production
+    steps:
+      - name: Deploy to Server
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ vars.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
-          script: >
-            docker login ${{ vars.REGISTRY }} -u ${{ github.actor }} -p ${{
-            secrets.MY_PERSONAL_PAT }}
-
+          script: |
+            docker login ${{ vars.REGISTRY }} -u ${{ github.actor }} --password-stdin ${{ secrets.PWD_TOKEN }}
             docker pull ${{ vars.REGISTRY }}/${{ github.actor }}/${{ vars.IMAGE_NAME }}:latest
-
             cd ${{ secrets.APP_PATH }}
-
             docker compose down
-
             docker compose up -d --build
