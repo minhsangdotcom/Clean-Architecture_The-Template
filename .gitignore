@@ -6,6 +6,7 @@
 # dotenv files
 .env
 .vscode/
+.cursorignore
 # User-specific files
 *.rsuser
 *.suo
