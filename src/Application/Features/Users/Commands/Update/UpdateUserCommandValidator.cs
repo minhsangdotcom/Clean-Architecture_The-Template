@@ -14,7 +14,6 @@ public class UpdateUserCommandValidator : AbstractValidator<UserUpdateRequest>
         IHttpContextAccessorService httpContextAccessorService
     )
     {
-        _ = Ulid.TryParse(httpContextAccessorService.GetId(), out Ulid id);
         Include(new UserValidator(userManagerService, httpContextAccessorService)!);
 
         RuleFor(x => x.Roles)
