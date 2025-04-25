@@ -22,9 +22,10 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
         CancellationToken cancellationToken
     )
     {
+        Type responseType = typeof(TResponse);
         if (
-            !typeof(TResponse).IsGenericType
-            || typeof(TResponse).GetGenericTypeDefinition() != typeof(Result<>)
+            !responseType.IsGenericType
+            || responseType.GetGenericTypeDefinition() != typeof(Result<>)
         )
         {
             return default!;
@@ -38,8 +39,8 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
 
         // Check if the response is a PaginationResponse and handle accordingly
         if (
-            ResultTypeHelper.GetResultType(typeof(TResponse)).GetGenericTypeDefinition()
-            == typeof(PaginationResponse<>)
+            responseType.GetGenericArguments().Length > 0
+            && responseType.GetGenericArguments()[0] == typeof(PaginationResponse<>)
         )
         {
             ProcessPaginationResponse(value);

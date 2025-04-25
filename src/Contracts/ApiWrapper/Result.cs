@@ -48,24 +48,14 @@ public static class ResultExtension
 
 public static class ResultTypeHelper
 {
-    public static Type GetResultType(Type resultType)
-    {
-        if (!resultType.IsGenericType || resultType.GetGenericTypeDefinition() != typeof(Result<>))
-        {
-            throw new ArgumentException("Type must be Result<T>", nameof(resultType));
-        }
-
-        return resultType.GetGenericArguments()[0];
-    }
-
-    public static object? GetResultValue<TResult>(Result<TResult> result)
+    public static object? GetResultValue<TResult>(this Result<TResult> result)
         where TResult : class
     {
-        var propertyInfo = typeof(Result<TResult>).GetProperty("Value");
+        var propertyInfo = typeof(Result<TResult>).GetProperty(nameof(Result<TResult>.Value));
         return propertyInfo?.GetValue(result);
     }
 
-    public static TResult? GetTypedResultValue<TResult>(Result<TResult> result)
+    public static TResult? GetTypedResultValue<TResult>(this Result<TResult> result)
         where TResult : class
     {
         var value = GetResultValue(result);
@@ -85,7 +75,7 @@ public static class ResultTypeHelper
             throw new ArgumentException("Object must be Result<T>", nameof(result));
         }
 
-        var valueProperty = resultType.GetProperty("Value");
+        var valueProperty = resultType.GetProperty(nameof(Result<object>.Value));
         return valueProperty?.GetValue(result);
     }
 }
