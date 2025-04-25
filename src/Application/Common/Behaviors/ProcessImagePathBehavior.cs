@@ -2,7 +2,9 @@ using System.Collections;
 using System.Reflection;
 using Application.Common.Interfaces.Services.Storage;
 using Application.Common.Security;
+using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
+using Elastic.Clients.Elasticsearch;
 using Mediator;
 using Serilog;
 
@@ -13,6 +15,7 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
     IStorageService storageService
 ) : MessagePostProcessor<TMessage, TResponse>
     where TMessage : notnull, IMessage
+    where TResponse : notnull
 {
     protected override ValueTask Handle(
         TMessage message,
@@ -20,28 +23,41 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
         CancellationToken cancellationToken
     )
     {
-        // Check if the response is a PaginationResponse and handle accordingly
         if (
-            typeof(TResponse).IsGenericType
-            && typeof(TResponse).GetGenericTypeDefinition() == typeof(PaginationResponse<>)
+            !typeof(TResponse).IsGenericType
+            || typeof(TResponse).GetGenericTypeDefinition() != typeof(Result<>)
         )
         {
-            ProcessPaginationResponse(response);
+            return default!;
+        }
+
+        object? value = ResultTypeHelper.ExtractValue(response);
+        if (value == null)
+        {
+            return default!;
+        }
+
+        // Check if the response is a PaginationResponse and handle accordingly
+        if (
+            ResultTypeHelper.GetResultType(typeof(TResponse)).GetGenericTypeDefinition()
+            == typeof(PaginationResponse<>)
+        )
+        {
+            ProcessPaginationResponse(value);
             return default!;
         }
 
         // Handle non-pagination responses
-        ProcessSingleResponse(response);
-
+        ProcessSingleResponse(value);
         return default!;
     }
 
     // Processes responses of type PaginationResponse<>
-    private void ProcessPaginationResponse(TResponse response)
+    private void ProcessPaginationResponse(object response)
     {
-        PropertyInfo? dataProperty = typeof(TResponse).GetProperty(
-            nameof(PaginationResponse<object>.Data)
-        );
+        PropertyInfo? dataProperty = response
+            .GetType()
+            .GetProperty(nameof(PaginationResponse<object>.Data));
         if (dataProperty == null)
         {
             return;
@@ -58,8 +74,8 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
     }
 
     // Processes individual response properties with the [File] attribute
-    private void ProcessSingleResponse(TResponse response) =>
-        ProcessDataPropertiesWithFileAttribute(response!);
+    private void ProcessSingleResponse(object response) =>
+        ProcessDataPropertiesWithFileAttribute(response);
 
     // Processes the properties of a data object within a pagination response
     private void ProcessDataPropertiesWithFileAttribute(object data)

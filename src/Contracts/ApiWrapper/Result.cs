@@ -45,3 +45,47 @@ public static class ResultExtension
         return result.IsSuccess ? onSuccess(result.Value!) : onFailure(result.Error!);
     }
 }
+
+public static class ResultTypeHelper
+{
+    public static Type GetResultType(Type resultType)
+    {
+        if (!resultType.IsGenericType || resultType.GetGenericTypeDefinition() != typeof(Result<>))
+        {
+            throw new ArgumentException("Type must be Result<T>", nameof(resultType));
+        }
+
+        return resultType.GetGenericArguments()[0];
+    }
+
+    public static object? GetResultValue<TResult>(Result<TResult> result)
+        where TResult : class
+    {
+        var propertyInfo = typeof(Result<TResult>).GetProperty("Value");
+        return propertyInfo?.GetValue(result);
+    }
+
+    public static TResult? GetTypedResultValue<TResult>(Result<TResult> result)
+        where TResult : class
+    {
+        var value = GetResultValue(result);
+        return value != null ? (TResult)value : default;
+    }
+
+    public static object? ExtractValue(object? result)
+    {
+        if (result == null)
+        {
+            return null;
+        }
+
+        var resultType = result.GetType();
+        if (!resultType.IsGenericType || resultType.GetGenericTypeDefinition() != typeof(Result<>))
+        {
+            throw new ArgumentException("Object must be Result<T>", nameof(result));
+        }
+
+        var valueProperty = resultType.GetProperty("Value");
+        return valueProperty?.GetValue(result);
+    }
+}
