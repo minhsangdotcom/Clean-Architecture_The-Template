@@ -11,22 +11,22 @@ namespace Application.Features.Common.Validators.Users;
 
 public partial class UserValidator : AbstractValidator<UserModel>
 {
-    private readonly IActionAccessorService accessorService;
+    private readonly IHttpContextAccessorService httpContextAccessorService;
     private readonly IUserManagerService userManagerService;
 
     public UserValidator(
         IUserManagerService userManagerService,
-        IActionAccessorService accessorService
+        IHttpContextAccessorService httpContextAccessorService
     )
     {
-        this.accessorService = accessorService;
+        this.httpContextAccessorService = httpContextAccessorService;
         this.userManagerService = userManagerService;
         ApplyRules();
     }
 
     private void ApplyRules()
     {
-        _ = Ulid.TryParse(accessorService.Id, out Ulid id);
+        _ = Ulid.TryParse(httpContextAccessorService.GetId(), out Ulid id);
 
         RuleFor(x => x.LastName)
             .NotEmpty()
@@ -94,7 +94,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
                 (email, cancellationToken) => IsEmailAvailableAsync(email!, id, cancellationToken)
             )
             .When(
-                _ => accessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
+                _ => httpContextAccessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
             .WithState(x =>
@@ -109,7 +109,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     IsEmailAvailableAsync(email!, cancellationToken: cancellationToken)
             )
             .When(
-                _ => accessorService.GetHttpMethod() == HttpMethod.Post.ToString(),
+                _ => httpContextAccessorService.GetHttpMethod() == HttpMethod.Post.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
             .WithState(x =>

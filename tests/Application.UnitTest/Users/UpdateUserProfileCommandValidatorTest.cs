@@ -21,8 +21,8 @@ public class UpdateUserProfileCommandValidatorTest
     public UpdateUserProfileCommandValidatorTest()
     {
         Mock<IUserManagerService> mockUserManagerService = new();
-        Mock<IActionAccessorService> mockActionAccessorService = new();
-        validator = new(mockUserManagerService.Object, mockActionAccessorService.Object);
+        Mock<IHttpContextAccessorService> mockHttpContextAccessorService = new();
+        validator = new(mockUserManagerService.Object, mockHttpContextAccessorService.Object);
         command = fixture
             .Build<UpdateUserProfileCommand>()
             .With(x => x.ProvinceId, Ulid.Parse("01JRQHWS3RQR1N0J84EV1DQXR1"))
