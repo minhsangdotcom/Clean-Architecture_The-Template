@@ -18,7 +18,10 @@ public static class Credential
         Permission.CreatebasicPermissions(PermissionResource.Role),
     ];
 
-    public static readonly List<string> ADMIN_CLAIMS = [.. permissions.SelectMany(x => x.Keys)];
+    public static readonly List<string> ADMIN_CLAIMS =
+    [
+        .. permissions.SelectMany(x => x.Keys).Distinct(),
+    ];
 
     public static readonly List<string> MANAGER_CLAIMS =
     [

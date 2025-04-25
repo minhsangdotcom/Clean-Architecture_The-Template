@@ -6,7 +6,6 @@ using Contracts.Dtos.Responses;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using SharedKernel.Extensions;
-using SharedKernel.Extensions.Encryption;
 using SharedKernel.Extensions.Expressions;
 using SharedKernel.Extensions.QueryExtensions;
 using SharedKernel.Extensions.Reflections;

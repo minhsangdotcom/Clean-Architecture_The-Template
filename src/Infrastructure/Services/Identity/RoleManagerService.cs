@@ -240,8 +240,12 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         await context.SaveChangesAsync();
     }
 
-    public async Task<IList<RoleClaim>> GetRolePermissionClaimsAsync() =>
-        await RoleClaims.Where(claim => claim.ClaimType == ClaimTypes.Permission).ToListAsync();
+    public async Task<IList<KeyValuePair<string, string>>> GetRolePermissionClaimsAsync() =>
+        await RoleClaims
+            .Where(claim => claim.ClaimType == ClaimTypes.Permission)
+            .GroupBy(x => x.ClaimValue)
+            .Select(x => new KeyValuePair<string, string>(ClaimTypes.Permission, x.Key))
+            .ToListAsync();
 
     public Task<List<RoleClaim>> GetRoleClaimsAsync(Ulid roleId) => GetRoleClaimsAsync([roleId]);
 

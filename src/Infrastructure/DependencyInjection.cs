@@ -13,7 +13,6 @@ using Infrastructure.Services.Mail;
 using Infrastructure.Services.Queue;
 using Infrastructure.Services.Token;
 using Infrastructure.UnitOfWorks;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -69,8 +68,8 @@ public static class DependencyInjection
         services
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentUser, CurrentUserService>()
-            .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
-            .AddSingleton<IActionAccessorService, ActionAccessorService>()
+            .AddHttpContextAccessor()
+            .AddSingleton<IHttpContextAccessorService, HttpContextAccessorService>()
             .AddJwt(configuration)
             .AddQueue(configuration)
             .AddHangfireConfiguration(configuration)
