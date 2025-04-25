@@ -4,7 +4,6 @@ using Application.Common.Interfaces.Services.Storage;
 using Application.Common.Security;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
-using Elastic.Clients.Elasticsearch;
 using Mediator;
 using Serilog;
 
