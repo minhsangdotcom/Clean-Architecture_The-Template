@@ -6,6 +6,13 @@ services:
       - urls=http://0.0.0.0:8080
       - S3AwsSettings__AccessKey=${S3_ACCESS_KEY}
       - S3AwsSettings__SecretKey=${S3_SECRET_KEY}
+      - RedisDatabaseSettings__Password=${REDIS_PASSWORD}
+      - ElasticsearchSettings__Password=${ELASTICSEARCH_PASSWORD}
+      - DatabaseSettings__DatabaseConnection=${DATABASE_CONNECTION}
+      - HangfireSettings__Storage__ConnectionString=${DATABASE_CONNECTION}
+      - HangfireSettings__Credentials__Username=${HANGFIRE_USERNAME}
+      - HangfireSettings__Credentials__Password=${HANGFIRE_PASSWORD}
+      - SecuritySettings__JwtSettings__SecretKey=${JWT_SECRET_KEY}
     ports:
       - "8081:8080"
     networks:
