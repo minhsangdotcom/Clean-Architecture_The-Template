@@ -38,9 +38,10 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
         }
 
         // Check if the response is a PaginationResponse and handle accordingly
+        Type resultType = responseType.GetGenericArguments()[0];
         if (
-            responseType.GetGenericArguments().Length > 0
-            && responseType.GetGenericArguments()[0] == typeof(PaginationResponse<>)
+            resultType.IsGenericType
+            && resultType.GetGenericTypeDefinition() == typeof(PaginationResponse<>)
         )
         {
             ProcessPaginationResponse(value);
