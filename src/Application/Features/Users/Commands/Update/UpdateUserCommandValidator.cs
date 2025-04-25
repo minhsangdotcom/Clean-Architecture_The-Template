@@ -11,11 +11,11 @@ public class UpdateUserCommandValidator : AbstractValidator<UserUpdateRequest>
 {
     public UpdateUserCommandValidator(
         IUserManagerService userManagerService,
-        IActionAccessorService accessorService
+        IHttpContextAccessorService httpContextAccessorService
     )
     {
-        _ = Ulid.TryParse(accessorService.Id, out Ulid id);
-        Include(new UserValidator(userManagerService, accessorService)!);
+        _ = Ulid.TryParse(httpContextAccessorService.GetId(), out Ulid id);
+        Include(new UserValidator(userManagerService, httpContextAccessorService)!);
 
         RuleFor(x => x.Roles)
             .NotEmpty()

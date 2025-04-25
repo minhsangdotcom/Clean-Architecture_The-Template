@@ -9,9 +9,9 @@ public class CreateRoleCommandValidator : AbstractValidator<CreateRoleCommand>
 {
     public CreateRoleCommandValidator(
         IRoleManagerService roleManagerService,
-        IActionAccessorService actionAccessorService
+        IHttpContextAccessorService httpContextAccessorService
     )
     {
-        Include(new RoleValidator(roleManagerService, actionAccessorService));
+        Include(new RoleValidator(roleManagerService, httpContextAccessorService));
     }
 }

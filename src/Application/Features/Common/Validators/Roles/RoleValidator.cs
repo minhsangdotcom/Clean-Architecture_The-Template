@@ -12,21 +12,21 @@ namespace Application.Features.Common.Validators.Roles;
 public class RoleValidator : AbstractValidator<RoleModel>
 {
     private readonly IRoleManagerService roleManagerService;
-    private readonly IActionAccessorService actionAccessorService;
+    private readonly IHttpContextAccessorService httpContextAccessorService;
 
     public RoleValidator(
         IRoleManagerService roleManagerService,
-        IActionAccessorService actionAccessorService
+        IHttpContextAccessorService httpContextAccessorService
     )
     {
         this.roleManagerService = roleManagerService;
-        this.actionAccessorService = actionAccessorService;
+        this.httpContextAccessorService = httpContextAccessorService;
         ApplyRules();
     }
 
     private void ApplyRules()
     {
-        _ = Ulid.TryParse(actionAccessorService.Id, out Ulid id);
+        _ = Ulid.TryParse(httpContextAccessorService.GetId(), out Ulid id);
 
         RuleFor(x => x.Name)
             .NotEmpty()
@@ -51,7 +51,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                     IsNameAvailableAsync(name, cancellationToken: cancellationToken)
             )
             .When(
-                _ => actionAccessorService.GetHttpMethod() == HttpMethod.Post.ToString(),
+                _ => httpContextAccessorService.GetHttpMethod() == HttpMethod.Post.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
             .WithState(x =>
@@ -65,7 +65,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
                 (name, cancellationToken) => IsNameAvailableAsync(name, id, cancellationToken)
             )
             .When(
-                _ => actionAccessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
+                _ => httpContextAccessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
                 ApplyConditionTo.CurrentValidator
             )
             .WithState(x =>

@@ -20,14 +20,14 @@ public sealed class UpdateRoleCommandValidatorTest
     private readonly List<RoleClaimModel> roleClaims;
     private readonly Fixture fixture = new();
     private readonly Mock<IRoleManagerService> mockRoleManager = new();
-    private readonly Mock<IActionAccessorService> mockActionAccessorService = new();
+    private readonly Mock<IHttpContextAccessorService> mockHttpContextAccessorService = new();
 
     public UpdateRoleCommandValidatorTest()
     {
         mockValidator = [];
         validator = new UpdateRoleCommandValidator(
             mockRoleManager.Object,
-            mockActionAccessorService.Object
+            mockHttpContextAccessorService.Object
         );
         roleClaims = [.. fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2)];
         command = fixture.Build<RoleUpdateRequest>().With(x => x.RoleClaims, roleClaims).Create();

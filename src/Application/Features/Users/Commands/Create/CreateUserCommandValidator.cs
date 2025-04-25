@@ -12,18 +12,18 @@ namespace Application.Features.Users.Commands.Create;
 public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 {
     private readonly IUserManagerService userManagerService;
-    private readonly IActionAccessorService accessorService;
+    private readonly IHttpContextAccessorService httpContextAccessorService;
 
     private readonly IRoleManagerService roleManagerService;
 
     public CreateUserCommandValidator(
         IUserManagerService userManagerService,
-        IActionAccessorService accessorService,
+        IHttpContextAccessorService httpContextAccessorService,
         IRoleManagerService roleManagerService
     )
     {
         this.userManagerService = userManagerService;
-        this.accessorService = accessorService;
+        this.httpContextAccessorService = httpContextAccessorService;
         this.roleManagerService = roleManagerService;
 
         ApplyRules();
@@ -31,7 +31,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
 
     private void ApplyRules()
     {
-        Include(new UserValidator(userManagerService, accessorService));
+        Include(new UserValidator(userManagerService, httpContextAccessorService));
         RuleFor(x => x.Username)
             .NotEmpty()
             .WithState(x =>
