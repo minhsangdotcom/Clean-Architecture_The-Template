@@ -286,4 +286,8 @@
     <value>the In operator</value>
     <comment>   </comment>
   </data>
+  <data name="TheCurrentOne" xml:space="preserve">
+    <value>the current one</value>
+    <comment>   </comment>
+  </data>
 </root>

@@ -1,23 +1,23 @@
-version: '3.8'  # Specify the version of Docker Compose
+version: '3.8'
 
 services:
   redis:
-    image: redis:latest  # Use the latest official Redis image
-    container_name: redis-db  # Optional: name the container for easy identification
+    image: redis:latest
+    container_name: redis-db
     ports:
-      - "6379:6379"  # Map Redis default port to host
+      - "6379:6379"
     networks:
       - the-template-network
     volumes:
-      - redis_data:/data  # Persist Redis data using a named volume
+      - redis_data:/data
     environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}  # Secure Redis with a password (replace with a strong password)
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     command: >
       redis-server --requirepass "${REDIS_PASSWORD}"
 
 volumes:
   redis_data:
-    driver: local  # Use local storage for the Redis data volume
+    driver: local
 
 networks: 
   the-template-network:
