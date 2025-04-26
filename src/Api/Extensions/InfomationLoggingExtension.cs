@@ -19,13 +19,10 @@ public static class InfomationLoggingExtension
             if (addresses != null && addresses.Length > 0)
             {
                 string? url = addresses?[0];
-                string? renewUrl =
-                    url?.Contains("0.0.0.0") == true ? url.Replace("0.0.0.0", "localhost") : url;
-                logger.Information("Application is running at: {Url}", renewUrl);
-                logger.Information("Swagger UI is running at: {Url}", $"{renewUrl}/{swaggerRoute}");
+                logger.Information("Swagger UI is running at: {Url}", $"{url}/{swaggerRoute}");
                 logger.Information(
                     "Application health check is running at: {Url}",
-                    $"{renewUrl}{healthCheckRoute}"
+                    $"{url}{healthCheckRoute}"
                 );
             }
         });

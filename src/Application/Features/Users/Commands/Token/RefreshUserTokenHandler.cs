@@ -11,6 +11,7 @@ using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using SharedKernel.Common.Messages;
 using SharedKernel.Constants;
+using SharedKernel.Extensions;
 using SharedKernel.Models;
 using Wangkanai.Detection.Services;
 
@@ -28,27 +29,42 @@ public class RefreshUserTokenHandler(
         CancellationToken cancellationToken
     )
     {
-        Result<DecodeTokenResponse> result = ValidateRefreshToken(command.RefreshToken!);
-        DecodeTokenResponse decodeToken = result.Value!;
+        bool isValid = ValidateRefreshToken(
+            command.RefreshToken!,
+            out DecodeTokenResponse? decodeToken
+        );
+        if (!isValid)
+        {
+            return Result<RefreshUserTokenResponse>.Failure(
+                new BadRequestError(
+                    "Error has occured with the Refresh token",
+                    Messager
+                        .Create<UserToken>(nameof(User))
+                        .Property(x => x.RefreshToken!)
+                        .Message(MessageType.Valid)
+                        .Negative()
+                        .BuildMessage()
+                )
+            );
+        }
 
         IList<UserToken> refreshTokens = await unitOfWork
             .DynamicReadOnlyRepository<UserToken>()
             .ListAsync(
                 new ListRefreshtokenByFamillyIdSpecification(
-                    decodeToken.FamilyId!,
+                    decodeToken!.FamilyId!,
                     Ulid.Parse(decodeToken.Sub!)
                 ),
                 new()
                 {
-                    Sort =
-                        $"{nameof(UserToken.CreatedAt).ToLower()}${OrderTerm.DELIMITER}{OrderTerm.DESC}",
+                    Sort = $"{nameof(UserToken.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}",
                 },
                 cancellationToken
             );
         UserToken validRefreshToken = refreshTokens[0];
 
         // detect cheating with token, maybe which is stolen
-        if (validRefreshToken == null)
+        if (validRefreshToken.RefreshToken != command.RefreshToken)
         {
             // remove all the token by family token
             await unitOfWork.Repository<UserToken>().DeleteRangeAsync(refreshTokens);
@@ -68,7 +84,7 @@ public class RefreshUserTokenHandler(
             );
         }
 
-        if (validRefreshToken.User!.Status == UserStatus.Inactive)
+        if (validRefreshToken.User?.Status == UserStatus.Inactive)
         {
             return Result<RefreshUserTokenResponse>.Failure(
                 new BadRequestError(
@@ -97,13 +113,22 @@ public class RefreshUserTokenHandler(
             refreshTokenExpiredTime
         );
 
+        var userAgent = new
+        {
+            Agent = detectionService.UserAgent.ToString(),
+            DeviceType = detectionService.Device.Type,
+            Platform = detectionService.Platform.Name,
+            Browser = detectionService.Browser.Name,
+            Engine = detectionService.Engine.Name,
+        };
+
         var userToken = new UserToken()
         {
             FamilyId = decodeToken.FamilyId,
             UserId = Ulid.Parse(decodeToken.Sub!),
             ExpiredTime = refreshTokenExpiredTime,
             RefreshToken = refreshToken,
-            UserAgent = detectionService.UserAgent.ToString(),
+            UserAgent = SerializerExtension.Serialize(userAgent).StringJson,
             ClientIp = currentUser.ClientIp,
         };
 
@@ -115,25 +140,17 @@ public class RefreshUserTokenHandler(
         );
     }
 
-    private Result<DecodeTokenResponse> ValidateRefreshToken(string token)
+    private bool ValidateRefreshToken(string token, out DecodeTokenResponse? decodeTokenResponse)
     {
         try
         {
-            return Result<DecodeTokenResponse>.Success(tokenFactory.DecodeToken(token));
+            decodeTokenResponse = tokenFactory.DecodeToken(token);
+            return true;
         }
         catch (Exception)
         {
-            return Result<DecodeTokenResponse>.Failure(
-                new BadRequestError(
-                    "Error has occured with the Refresh token",
-                    Messager
-                        .Create<UserToken>(nameof(User))
-                        .Property(x => x.RefreshToken!)
-                        .Message(MessageType.Valid)
-                        .Negative()
-                        .BuildMessage()
-                )
-            );
+            decodeTokenResponse = null!;
+            return false;
         }
     }
 }
