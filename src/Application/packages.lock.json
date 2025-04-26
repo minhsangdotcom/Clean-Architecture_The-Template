@@ -29,22 +29,20 @@
       },
       "Mediator.Abstractions": {
         "type": "Direct",
-        "requested": "[3.0.0-preview.27, )",
-        "resolved": "3.0.0-preview.27",
-        "contentHash": "nxOWMB9M7iM1vgICwB/HTREFGyF4EDlyCuAWXnpjFTuz1bj5ss5OtMZ3vBmj0ERuHP6CfcAxlrZKuSQKKEmkPQ==",
+        "requested": "[3.0.0-preview.46, )",
+        "resolved": "3.0.0-preview.46",
+        "contentHash": "/6SM36YKqcgUaHGbymQHjlfbXcHGxB90DUBnE+5YsPVDEl5rPhSaWCl0WlYBhKcChgNnR33n9o3EgTAmhDfyCg==",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0"
         }
       },
       "Mediator.SourceGenerator": {
         "type": "Direct",
-        "requested": "[3.0.0-preview.27, )",
-        "resolved": "3.0.0-preview.27",
-        "contentHash": "W8Qadl678b+ZtzmTY1JjO2EyofDLch8iSCHnSaW+TWZmfDExxTQqQ3ND4fIaQ6WWKGvdWl/nyOh24wboMgAl+w==",
+        "requested": "[3.0.0-preview.46, )",
+        "resolved": "3.0.0-preview.46",
+        "contentHash": "fFOWljLGM5zicAA0VbGGqaOSE6h86CejnK+zKLBOfnA3Acy7ypUNPIa1mYHF/GnQWBKR2pB0bTrSF3hEJUo3kQ==",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection": "8.0.0",
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0",
-          "Scriban": "5.4.6"
+          "Scriban": "6.2.0"
         }
       },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
@@ -129,13 +127,13 @@
       },
       "Wangkanai.Detection": {
         "type": "Direct",
-        "requested": "[8.14.0, )",
-        "resolved": "8.14.0",
-        "contentHash": "wwsSQrm0FFnlnxgsAUjWA5ersoQSQefUN1wVSAN2s5S3T5UDTkW6DJ5/75fYzjcheUWuKK8wxEdycSZ2EkdIfQ==",
+        "requested": "[8.15.0, )",
+        "resolved": "8.15.0",
+        "contentHash": "/w6ko+zRGRWDJsSS/XJ49WTSSQR351iXnv7DID3jcpXGAGDKtrvwTcVXraSuH6EMCsJJQ8Yi9NgUDD+jIsPJEA==",
         "dependencies": {
           "Microsoft.SourceLink.GitHub": "8.0.0",
-          "Wangkanai.Hosting": "3.2.0",
-          "Wangkanai.System": "5.0.0"
+          "Wangkanai.Hosting": "3.3.0",
+          "Wangkanai.System": "5.1.0"
         }
       },
       "Ardalis.GuardClauses": {
@@ -679,8 +677,8 @@
       },
       "Scriban": {
         "type": "Transitive",
-        "resolved": "5.4.6",
-        "contentHash": "08MfrLDM9Rz08/toBVjTqcUmdGyKbLQ5eTLp2MHUv4k8cox2jN6E/3Ss8NaqUuL2psU2cp0sy2aNEDep7jp0Kg=="
+        "resolved": "6.2.0",
+        "contentHash": "Mpd/9Q6LQn9jPGZR11gfytuZ5ivNgjnds1RB/3HzAdivhreX5mosRtqI87Zjafdxmm7HRgjZgdDYhiGVdytLwA=="
       },
       "Serilog": {
         "type": "Transitive",
@@ -838,17 +836,17 @@
       },
       "Wangkanai.Hosting": {
         "type": "Transitive",
-        "resolved": "3.2.0",
-        "contentHash": "beeZI1Qy+VkEiDIQZdfhQiM+npFIlKeDX+a8Fyf09JbTb710o64G31iH432C4xRttZcezbNEf3jkE54X1FXzVg==",
+        "resolved": "3.3.0",
+        "contentHash": "0Z83MDSf3BiQu1yBaAm1f+HfSSBty6umTpjPCmW7gjHNTvYc9Wf2X26Erh7Iscv6pvvcmXLXz9IAWTr9EjPzvA==",
         "dependencies": {
           "Microsoft.SourceLink.GitHub": "8.0.0",
-          "Wangkanai.System": "5.0.0"
+          "Wangkanai.System": "5.1.0"
         }
       },
       "Wangkanai.System": {
         "type": "Transitive",
-        "resolved": "5.0.0",
-        "contentHash": "zMzNXq6Ao0vtO4NrzOHqK8OMg0VOL1xTqsCeagyLVdr5k3HNs6ZDsvGBbzNPko7h/T1Q5yIXIP1TcB8xOg/pNA==",
+        "resolved": "5.1.0",
+        "contentHash": "kdDrS0AeKrTpx17jolBwPmQhKEvyOFraNoQsNVP6dSJWquogWKOFu7/wPCuW5L06tNVtxbX5SYOqJS9MFCuhgg==",
         "dependencies": {
           "Microsoft.SourceLink.GitHub": "8.0.0"
         }
@@ -867,7 +865,7 @@
         "type": "Project",
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
-          "Mediator.Abstractions": "[3.0.0-preview.27, )",
+          "Mediator.Abstractions": "[3.0.0-preview.46, )",
           "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.3, )",
           "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.2-alpha, )"
         }

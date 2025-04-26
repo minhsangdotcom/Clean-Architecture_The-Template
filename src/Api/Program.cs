@@ -96,11 +96,6 @@ try
     app.UseDetection();
 
     app.MapEndpoints(apiVersion: EndpointVersion.One);
-
-    Log.Logger.Information(
-        "Application is in {environment} environment",
-        app.Environment.EnvironmentName
-    );
     Log.Logger.Information("Application is hosted on {os}", RuntimeInformation.OSDescription);
     app.Run();
 }

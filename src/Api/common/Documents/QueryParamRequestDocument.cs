@@ -74,30 +74,25 @@ public static class QueryParamRequestDocument
                     Type = "object",
                     AdditionalPropertiesAllowed = true,
                     Description =
-                        "query string like : filter[$and][0][gender][$eq]=1&filter&filter[$and][1][dayOfBirth][$between][0]=2002-10-01&filter[$and][1][dayOfBirth][$between][1]=2005-10-01",
+                        "query string like : filter[$and][0][gender][$eq]=1&filter[$and][1][dayOfBirth][$between][0]=2002-10-01&filter[$and][1][dayOfBirth][$between][1]=2005-10-01",
                     Example = new OpenApiObject(
                         new()
                         {
-                            ["filter"] = new OpenApiObject(
-                                new()
+                            ["$and"] = new OpenApiObject()
+                            {
+                                ["gender"] = new OpenApiObject()
                                 {
-                                    ["$and"] = new OpenApiObject()
+                                    ["$eq"] = new OpenApiInteger(1),
+                                },
+                                ["dayofBirth"] = new OpenApiObject()
+                                {
+                                    ["$between"] = new OpenApiArray()
                                     {
-                                        ["gender"] = new OpenApiObject()
-                                        {
-                                            ["$eq"] = new OpenApiInteger(1),
-                                        },
-                                        ["dayofBirth"] = new OpenApiObject()
-                                        {
-                                            ["$between"] = new OpenApiArray()
-                                            {
-                                                new OpenApiDate(new DateTime(2002, 10, 1)),
-                                                new OpenApiDate(new DateTime(2005, 10, 1)),
-                                            },
-                                        },
+                                        new OpenApiDate(new DateTime(2002, 10, 1)),
+                                        new OpenApiDate(new DateTime(2005, 10, 1)),
                                     },
-                                }
-                            ),
+                                },
+                            },
                         }
                     ),
                 },
