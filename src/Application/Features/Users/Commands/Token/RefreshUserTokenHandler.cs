@@ -61,6 +61,22 @@ public class RefreshUserTokenHandler(
                 },
                 cancellationToken
             );
+
+        if (refreshTokens.Count <= 0)
+        {
+            return Result<RefreshUserTokenResponse>.Failure(
+                new BadRequestError(
+                    "Error has occured with the Refresh token",
+                    Messager
+                        .Create<UserToken>(nameof(User))
+                        .Property(x => x.RefreshToken!)
+                        .Negative()
+                        .Message(MessageType.Identical)
+                        .ObjectName("TheCurrentOne")
+                        .BuildMessage()
+                )
+            );
+        }
         UserToken validRefreshToken = refreshTokens[0];
 
         // detect cheating with token, maybe which is stolen
