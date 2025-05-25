@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Create;
@@ -9,6 +10,7 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.SubcutaneousTests;
@@ -59,11 +61,14 @@ public partial class TestingFixture
 
     public async Task<User> CreateAdminUserAsync(
         UserAddress? address = null,
-        IFormFile? avatar = null
-    )
+        IFormFile? avatar = null,
+        List<Ulid>? roleIds = null)
     {
         address ??= GetDefaultAddress();
         Role role = await CreateAdminRoleAsync();
+        List<Ulid> roles = roleIds ?? [];
+        roles.Add(role.Id);
+        
         CreateUserCommand command =
             new()
             {
@@ -78,7 +83,7 @@ public partial class TestingFixture
                 ProvinceId = address.ProvinceId,
                 DistrictId = address.DistrictId,
                 CommuneId = address.CommuneId,
-                Roles = [role.Id],
+                Roles = roles,
                 Street = "abcdef",
                 Status = UserStatus.Active,
                 Avatar = avatar,
@@ -97,11 +102,14 @@ public partial class TestingFixture
 
     public async Task<User> CreateManagerUserAsync(
         UserAddress? address = null,
-        IFormFile? avatar = null
+        IFormFile? avatar = null,
+        List<Ulid>? roleIds = null
     )
     {
         address ??= GetDefaultAddress();
         Role role = await CreateManagerRoleAsync();
+        List<Ulid> roles = roleIds ?? [];
+        roles.Add(role.Id);
         CreateUserCommand command =
             new()
             {
@@ -135,11 +143,14 @@ public partial class TestingFixture
 
     public async Task<User> CreateNormalUserAsync(
         UserAddress? address = null,
-        IFormFile? avatar = null
+        IFormFile? avatar = null,
+        List<Ulid>? roleIds = null
     )
     {
         address ??= GetDefaultAddress();
         Role role = await CreateNormalRoleAsync();
+        List<Ulid> roles = roleIds ?? [];
+        roles.Add(role.Id);
         CreateUserCommand command =
             new()
             {
@@ -186,6 +197,18 @@ public partial class TestingFixture
         return await unitOfWork!
             .DynamicReadOnlyRepository<User>()
             .FindByConditionAsync(new GetUserByIdSpecification(userId));
+    }
+
+    public async Task<List<UserClaim>> FindUserClaimsByRoleAsync(Ulid roleId, IEnumerable<KeyValuePair<string, string>>? claims = null)
+    {
+        using var scope = factory!.Services.CreateScope();
+        var roleManagerService = scope.ServiceProvider.GetRequiredService<IRoleManagerService>();
+
+        var userClaims = await roleManagerService.Roles
+            .Where(x => x.Id == roleId).SelectMany(x => x.UserRoles!)
+            .Select(x => x.User!).SelectMany(x => x.UserClaims!)
+            .ToListAsync();
+        return userClaims.FindAll(x => claims?.Any(p => p.Key == x.ClaimType && p.Value == x.ClaimValue) == true);
     }
 
     private static UserAddress GetDefaultAddress() =>

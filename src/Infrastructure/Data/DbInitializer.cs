@@ -13,7 +13,7 @@ using SharedKernel.Constants;
 
 namespace Infrastructure.Data;
 
-public class DbInitializer
+public static class DbInitializer
 {
     public static async Task InitializeAsync(IServiceProvider provider)
     {
@@ -125,15 +125,10 @@ public class DbInitializer
         {
             await roleManagerService.RemoveClaimsFromRoleAsync(
                 role,
-                [
-                    .. claimsToDelete.Select(x => new KeyValuePair<string, string>(
-                        x.ClaimType,
-                        x.ClaimValue
-                    )),
-                ]
+                claimsToDelete
             );
             logger.Information(
-                "deleting {count} claims of {roleName} inclde {data}",
+                "deleting {count} claims of {roleName} include {data}",
                 claimsToDelete.Count,
                 role.Name,
                 string.Join(',', claimsToDelete.Select(x => x.ClaimValue))
@@ -143,16 +138,15 @@ public class DbInitializer
         if (claimsToInsert.Count > 0)
         {
             await roleManagerService.AssignClaimsToRoleAsync(
-                role,
-                [
-                    .. claimsToInsert.Select(x => new KeyValuePair<string, string>(
-                        ClaimTypes.Permission,
-                        x
-                    )),
-                ]
-            );
+                    role,
+                    claimsToInsert.ConvertAll(claim => new RoleClaim()
+                    {
+                        ClaimType = ClaimTypes.Permission,
+                        ClaimValue = claim,
+                    })
+                );
             logger.Information(
-                "inserting {count} claims of {roleName} inclde {data}",
+                "inserting {count} claims of {roleName} include {data}",
                 claimsToInsert.Count,
                 role.Name,
                 string.Join(',', claimsToInsert)

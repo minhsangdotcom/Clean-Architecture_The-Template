@@ -18,7 +18,7 @@ public class RoleClaim : DefaultEntity
 
     public List<UserClaim> UpdateUserClaim()
     {
-        if (UserClaims == null || UserClaims.Count <= 0)
+        if (UserClaims is not { Count: > 0 })
         {
             return [];
         }

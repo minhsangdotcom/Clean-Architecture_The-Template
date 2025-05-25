@@ -90,6 +90,7 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         // Arrange
         var requestData = updateRoleCommand.UpdateData;
         var roleClaims = requestData.RoleClaims!;
+        var uer = await testingFixture.CreateManagerUserAsync(roleIds: [Ulid.Parse(updateRoleCommand.RoleId)]);
 
         // modify the claims collection
         roleClaims.RemoveAt(1);
@@ -105,6 +106,8 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         // Assert
         var response = result.Value!;
         var createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(response.Id);
+        var userClaims = await testingFixture.FindUserClaimsByRoleAsync(response.Id,
+            roleClaims.Select(x => new KeyValuePair<string, string>(x.ClaimType!, x.ClaimValue!)));
         createdRole.ShouldNotBeNull();
 
         createdRole!.Name.ShouldBe(requestData.Name!.ToScreamingSnakeCase());
@@ -114,6 +117,10 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             .RoleClaims!.Select(rc => new { rc.ClaimType, rc.ClaimValue })
             .ToList();
         actualClaims.ShouldBe(expectedClaims!, ignoreOrder: true);
+        if (userClaims.Count > 0)
+        {
+            userClaims.Select(x => new { x.ClaimType, x.ClaimValue }).ShouldBe(actualClaims, ignoreOrder: true);
+        }
         createdRole.Description.ShouldBe(requestData.Description);
     }
 
