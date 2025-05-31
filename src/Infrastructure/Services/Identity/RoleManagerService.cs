@@ -109,11 +109,6 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         IEnumerable<RoleClaim> claimsToRemove =
             currentRoleClaims.Except(rolesClaimsToProcess, new RoleClaimComparer());
 
-        // IEnumerable<UserClaim> userClaims = ProcessUserClaimUpdate(
-        //     claimsToUpdate,
-        //     rolesClaimsToProcess
-        // );
-
         // remove
         await RemoveClaimsFromRoleAsync(
             role,
@@ -132,23 +127,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             config.NotifyAfter = 2000;
         });
 
-        var userClaims = new List<UserClaim>();
-        foreach (var claim in claimsToUpdate)
-        {
-           var a = currentRoleClaims.FirstOrDefault(x => x.Id == claim.Id);
-           if (a == null)
-           {
-               continue;
-           }
-           
-           foreach (var userClaim in a.UserClaims)
-           {
-               userClaim.ClaimValue = claim.ClaimValue;
-           }
-           
-           userClaims.AddRange(a.UserClaims);
-        }
-
+        IEnumerable<UserClaim> userClaims = ProcessUserClaimUpdate(currentRoleClaims, claimsToUpdate);
         await context.UpdateRangeAsync(userClaims, config =>
         {
             config.SetOutputIdentity = true;
@@ -292,26 +271,21 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
     }
 
     private static IEnumerable<UserClaim> ProcessUserClaimUpdate(
-        List<RoleClaim> currentClaims,
+        ICollection<RoleClaim> currentClaims,
         List<RoleClaim> rolesClaimsToProcess
     )
     {
-        for (int i = 0; i < currentClaims.Count; i++)
+        foreach (var claim in rolesClaimsToProcess)
         {
-            RoleClaim claim = currentClaims[i];
-            RoleClaim? correspondedClaim = rolesClaimsToProcess.Find(x =>
-                x.Id == claim.Id
-            );
-
-            if (correspondedClaim == null)
+            var roleClaim = currentClaims.FirstOrDefault(x => x.Id == claim.Id);
+            if (roleClaim == null)
             {
                 continue;
             }
 
-            claim.ClaimValue = correspondedClaim.ClaimValue;
-            List<UserClaim> userClaims = claim.UpdateUserClaim();
-            foreach (var userClaim in userClaims)
+            foreach (var userClaim in roleClaim.UserClaims!)
             {
+                userClaim.ClaimValue = claim.ClaimValue;
                 yield return userClaim;
             }
         }

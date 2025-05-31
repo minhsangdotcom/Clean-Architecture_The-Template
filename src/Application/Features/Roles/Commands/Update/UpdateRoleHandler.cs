@@ -16,7 +16,7 @@ public class UpdateRoleHandler(IRoleManagerService roleManagerService)
         CancellationToken cancellationToken
     )
     {
-        Role? role = await roleManagerService.GetByIdAsync(Ulid.Parse(command.RoleId));
+        Role? role = await roleManagerService.FindByIdAsync(Ulid.Parse(command.RoleId));
 
         if (role == null)
         {
