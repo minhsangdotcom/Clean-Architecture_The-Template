@@ -328,11 +328,28 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
         IEnumerable<KeyValuePair<string, string>> claims
     )
     {
-        List<UserClaim> userClaims = await UserClaims
-            .Where(x => x.UserId == id && x.ClaimType == ClaimTypes.Permission)
-            .ToListAsync();
+        ArgumentNullException.ThrowIfNull(claims);
+        List<KeyValuePair<string, string>> authorizeClaims = [..claims];
+        
+        if (authorizeClaims.Count == 0)
+        {
+            return false;
+        }
+        
+        string key = authorizeClaims[0].Key;
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            throw new ArgumentException($"{nameof(claims)} key must not be empty or white space.", nameof(claims));
+        }
+        if (authorizeClaims.Any(p => p.Key != key))
+        {
+            throw new ArgumentException($"{nameof(claims)} doesn't has the same key.", nameof(claims));
+        }
 
-        return userClaims.Exists(x => claims.Any(p => p.Key == x.ClaimType && p.Value == x.ClaimValue));
+        List<string> values = authorizeClaims.ConvertAll(x => x.Value);
+        return await UserClaims
+            .Where(x => x.UserId == id && x.ClaimType == key)
+            .AnyAsync(x => values.Contains(x.ClaimValue));
     }
 
     public async Task<bool> HasUserPermissionAsync(Ulid id, IEnumerable<string> claims)
