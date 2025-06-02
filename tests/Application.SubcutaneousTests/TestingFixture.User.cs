@@ -124,7 +124,7 @@ public partial class TestingFixture
                 ProvinceId = address.ProvinceId,
                 DistrictId = address.DistrictId,
                 CommuneId = address.CommuneId,
-                Roles = [role.Id],
+                Roles = roles,
                 Street = "abcdef",
                 Status = UserStatus.Active,
                 Avatar = avatar,
@@ -165,7 +165,7 @@ public partial class TestingFixture
                 ProvinceId = address.ProvinceId,
                 DistrictId = address.DistrictId,
                 CommuneId = address.CommuneId,
-                Roles = [role.Id],
+                Roles = roles,
                 Street = "abcdef",
                 Status = UserStatus.Active,
                 Avatar = avatar,
@@ -198,19 +198,7 @@ public partial class TestingFixture
             .DynamicReadOnlyRepository<User>()
             .FindByConditionAsync(new GetUserByIdSpecification(userId));
     }
-
-    public async Task<List<UserClaim>> FindUserClaimsByRoleAsync(Ulid roleId, IEnumerable<KeyValuePair<string, string>>? claims = null)
-    {
-        using var scope = factory!.Services.CreateScope();
-        var roleManagerService = scope.ServiceProvider.GetRequiredService<IRoleManagerService>();
-
-        var userClaims = await roleManagerService.Roles
-            .Where(x => x.Id == roleId).SelectMany(x => x.UserRoles!)
-            .Select(x => x.User!).SelectMany(x => x.UserClaims!)
-            .ToListAsync();
-        return userClaims.FindAll(x => claims?.Any(p => p.Key == x.ClaimType && p.Value == x.ClaimValue) == true);
-    }
-
+    
     private static UserAddress GetDefaultAddress() =>
         new(
             Ulid.Parse("01JRQHWS3RQR1N0J84EV1DQXR1"),
