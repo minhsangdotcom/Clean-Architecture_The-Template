@@ -13,15 +13,26 @@ services:
       - HangfireSettings__Credentials__Username=${HANGFIRE_USERNAME}
       - HangfireSettings__Credentials__Password=${HANGFIRE_PASSWORD}
       - SecuritySettings__JwtSettings__SecretKey=${JWT_SECRET_KEY}
-    ports:
-      - "8081:8080"
     networks:
       - the-template-network
+    deploy:
+      replicas: 3
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      test: ["CMD", "curl", "-f", "http://webapi/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    networks:
+       - the-template-network
+    depends_on:
+      - webapi
 networks:
   the-template-network:
     external: true
