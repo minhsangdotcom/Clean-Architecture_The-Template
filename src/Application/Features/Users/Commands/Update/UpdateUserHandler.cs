@@ -23,13 +23,7 @@ public class UpdateUserHandler(
         CancellationToken cancellationToken
     )
     {
-        User? user = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .FindByConditionAsync(
-                new GetUserByIdSpecification(Ulid.Parse(command.UserId)),
-                cancellationToken
-            );
-
+        User? user = await GetUserAsync(Ulid.Parse(command.UserId), cancellationToken);
         if (user == null)
         {
             return Result<UpdateUserResponse>.Failure(
@@ -105,6 +99,7 @@ public class UpdateUserHandler(
                 );
             }
         }
+
         //* replace address
         user.UpdateAddress(
             new(
@@ -121,7 +116,7 @@ public class UpdateUserHandler(
         string? key = mediaUpdateService.GetKey(avatar);
         user.Avatar = await mediaUpdateService.UploadAvatarAsync(avatar, key);
 
-        //* trigger event to update default claims -  that's infomation of user
+        //* trigger event to update default claims -  that's information of user
         user.UpdateDefaultUserClaims();
 
         try
@@ -139,7 +134,8 @@ public class UpdateUserHandler(
             await unitOfWork.CommitAsync(cancellationToken);
 
             await mediaUpdateService.DeleteAvatarAsync(oldAvatar);
-            return Result<UpdateUserResponse>.Success(user.ToUpdateUserResponse());
+            User? userResponse = await GetUserAsync(user.Id, cancellationToken);
+            return Result<UpdateUserResponse>.Success(userResponse!.ToUpdateUserResponse());
         }
         catch (Exception)
         {
@@ -147,5 +143,15 @@ public class UpdateUserHandler(
             await unitOfWork.RollbackAsync(cancellationToken);
             throw;
         }
+    }
+
+    private async Task<User?> GetUserAsync(Ulid id, CancellationToken cancellationToken)
+    {
+        return await unitOfWork
+            .DynamicReadOnlyRepository<User>()
+            .FindByConditionAsync(
+                new GetUserByIdSpecification(id),
+                cancellationToken
+            );
     }
 }

@@ -34,12 +34,22 @@ public static class UpdateUserMapping
     {
         return
         [
-            .. userClaims.Select(claim => new UserClaim()
+            .. userClaims.Select(claim =>
             {
-                ClaimType = claim.ClaimType!,
-                ClaimValue = claim.ClaimValue!,
-                Type = claimType,
-                UserId = userId,
+                var result = new UserClaim()
+                {
+                    ClaimType = claim.ClaimType!,
+                    ClaimValue = claim.ClaimValue!,
+                    Type = claimType,
+                    UserId = userId,
+                };
+
+                if (claim.Id != null)
+                {
+                    result.Id = claim.Id.Value;
+                }
+                
+                return result;
             }),
         ];
     }

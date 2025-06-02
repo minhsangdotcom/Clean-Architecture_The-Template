@@ -4,7 +4,7 @@
 
 #
 
-![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?logo=visual-studio-code&logoColor=white) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?color=orange) ![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?color=pink) ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?color=%23f61d9c) ![NuGet Version](https://img.shields.io/nuget/v/minhsangdotcom.TheTemplate.SharedKernel?label=SharedKernel&color=red) ![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.SpecificationPattern?style=flat&label=SpecificationPattern&color=red) ![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)
+![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?logo=visual-studio-code&logoColor=white) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?color=orange) ![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?color=pink) ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?color=%23f61d9c) [![NuGet Version](https://img.shields.io/nuget/v/minhsangdotcom.TheTemplate.SharedKernel?label=SharedKernel&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SharedKernel) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.SpecificationPattern?style=flat&label=SpecificationPattern&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SpecificationPattern/1.0.2-alpha) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig/1.0.1-alpha)
 
 # Table of Contents
 
@@ -306,13 +306,15 @@ dotnet run
 
 http://localhost:8080/docs is swagger UI path
 
+The default admin account <ins>username:</ins> <b>chloe.kim</b>, <ins>password</ins>: <b>Admin@123</b>
+
 Congrat! you are all set up :tada: :tada: :tada: :clap:
 
 ## 8.2. Basic Usage
 
 ### 8.2.1. Authorize
 
-To Achieve this, let's add RequireAuth on minimal api, permissions parameter is string and seperate each permission by comma "create:user,update:use".
+To Achieve this, let's add RequireAuth on minimal api, permissions parameter is string and Each permission is seperated by comma like "create:user,update:user".
 
 ```csharp
 app.MapPost(Router.UserRoute.Users, HandleAsync)

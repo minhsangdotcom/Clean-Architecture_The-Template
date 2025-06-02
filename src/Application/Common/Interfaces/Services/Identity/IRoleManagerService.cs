@@ -31,9 +31,9 @@ public interface IRoleManagerService
 
     Task UpdateRoleClaimsAsync(IEnumerable<RoleClaim> roleClaims, Role role);
 
-    Task AssignClaimsToRoleAsync(Role role, IEnumerable<KeyValuePair<string, string>> claims);
+    Task AssignClaimsToRoleAsync(Role role, IEnumerable<RoleClaim> claims);
 
-    Task RemoveClaimsFromRoleAsync(Role role, IEnumerable<KeyValuePair<string, string>> roleClaims);
+    Task RemoveClaimsFromRoleAsync(Role role, IEnumerable<RoleClaim> roleClaims);
 
     Task<List<RoleClaim>> GetRoleClaimsAsync(Ulid roleId);
 
@@ -43,7 +43,7 @@ public interface IRoleManagerService
 
     Task<bool> HasRoleClaimAsync(Ulid roleId, string claimName);
 
-    Task<bool> HasRoleClaimAsync(Ulid roleId, string claimName, string ClaimValue);
+    Task<bool> HasRoleClaimAsync(Ulid roleId, string claimName, string claimValue);
 
     Task<bool> HasRoleClaimAsync(Ulid roleId, IEnumerable<KeyValuePair<string, string>> claims);
 }

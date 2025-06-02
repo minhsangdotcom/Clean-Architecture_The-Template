@@ -106,7 +106,6 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         var response = result.Value!;
         var createdRole = await testingFixture.FindRoleByIdIncludeRoleClaimsAsync(response.Id);
         createdRole.ShouldNotBeNull();
-
         createdRole!.Name.ShouldBe(requestData.Name!.ToScreamingSnakeCase());
 
         var expectedClaims = roleClaims.Select(rc => new { rc.ClaimType, rc.ClaimValue }).ToList();

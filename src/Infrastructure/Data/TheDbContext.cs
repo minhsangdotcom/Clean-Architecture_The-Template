@@ -10,9 +10,6 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(op
 {
     public DatabaseFacade DatabaseFacade => Database;
 
-    public override DbSet<TEntity> Set<TEntity>()
-        where TEntity : class => base.Set<TEntity>();
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

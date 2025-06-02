@@ -4,7 +4,7 @@
 
 #
 
-![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?logo=visual-studio-code&logoColor=white) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?color=orange) ![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?color=pink) ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?color=%23f61d9c) ![NuGet Version](https://img.shields.io/nuget/v/minhsangdotcom.TheTemplate.SharedKernel?label=SharedKernel&color=red) ![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.SpecificationPattern?style=flat&label=SpecificationPattern&color=red) ![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)
+![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?logo=visual-studio-code&logoColor=white) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?color=orange) ![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?color=pink) ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?color=%23f61d9c) [![NuGet Version](https://img.shields.io/nuget/v/minhsangdotcom.TheTemplate.SharedKernel?label=SharedKernel&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SharedKernel) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.SpecificationPattern?style=flat&label=SpecificationPattern&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SpecificationPattern/1.0.2-alpha) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig/1.0.1-alpha)
 
 # Bảng nội dung
 
@@ -19,9 +19,9 @@
 - [Tính năng :rocket:](#tinh-nang)
 - [Nhá hàng cho các tính năng :fire:](#nha-hang-cho-cac-tinh-nang)
   - [Api](#api)
-  - [Truy vết](#truy-vết)
-  - [Lưu trử file media bằng Minio](#lưu-trử-file-media-bằng-minio)
-  - [Tự động dịch message](#tự-động-dịch-message)
+  - [Truy vết](#truy-vet)
+  - [Lưu trử file media bằng Minio](#minio-storage)
+  - [Tự động dịch message](#message-translation)
 - [Sơ lượt về Cấu trúc :mag_right:](#so-luot-ve-cau-truc)
 - [Bắt đầu thôi nào](#bắt-đầu-thôi-nào)
   - [Cách để chạy ứng dụng](#cách-để-chạy-ứng-dụng)
@@ -111,13 +111,19 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
 
 ![Role Apis](/Screenshots/role-api.png)
 
+<div id='truy-vet'/>
+
 ### Truy Vết
 
 ![Tracing](/Screenshots/trace.png)
 
+<div id='minio-storage'/>
+
 ### Lưu trử file media bằng Minio
 
 ![AWS s3 feature](Screenshots/AWS_S3_Feature.png)
+
+<div id='message-translation'/>
 
 ### Tự động dịch message
 
@@ -296,11 +302,11 @@ Chỉnh lại setting ở your appsettings.json
 
 ```json
 "S3AwsSettings": {
-      "ServiceUrl": "[your_host]:9000",
-      "AccessKey": "[yours]",
-      "SecretKey": "[yours]",
+      "ServiceUrl": "http://localhost:9000",
+      "AccessKey": "",
+      "SecretKey": "",
       "BucketName": "the-template-project",
-      "PublicUrl": "[your_host]:9000",
+      "PublicUrl": "http://localhost:9000",
       "PreSignedUrlExpirationInMinutes": 1440,
       "Protocol": 1
     },
@@ -315,6 +321,8 @@ dotnet run
 ```
 
 vào swagger ui ở http://localhost:8080/docs
+
+Tài khoản admin mặc định là <ins>username:</ins> <b>chloe.kim</b>, <ins>password</ins>: <b>Admin@123</b>
 
 Xong rồi đó :tada: :tada: :tada: :clap:
 
