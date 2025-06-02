@@ -6,7 +6,7 @@ using SharedKernel.Models;
 
 namespace Infrastructure.UnitOfWorks;
 
-public static class RepositoryExtention
+public static class RepositoryExtension
 {
     public static string GetSort(this string? sort)
     {
@@ -24,19 +24,20 @@ public static class RepositoryExtention
         StringBuilder text = new();
         foreach (object? param in parameters)
         {
-            if (param is null)
+            switch (param)
             {
-                continue;
+                case null:
+                    continue;
+                case string:
+                    AppendParameter(text, param.ToString()!);
+                    continue;
+                default:
+                {
+                    var result = JsonConvert.SerializeObject(param);
+                    AppendParameter(text, result);
+                    break;
+                }
             }
-
-            if (param is string)
-            {
-                AppendParameter(text, param.ToString()!);
-                continue;
-            }
-
-            var result = JsonConvert.SerializeObject(param);
-            AppendParameter(text, result);
         }
 
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(text.ToString()));
