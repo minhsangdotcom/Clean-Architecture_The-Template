@@ -51,7 +51,7 @@ try
     var app = builder.Build();
 
     string healthCheckPath =
-        configuration.GetSection("HealthCheckPath").Get<string>() ?? "/api/health";
+        configuration.GetSection("HealthCheckPath").Get<string>() ?? "/health";
     app.MapHealthChecks(
         healthCheckPath,
         new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }
