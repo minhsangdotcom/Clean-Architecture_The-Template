@@ -2,7 +2,7 @@ using Contracts.Dtos.Requests;
 
 namespace Application.Common.Interfaces.Services.Mail;
 
-public interface IMailService : IDisposable
+public interface IMailService
 {
     Task<bool> SendAsync(MailMessageData metaData);
     Task<bool> SendWithTemplateAsync(MailTemplateData metaData);
