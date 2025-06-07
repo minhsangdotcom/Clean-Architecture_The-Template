@@ -8,7 +8,8 @@ using Serilog;
 
 namespace Infrastructure.Services.Mail;
 
-public class MailService(IOptions<EmailSettings> options, ILogger logger) : IMailService
+public class MailService(IOptions<EmailSettings> options, RazorViewToStringRenderer razorView, ILogger logger)
+    : IMailService
 {
     private readonly EmailSettings emailSettings = options.Value;
 
@@ -28,7 +29,7 @@ public class MailService(IOptions<EmailSettings> options, ILogger logger) : IMai
 
     public async Task<bool> SendWithTemplateAsync(MailTemplateData metaData)
     {
-        string template = await RazorViewToStringRenderer.RenderViewToStringAsync(
+        string template = await razorView.RenderViewToStringAsync(
             metaData.Template!
         );
         MimeMessage message = CreateEmailMessage(
