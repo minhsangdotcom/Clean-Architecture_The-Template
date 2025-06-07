@@ -4,7 +4,7 @@
 
 #
 
-![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?logo=visual-studio-code&logoColor=white) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?color=orange) ![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?color=pink) ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?color=%23f61d9c) [![NuGet Version](https://img.shields.io/nuget/v/minhsangdotcom.TheTemplate.SharedKernel?label=SharedKernel&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SharedKernel) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.SpecificationPattern?style=flat&label=SpecificationPattern&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SpecificationPattern/1.0.2-alpha) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig/1.0.1-alpha)
+![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?logo=visual-studio-code&logoColor=white) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?color=orange) ![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?color=pink) ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?color=%23f61d9c) [![NuGet Version](https://img.shields.io/nuget/v/minhsangdotcom.TheTemplate.SharedKernel?label=SharedKernel&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SharedKernel) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.SpecificationPattern?style=flat&label=SpecificationPattern&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SpecificationPattern/) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig/1.0.1-alpha)
 
 # Table of Contents
 
@@ -243,7 +243,7 @@ The following prerequisites are required to build and run the solution:
 
 The first step :point_up: :
 
-we're going to copy content of appsettings.example.json to your own appsettings.json.
+Create a appsettings.Development.json file at root of Api layer and just copy the content of appsettings.example.json to the file then Modify configurations in your case.
 
 Modify PostgreSQL connection string (this template is using PostgreSQL currently).
 
@@ -308,13 +308,13 @@ http://localhost:8080/docs is swagger UI path
 
 The default admin account <ins>username:</ins> <b>chloe.kim</b>, <ins>password</ins>: <b>Admin@123</b>
 
-Congrat! you are all set up :tada: :tada: :tada: :clap:
+Congrats! you are all set up :tada: :tada: :tada: :clap:
 
 ## 8.2. Basic Usage
 
 ### 8.2.1. Authorize
 
-To Achieve this, let's add RequireAuth on minimal api, permissions parameter is string and Each permission is seperated by comma like "create:user,update:user".
+To Achieve this, let's add RequireAuth on minimal api, permissions parameter is string and Each permission is separated by comma like "create:user,update:user".
 
 ```csharp
 app.MapPost(Router.UserRoute.Users, HandleAsync)
@@ -366,7 +366,7 @@ public static readonly List<Dictionary<string, List<string>>> permissions =
 
 Notice that, the key is **primary permission** and value is **list of relative permissions**
 
-Permission combibes from action and entity name.
+Permission combines from action and entity name.
 For example:
 
 ```
@@ -405,7 +405,7 @@ LHS is the way to encode operators is the use of square brackets [] on the key n
 For example
 
 ```
-/users?filter[dayOfBirth][$gt]="1990-10-01"
+GET api/v1/users?filter[dayOfBirth][$gt]="1990-10-01"
 ```
 
 This example indicates filtering out users whose birthdays are after 1990/10/01
@@ -435,43 +435,48 @@ All support operations:
 Some Examples:
 
 ```
-GET /api/user?filter[gender][$in][0]=1&filter[gender][$in][1]=2
+GET /api/v1/users?filter[gender][$in][0]=1&filter[gender][$in][1]=2
 ```
 
 ```
-GET /api/user?filter[gender][$between][0]=1&filter[gender][$between][1]=2
+GET /api/v1/users?filter[gender][$between][0]=1&filter[gender][$between][1]=2
 ```
 
 ```
-GET /api/user?filter[firstName][$contains]=abc
+GET /api/v1/users?filter[firstName][$contains]=abc
 ```
 
 $and and $or operator:
 
 ```
-/api/users/filter[$and][0][firstName][$containsi]="sa"&filter[$and][1][lastName][$eq]="Tran"
+GET /api/v1/users/filter[$and][0][firstName][$containsi]="sa"&filter[$and][1][lastName][$eq]="Tran"
 ```
 
 ```JSON
-"filter":{
+{
+  "filter": {
     "$and": {
-        "firstName":"ng",
-        "lastName":"Tran"
+      "firstName": "sa",
+      "lastName": "Tran"
     }
+  }
 }
 ```
 
 ```
-/api/users/filter[$or][0][$and][0][claims][claimValue][$eq]=admin
+GET /api/v1/users/filter[$or][0][$and][0][claims][claimValue][$eq]=admin&filter[$or][1][lastName][$eq]=Tran
 ```
 
 ```JSON
-"filter":{
-    "$or": {
-        "$and":{
-            "claims": : {
-                "claimValue": "admin"
-            }
+{
+    "filter": {
+        "$or": {
+            "$and":{
+                "claims": {
+                    "claimValue": "admin"
+                }
+            },
+            "lastName": "Tran"
         }
     }
 }
@@ -561,8 +566,8 @@ var response = await unitOfWork
 
 - .NET 8
 - EntityFramework core 8
-- PostgreSQL
-- Fluent validation
+- PostgresSQL
+- FluentValidation
 - Mediator
 - XUnit, Shouldly, Respawn
 - OpenTelemetry
@@ -570,34 +575,24 @@ var response = await unitOfWork
 - Redis
 - ElasticSearch
 - Docker
-- Github Workflow
+- GitHub Workflow
 
 # 10. Support
 
-If you are having problems, please let me know by issue section.
+If you are having problems, please let me know at [issue section](https://github.com/minhsangdotcom/Clean-Architecture_The-Template/issues).
 
 # 11. Credits
 
 :heart: Thank you guys so much :heart: :pray:.
 
-- [Clean architecture by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture)\
-  A fantastic guide to structuring projects with clean architecture principles, which helped shape the design of this template.
+- [Clean architecture by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture)
 
-- [Clean architecture by amantinband](https://github.com/amantinband/clean-architecture)\
-  A concise and practical implementation of clean architecture that provided fresh perspectives and further deepened my understanding of this powerful approach.
+- [Clean architecture by amantinband](https://github.com/amantinband/clean-architecture)
+- [Clean architecture by Ardalis](https://github.com/ardalis/CleanArchitecture)
+- [Specification pattern](https://github.com/ardalis/Specification)
+- [REPR Pattern](https://github.com/ardalis/ApiEndpoints)
+- [Clean testing by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture/tree/main/tests)
 
-- [Clean architecture by Ardalis](https://github.com/ardalis/CleanArchitecture)\
-  A thoughtful and thorough take on clean architecture that helped refine the modular structure and scalability of this template.
-
-- [Specification pattern](https://github.com/ardalis/Specification)\
-  A brilliant implementation of the Specification pattern, simplifying complex query logic and promoting cleaner, more maintainable code.
-
-- [REPR Pattern](https://github.com/ardalis/ApiEndpoints)\
-  A practical implementation of the Request-Endpoint-Response (REPR) pattern, which provided a clear and structured approach to organizing API endpoints. It emphasizes simplicity and single-responsibility for each endpoint, ensuring clarity and maintainability.
-
-- [Clean testing by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture/tree/main/tests)\
-  An inspiring repository of testing best practices, showcasing how to write robust and meaningful tests to ensure the reliability of clean architecture-based projects.
-
-# 12. Licence
+# 12. License
 
 This project is licensed with the [MIT license](LICENSE).
