@@ -86,14 +86,14 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
         }
 
         ICollection<UserRole> currentUserRoles = currentUser.UserRoles!;
-        List<Ulid> roleClaimsToInsert = [..rolesToProcess.Except(currentUserRoles.Select(ur => ur.RoleId))];
+        List<Ulid> rolesToInsert = [..rolesToProcess.Except(currentUserRoles.Select(ur => ur.RoleId))];
         await userRoleDbSet.AddRangeAsync(
-            roleClaimsToInsert.Select(x => new UserRole { RoleId = x, UserId = currentUser.Id })
+            rolesToInsert.Select(x => new UserRole { RoleId = x, UserId = currentUser.Id })
         );
         await context.SaveChangesAsync();
 
         //derive all role claims for users if user is assigned specific role.
-        List<RoleClaim> roleClaims = await roleManagerService.GetRoleClaimsAsync(roleClaimsToInsert);
+        List<RoleClaim> roleClaims = await roleManagerService.GetRoleClaimsAsync(rolesToInsert);
         List<UserClaim> userClaimsToInsert = roleClaims
             .FindAll(x =>
                 !currentUser.UserClaims!.Any(p => p.ClaimType == x.ClaimType && p.ClaimValue == x.ClaimValue)

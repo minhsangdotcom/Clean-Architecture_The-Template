@@ -15,7 +15,7 @@ public static class DistributedCacheExtension
             configuration.GetSection(nameof(RedisDatabaseSettings)).Get<RedisDatabaseSettings>()
             ?? new();
 
-        if (databaseSettings.IsEnbaled)
+        if (databaseSettings.IsEnabled)
         {
             services
                 .Configure<RedisDatabaseSettings>(options =>

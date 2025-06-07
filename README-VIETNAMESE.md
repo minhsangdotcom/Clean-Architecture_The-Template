@@ -4,7 +4,7 @@
 
 #
 
-![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?logo=visual-studio-code&logoColor=white) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?color=orange) ![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?color=pink) ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?color=%23f61d9c) [![NuGet Version](https://img.shields.io/nuget/v/minhsangdotcom.TheTemplate.SharedKernel?label=SharedKernel&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SharedKernel) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.SpecificationPattern?style=flat&label=SpecificationPattern&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SpecificationPattern/1.0.2-alpha) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig/1.0.1-alpha)
+![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?logo=visual-studio-code&logoColor=white) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?color=orange) ![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?color=pink) ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?color=%23f61d9c) [![NuGet Version](https://img.shields.io/nuget/v/minhsangdotcom.TheTemplate.SharedKernel?label=SharedKernel&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SharedKernel) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.SpecificationPattern?style=flat&label=SpecificationPattern&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SpecificationPattern/) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig/1.0.1-alpha)
 
 # Bảng nội dung
 
@@ -51,7 +51,7 @@ Sự hỗ trợ của bạn là động lực giúp mình mang đến những t�
 
 # Định Nghĩa
 
-Kiến trúc Sạch (Clean Architecture) là một phương pháp thiết kế phần mềm do Robert C. Martin (Uncle Bob) giới thiệu, nhấn mạnh vào thuật ngữ "Tách biệt các thành phần",các tầng ngoài cùng sẽ phụ thuộc vào các tầng ở trong như hình. Tầng core sẽ không phụ thuộc vào các framework bên ngoài, cơ sở dữ liệu hay giao diện người dùng, từ đó giúp hệ thống dễ bảo trì, kiểm thử và phát triển theo thời gian.
+Kiến trúc Sạch (Clean Architecture) là một phương pháp thiết kế phần mềm do Robert C. Martin (Uncle Bob) giới thiệu, nhấn mạnh vào thuật ngữ "Tách biệt các thành phần",các tầng ngoài cùng sẽ phụ thuộc vào các tầng bên trong như hình minh họa. Tầng core sẽ không phụ thuộc vào các framework bên ngoài, cơ sở dữ liệu hay giao diện người dùng, từ đó giúp hệ thống dễ bảo trì, kiểm thử và phát triển theo thời gian.
 
 ![Alt text](Screenshots/clean-architecture.png "Cấu trúc chung của Clean Architecture")
 
@@ -258,7 +258,7 @@ Các thứ cần để chạy ứng dụng:
 
 Bước thứ 1 :point_up: :
 
-Copy nội dung trong appsettings.example.json vào appsettings.json.
+Tạo 1 file tên appsettings.Development.json ở ngoài cùng của tầng Api, Sao chép nội dung của appsettings.example.json vào file mới tạo và sau đó điều chỉnh lại các cấu hình theo cách của bạn.
 
 Chỉnh sửa connection string của PostgreSQL (Bởi vì template này đang sử dụng PostgreSQL).
 
@@ -422,7 +422,7 @@ LHS là cách để sử dụng các phương thức trong dấu ngoặc vuông 
 VD:
 
 ```
-/users?filter[dayOfBirth][$gt]="1990-10-01"
+GET api/v1/users?filter[dayOfBirth][$gt]="1990-10-01"
 ```
 
 Ví dụ này nói rằng hãy lấy ra cho tôi tất cả những người có ngày sinh sau ngày 01 tháng 10 năm 1990
@@ -452,43 +452,48 @@ Tất cả các phương thức:
 Vài VD:
 
 ```
-GET /api/user?filter[gender][$in][0]=1&filter[gender][$in][1]=2
+GET /api/v1/user?filter[gender][$in][0]=1&filter[gender][$in][1]=2
 ```
 
 ```
-GET /api/user?filter[gender][$between][0]=1&filter[gender][$between][1]=2
+GET /api/v1/user?filter[gender][$between][0]=1&filter[gender][$between][1]=2
 ```
 
 ```
-GET /api/user?filter[firstName][$contains]=abc
+GET /api/v1/user?filter[firstName][$contains]=abc
 ```
 
 Phương thúc $and và $or:
 
 ```
-/api/users/filter[$and][0][firstName][$containsi]="sa"&filter[$and][1][lastName][$eq]="Tran"
+GET /api/v1/users/filter[$and][0][firstName][$containsi]="sa"&filter[$and][1][lastName][$eq]="Tran"
 ```
 
 ```JSON
-"filter":{
+{
+  "filter": {
     "$and": {
-        "firstName":"ng",
-        "lastName":"Tran"
+      "firstName": "sa",
+      "lastName": "Tran"
     }
+  }
 }
 ```
 
 ```
-/api/users/filter[$or][0][$and][0][claims][claimValue][$eq]=admin
+GET /api/users/filter[$or][0][$and][0][claims][claimValue][$eq]=admin&filter[$or][1][lastName][$eq]=Tran
 ```
 
 ```JSON
-"filter":{
-    "$or": {
-        "$and":{
-            "claims": : {
-                "claimValue": "admin"
-            }
+{
+    "filter": {
+        "$or": {
+            "$and":{
+                "claims": {
+                    "claimValue": "admin"
+                }
+            },
+            "lastName": "Tran"
         }
     }
 }
@@ -581,42 +586,32 @@ var response = await unitOfWork
 - .NET 8
 - EntityFramework core 8
 - AutoMapper
-- Fluent validation
-- Medator
+- FluentValidation
+- Mediator
 - XUnit, FluentAssertion, Respawn
 - OpenTelemetry
-- PostgreSQL
+- PostgresSQL
 - Redis
 - ElasticSearch
 - Serilog
 - Docker
-- Github Workflow
+- GitHub Workflow
 
 # Hỗ trợ
 
-Nếu như có bất kì vấn đề nào thì cho mình biết qua phần issue nhé.
+Nếu như có bất kì vấn đề nào thì cho mình biết qua [phần issue ](https://github.com/minhsangdotcom/Clean-Architecture_The-Template/issues) nhé.
 
 # Lời cảm ơn
 
 :heart: Cảm ơn mọi người rất nhiều :heart: :pray:.
 
-- [Clean architecture by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture)\
-  A fantastic guide to structuring projects with clean architecture principles, which helped shape the design of this template.
+- [Clean architecture by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture)
 
-- [Clean architecture by amantinband](https://github.com/amantinband/clean-architecture)\
-  A concise and practical implementation of clean architecture that provided fresh perspectives and further deepened my understanding of this powerful approach.
-
-- [Clean architecture by Ardalis](https://github.com/ardalis/CleanArchitecture)\
-  A thoughtful and thorough take on clean architecture that helped refine the modular structure and scalability of this template.
-
-- [Specification pattern](https://github.com/ardalis/Specification)\
-  A brilliant implementation of the Specification pattern, simplifying complex query logic and promoting cleaner, more maintainable code.
-
-- [REPR Pattern](https://github.com/ardalis/ApiEndpoints)\
-  A practical implementation of the Request-Endpoint-Response (REPR) pattern, which provided a clear and structured approach to organizing API endpoints. It emphasizes simplicity and single-responsibility for each endpoint, ensuring clarity and maintainability.
-
-- [Clean testing by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture/tree/main/tests)\
-  An inspiring repository of testing best practices, showcasing how to write robust and meaningful tests to ensure the reliability of clean architecture-based projects.
+- [Clean architecture by amantinband](https://github.com/amantinband/clean-architecture)
+- [Clean architecture by Ardalis](https://github.com/ardalis/CleanArchitecture)
+- [Specification pattern](https://github.com/ardalis/Specification)
+- [REPR Pattern](https://github.com/ardalis/ApiEndpoints)
+- [Clean testing by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture/tree/main/tests)
 
 <div id="license"/>
 

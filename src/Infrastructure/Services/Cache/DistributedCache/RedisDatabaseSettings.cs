@@ -8,5 +8,5 @@ public class RedisDatabaseSettings
 
     public string? Password { get; set; }
 
-    public bool IsEnbaled { get; set; }
+    public bool IsEnabled { get; set; }
 }

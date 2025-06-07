@@ -69,11 +69,11 @@ public class QueueBackgroundService(
             queueResponse =
                 await sender.Send(request, cancellationToken) as QueueResponse<TResponse>;
 
-            // sucess case
+            // success case
             if (queueResponse!.IsSuccess)
             {
                 logger.Information(
-                    "excuting request {payloadId} has been success!",
+                    "Executing request {payloadId} has been success!",
                     queueResponse.PayloadId
                 );
                 break;
@@ -93,33 +93,30 @@ public class QueueBackgroundService(
                 await sender.Send(createQueueLogCommand, cancellationToken);
                 break;
             }
-
-            // transient error retry but
-            if (queueResponse.ErrorType == QueueErrorType.Transient)
+            
+            // transient error retry
+            attempt++;
+            if (attempt > maximumRetryAttempt)
             {
-                attempt++;
-                if (attempt > maximumRetryAttempt)
-                {
-                    break;
-                }
-
-                queueResponse.RetryCount = attempt;
-
-                // Calculate delay time with exponential jitter backoff method
-                // 1st -> 2.1s; 2nd -> 4.2; 3rd -> 8.2; 4th -> 16.1
-                double backoff = Math.Pow(QueueExtention.INIT_DELAY, attempt); // Exponential backoff (2^attempt)
-                double jitter = QueueExtention.GenerateJitter(0, QueueExtention.MAXIMUM_JITTER); // Add jitter
-                double delay = Math.Min(backoff + jitter, maximumDelay);
-
-                TimeSpan delayTime = TimeSpan.FromSeconds(delay);
-                logger.Warning($"Retry {attempt} in {delayTime.TotalSeconds:F2} seconds...");
-                await Task.Delay(delayTime, cancellationToken);
+                break;
             }
+
+            queueResponse.RetryCount = attempt;
+
+            // Calculate delay time with exponential jitter backoff method
+            // 1st -> 2.1s; 2nd -> 4.2; 3rd -> 8.2; 4th -> 16.1
+            double backoff = Math.Pow(QueueExtention.INIT_DELAY, attempt); // Exponential backoff (2^attempt)
+            double jitter = QueueExtention.GenerateJitter(0, QueueExtention.MAXIMUM_JITTER); // Add jitter
+            double delay = Math.Min(backoff + jitter, maximumDelay);
+
+            TimeSpan delayTime = TimeSpan.FromSeconds(delay);
+            logger.Warning("Retry {Attempt} in {DelayTimeTotalSeconds:F2} seconds...", attempt, delayTime.TotalSeconds);
+            await Task.Delay(delayTime, cancellationToken);
         }
 
-        if (!queueResponse.IsSuccess && queueResponse.ErrorType == QueueErrorType.Transient)
+        if (queueResponse is { IsSuccess: false, ErrorType: QueueErrorType.Transient })
         {
-            // if it still fail after many attempts then logging into db
+            // if it still fails after many attempts then logging into db
             await sender.Send(
                 new CreateQueueLogCommand()
                 {

@@ -7,6 +7,7 @@ public static class MailExtension
 {
     public static IServiceCollection AddMail(this IServiceCollection services)
     {
-        return services.AddSingleton<IMailService, MailService>();
+        return services.AddTransient<IMailService, MailService>()
+            .AddSingleton<RazorViewToStringRenderer>();
     }
 }
