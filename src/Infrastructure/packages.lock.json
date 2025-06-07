@@ -4,11 +4,11 @@
     "net8.0": {
       "AWSSDK.S3": {
         "type": "Direct",
-        "requested": "[4.0.0-preview.9, )",
-        "resolved": "4.0.0-preview.9",
-        "contentHash": "QW1PkFffZRYLDBvcYitxE24zj/5ZmGCftkJ6FzY8yxjtCL1fB0rTiGRq9sXd9cEiEFGdn2zlOUERRRmciY5rFQ==",
+        "requested": "[4.0.1.3, )",
+        "resolved": "4.0.1.3",
+        "contentHash": "0NJlSOwRbRzcQ3LXQTNpyN8SsgvuzcAiNn3cXJ0jNhEir9TdcwbCE9FMGoMgFtuQokl3bzKI/lPkzx41FDU07Q==",
         "dependencies": {
-          "AWSSDK.Core": "[4.0.0-preview.9, 5.0.0-preview.9)"
+          "AWSSDK.Core": "[4.0.0.7, 5.0.0)"
         }
       },
       "EFCore.NamingConventions": {
@@ -108,12 +108,12 @@
       },
       "Scrutor": {
         "type": "Direct",
-        "requested": "[4.2.2, )",
-        "resolved": "4.2.2",
-        "contentHash": "t5VIYA7WJXoJJo7s4DoHakMGwTu+MeEnZumMOhTCH7kz9xWha24G7dJNxWrHPlu0ZdZAS4jDZCxxAnyaBh7uYw==",
+        "requested": "[6.1.0, )",
+        "resolved": "6.1.0",
+        "contentHash": "m4+0RdgnX+jeiaqteq9x5SwEtuCjWG0KTw1jBjCzn7V8mCanXKoeF8+59E0fcoRbAjdEq6YqHFCmxZ49Kvqp3g==",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "6.0.0",
-          "Microsoft.Extensions.DependencyModel": "6.0.0"
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.1",
+          "Microsoft.Extensions.DependencyModel": "8.0.2"
         }
       },
       "Ulid": {
@@ -129,8 +129,8 @@
       },
       "AWSSDK.Core": {
         "type": "Transitive",
-        "resolved": "4.0.0-preview.9",
-        "contentHash": "CQbZ3VjpCuU0Dx3ZWmHtFxE8afsMxcZSpOtBZ91qiCNW3EDXep4bx5+yq7WbOzR0ZpJM67B/ue/a32tsFuqLUw=="
+        "resolved": "4.0.0.7",
+        "contentHash": "0MXHFU5prc2iwOQFxn+1p7tK18McvfUJKu+UOA25NBxSyS7A2XiEk51j9QL3zu+VZc7OmLI5C/JO9Z7JtJ7otg=="
       },
       "BCrypt.Net-Next": {
         "type": "Transitive",
@@ -167,15 +167,15 @@
       },
       "FluentValidation": {
         "type": "Transitive",
-        "resolved": "11.11.0",
-        "contentHash": "cyIVdQBwSipxWG8MA3Rqox7iNbUNUTK5bfJi9tIdm4CAfH71Oo5ABLP4/QyrUwuakqpUEPGtE43BDddvEehuYw=="
+        "resolved": "12.0.0",
+        "contentHash": "8NVLxtMUXynRHJIX3Hn1ACovaqZIJASufXIIFkD0EUbcd5PmMsL1xUD5h548gCezJ5BzlITaR9CAMrGe29aWpA=="
       },
       "FluentValidation.DependencyInjectionExtensions": {
         "type": "Transitive",
-        "resolved": "11.11.0",
-        "contentHash": "viTKWaMbL3yJYgGI0DiCeavNbE9UPMWFVK2XS9nYXGbm3NDMd0/L5ER4wBzmTtW3BYh3SrlSXm9RACiKZ6stlA==",
+        "resolved": "12.0.0",
+        "contentHash": "B28fBRL1UjhGsBC8fwV6YBZosh+SiU1FxdD7l7p5dGPgRlVI7UnM+Lgzmg+unZtV1Zxzpaw96UY2MYfMaAd8cg==",
         "dependencies": {
-          "FluentValidation": "11.11.0",
+          "FluentValidation": "12.0.0",
           "Microsoft.Extensions.Dependencyinjection.Abstractions": "2.1.0"
         }
       },
@@ -213,8 +213,8 @@
       },
       "Mediator.Abstractions": {
         "type": "Transitive",
-        "resolved": "3.0.0-preview.46",
-        "contentHash": "/6SM36YKqcgUaHGbymQHjlfbXcHGxB90DUBnE+5YsPVDEl5rPhSaWCl0WlYBhKcChgNnR33n9o3EgTAmhDfyCg==",
+        "resolved": "3.0.0-preview.65",
+        "contentHash": "SqmWbc0kbIFFBKuLJZPicJy8FXOAO9WtbnUYaa+HeeX5eyI500basAP7DqT/vbVyiNyJP2CoeBdpfLOD+ajkHQ==",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0"
         }
@@ -241,8 +241,8 @@
       },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
         "type": "Transitive",
-        "resolved": "8.0.13",
-        "contentHash": "EUNaX3F4fALAfvp7wsCqjqziu1lTNwYRFbIcVJEt6vInWxEpscAM/pcG6GBOx3WcmSRdB7sqtKAKSkyY6XhTig==",
+        "resolved": "8.0.16",
+        "contentHash": "WtKPOmlqzwWGQZCOixnOE+3bIYzxmUw7zjfs7VRWDhZlxfcmw5Qw2c4r87XWPk+kkurntzvE0sWyruI6KDpTiA==",
         "dependencies": {
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "7.1.2"
         }
@@ -409,11 +409,6 @@
         "type": "Transitive",
         "resolved": "6.0.0",
         "contentHash": "UcSjPsst+DfAdJGVDsu346FX0ci0ah+lw3WRtn18NUwEqRt70HaOQ7lI72vy3+1LxtqI3T5GWwV39rQSrCzAeg=="
-      },
-      "Microsoft.Build.Tasks.Git": {
-        "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "bZKfSIKJRXLTuSzLudMFte/8CempWjVamNUR5eHJizsy+iuOuO/k2gnh7W0dHJmYY0tBf+gUErfluCv5mySAOQ=="
       },
       "Microsoft.CodeAnalysis.Analyzers": {
         "type": "Transitive",
@@ -754,20 +749,6 @@
           "System.Buffers": "4.6.0"
         }
       },
-      "Microsoft.SourceLink.Common": {
-        "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "dk9JPxTCIevS75HyEQ0E4OVAFhB2N+V9ShCXf8Q6FkUQZDkgLI12y679Nym1YqsiSysuQskT7Z+6nUf3yab6Vw=="
-      },
-      "Microsoft.SourceLink.GitHub": {
-        "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "G5q7OqtwIyGTkeIOAc3u2ZuV/kicQaec5EaRnc0pIeSnh9LUjj+PYQrJYBURvDt7twGl2PKA7nSN0kz1Zw5bnQ==",
-        "dependencies": {
-          "Microsoft.Build.Tasks.Git": "8.0.0",
-          "Microsoft.SourceLink.Common": "8.0.0"
-        }
-      },
       "MimeKit": {
         "type": "Transitive",
         "resolved": "4.12.0",
@@ -798,8 +779,8 @@
       },
       "minhsangdotcom.TheTemplate.SpecificationPattern": {
         "type": "Transitive",
-        "resolved": "1.0.2-alpha",
-        "contentHash": "UlbHLn+kYhqJ/nhiBGcMVNy8bX+MHCionasEalXDXPxkklNg5nSuOeuR9M3cWwQjmYYG8HObo3lccvMjVjIbkA==",
+        "resolved": "1.0.3",
+        "contentHash": "JrRS/VkX4zA/cHazsaSrP0JYwxAA/LueTaiKrkUZIYBdvsL9AuIBfSdLbaedsTWy0Lj7Eqr1qjHGLetm9AKNQg==",
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "8.0.13",
           "Microsoft.EntityFrameworkCore.Relational": "8.0.13"
@@ -836,11 +817,11 @@
       },
       "NRedisStack": {
         "type": "Transitive",
-        "resolved": "0.13.2",
-        "contentHash": "tgtzv5D3HrC9frmCzd/va5xJldMhw3mZ4j56nQZGJOjnhfKjaR3dNHT04l9PSrMJZkHu4laKcvNMki9q28wAAA==",
+        "resolved": "1.0.0",
+        "contentHash": "vCSwHNibWIgDic2sXAP23s7m7IMu3dlWdfv8LIufFfVGm+yyZ9MXCTFQaGw6zv4hE7k9RhJp64ObvLYx+2sQIQ==",
         "dependencies": {
           "NetTopologySuite": "2.5.0",
-          "StackExchange.Redis": "2.8.16"
+          "StackExchange.Redis": "2.8.24"
         }
       },
       "Pipelines.Sockets.Unofficial": {
@@ -968,8 +949,8 @@
       },
       "StackExchange.Redis": {
         "type": "Transitive",
-        "resolved": "2.8.16",
-        "contentHash": "WaoulkOqOC9jHepca3JZKFTqndCWab5uYS7qCzmiQDlrTkFaDN7eLSlEfHycBxipRnQY9ppZM7QSsWAwUEGblw==",
+        "resolved": "2.8.24",
+        "contentHash": "GWllmsFAtLyhm4C47cOCipGxyEi1NQWTFUHXnJ8hiHOsK/bH3T5eLkWPVW+LRL6jDiB3g3izW3YEHgLuPoJSyA==",
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "6.0.0",
           "Pipelines.Sockets.Unofficial": "2.2.8"
@@ -1122,30 +1103,25 @@
       },
       "Wangkanai.Detection": {
         "type": "Transitive",
-        "resolved": "8.15.0",
-        "contentHash": "/w6ko+zRGRWDJsSS/XJ49WTSSQR351iXnv7DID3jcpXGAGDKtrvwTcVXraSuH6EMCsJJQ8Yi9NgUDD+jIsPJEA==",
+        "resolved": "8.17.0",
+        "contentHash": "37Vg2RX3V7+YL+/2y3lcfabJLTYyrOos3y5OZIJnjQfrRrzXh4ihpfaxYkjDzvIhUBRU6YnGHSfKihPqIa8qQQ==",
         "dependencies": {
-          "Microsoft.SourceLink.GitHub": "8.0.0",
-          "Wangkanai.Hosting": "3.3.0",
-          "Wangkanai.System": "5.1.0"
+          "Wangkanai.Hosting": "3.4.0",
+          "Wangkanai.System": "5.4.0"
         }
       },
       "Wangkanai.Hosting": {
         "type": "Transitive",
-        "resolved": "3.3.0",
-        "contentHash": "0Z83MDSf3BiQu1yBaAm1f+HfSSBty6umTpjPCmW7gjHNTvYc9Wf2X26Erh7Iscv6pvvcmXLXz9IAWTr9EjPzvA==",
+        "resolved": "3.4.0",
+        "contentHash": "XPew5al4lGcAcrXstvJ+j5xUBkLE+eKpmOfAqG8ozTpCi9rqBtHilh4zYJ0yELQOnQAyrPDW+cAFI59bwVUnbQ==",
         "dependencies": {
-          "Microsoft.SourceLink.GitHub": "8.0.0",
-          "Wangkanai.System": "5.1.0"
+          "Wangkanai.System": "5.4.0"
         }
       },
       "Wangkanai.System": {
         "type": "Transitive",
-        "resolved": "5.1.0",
-        "contentHash": "kdDrS0AeKrTpx17jolBwPmQhKEvyOFraNoQsNVP6dSJWquogWKOFu7/wPCuW5L06tNVtxbX5SYOqJS9MFCuhgg==",
-        "dependencies": {
-          "Microsoft.SourceLink.GitHub": "8.0.0"
-        }
+        "resolved": "5.4.0",
+        "contentHash": "9Icv3SGFRiYsjI1IPvqVi+0/GJXkYPVXhEuf7r5y0+c29NBEL8CLvKWXIBAeYiMHbTixJ5JomoUVSPmtjXGdlA=="
       },
       "application": {
         "type": "Project",
@@ -1153,16 +1129,16 @@
           "BCrypt.Net-Next": "[4.0.3, )",
           "Contracts": "[1.0.0, )",
           "Domain": "[1.0.0, )",
-          "FluentValidation.DependencyInjectionExtensions": "[11.11.0, )",
+          "FluentValidation.DependencyInjectionExtensions": "[12.0.0, )",
           "JWT": "[11.0.0, )",
-          "Mediator.Abstractions": "[3.0.0-preview.46, )",
-          "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.13, )",
-          "NRedisStack": "[0.13.2, )",
+          "Mediator.Abstractions": "[3.0.0-preview.65, )",
+          "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.16, )",
+          "NRedisStack": "[1.0.0, )",
           "RazorLight": "[2.3.1, )",
           "Serilog.AspNetCore": "[9.0.0, )",
           "Serilog.Enrichers.Environment": "[3.0.1, )",
           "Serilog.Sinks.Seq": "[9.0.0, )",
-          "Wangkanai.Detection": "[8.15.0, )",
+          "Wangkanai.Detection": "[8.17.0, )",
           "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": "[1.0.1-alpha, )"
         }
       },
@@ -1173,16 +1149,16 @@
           "Microsoft.AspNetCore.Mvc.Core": "[2.3.0, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "Ulid": "[1.3.4, )",
-          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.2, )"
+          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.5, )"
         }
       },
       "domain": {
         "type": "Project",
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
-          "Mediator.Abstractions": "[3.0.0-preview.46, )",
+          "Mediator.Abstractions": "[3.0.0-preview.65, )",
           "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.5, )",
-          "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.2-alpha, )"
+          "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.3, )"
         }
       }
     }
