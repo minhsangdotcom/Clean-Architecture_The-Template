@@ -20,7 +20,7 @@ public static class ElasticSearchExtension
             ?? new();
         services.AddSingleton(typeof(IElasticsearchService<>), typeof(ElasticsearchService<>));
 
-        if (elasticsearch.IsEnbaled)
+        if (elasticsearch.IsEnabled)
         {
             IEnumerable<Uri> nodes = elasticsearch!.Nodes.Select(x => new Uri(x));
             var pool = new StaticNodePool(nodes);

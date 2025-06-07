@@ -6,9 +6,9 @@ public class OpenTelemetrySettings
     public string? ServiceVersion { get; set; } = "1.0.0";
     public string? ActivitySourceName { get; set; } = "Testing Service";
 
-    public string? Otelp { get; set; }
+    public string? Endpoint { get; set; }
 
-    public OtelpOption OtelpOption { get; set; } = OtelpOption.Non;
+    public OtelpOption Options { get; set; } = OtelpOption.Non;
 
     public bool IsEnabled { get; set; }
 }

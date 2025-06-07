@@ -17,7 +17,7 @@ public static class QueueRegisterExtension
             configuration.GetSection(nameof(RedisDatabaseSettings)).Get<RedisDatabaseSettings>()
             ?? new();
 
-        if (databaseSettings.IsEnbaled)
+        if (databaseSettings.IsEnabled)
         {
             services
                 .Configure<QueueSettings>(options =>
