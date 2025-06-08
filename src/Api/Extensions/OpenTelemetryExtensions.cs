@@ -39,10 +39,10 @@ public static class OpenTelemetryExtensions
                     options
                         .AddSource(openTelemetrySettings!.ActivitySourceName!)
                         .AddHttpClientInstrumentation()
-                        .AddAspNetCoreInstrumentation(options =>
+                        .AddAspNetCoreInstrumentation(option =>
                         {
                             // to trace only api requests
-                            options.Filter = (context) =>
+                            option.Filter = (context) =>
                                 !string.IsNullOrEmpty(context.Request.Path.Value)
                                 && context.Request.Path.Value.Contains(
                                     RoutePath.prefix.Replace("/", string.Empty),
@@ -50,18 +50,18 @@ public static class OpenTelemetryExtensions
                                 );
 
                             // enrich activity with http request and response
-                            options.EnrichWithHttpRequest = (activity, httpRequest) =>
+                            option.EnrichWithHttpRequest = (activity, httpRequest) =>
                             {
                                 activity.SetTag("requestProtocol", httpRequest.Protocol);
                             };
-                            options.EnrichWithHttpResponse = (activity, httpResponse) =>
+                            option.EnrichWithHttpResponse = (activity, httpResponse) =>
                             {
                                 activity.SetTag("responseLength", httpResponse.ContentLength);
                             };
 
                             // automatically sets Activity Status to Error if an unhandled exception is thrown
-                            options.RecordException = true;
-                            options.EnrichWithException = (activity, exception) =>
+                            option.RecordException = true;
+                            option.EnrichWithException = (activity, exception) =>
                             {
                                 activity.SetTag("exceptionType", exception?.GetType().ToString());
                                 activity.SetTag("stackTrace", exception?.StackTrace);
@@ -79,17 +79,18 @@ public static class OpenTelemetryExtensions
                         })
                         .AddHttpClientInstrumentation();
 
-                    switch (openTelemetrySettings.OtelpOption)
+                    switch (openTelemetrySettings.Options)
                     {
                         case OtelpOption.DistributedServer:
-                            options.AddOtlpExporter(options =>
+                            options.AddOtlpExporter(option =>
                             {
-                                options.Endpoint = new Uri(openTelemetrySettings.Otelp!.ToString());
+                                option.Endpoint = new Uri(openTelemetrySettings.Endpoint!);
                             });
                             break;
                         case OtelpOption.Console:
                             options.AddConsoleExporter();
                             break;
+                        case OtelpOption.Non:
                         default:
                             break;
                     }
