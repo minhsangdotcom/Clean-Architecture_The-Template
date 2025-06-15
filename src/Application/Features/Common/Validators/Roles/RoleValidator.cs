@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Features.Common.Payloads.Roles;
 using Application.Features.Common.Projections.Roles;
 using CaseConverter;
 using Domain.Aggregates.Roles;
@@ -9,7 +10,7 @@ using SharedKernel.Common.Messages;
 
 namespace Application.Features.Common.Validators.Roles;
 
-public class RoleValidator : AbstractValidator<RoleModel>
+public class RoleValidator : AbstractValidator<RolePayload>
 {
     private readonly IRoleManagerService roleManagerService;
     private readonly IHttpContextAccessorService httpContextAccessorService;
@@ -32,7 +33,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
             .NotEmpty()
             .WithState(x =>
                 Messager
-                    .Create<RoleModel>(nameof(Role))
+                    .Create<RolePayload>(nameof(Role))
                     .Property(x => x.Name!)
                     .Negative()
                     .Message(MessageType.Null)
@@ -41,7 +42,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
             .MaximumLength(256)
             .WithState(x =>
                 Messager
-                    .Create<RoleModel>(nameof(Role))
+                    .Create<RolePayload>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.MaximumLength)
                     .Build()
@@ -56,7 +57,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
             )
             .WithState(x =>
                 Messager
-                    .Create<RoleModel>(nameof(Role))
+                    .Create<RolePayload>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.Existence)
                     .Build()
@@ -70,7 +71,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
             )
             .WithState(x =>
                 Messager
-                    .Create<RoleModel>(nameof(Role))
+                    .Create<RolePayload>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.Existence)
                     .Build()
@@ -81,7 +82,7 @@ public class RoleValidator : AbstractValidator<RoleModel>
             .When(x => x.Description != null, ApplyConditionTo.CurrentValidator)
             .WithState(x =>
                 Messager
-                    .Create<RoleModel>(nameof(Role))
+                    .Create<RolePayload>(nameof(Role))
                     .Property(x => x.Description!)
                     .Message(MessageType.MaximumLength)
                     .Build()

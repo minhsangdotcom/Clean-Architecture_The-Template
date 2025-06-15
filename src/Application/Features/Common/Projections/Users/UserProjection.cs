@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using Application.Common.Security;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -24,8 +23,7 @@ public class UserProjection : BaseResponse
     public Gender? Gender { get; set; }
 
     public string? Address { get; set; }
-
-    [JsonIgnore]
+    
     public Address? UserAddress { get; set; }
 
     [File]

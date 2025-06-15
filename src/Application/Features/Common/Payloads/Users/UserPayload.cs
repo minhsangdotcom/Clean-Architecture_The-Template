@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Http;
 
-namespace Application.Features.Common.Projections.Users;
+namespace Application.Features.Common.Payloads.Users;
 
-public class UserModel
+public class UserPayload
 {
     public string? FirstName { get; set; }
 

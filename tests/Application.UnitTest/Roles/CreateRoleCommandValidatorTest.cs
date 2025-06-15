@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Features.Common.Payloads.Roles;
 using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Create;
 using AutoFixture;
@@ -17,7 +18,7 @@ public class CreateRoleCommandValidatorTest
     private readonly CreateRoleCommandValidator validator;
 
     private readonly CreateRoleCommand command;
-    private readonly List<RoleClaimModel> roleClaims;
+    private readonly List<RoleClaimPayload> roleClaims;
     private readonly Fixture fixture = new();
     private readonly Mock<IRoleManagerService> mockRoleManager = new();
     private readonly Mock<IHttpContextAccessorService> mockHttpContextAccessorService = new();
@@ -29,7 +30,7 @@ public class CreateRoleCommandValidatorTest
             mockRoleManager.Object,
             mockHttpContextAccessorService.Object
         );
-        roleClaims = [.. fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2)];
+        roleClaims = [.. fixture.Build<RoleClaimPayload>().Without(x => x.Id).CreateMany(2)];
         command = fixture
             .Build<CreateRoleCommand>()
             .With(x => x.Name, "manager")
@@ -50,7 +51,7 @@ public class CreateRoleCommandValidatorTest
 
         //assert
         MessageResult expectedState = Messager
-            .Create<RoleModel>(nameof(Role))
+            .Create<RolePayload>(nameof(Role))
             .Property(x => x.Name!)
             .Negative()
             .Message(MessageType.Null)
@@ -73,7 +74,7 @@ public class CreateRoleCommandValidatorTest
 
         //assert
         MessageResult expectedState = Messager
-            .Create<RoleModel>(nameof(Role))
+            .Create<RolePayload>(nameof(Role))
             .Property(x => x.Name!)
             .Message(MessageType.MaximumLength)
             .Build();
@@ -91,7 +92,7 @@ public class CreateRoleCommandValidatorTest
         const string existedName = "ADMIN";
         command.Name = existedName;
         MessageResult expectedState = Messager
-            .Create<RoleModel>(nameof(Role))
+            .Create<RolePayload>(nameof(Role))
             .Property(x => x.Name!)
             .Message(MessageType.Existence)
             .Build();
@@ -122,7 +123,7 @@ public class CreateRoleCommandValidatorTest
 
         //assert
         MessageResult expectedState = Messager
-            .Create<RoleModel>(nameof(Role))
+            .Create<RolePayload>(nameof(Role))
             .Property(x => x.Description!)
             .Message(MessageType.MaximumLength)
             .Build();
@@ -152,7 +153,7 @@ public class CreateRoleCommandValidatorTest
 
         result
             .ShouldHaveValidationErrorFor(
-                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimModel.ClaimType)}"
+                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimPayload.ClaimType)}"
             )
             .WithCustomState(expectedState, new MessageResultComparer());
     }
@@ -175,7 +176,7 @@ public class CreateRoleCommandValidatorTest
             .Build();
         result
             .ShouldHaveValidationErrorFor(
-                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimModel.ClaimType)}"
+                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimPayload.ClaimType)}"
             )
             .WithCustomState(expectedState, new MessageResultComparer());
     }
@@ -195,7 +196,7 @@ public class CreateRoleCommandValidatorTest
             .Build();
         result
             .ShouldHaveValidationErrorFor(
-                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimModel.ClaimValue)}"
+                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimPayload.ClaimValue)}"
             )
             .WithCustomState(expectedState, new MessageResultComparer());
     }
@@ -215,7 +216,7 @@ public class CreateRoleCommandValidatorTest
             .Build();
         result
             .ShouldHaveValidationErrorFor(
-                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimModel.ClaimValue)}"
+                $"{nameof(CreateRoleCommand.RoleClaims)}[0].{nameof(RoleClaimPayload.ClaimValue)}"
             )
             .WithCustomState(expectedState, new MessageResultComparer());
     }

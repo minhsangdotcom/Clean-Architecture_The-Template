@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Features.Common.Payloads.Users;
 using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Create;
 using Contracts.ApiWrapper;
@@ -89,9 +90,9 @@ public partial class TestingFixture
                 Avatar = avatar,
                 UserClaims =
                 [
-                    new UserClaimModel() { ClaimType = "test1", ClaimValue = "test1.value" },
-                    new UserClaimModel() { ClaimType = "test2", ClaimValue = "test2.value" },
-                    new UserClaimModel() { ClaimType = "test3", ClaimValue = "test3.value" },
+                    new UserClaimPayload() { ClaimType = "test1", ClaimValue = "test1.value" },
+                    new UserClaimPayload() { ClaimType = "test2", ClaimValue = "test2.value" },
+                    new UserClaimPayload() { ClaimType = "test3", ClaimValue = "test3.value" },
                 ],
             };
 
@@ -130,9 +131,9 @@ public partial class TestingFixture
                 Avatar = avatar,
                 UserClaims =
                 [
-                    new UserClaimModel() { ClaimType = "test1", ClaimValue = "test1.value" },
-                    new UserClaimModel() { ClaimType = "test2", ClaimValue = "test2.value" },
-                    new UserClaimModel() { ClaimType = "test3", ClaimValue = "test3.value" },
+                    new UserClaimPayload() { ClaimType = "test1", ClaimValue = "test1.value" },
+                    new UserClaimPayload() { ClaimType = "test2", ClaimValue = "test2.value" },
+                    new UserClaimPayload() { ClaimType = "test3", ClaimValue = "test3.value" },
                 ],
             };
 
@@ -171,9 +172,9 @@ public partial class TestingFixture
                 Avatar = avatar,
                 UserClaims =
                 [
-                    new UserClaimModel() { ClaimType = "test1", ClaimValue = "test1.value" },
-                    new UserClaimModel() { ClaimType = "test2", ClaimValue = "test2.value" },
-                    new UserClaimModel() { ClaimType = "test3", ClaimValue = "test3.value" },
+                    new UserClaimPayload() { ClaimType = "test1", ClaimValue = "test1.value" },
+                    new UserClaimPayload() { ClaimType = "test2", ClaimValue = "test2.value" },
+                    new UserClaimPayload() { ClaimType = "test3", ClaimValue = "test3.value" },
                 ],
             };
 

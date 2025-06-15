@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Features.Common.Payloads.Users;
 using Application.Features.Common.Projections.Users;
 using Domain.Aggregates.Users;
 using FluentValidation;
@@ -9,7 +10,7 @@ using SharedKernel.Common.Messages;
 
 namespace Application.Features.Common.Validators.Users;
 
-public partial class UserValidator : AbstractValidator<UserModel>
+public partial class UserValidator : AbstractValidator<UserPayload>
 {
     private readonly IHttpContextAccessorService httpContextAccessorService;
     private readonly IUserManagerService userManagerService;
@@ -161,7 +162,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
             .WithState(x =>
                 Messager
                     .Create<User>()
-                    .Property(nameof(UserModel.DistrictId))
+                    .Property(nameof(UserPayload.DistrictId))
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
@@ -172,7 +173,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
             .WithState(x =>
                 Messager
                     .Create<User>()
-                    .Property(nameof(UserModel.Street))
+                    .Property(nameof(UserPayload.Street))
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()

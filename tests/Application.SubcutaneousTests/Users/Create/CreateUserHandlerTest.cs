@@ -1,3 +1,4 @@
+using Application.Features.Common.Payloads.Users;
 using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
@@ -148,7 +149,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
                 x => x.UserClaims,
                 [
                     .. Credential
-                        .MANAGER_CLAIMS.Select(x => new UserClaimModel()
+                        .MANAGER_CLAIMS.Select(x => new UserClaimPayload()
                         {
                             ClaimType = ClaimTypes.Permission,
                             ClaimValue = x,

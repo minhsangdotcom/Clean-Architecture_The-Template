@@ -26,10 +26,6 @@ public static class ListUserMapping
             Gender = user.Gender,
             Avatar = user.Avatar,
             Status = user.Status,
-            //Street = user.Address!.Street,
-            // Province = user.Address!.Province!.ToProvinceProjection(),
-            // District = user.Address!.District!.ToDistrictProjection(),
-            // Commune = user.Address!.Commune!.ToCommuneProjection(),
             Address = user.Address!.ToString(),
         };
 }

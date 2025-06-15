@@ -17,14 +17,12 @@ public class ListUserHandler(IUnitOfWork unitOfWork)
     )
     {
         var validationResult = query.ValidateQuery();
-
         if (validationResult.Error != null)
         {
             return Result<PaginationResponse<ListUserResponse>>.Failure(validationResult.Error);
         }
 
         var validationFilterResult = query.ValidateFilter<ListUserQuery, ListUserResponse>();
-
         if (validationFilterResult.Error != null)
         {
             return Result<PaginationResponse<ListUserResponse>>.Failure(

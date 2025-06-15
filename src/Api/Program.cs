@@ -38,6 +38,17 @@ services.AddOpenTelemetryTracing(configuration);
 builder.AddSerialogs();
 services.AddHealthChecks();
 services.AddDatabaseHealthCheck(configuration);
+services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost3000", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:3000") // React dev server
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials(); // Optional, if using cookies or auth headers
+    });
+});
 #endregion
 
 #region layers dependencies
@@ -87,7 +98,8 @@ try
         });
         app.AddLog(Log.Logger, routeRefix, healthCheckPath);
     }
-
+    
+    app.UseCors("AllowLocalhost3000");
     app.UseStatusCodePages();
     app.UseExceptionHandler();
     app.UseAuthentication();

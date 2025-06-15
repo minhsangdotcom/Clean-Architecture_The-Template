@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Features.Common.Payloads.Users;
 using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Update;
 using AutoFixture;
@@ -32,7 +33,7 @@ public class UpdateUserCommandValidatorTest
             .Without(x => x.Avatar)
             .With(
                 x => x.UserClaims,
-                [new UserClaimModel() { ClaimType = "test", ClaimValue = "test.value" }]
+                [new UserClaimPayload() { ClaimType = "test", ClaimValue = "test.value" }]
             )
             .With(x => x.Roles, [Ulid.Parse("01JS72XZJ6NFKFVWA9QM03RY5G")])
             .With(x => x.Email, "admin@gmail.com")
@@ -353,7 +354,7 @@ public class UpdateUserCommandValidatorTest
             .Negative()
             .Build();
         result.ShouldHaveValidationErrorFor(
-            $"{nameof(User.UserClaims)}[0].{nameof(UserClaimModel.ClaimType)}"
+            $"{nameof(User.UserClaims)}[0].{nameof(UserClaimPayload.ClaimType)}"
         );
     }
 
@@ -374,7 +375,7 @@ public class UpdateUserCommandValidatorTest
             .Negative()
             .Build();
         result.ShouldHaveValidationErrorFor(
-            $"{nameof(User.UserClaims)}[0].{nameof(UserClaimModel.ClaimValue)}"
+            $"{nameof(User.UserClaims)}[0].{nameof(UserClaimPayload.ClaimValue)}"
         );
     }
 

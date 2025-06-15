@@ -1,3 +1,4 @@
+using Application.Features.Common.Payloads.Roles;
 using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Create;
 using AutoFixture;
@@ -37,7 +38,7 @@ public class CreateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task CreateRole_WhenNoDescription_ShouldCreateRole()
     {
         // Arrange
-        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
+        var roleClaims = fixture.Build<RoleClaimPayload>().Without(x => x.Id).CreateMany(2).ToList();
 
         var command = fixture
             .Build<CreateRoleCommand>()
@@ -64,7 +65,7 @@ public class CreateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     public async Task CreateRole_ShouldCreateRole()
     {
         // Arrange
-        var roleClaims = fixture.Build<RoleClaimModel>().Without(x => x.Id).CreateMany(2).ToList();
+        var roleClaims = fixture.Build<RoleClaimPayload>().Without(x => x.Id).CreateMany(2).ToList();
 
         var command = fixture
             .Build<CreateRoleCommand>()
