@@ -7,11 +7,9 @@ using SharedKernel.Extensions;
 
 namespace Application.Common.Auth;
 
-public class AuthorizeHandler(IServiceProvider serviceProvider)
+public class AuthorizeHandler(IServiceProvider serviceProvider, ICurrentUser currentUser)
     : AuthorizationHandler<AuthorizationRequirement>
 {
-    private readonly IServiceProvider serviceProvider = serviceProvider;
-
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         AuthorizationRequirement requirement
@@ -20,10 +18,8 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
         using var scope = serviceProvider.CreateScope();
         IUserManagerService userManagerService =
             scope.ServiceProvider.GetRequiredService<IUserManagerService>();
-        ICurrentUser currentUser = scope.ServiceProvider.GetRequiredService<ICurrentUser>();
 
         Ulid? userId = currentUser.Id;
-
         if (userId == null)
         {
             context.Fail(new AuthorizationFailureReason(this, "User is UnAuthenticated"));
@@ -56,7 +52,7 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
                     permission
                 ))
             );
-            SuccessOrFailiureHandler(context, requirement, hasRolesAndClaims);
+            SuccessOrFailure(context, requirement, hasRolesAndClaims);
             return;
         }
 
@@ -66,7 +62,7 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
                 userId.Value,
                 authorizeModel.Roles
             );
-            SuccessOrFailiureHandler(context, requirement, hasRole);
+            SuccessOrFailure(context, requirement, hasRole);
 
             return;
         }
@@ -77,7 +73,7 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
                 userId.Value,
                 authorizeModel.Permissions
             );
-            SuccessOrFailiureHandler(context, requirement, hasPermission);
+            SuccessOrFailure(context, requirement, hasPermission);
 
             return;
         }
@@ -85,7 +81,7 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
         await Task.CompletedTask;
     }
 
-    private static void SuccessOrFailiureHandler(
+    private static void SuccessOrFailure(
         AuthorizationHandlerContext context,
         AuthorizationRequirement requirement,
         bool isSuccess = false

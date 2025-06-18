@@ -96,7 +96,7 @@ public class LoginUserHandler(
             new()
             {
                 Token = accessToken,
-                Refresh = refreshToken,
+                RefreshToken = refreshToken,
                 AccessTokenExpiredIn = (long)
                     Math.Ceiling((accesstokenExpiredTime - DateTime.UtcNow).TotalSeconds),
                 TokenType = JwtBearerDefaults.AuthenticationScheme,

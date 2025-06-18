@@ -15,10 +15,9 @@ public class LoggingBehavior<TMessage, TResponse>(ILogger logger, ICurrentUser c
 
         const string replacePhrase = "for user {userId}";
         string loggingMessage =
-            "\n\n Incomming request: {Name} " + replacePhrase + " with payload \n {@Request} \n";
+            "\n\n Incoming request: {Name} " + replacePhrase + " with payload \n {@Request} \n";
 
-        List<object> parameters = [requestName, id, message];
-
+        List<object?> parameters = [requestName, id, message];
         if (id == null)
         {
             loggingMessage = loggingMessage.Replace(
@@ -29,7 +28,7 @@ public class LoggingBehavior<TMessage, TResponse>(ILogger logger, ICurrentUser c
             parameters.RemoveAt(1);
         }
 
-        logger.Information(loggingMessage, [.. parameters]);
+        logger.Information(loggingMessage, parameters.ToArray());
         return default!;
     }
 }

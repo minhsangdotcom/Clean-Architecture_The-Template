@@ -16,9 +16,9 @@ public class UserDetailProjection : UserProjection
         Roles = user
             .UserRoles?.Select(userRole =>
             {
-                var userResonse = new RoleDetailProjection();
-                userResonse.MappingFrom(userRole.Role!);
-                return userResonse;
+                var userResponse = new RoleDetailProjection();
+                userResponse.MappingFrom(userRole.Role!);
+                return userResponse;
             })
             .ToList();
         UserClaims = user.UserClaims?.Select(claim => claim.ToRoleClaimDetailProjection()).ToList();
