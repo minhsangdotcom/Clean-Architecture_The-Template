@@ -7,11 +7,11 @@ public class Address : ValueObject
 {
     public string? Street { get; private set; }
 
-    public Ulid ProvinceId { get;private set; }
-    public string Province { get; private set; }
+    public Ulid ProvinceId { get; private set; }
+    public string Province { get; private set; } = string.Empty;
 
     public Ulid DistrictId { get; private set; }
-    public string District { get; private set; }
+    public string District { get; private set; } = string.Empty;
 
     public Ulid? CommuneId { get; private set; }
     public string? Commune { get; private set; }

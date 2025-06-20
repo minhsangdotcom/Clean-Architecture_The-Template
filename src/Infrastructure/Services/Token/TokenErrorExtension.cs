@@ -27,7 +27,7 @@ public class TokenErrorExtension
                 Status = forbiddenError.Status,
                 Extensions = new Dictionary<string, object?>()
                 {
-                    { "detail", forbiddenError.ErrorMessage },
+                    { "errorDetails", forbiddenError.ErrorMessage },
                 },
             };
 
@@ -55,7 +55,7 @@ public class TokenErrorExtension
                 Status = unauthorizedError.Status,
                 Extensions = new Dictionary<string, object?>()
                 {
-                    { "detail", unauthorizedError.ErrorMessage },
+                    { "errorDetails", unauthorizedError.ErrorMessage },
                 },
             };
 
