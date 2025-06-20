@@ -22,7 +22,7 @@ public static partial class QueryParamValidate
             return new(
                 Error: new BadRequestError(
                     Message,
-                    Messager
+                    Messenger
                         .Create<QueryParamRequest>("QueryParam")
                         .Property("Cursor")
                         .Message(MessageType.Redundant)
@@ -63,11 +63,11 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
                             .Message(MessageType.Missing)
-                            .ObjectName("ArrayIndex")
+                            .Object("ArrayIndex")
                             .Build()
                     )
                 );
@@ -79,12 +79,12 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
                             .Message(MessageType.Valid)
                             .Negative()
-                            .ObjectName("ArrayIndex")
+                            .Object("ArrayIndex")
                             .Build()
                     )
                 );
@@ -96,11 +96,11 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
                             .Message(MessageType.Missing)
-                            .ObjectName("Operator")
+                            .Object("Operator")
                             .Build()
                     )
                 );
@@ -112,11 +112,11 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
                             .Message(MessageType.Missing)
-                            .ObjectName("Element")
+                            .Object("Element")
                             .Build()
                     )
                 );
@@ -135,11 +135,11 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
                             .Message(MessageType.Missing)
-                            .ObjectName("Property")
+                            .Object("Property")
                             .Build()
                     )
                 );
@@ -158,11 +158,11 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property("FilterValue")
                             .Negative()
-                            .ObjectName("Integer")
+                            .Object("Integer")
                             .Build()
                     )
                 );
@@ -180,11 +180,11 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property("FilterValue")
                             .Negative()
-                            .ObjectName("Datetime")
+                            .Object("Datetime")
                             .Build()
                     )
                 );
@@ -196,11 +196,11 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property("FilterValue")
                             .Negative()
-                            .ObjectName("Ulid")
+                            .Object("Ulid")
                             .Build()
                     )
                 );
@@ -213,11 +213,11 @@ public static partial class QueryParamValidate
             return new(
                 Error: new BadRequestError(
                     Message,
-                    Messager
+                    Messenger
                         .Create<QueryParamRequest>("QueryParam")
                         .Property(x => x.Filter!)
                         .Message(MessageType.Valid)
-                        .ObjectName("BetweenOperator")
+                        .Object("BetweenOperator")
                         .Negative()
                         .Build()
                 )
@@ -230,11 +230,11 @@ public static partial class QueryParamValidate
             return new(
                 Error: new BadRequestError(
                     Message,
-                    Messager
+                    Messenger
                         .Create<QueryParamRequest>("QueryParam")
                         .Property(x => x.Filter!)
                         .Message(MessageType.Valid)
-                        .ObjectName("InOperator")
+                        .Object("InOperator")
                         .Negative()
                         .Build()
                 )
@@ -248,7 +248,7 @@ public static partial class QueryParamValidate
             return new(
                 Error: new BadRequestError(
                     Message,
-                    Messager
+                    Messenger
                         .Create<QueryParamRequest>("QueryParam")
                         .Property("FilterElement")
                         .Message(MessageType.Unique)

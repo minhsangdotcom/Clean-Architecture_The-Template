@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -28,8 +29,13 @@ public class DeleteUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User>
         {
             return Result<string>.Failure(
                 new NotFoundError(
-                    "Resource is not found",
-                    Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
+                        .Create<User>()
+                        .Message(MessageType.Found)
+                        .Negative()
+                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
+                        .BuildMessage()
                 )
             );
         }

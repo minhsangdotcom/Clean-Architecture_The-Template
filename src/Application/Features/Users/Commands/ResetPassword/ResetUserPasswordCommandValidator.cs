@@ -3,30 +3,29 @@ using Domain.Aggregates.Users;
 using FluentValidation;
 using SharedKernel.Common.Messages;
 
-namespace Application.Features.Users.Commands.ChangePassword;
+namespace Application.Features.Users.Commands.ResetPassword;
 
-public class ChangeUserPasswordCommandValidator : AbstractValidator<ChangeUserPasswordCommand>
+public class UpdateUserPasswordValidator : AbstractValidator<UpdateUserPassword>
 {
-    public ChangeUserPasswordCommandValidator()
+    public UpdateUserPasswordValidator()
     {
-        RuleFor(x => x.OldPassword)
+        RuleFor(x => x.Token)
             .NotEmpty()
             .WithState(x =>
                 Messenger
-                    .Create<ChangeUserPasswordCommand>(nameof(User))
-                    .Property(x => x.OldPassword!)
+                    .Create<UserResetPassword>()
+                    .Property(x => x.Token)
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
             );
 
-        RuleFor(x => x.NewPassword)
-            .Cascade(CascadeMode.Stop)
+        RuleFor(x => x.Password)
             .NotEmpty()
             .WithState(x =>
                 Messenger
-                    .Create<ChangeUserPasswordCommand>(nameof(User))
-                    .Property(x => x.NewPassword!)
+                    .Create<User>()
+                    .Property(x => x.Password!)
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
@@ -34,8 +33,8 @@ public class ChangeUserPasswordCommandValidator : AbstractValidator<ChangeUserPa
             .Must(x => x!.IsValidPassword())
             .WithState(x =>
                 Messenger
-                    .Create<ChangeUserPasswordCommand>(nameof(User))
-                    .Property(x => x.NewPassword!)
+                    .Create<User>(nameof(User))
+                    .Property(x => x.Password)
                     .Message(MessageType.Strong)
                     .Negative()
                     .Build()

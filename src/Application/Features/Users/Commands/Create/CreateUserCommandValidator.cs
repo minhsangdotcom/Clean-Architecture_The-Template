@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Application.Common.Extensions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Features.Common.Validators.Users;
@@ -9,11 +10,10 @@ using SharedKernel.Common.Messages;
 
 namespace Application.Features.Users.Commands.Create;
 
-public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
+public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 {
-    private readonly IUserManagerService userManagerService;
     private readonly IHttpContextAccessorService httpContextAccessorService;
-
+    private readonly IUserManagerService userManagerService;
     private readonly IRoleManagerService roleManagerService;
 
     public CreateUserCommandValidator(
@@ -35,34 +35,27 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
         RuleFor(x => x.Username)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Username!)
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
             )
-            .Must(
-                (_, x) =>
-                {
-                    Regex regex = UsernameValidationRegex();
-                    return regex.IsMatch(x!);
-                }
-            )
+            .Must((_, x) => x!.IsValidUsername())
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Username!)
                     .Message(MessageType.Valid)
                     .Negative()
                     .Build()
             )
-            .MustAsync(
-                (username, cancellationToken) =>
-                    IsUsernameAvailableAsync(username!, cancellationToken: cancellationToken)
+            .MustAsync((username, cancellationToken) =>
+                IsUsernameAvailableAsync(username!, cancellationToken: cancellationToken)
             )
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<User>()
                     .Property(x => x.Username)
                     .Message(MessageType.Existence)
@@ -72,22 +65,16 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
         RuleFor(x => x.Password)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Password!)
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
             )
-            .Must(
-                (_, x) =>
-                {
-                    Regex regex = PassowordValidationRegex();
-                    return regex.IsMatch(x!);
-                }
-            )
+            .Must((_, x) => x!.IsValidPassword())
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Password!)
                     .Message(MessageType.Strong)
@@ -98,7 +85,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
         RuleFor(x => x.Gender)
             .IsInEnum()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Gender!)
                     .Negative()
@@ -109,7 +96,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
         RuleFor(x => x.Status)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Status!)
                     .Message(MessageType.Null)
@@ -118,7 +105,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             )
             .IsInEnum()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Status!)
                     .Negative()
@@ -129,7 +116,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
         RuleFor(x => x.Roles)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Roles!)
                     .Message(MessageType.Null)
@@ -138,16 +125,16 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             )
             .Must(x => x!.Distinct().Count() == x!.Count)
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Roles!)
                     .Message(MessageType.Unique)
                     .Negative()
                     .Build()
             )
-            .MustAsync((roles, cancellationToken) => IsRolesAvailableAsync(roles!))
+            .MustAsync((roles, _) => IsRolesAvailableAsync(roles!))
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<CreateUserCommand>(nameof(User))
                     .Property(x => x.Roles!)
                     .Message(MessageType.Found)
@@ -169,7 +156,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                             .Count() == x.FindAll(x => x.Id == null).Count
                     )
                     .WithState(x =>
-                        Messager
+                        Messenger
                             .Create<User>()
                             .Property(x => x.UserClaims!)
                             .Message(MessageType.Unique)
@@ -184,23 +171,11 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
         string username,
         Ulid? id = null,
         CancellationToken cancellationToken = default
-    )
-    {
-        return !await userManagerService.User.AnyAsync(
-            x => (!id.HasValue && x.Username == username) || (x.Id != id && x.Username == username),
-            cancellationToken
-        );
-    }
+    ) => !await userManagerService.User.AnyAsync(
+        x => (!id.HasValue && x.Username == username) || (x.Id != id && x.Username == username),
+        cancellationToken
+    );
 
-    private async Task<bool> IsRolesAvailableAsync(IEnumerable<Ulid> roles)
-    {
-        return await roleManagerService.Roles.CountAsync(x => roles.Contains(x.Id))
-            == roles.Count();
-    }
-
-    [GeneratedRegex(@"^[a-zA-Z0-9_.]+$")]
-    private static partial Regex UsernameValidationRegex();
-
-    [GeneratedRegex(@"^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{8,})\S$")]
-    private static partial Regex PassowordValidationRegex();
+    private async Task<bool> IsRolesAvailableAsync(IEnumerable<Ulid> roles) =>
+        await roleManagerService.Roles.CountAsync(x => roles.Contains(x.Id)) == roles.Count();
 }

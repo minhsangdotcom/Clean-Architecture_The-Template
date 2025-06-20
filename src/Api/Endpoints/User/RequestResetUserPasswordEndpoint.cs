@@ -15,7 +15,7 @@ public class RequestResetUserPasswordEndpoint : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost(Router.UserRoute.RequestResetPassowrd, HandleAsync)
+        app.MapPost(Router.UserRoute.RequestResetPassword, HandleAsync)
             .WithOpenApi(operation => new OpenApiOperation(operation)
             {
                 Summary = "Request password reset 📧",

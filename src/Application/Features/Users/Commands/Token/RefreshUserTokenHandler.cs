@@ -37,8 +37,8 @@ public class RefreshUserTokenHandler(
         {
             return Result<RefreshUserTokenResponse>.Failure(
                 new BadRequestError(
-                    "Error has occured with the Refresh token",
-                    Messager
+                    "Error has occurred with the Refresh token",
+                    Messenger
                         .Create<UserToken>(nameof(User))
                         .Property(x => x.RefreshToken!)
                         .Message(MessageType.Valid)
@@ -51,7 +51,7 @@ public class RefreshUserTokenHandler(
         IList<UserToken> refreshTokens = await unitOfWork
             .DynamicReadOnlyRepository<UserToken>()
             .ListAsync(
-                new ListRefreshtokenByFamillyIdSpecification(
+                new ListRefreshTokenByFamilyIdSpecification(
                     decodeToken!.FamilyId!,
                     Ulid.Parse(decodeToken.Sub!)
                 ),
@@ -65,14 +65,14 @@ public class RefreshUserTokenHandler(
         if (refreshTokens.Count <= 0)
         {
             return Result<RefreshUserTokenResponse>.Failure(
-                new BadRequestError(
-                    "Error has occured with the Refresh token",
-                    Messager
+                new UnauthorizedError(
+                    "Error has occurred with the Refresh token",
+                    Messenger
                         .Create<UserToken>(nameof(User))
                         .Property(x => x.RefreshToken!)
                         .Negative()
                         .Message(MessageType.Identical)
-                        .ObjectName("TheCurrentOne")
+                        .Object("TheCurrentOne")
                         .BuildMessage()
                 )
             );
@@ -87,14 +87,14 @@ public class RefreshUserTokenHandler(
             await unitOfWork.SaveAsync(cancellationToken);
 
             return Result<RefreshUserTokenResponse>.Failure(
-                new BadRequestError(
-                    "Error has occured with the Refresh token",
-                    Messager
+                new UnauthorizedError(
+                    "Error has occurred with the Refresh token",
+                    Messenger
                         .Create<UserToken>(nameof(User))
                         .Property(x => x.RefreshToken!)
                         .Negative()
                         .Message(MessageType.Identical)
-                        .ObjectName("TheCurrentOne")
+                        .Object("TheCurrentOne")
                         .BuildMessage()
                 )
             );
@@ -104,22 +104,22 @@ public class RefreshUserTokenHandler(
         {
             return Result<RefreshUserTokenResponse>.Failure(
                 new BadRequestError(
-                    "Error has occured with the current user",
-                    Messager.Create<User>().Message(MessageType.Active).Negative().BuildMessage()
+                    "Error has occurred with the current user",
+                    Messenger.Create<User>().Message(MessageType.Active).Negative().BuildMessage()
                 )
             );
         }
 
-        var accesstokenExpiredTime = tokenFactory.AccesstokenExpiredTime;
+        var accessTokenExpiredTime = tokenFactory.AccessTokenExpiredTime;
         var accessToken = tokenFactory.CreateToken(
-            [new(JwtRegisteredClaimNames.Sub.ToString(), decodeToken.Sub!.ToString())],
-            accesstokenExpiredTime
+            [new(JwtRegisteredClaimNames.Sub, decodeToken.Sub!)],
+            accessTokenExpiredTime
         );
 
-        var refreshTokenExpiredTime = tokenFactory.RefreshtokenExpiredTime;
+        var refreshTokenExpiredTime = tokenFactory.RefreshTokenExpiredTime;
         string refreshToken = tokenFactory.CreateToken(
             [
-                new(JwtRegisteredClaimNames.Sub.ToString(), decodeToken.Sub!.ToString()),
+                new(JwtRegisteredClaimNames.Sub, decodeToken.Sub!),
                 new(ClaimTypes.TokenFamilyId, decodeToken.FamilyId!),
                 new(
                     JwtRegisteredClaimNames.UniqueName,

@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Features.Users.Commands.Delete;
 using Application.SubcutaneousTests.Extensions;
 using Contracts.ApiWrapper;
@@ -18,10 +19,11 @@ public class DeleteUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         Result<string> result = await testingFixture.SendAsync(
             new DeleteUserCommand(Ulid.NewUlid())
         );
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<User>()
             .Message(MessageType.Found)
             .Negative()
+            .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
             .BuildMessage();
         result.Error.ShouldNotBeNull();
         result.Error.Status.ShouldBe(404);

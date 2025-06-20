@@ -38,7 +38,7 @@ public class UpdateUserEndpoint : IEndpoint
         CancellationToken cancellationToken = default
     )
     {
-        var command = new UpdateUserCommand() { UserId = id.ToString(), UpdateData = request };
+        var command = new UpdateUserCommand() { UserId = id, UpdateData = request };
         var result = await sender.Send(command, cancellationToken);
         return result.ToResult();
     }

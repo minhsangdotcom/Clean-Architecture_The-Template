@@ -1,5 +1,5 @@
+using Application.Common.Constants;
 using Application.Common.Errors;
-using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
@@ -30,8 +30,13 @@ public class GetUserProfileHandler(IUnitOfWork unitOfWork, ICurrentUser currentU
         {
             return Result<GetUserProfileResponse>.Failure(
                 new NotFoundError(
-                    "resource is not found",
-                    Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
+                        .Create<User>()
+                        .Message(MessageType.Found)
+                        .Negative()
+                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
+                        .BuildMessage()
                 )
             );
         }

@@ -385,31 +385,31 @@
       },
       "Microsoft.EntityFrameworkCore": {
         "type": "Transitive",
-        "resolved": "8.0.13",
-        "contentHash": "4wyLeg64sZgJcER83fkitlKuySY3OzwcOZSZcGV1TNskmThupfhcVlsQht7bNCfNpXTCZVNIOwAZChk6/OFdXQ==",
+        "resolved": "8.0.17",
+        "contentHash": "WqZly7Guj0I9EKXrPMCQFDaJMEIRHxfIs7/0ZUB3H1k4a15R1QgzN5ZGCCYoQWMLe0XL0f9AZIB4XwumeO9Gvw==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore.Abstractions": "8.0.13",
-          "Microsoft.EntityFrameworkCore.Analyzers": "8.0.13",
+          "Microsoft.EntityFrameworkCore.Abstractions": "8.0.17",
+          "Microsoft.EntityFrameworkCore.Analyzers": "8.0.17",
           "Microsoft.Extensions.Caching.Memory": "8.0.1",
           "Microsoft.Extensions.Logging": "8.0.1"
         }
       },
       "Microsoft.EntityFrameworkCore.Abstractions": {
         "type": "Transitive",
-        "resolved": "8.0.13",
-        "contentHash": "a6O+v8CMStumpVoQyN0aUpx5P3/qYZP+5791sGrzJhIM+QsniQdSaJVdUSneL40M+FpBgtiC8ggqzNo2x/gVlw=="
+        "resolved": "8.0.17",
+        "contentHash": "qj8GWkooslMPawGU/uKljHx9q9zI80qZ2O1nMpHsSA7Ud78B0G1rth3u4tYAMp8/SAuOeaXXa4FzwiyMOtIEOA=="
       },
       "Microsoft.EntityFrameworkCore.Analyzers": {
         "type": "Transitive",
-        "resolved": "8.0.13",
-        "contentHash": "ENny33QADFiRxge5ikJBs2p7JB4MQx/ZSPKPNwt2eJPO0lVUGSjTiJeunGGggkVHiaUy0yY4f625LQtNlErIsw=="
+        "resolved": "8.0.17",
+        "contentHash": "ndRuqcOP6GV3tMCyPipuMNbQq2dUNdRlcvfbXkfwbm8b8fc6psLIABgkL5qaekgyTKxEa1ftnidU7S0til/Jwg=="
       },
       "Microsoft.EntityFrameworkCore.Relational": {
         "type": "Transitive",
-        "resolved": "8.0.13",
-        "contentHash": "uQR2iTar+6ZEjEHTwgH0/7ySSRme4R9sDiupfG3w/eBub3365fPw/MjhsuOMQkdq9YzLM7veH4Qt/K9OqL26Qg==",
+        "resolved": "8.0.17",
+        "contentHash": "qgCpPznBOuCU7vebzjIz9uIJaHUQ6X4olzk2eoAY/o0hY/4yKyeOf7zmVSHz9xFPrcPMK4K0Kfl7/ZMHdagtsg==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore": "8.0.13",
+          "Microsoft.EntityFrameworkCore": "8.0.17",
           "Microsoft.Extensions.Configuration.Abstractions": "8.0.0"
         }
       },
@@ -617,8 +617,8 @@
       },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Transitive",
-        "resolved": "1.0.5",
-        "contentHash": "eLBp/Wxf6EWmxrKPAw61HJI52XqVeNOvVW5bvcs4ONCENS93DPz+5lHYflpNR8rgBwRKwNyGarbIcnx9vl3aWA==",
+        "resolved": "1.0.6",
+        "contentHash": "/1uRwtcPgtx/MJ9lyCntl+cONRxQWm71JtXwWZuPyTdAp4v0ODN6mUCHIjBrNMSY09Ev0JC6K71h0zhYEeKWsw==",
         "dependencies": {
           "BouncyCastle.Cryptography": "2.5.1",
           "CaseConverter": "2.0.1",
@@ -627,11 +627,11 @@
       },
       "minhsangdotcom.TheTemplate.SpecificationPattern": {
         "type": "Transitive",
-        "resolved": "1.0.3",
-        "contentHash": "JrRS/VkX4zA/cHazsaSrP0JYwxAA/LueTaiKrkUZIYBdvsL9AuIBfSdLbaedsTWy0Lj7Eqr1qjHGLetm9AKNQg==",
+        "resolved": "1.0.4",
+        "contentHash": "zvQA18+BM7T5v1zOOB9xrMi7kJabW3xBI7vidW2eny1iMJxkO63N2eF/6LSZtp4d0OhNpBI7HuwEtM1ckZKz5g==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore": "8.0.13",
-          "Microsoft.EntityFrameworkCore.Relational": "8.0.13"
+          "Microsoft.EntityFrameworkCore": "8.0.17",
+          "Microsoft.EntityFrameworkCore.Relational": "8.0.17"
         }
       },
       "NetTopologySuite": {
@@ -842,8 +842,8 @@
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
           "Mediator.Abstractions": "[3.0.0-preview.65, )",
-          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.5, )",
-          "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.3, )"
+          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.6, )",
+          "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.4, )"
         }
       }
     }

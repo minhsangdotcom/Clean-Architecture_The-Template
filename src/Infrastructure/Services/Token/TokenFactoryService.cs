@@ -13,9 +13,9 @@ public class TokenFactoryService(IOptions<JwtSettings> jwtSettings) : ITokenFact
 {
     private readonly JwtSettings settings = jwtSettings.Value;
 
-    public DateTime AccesstokenExpiredTime => GetAccesstokenExpiredTime();
+    public DateTime AccessTokenExpiredTime => GetAccessTokenExpiredTime();
 
-    public DateTime RefreshtokenExpiredTime => GetRefreshtokenExpiredTime();
+    public DateTime RefreshTokenExpiredTime => GetRefreshTokenExpiredTime();
 
     public string CreateToken(IEnumerable<Claim> claims, DateTime expirationTime)
     {
@@ -43,9 +43,9 @@ public class TokenFactoryService(IOptions<JwtSettings> jwtSettings) : ITokenFact
         return SerializerExtension.Deserialize<DecodeTokenResponse>(json).Object!;
     }
 
-    private DateTime GetAccesstokenExpiredTime() =>
-        DateTime.UtcNow.AddHours(double.Parse(settings.ExpireTimeAccessToken!));
+    private DateTime GetAccessTokenExpiredTime() =>
+        DateTime.UtcNow.AddMinutes(double.Parse(settings.ExpireTimeAccessToken!));
 
-    private DateTime GetRefreshtokenExpiredTime() =>
+    private DateTime GetRefreshTokenExpiredTime() =>
         DateTime.UtcNow.AddDays(double.Parse(settings.ExpireTimeRefreshToken!));
 }

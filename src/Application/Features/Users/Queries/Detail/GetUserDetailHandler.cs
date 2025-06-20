@@ -29,7 +29,7 @@ public class GetUserDetailHandler(IUnitOfWork unitOfWork)
             return Result<GetUserDetailResponse>.Failure(
                 new NotFoundError(
                     "",
-                    Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()
+                    Messenger.Create<User>().Message(MessageType.Found).Negative().BuildMessage()
                 )
             );
         }

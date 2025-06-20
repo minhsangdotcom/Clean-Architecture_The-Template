@@ -48,7 +48,7 @@ public partial class CreateUserCommandValidatorTest
     {
         //arrage
         command!.FirstName = firstName;
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.FirstName)
             .Message(MessageType.Null)
@@ -71,7 +71,7 @@ public partial class CreateUserCommandValidatorTest
     public async Task Validate_WhenInvalidLengthOfFirstName_ShouldReturnMaximumLengthFailure()
     {
         command!.FirstName = new string([.. fixture.CreateMany<char>(257)]);
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.FirstName)
             .Message(MessageType.MaximumLength)
@@ -94,7 +94,7 @@ public partial class CreateUserCommandValidatorTest
     {
         command!.LastName = lastName;
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.LastName)
             .Message(MessageType.Null)
@@ -113,7 +113,7 @@ public partial class CreateUserCommandValidatorTest
     {
         command!.LastName = new string([.. fixture.CreateMany<char>(257)]);
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.LastName)
             .Message(MessageType.MaximumLength)
@@ -133,7 +133,7 @@ public partial class CreateUserCommandValidatorTest
     public async Task Validate_WhenEmailNullOrEmpty_ShouldReturnNullFailure(string? email)
     {
         command!.Email = email;
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.Email)
             .Message(MessageType.Null)
@@ -155,7 +155,7 @@ public partial class CreateUserCommandValidatorTest
     {
         command!.Email = email;
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.Email)
             .Message(MessageType.Valid)
@@ -184,7 +184,7 @@ public partial class CreateUserCommandValidatorTest
         const string existedEmail = "admin@gmail.com";
         command!.Email = existedEmail;
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.Email)
             .Message(MessageType.Existence)
@@ -212,7 +212,7 @@ public partial class CreateUserCommandValidatorTest
     public async Task Validate_WhenPhoneNumberNullOrEmpty_ShouldReturNullFailure(string phoneNumber)
     {
         command!.PhoneNumber = phoneNumber;
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.PhoneNumber)
             .Message(MessageType.Null)
@@ -239,7 +239,7 @@ public partial class CreateUserCommandValidatorTest
     {
         command!.PhoneNumber = phoneNumber;
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.PhoneNumber)
             .Message(MessageType.Valid)
@@ -270,7 +270,7 @@ public partial class CreateUserCommandValidatorTest
     {
         command!.ProvinceId = Ulid.Empty;
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(nameof(CreateUserCommand.ProvinceId))
             .Message(MessageType.Null)
@@ -293,7 +293,7 @@ public partial class CreateUserCommandValidatorTest
     {
         command!.DistrictId = Ulid.Empty;
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(nameof(CreateUserCommand.DistrictId))
             .Message(MessageType.Null)
@@ -316,7 +316,7 @@ public partial class CreateUserCommandValidatorTest
     {
         command!.Street = street;
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(nameof(CreateUserCommand.Street))
             .Message(MessageType.Null)
@@ -339,7 +339,7 @@ public partial class CreateUserCommandValidatorTest
     {
         command!.Username = username;
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<CreateUserCommand>(nameof(User))
             .Property(x => x.Username!)
             .Message(MessageType.Null)
@@ -361,7 +361,7 @@ public partial class CreateUserCommandValidatorTest
     [InlineData("admin123!")]
     public async Task CreateUser_WhenInvalidUsername_ShouldReturnInValidFailure(string username)
     {
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<CreateUserCommand>(nameof(User))
             .Property(x => x.Username!)
             .Message(MessageType.Valid)
@@ -390,7 +390,7 @@ public partial class CreateUserCommandValidatorTest
         string existedUserName = "admin";
         command!.Username = existedUserName;
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.Username)
             .Message(MessageType.Existence)
@@ -419,7 +419,7 @@ public partial class CreateUserCommandValidatorTest
     public async Task Validate_WhenPasswordNullOrEmpty_ShouldReturnNullFailure(string password)
     {
         command!.Password = password;
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<CreateUserCommand>(nameof(User))
             .Property(x => x.Password!)
             .Message(MessageType.Null)
@@ -440,7 +440,7 @@ public partial class CreateUserCommandValidatorTest
     {
         command!.Password = password;
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<CreateUserCommand>(nameof(User))
             .Property(x => x.Password!)
             .Message(MessageType.Strong)
@@ -471,7 +471,7 @@ public partial class CreateUserCommandValidatorTest
     {
         command!.Gender = (Gender)gender;
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<CreateUserCommand>(nameof(User))
             .Property(x => x.Gender!)
             .Negative()
@@ -491,7 +491,7 @@ public partial class CreateUserCommandValidatorTest
     {
         command!.Status = 0;
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<CreateUserCommand>(nameof(User))
             .Property(x => x.Status!)
             .Message(MessageType.Null)
@@ -514,7 +514,7 @@ public partial class CreateUserCommandValidatorTest
     )
     {
         command!.Status = (UserStatus)status;
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<CreateUserCommand>(nameof(User))
             .Property(x => x.Status!)
             .Negative()
@@ -534,7 +534,7 @@ public partial class CreateUserCommandValidatorTest
     {
         command!.Roles = null;
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<CreateUserCommand>(nameof(User))
             .Property(x => x.Roles!)
             .Message(MessageType.Null)
@@ -554,7 +554,7 @@ public partial class CreateUserCommandValidatorTest
     {
         command!.Roles!.Add(roleId);
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<CreateUserCommand>(nameof(User))
             .Property(x => x.Roles!)
             .Message(MessageType.Unique)
@@ -577,7 +577,7 @@ public partial class CreateUserCommandValidatorTest
         command!.Roles!.Add(Ulid.NewUlid());
         List<Ulid> existedroles = [roleId, Ulid.NewUlid()];
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<CreateUserCommand>(nameof(User))
             .Property(x => x.Roles!)
             .Message(MessageType.Found)
@@ -605,7 +605,7 @@ public partial class CreateUserCommandValidatorTest
     {
         command!.UserClaims!.ForEach(x => x.ClaimType = type);
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<UserClaim>(nameof(User.UserClaims))
             .Property(x => x.ClaimType!)
             .Message(MessageType.Null)
@@ -629,7 +629,7 @@ public partial class CreateUserCommandValidatorTest
     {
         command!.UserClaims!.ForEach(x => x.ClaimValue = value);
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<UserClaim>(nameof(User.UserClaims))
             .Property(x => x.ClaimValue!)
             .Message(MessageType.Null)
@@ -653,7 +653,7 @@ public partial class CreateUserCommandValidatorTest
             new UserClaimPayload() { ClaimType = "test", ClaimValue = "test.value" }
         );
 
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.UserClaims!)
             .Message(MessageType.Unique)

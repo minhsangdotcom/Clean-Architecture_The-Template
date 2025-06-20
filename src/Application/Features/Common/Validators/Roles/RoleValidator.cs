@@ -32,7 +32,7 @@ public class RoleValidator : AbstractValidator<RolePayload>
         RuleFor(x => x.Name)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<RolePayload>(nameof(Role))
                     .Property(x => x.Name!)
                     .Negative()
@@ -41,7 +41,7 @@ public class RoleValidator : AbstractValidator<RolePayload>
             )
             .MaximumLength(256)
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<RolePayload>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.MaximumLength)
@@ -56,7 +56,7 @@ public class RoleValidator : AbstractValidator<RolePayload>
                 ApplyConditionTo.CurrentValidator
             )
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<RolePayload>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.Existence)
@@ -70,7 +70,7 @@ public class RoleValidator : AbstractValidator<RolePayload>
                 ApplyConditionTo.CurrentValidator
             )
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<RolePayload>(nameof(Role))
                     .Property(x => x.Name!)
                     .Message(MessageType.Existence)
@@ -81,7 +81,7 @@ public class RoleValidator : AbstractValidator<RolePayload>
             .MaximumLength(1000)
             .When(x => x.Description != null, ApplyConditionTo.CurrentValidator)
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<RolePayload>(nameof(Role))
                     .Property(x => x.Description!)
                     .Message(MessageType.MaximumLength)

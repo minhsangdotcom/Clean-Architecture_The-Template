@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -32,8 +33,8 @@ public class CreateUserHandler(
         {
             return Result<CreateUserResponse>.Failure<NotFoundError>(
                 new(
-                    "Resource is not found",
-                    Messager
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
                         .Create<User>()
                         .Property(nameof(CreateUserCommand.ProvinceId))
                         .Message(MessageType.Existence)
@@ -50,8 +51,8 @@ public class CreateUserHandler(
         {
             return Result<CreateUserResponse>.Failure<NotFoundError>(
                 new(
-                    "Resource is not found",
-                    Messager
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
                         .Create<User>()
                         .Property(nameof(CreateUserCommand.DistrictId))
                         .Message(MessageType.Existence)
@@ -72,8 +73,8 @@ public class CreateUserHandler(
             {
                 return Result<CreateUserResponse>.Failure<NotFoundError>(
                     new(
-                        "Resource is not found",
-                        Messager
+                        TitleMessage.RESOURCE_NOT_FOUND,
+                        Messenger
                             .Create<User>()
                             .Property(nameof(CreateUserCommand.CommuneId))
                             .Message(MessageType.Existence)

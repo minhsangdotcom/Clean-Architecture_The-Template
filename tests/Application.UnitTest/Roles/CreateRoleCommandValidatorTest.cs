@@ -50,7 +50,7 @@ public class CreateRoleCommandValidatorTest
         var result = await validator.TestValidateAsync(command);
 
         //assert
-        MessageResult expectedState = Messager
+        MessageResult expectedState = Messenger
             .Create<RolePayload>(nameof(Role))
             .Property(x => x.Name!)
             .Negative()
@@ -73,7 +73,7 @@ public class CreateRoleCommandValidatorTest
         var result = await validator.TestValidateAsync(command);
 
         //assert
-        MessageResult expectedState = Messager
+        MessageResult expectedState = Messenger
             .Create<RolePayload>(nameof(Role))
             .Property(x => x.Name!)
             .Message(MessageType.MaximumLength)
@@ -91,7 +91,7 @@ public class CreateRoleCommandValidatorTest
         //arrage
         const string existedName = "ADMIN";
         command.Name = existedName;
-        MessageResult expectedState = Messager
+        MessageResult expectedState = Messenger
             .Create<RolePayload>(nameof(Role))
             .Property(x => x.Name!)
             .Message(MessageType.Existence)
@@ -122,7 +122,7 @@ public class CreateRoleCommandValidatorTest
         var result = await validator.TestValidateAsync(command);
 
         //assert
-        MessageResult expectedState = Messager
+        MessageResult expectedState = Messenger
             .Create<RolePayload>(nameof(Role))
             .Property(x => x.Description!)
             .Message(MessageType.MaximumLength)
@@ -144,7 +144,7 @@ public class CreateRoleCommandValidatorTest
         var result = await validator.TestValidateAsync(command);
 
         //assert
-        MessageResult expectedState = Messager
+        MessageResult expectedState = Messenger
             .Create<RoleClaim>(nameof(Role.RoleClaims))
             .Property(x => x.ClaimType!)
             .Message(MessageType.Null)
@@ -168,7 +168,7 @@ public class CreateRoleCommandValidatorTest
         var result = await validator.TestValidateAsync(command);
 
         //assert
-        MessageResult expectedState = Messager
+        MessageResult expectedState = Messenger
             .Create<RoleClaim>(nameof(Role.RoleClaims))
             .Property(x => x.ClaimType!)
             .Message(MessageType.Null)
@@ -188,7 +188,7 @@ public class CreateRoleCommandValidatorTest
         //act
         var result = await validator.TestValidateAsync(command);
         //assert
-        MessageResult expectedState = Messager
+        MessageResult expectedState = Messenger
             .Create<RoleClaim>(nameof(Role.RoleClaims))
             .Property(x => x.ClaimValue!)
             .Message(MessageType.Null)
@@ -208,7 +208,7 @@ public class CreateRoleCommandValidatorTest
         //act
         var result = await validator.TestValidateAsync(command);
         //assert
-        MessageResult expectedState = Messager
+        MessageResult expectedState = Messenger
             .Create<RoleClaim>(nameof(Role.RoleClaims))
             .Property(x => x.ClaimValue!)
             .Message(MessageType.Null)

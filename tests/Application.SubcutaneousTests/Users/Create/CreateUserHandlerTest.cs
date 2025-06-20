@@ -29,7 +29,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
 
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<User>()
             .Property(nameof(CreateUserCommand.ProvinceId))
             .Message(MessageType.Existence)
@@ -49,7 +49,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
 
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<User>()
             .Property(nameof(CreateUserCommand.DistrictId))
             .Message(MessageType.Existence)
@@ -69,7 +69,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
 
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<User>()
             .Property(nameof(CreateUserCommand.CommuneId))
             .Message(MessageType.Existence)

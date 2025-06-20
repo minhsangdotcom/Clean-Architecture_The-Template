@@ -53,7 +53,7 @@ public class UpdateUserCommandValidatorTest
         var result = await validator.TestValidateAsync(userUpdate);
 
         //assert
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.FirstName)
             .Message(MessageType.Null)
@@ -74,7 +74,7 @@ public class UpdateUserCommandValidatorTest
         var result = await validator.TestValidateAsync(userUpdate);
 
         //assert
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.FirstName)
             .Message(MessageType.MaximumLength)
@@ -95,7 +95,7 @@ public class UpdateUserCommandValidatorTest
         var result = await validator.TestValidateAsync(userUpdate);
 
         //assert
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.LastName)
             .Message(MessageType.Null)
@@ -116,7 +116,7 @@ public class UpdateUserCommandValidatorTest
         var result = await validator.TestValidateAsync(userUpdate);
 
         //assert
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.LastName)
             .Message(MessageType.MaximumLength)
@@ -138,7 +138,7 @@ public class UpdateUserCommandValidatorTest
         var result = await validator.TestValidateAsync(userUpdate);
 
         //assert
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.Email)
             .Message(MessageType.Null)
@@ -162,7 +162,7 @@ public class UpdateUserCommandValidatorTest
         var result = await validator.TestValidateAsync(userUpdate);
 
         //assert
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.Email)
             .Message(MessageType.Valid)
@@ -179,7 +179,7 @@ public class UpdateUserCommandValidatorTest
     {
         const string existedEmail = "admin@gmail.com";
         userUpdate!.Email = existedEmail;
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.Email)
             .Message(MessageType.Existence)
@@ -215,7 +215,7 @@ public class UpdateUserCommandValidatorTest
         var result = await validator.TestValidateAsync(userUpdate);
 
         //assert
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.PhoneNumber)
             .Message(MessageType.Null)
@@ -240,7 +240,7 @@ public class UpdateUserCommandValidatorTest
         var result = await validator.TestValidateAsync(userUpdate);
 
         //assert
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(x => x.PhoneNumber)
             .Message(MessageType.Valid)
@@ -262,7 +262,7 @@ public class UpdateUserCommandValidatorTest
         var result = await validator.TestValidateAsync(userUpdate);
 
         //assert
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(nameof(UserUpdateRequest.ProvinceId))
             .Message(MessageType.Null)
@@ -282,7 +282,7 @@ public class UpdateUserCommandValidatorTest
         var result = await validator.TestValidateAsync(userUpdate);
 
         //assert
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(nameof(UserUpdateRequest.DistrictId))
             .Message(MessageType.Null)
@@ -305,7 +305,7 @@ public class UpdateUserCommandValidatorTest
         var result = await validator.TestValidateAsync(userUpdate);
 
         //assert
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<User>()
             .Property(nameof(UserUpdateRequest.Street))
             .Message(MessageType.Null)
@@ -325,7 +325,7 @@ public class UpdateUserCommandValidatorTest
         //act
         var result = await validator.TestValidateAsync(userUpdate);
         //assert
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<UserUpdateRequest>(nameof(User))
             .Property(x => x.Roles!)
             .Message(MessageType.Null)
@@ -347,7 +347,7 @@ public class UpdateUserCommandValidatorTest
         //act
         var result = await validator.TestValidateAsync(userUpdate);
         //assert
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<UserClaim>(nameof(User.UserClaims))
             .Property(x => x.ClaimType!)
             .Message(MessageType.Null)
@@ -368,7 +368,7 @@ public class UpdateUserCommandValidatorTest
         //act
         var result = await validator.TestValidateAsync(userUpdate);
         //assert
-        var expectedState = Messager
+        var expectedState = Messenger
             .Create<UserClaim>(nameof(User.UserClaims))
             .Property(x => x.ClaimValue!)
             .Message(MessageType.Null)

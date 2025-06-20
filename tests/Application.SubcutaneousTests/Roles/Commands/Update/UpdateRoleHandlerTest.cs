@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Features.Common.Payloads.Roles;
 using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Update;
@@ -34,10 +35,11 @@ public class UpdateRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         var result = await testingFixture.SendAsync(updateRoleCommand);
 
         // Assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<Role>()
             .Message(MessageType.Found)
             .Negative()
+            .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
             .BuildMessage();
 
         result.Error.ShouldNotBeNull();

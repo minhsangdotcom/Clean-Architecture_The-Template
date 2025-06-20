@@ -5,9 +5,9 @@ namespace Application.Common.Interfaces.Services.Token;
 
 public interface ITokenFactoryService
 {
-    public DateTime AccesstokenExpiredTime { get; }
+    public DateTime AccessTokenExpiredTime { get; }
 
-    public DateTime RefreshtokenExpiredTime { get; }
+    public DateTime RefreshTokenExpiredTime { get; }
 
     DecodeTokenResponse DecodeToken(string token);
 

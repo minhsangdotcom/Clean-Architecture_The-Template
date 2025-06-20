@@ -19,7 +19,7 @@ public class UpdateUserCommandValidator : AbstractValidator<UserUpdateRequest>
         RuleFor(x => x.Roles)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<UserUpdateRequest>(nameof(User))
                     .Property(x => x.Roles!)
                     .Message(MessageType.Null)
