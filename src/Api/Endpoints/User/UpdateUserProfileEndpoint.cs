@@ -24,7 +24,8 @@ public class UpdateUserProfileEndpoint : IEndpoint
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
             .WithRequestValidation<UpdateUserProfileCommand>()
-            .RequireAuth();
+            .RequireAuth()
+            .DisableAntiforgery();
     }
 
     private async Task<

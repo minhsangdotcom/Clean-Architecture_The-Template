@@ -9,9 +9,10 @@ public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserPro
 {
     public UpdateUserProfileCommandValidator(
         IUserManagerService userManagerService,
-        IHttpContextAccessorService httpContextAccessorService
+        IHttpContextAccessorService httpContextAccessorService,
+        ICurrentUser currentUser
     )
     {
-        Include(new UserValidator(userManagerService, httpContextAccessorService));
+        Include(new UserValidator(userManagerService, httpContextAccessorService, currentUser));
     }
 }

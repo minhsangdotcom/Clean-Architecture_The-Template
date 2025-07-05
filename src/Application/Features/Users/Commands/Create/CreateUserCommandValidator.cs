@@ -19,19 +19,20 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
     public CreateUserCommandValidator(
         IUserManagerService userManagerService,
         IHttpContextAccessorService httpContextAccessorService,
-        IRoleManagerService roleManagerService
+        IRoleManagerService roleManagerService,
+        ICurrentUser currentUser
     )
     {
         this.userManagerService = userManagerService;
         this.httpContextAccessorService = httpContextAccessorService;
         this.roleManagerService = roleManagerService;
 
-        ApplyRules();
+        ApplyRules(currentUser);
     }
 
-    private void ApplyRules()
+    private void ApplyRules(ICurrentUser currentUser)
     {
-        Include(new UserValidator(userManagerService, httpContextAccessorService));
+        Include(new UserValidator(userManagerService, httpContextAccessorService, currentUser)!);
         RuleFor(x => x.Username)
             .NotEmpty()
             .WithState(x =>
@@ -51,8 +52,9 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
                     .Negative()
                     .Build()
             )
-            .MustAsync((username, cancellationToken) =>
-                IsUsernameAvailableAsync(username!, cancellationToken: cancellationToken)
+            .MustAsync(
+                (username, cancellationToken) =>
+                    IsUsernameAvailableAsync(username!, cancellationToken: cancellationToken)
             )
             .WithState(x =>
                 Messenger
@@ -171,10 +173,11 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
         string username,
         Ulid? id = null,
         CancellationToken cancellationToken = default
-    ) => !await userManagerService.User.AnyAsync(
-        x => (!id.HasValue && x.Username == username) || (x.Id != id && x.Username == username),
-        cancellationToken
-    );
+    ) =>
+        !await userManagerService.User.AnyAsync(
+            x => (!id.HasValue && x.Username == username) || (x.Id != id && x.Username == username),
+            cancellationToken
+        );
 
     private async Task<bool> IsRolesAvailableAsync(IEnumerable<Ulid> roles) =>
         await roleManagerService.Roles.CountAsync(x => roles.Contains(x.Id)) == roles.Count();
