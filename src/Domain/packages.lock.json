@@ -19,9 +19,9 @@
       },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Direct",
-        "requested": "[1.0.6, )",
-        "resolved": "1.0.6",
-        "contentHash": "/1uRwtcPgtx/MJ9lyCntl+cONRxQWm71JtXwWZuPyTdAp4v0ODN6mUCHIjBrNMSY09Ev0JC6K71h0zhYEeKWsw==",
+        "requested": "[1.0.7, )",
+        "resolved": "1.0.7",
+        "contentHash": "ygchElTS/HLvoBFFvJOYNRCaTpduw5/fycLHAK8MBlf2G2uEIHiGd3hVtCEnCXE5TdwI5AiO+vYKquEsmjqKNw==",
         "dependencies": {
           "BouncyCastle.Cryptography": "2.5.1",
           "CaseConverter": "2.0.1",
