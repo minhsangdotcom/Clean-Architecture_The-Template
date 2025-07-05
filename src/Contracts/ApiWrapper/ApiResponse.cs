@@ -2,9 +2,14 @@ using Microsoft.AspNetCore.Http;
 
 namespace Contracts.ApiWrapper;
 
-public class ApiResponse<T> : ApiBaseResponse
+[Serializable]
+public class ApiResponse<T>
     where T : class
 {
+    public int Status { get; set; }
+
+    public string? Message { get; set; }
+
     public T? Results { get; set; }
 
     public ApiResponse() { }

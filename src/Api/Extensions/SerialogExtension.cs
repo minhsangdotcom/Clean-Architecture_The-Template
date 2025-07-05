@@ -23,7 +23,6 @@ public static class SerialogExtension
         Log.Logger = loggerConfiguration.CreateLogger();
 
         builder.Host.UseSerilog(Log.Logger);
-
         builder.Services.AddSingleton(Log.Logger);
     }
 }

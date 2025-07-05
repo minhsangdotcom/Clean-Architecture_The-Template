@@ -28,7 +28,7 @@ public class LoggingBehavior<TMessage, TResponse>(ILogger logger, ICurrentUser c
             parameters.RemoveAt(1);
         }
 
-        logger.Information(loggingMessage, parameters.ToArray());
+        logger.Information(loggingMessage, [.. parameters]);
         return default!;
     }
 }
