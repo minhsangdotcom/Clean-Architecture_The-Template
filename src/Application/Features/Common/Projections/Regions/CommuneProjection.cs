@@ -4,6 +4,8 @@ namespace Application.Features.Common.Projections.Regions;
 
 public class CommuneProjection : Region
 {
+    public Ulid DistrictId { get; set; }
+
     public virtual void MappingFrom(Commune commune)
     {
         Id = commune.Id;
@@ -13,6 +15,8 @@ public class CommuneProjection : Region
         FullName = commune.FullName;
         EnglishFullName = commune.EnglishFullName;
         CustomName = commune.CustomName;
+        DistrictId = commune.DistrictId;
+
         CreatedAt = commune.CreatedAt;
         CreatedBy = commune.CreatedBy;
         UpdatedAt = commune.UpdatedAt;

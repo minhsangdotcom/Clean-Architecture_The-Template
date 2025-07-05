@@ -16,17 +16,24 @@ public partial class UserValidator : AbstractValidator<UserPayload>
 
     public UserValidator(
         IUserManagerService userManagerService,
-        IHttpContextAccessorService httpContextAccessorService
+        IHttpContextAccessorService httpContextAccessorService,
+        ICurrentUser currentUser
     )
     {
         this.httpContextAccessorService = httpContextAccessorService;
         this.userManagerService = userManagerService;
-        ApplyRules();
+        ApplyRules(currentUser);
     }
 
-    private void ApplyRules()
+    private void ApplyRules(ICurrentUser currentUser)
     {
         _ = Ulid.TryParse(httpContextAccessorService.GetId(), out Ulid id);
+        string? requestPath = httpContextAccessorService.GetRequestPath();
+
+        if (requestPath == "/api/v1/users/profile")
+        {
+            id = currentUser.Id!.Value;
+        }
 
         RuleFor(x => x.LastName)
             .NotEmpty()
@@ -177,7 +184,7 @@ public partial class UserValidator : AbstractValidator<UserPayload>
         CancellationToken cancellationToken = default
     ) =>
         !await userManagerService.User.AnyAsync(
-            x => (!id.HasValue && x.Email == email) || (x.Id != id && x.Email == email),
+            x => x.Email == email && (!id.HasValue || x.Id != id.Value),
             cancellationToken
         );
 }
