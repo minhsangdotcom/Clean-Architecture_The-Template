@@ -25,8 +25,8 @@ builder.AddConfiguration();
 services.AddEndpoints();
 services.ConfigureHttpJsonOptions(options =>
 {
-    options.SerializerOptions.Converters.Add(new DatetimeConverter());
-    options.SerializerOptions.Converters.Add(new DateTimeOffsetConvert());
+    options.SerializerOptions.Converters.Add(new DateTimeJsonConverter());
+    options.SerializerOptions.Converters.Add(new DateTimeOffsetJsonConverter());
     options.SerializerOptions.Converters.Add(new UlidJsonConverter());
 });
 
@@ -40,14 +40,17 @@ services.AddHealthChecks();
 services.AddDatabaseHealthCheck(configuration);
 services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost3000", policy =>
-    {
-        policy
-            .WithOrigins("http://localhost:3000") // React dev server
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials(); // Optional, if using cookies or auth headers
-    });
+    options.AddPolicy(
+        "AllowLocalhost3000",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:3000")
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        }
+    );
 });
 #endregion
 
@@ -61,8 +64,7 @@ try
     Log.Logger.Information("Application is starting....");
     var app = builder.Build();
 
-    string healthCheckPath =
-        configuration.GetSection("HealthCheckPath").Get<string>() ?? "/health";
+    string healthCheckPath = configuration.GetSection("HealthCheckPath").Get<string>() ?? "/health";
     app.MapHealthChecks(
         healthCheckPath,
         new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }
@@ -98,7 +100,7 @@ try
         });
         app.AddLog(Log.Logger, routeRefix, healthCheckPath);
     }
-    
+
     app.UseCors("AllowLocalhost3000");
     app.UseStatusCodePages();
     app.UseExceptionHandler();
