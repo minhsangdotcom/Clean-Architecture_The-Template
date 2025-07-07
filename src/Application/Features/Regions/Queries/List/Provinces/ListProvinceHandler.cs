@@ -6,10 +6,11 @@ using Contracts.Dtos.Responses;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Regions.Specifications;
 using Mediator;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Regions.Queries.List.Provinces;
 
-public class ListProvinceHandler(IUnitOfWork unitOfWork)
+public class ListProvinceHandler(IUnitOfWork unitOfWork, ILogger<ListProvinceHandler> logger)
     : IRequestHandler<ListProvinceQuery, Result<PaginationResponse<ProvinceProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<ProvinceProjection>>> Handle(
@@ -24,7 +25,9 @@ public class ListProvinceHandler(IUnitOfWork unitOfWork)
             return Result<PaginationResponse<ProvinceProjection>>.Failure(validationResult.Error);
         }
 
-        var validationFilterResult = query.ValidateFilter<ListProvinceQuery, ProvinceProjection>();
+        var validationFilterResult = query.ValidateFilter<ListProvinceQuery, ProvinceProjection>(
+            logger
+        );
 
         if (validationFilterResult.Error != null)
         {

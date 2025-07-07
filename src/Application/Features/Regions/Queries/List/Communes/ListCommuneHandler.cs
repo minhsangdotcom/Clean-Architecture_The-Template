@@ -7,10 +7,11 @@ using Contracts.Dtos.Responses;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Regions.Specifications;
 using Mediator;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Regions.Queries.List.Communes;
 
-public class ListCommuneHandler(IUnitOfWork unitOfWork)
+public class ListCommuneHandler(IUnitOfWork unitOfWork, ILogger<ListCommuneHandler> logger)
     : IRequestHandler<ListCommuneQuery, Result<PaginationResponse<CommuneProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<CommuneProjection>>> Handle(
@@ -25,7 +26,9 @@ public class ListCommuneHandler(IUnitOfWork unitOfWork)
             return Result<PaginationResponse<CommuneProjection>>.Failure(validationResult.Error);
         }
 
-        var validationFilterResult = query.ValidateFilter<ListCommuneQuery, CommuneProjection>();
+        var validationFilterResult = query.ValidateFilter<ListCommuneQuery, CommuneProjection>(
+            logger
+        );
 
         if (validationFilterResult.Error != null)
         {

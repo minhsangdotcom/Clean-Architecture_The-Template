@@ -5,12 +5,12 @@ using Application.Common.Security;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
 using Mediator;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Common.Behaviors;
 
 public class ProcessImagePathBehavior<TMessage, TResponse>(
-    ILogger logger,
+    ILogger<ProcessImagePathBehavior<TMessage, TResponse>> logger,
     IStorageService storageService
 ) : MessagePostProcessor<TMessage, TResponse>
     where TMessage : notnull, IMessage
@@ -93,7 +93,7 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
                 continue;
             }
 
-            logger.Information("image key {value}", imageKey);
+            logger.LogInformation("image key {value}", imageKey);
 
             UpdatePropertyIfNotPublicUrl(data, prop, imageKey);
         }
@@ -106,7 +106,7 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
         if (!imageKeyStr.StartsWith(storageService.GetPublicUrl()!))
         {
             string? fullPath = storageService.GetFullpath(imageKeyStr);
-            logger.Information("image path {value}", fullPath);
+            logger.LogInformation("image path {value}", fullPath);
             property.SetValue(target, fullPath);
         }
     }

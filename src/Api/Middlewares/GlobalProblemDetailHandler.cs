@@ -6,7 +6,7 @@ namespace Api.Middlewares;
 
 public class GlobalProblemDetailHandler(
     IProblemDetailsService problemDetailsService,
-    Serilog.ILogger logger
+    ILogger<GlobalProblemDetailHandler> logger
 ) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
@@ -18,8 +18,8 @@ public class GlobalProblemDetailHandler(
         IHttpActivityFeature? activityFeature = httpContext.Features.Get<IHttpActivityFeature>();
         string? traceId = activityFeature?.Activity?.TraceId.ToString();
         string? spanId = activityFeature?.Activity?.SpanId.ToString();
-        logger.Error(
-            "\n\n{exception} error's occured having tracing identifier [traceId:{traceId}, spanId:{spanId}]\nwith message '{Message}'\n{StackTrace}\n",
+        logger.LogError(
+            "\n\n{exception} error's occurred having tracing identifier [traceId:{traceId}, spanId:{spanId}]\nwith message '{Message}'\n{StackTrace}\n",
             exception.GetType().Name,
             traceId,
             spanId,
@@ -34,7 +34,7 @@ public class GlobalProblemDetailHandler(
             new()
             {
                 Status = code,
-                Title = "An Error has occured",
+                Title = "An Error has occurred",
                 Detail = exception.Message,
                 Type = exception.GetType().Name,
             };

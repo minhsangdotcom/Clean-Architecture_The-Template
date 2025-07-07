@@ -5,13 +5,13 @@ using Infrastructure.UnitOfWorks.CachedRepositories;
 using Infrastructure.UnitOfWorks.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.UnitOfWorks;
 
 public class UnitOfWork(
     IDbContext dbContext,
-    ILogger logger,
+    ILogger<UnitOfWork> logger,
     IMemoryCacheService memoryCacheService
 ) : IUnitOfWork
 {
@@ -134,7 +134,7 @@ public class UnitOfWork(
     {
         if (CurrentTransaction == null)
         {
-            logger.Warning("Thre is no transaction started.");
+            logger.LogWarning("There is no transaction started.");
             return;
         }
 

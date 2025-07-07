@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using ILogger = Serilog.ILogger;
 
 namespace Api.Extensions;
 
-public static class InfomationLoggingExtension
+public static class InformationLoggingExtension
 {
     public static void AddLog(
         this WebApplication webApplication,
-        Serilog.ILogger logger,
+        ILogger logger,
         string swaggerRoute,
         string healthCheckRoute
     ) =>

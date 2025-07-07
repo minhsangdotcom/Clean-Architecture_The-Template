@@ -2608,6 +2608,9 @@
           "OpenTelemetry.Instrumentation.AspNetCore": "[1.12.0, )",
           "OpenTelemetry.Instrumentation.EntityFrameworkCore": "[1.12.0-beta.1, )",
           "OpenTelemetry.Instrumentation.Http": "[1.12.0, )",
+          "Serilog.AspNetCore": "[9.0.0, )",
+          "Serilog.Enrichers.Environment": "[3.0.1, )",
+          "Serilog.Sinks.Seq": "[9.0.0, )",
           "Swashbuckle.AspNetCore": "[8.1.4, )"
         }
       },
@@ -2623,9 +2626,6 @@
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.16, )",
           "NRedisStack": "[1.0.0, )",
           "RazorLight": "[2.3.1, )",
-          "Serilog.AspNetCore": "[9.0.0, )",
-          "Serilog.Enrichers.Environment": "[3.0.1, )",
-          "Serilog.Sinks.Seq": "[9.0.0, )",
           "Wangkanai.Detection": "[8.17.0, )",
           "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": "[1.0.1-alpha, )"
         }

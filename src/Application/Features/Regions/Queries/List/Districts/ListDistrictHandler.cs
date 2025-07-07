@@ -6,10 +6,11 @@ using Contracts.Dtos.Responses;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Regions.Specifications;
 using Mediator;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Regions.Queries.List.Districts;
 
-public class ListDistrictHandler(IUnitOfWork unitOfWork)
+public class ListDistrictHandler(IUnitOfWork unitOfWork, ILogger<ListDistrictHandler> logger)
     : IRequestHandler<ListDistrictQuery, Result<PaginationResponse<DistrictProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<DistrictProjection>>> Handle(
@@ -24,7 +25,9 @@ public class ListDistrictHandler(IUnitOfWork unitOfWork)
             return Result<PaginationResponse<DistrictProjection>>.Failure(validationResult.Error);
         }
 
-        var validationFilterResult = query.ValidateFilter<ListDistrictQuery, DistrictProjection>();
+        var validationFilterResult = query.ValidateFilter<ListDistrictQuery, DistrictProjection>(
+            logger
+        );
 
         if (validationFilterResult.Error != null)
         {

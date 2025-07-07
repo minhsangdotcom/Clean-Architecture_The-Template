@@ -2,7 +2,7 @@ using System.Reflection;
 using Application.Common.Errors;
 using Application.Common.Extensions;
 using Contracts.Dtos.Requests;
-using Serilog;
+using Microsoft.Extensions.Logging;
 using SharedKernel.Common.Messages;
 using SharedKernel.Extensions;
 using SharedKernel.Extensions.Reflections;
@@ -37,7 +37,7 @@ public static partial class QueryParamValidate
     public static ValidationRequestResult<TRequest, BadRequestError> ValidateFilter<
         TRequest,
         TResponse
-    >(this TRequest request)
+    >(this TRequest request, ILogger logger)
         where TResponse : class
         where TRequest : QueryParamRequest
     {
@@ -260,10 +260,8 @@ public static partial class QueryParamValidate
 
         request.Filter = StringExtension.Parse(queries);
 
-        Log.Information(
-            "Filter has been bound {filter}",
-            SerializerExtension.Serialize(request.Filter!).StringJson
-        );
+        string filter = SerializerExtension.Serialize(request.Filter!).StringJson;
+        logger.LogInformation("Filter has been bound {filter}", filter);
 
         return new(request);
     }
@@ -308,10 +306,10 @@ public static partial class QueryParamValidate
                 }
                 _ = int.TryParse(
                     betweenOperator.CleanKey[betweenOperator.CleanKey.IndexOf("$or") + 1],
-                    out int orInddex
+                    out int orIndex
                 );
 
-                return new { key = $"$or.{orInddex}.{key}", indexValue };
+                return new { key = $"$or.{orIndex}.{key}", indexValue };
             })
             .GroupBy(x => x.key)
             .Select(x => new { x.Key, values = x.Select(x => x.indexValue).ToList() })

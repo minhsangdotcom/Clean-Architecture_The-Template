@@ -3,14 +3,14 @@ using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
-using Serilog;
+using Microsoft.Extensions.Logging;
 using Specification.Interfaces;
 
 namespace Infrastructure.UnitOfWorks.CachedRepositories;
 
 public class CachedDynamicSpecRepository<T>(
     IDynamicSpecificationRepository<T> repository,
-    ILogger logger,
+    ILogger<UnitOfWork> logger,
     IMemoryCacheService memoryCacheService
 ) : IDynamicSpecificationRepository<T>
     where T : class
@@ -26,10 +26,11 @@ public class CachedDynamicSpecRepository<T>(
         {
             string key = $"{spec.CacheKey}-{nameof(FindByConditionAsync)}";
             string hashingKey = RepositoryExtension.HashKey(key);
-            logger.Information("checking cache for {key}", hashingKey);
+            logger.LogInformation("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                () => repository.FindByConditionAsync(spec, mappingResult, cancellationToken)
+                () => repository.FindByConditionAsync(spec, mappingResult, cancellationToken),
+                options: null
             );
         }
         return repository.FindByConditionAsync(spec, mappingResult, cancellationToken);
@@ -44,10 +45,11 @@ public class CachedDynamicSpecRepository<T>(
         {
             string key = $"{spec.CacheKey}-{nameof(FindByConditionAsync)}";
             string hashingKey = RepositoryExtension.HashKey(key);
-            logger.Information("checking cache for {key}", hashingKey);
+            logger.LogInformation("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                () => repository.FindByConditionAsync(spec, cancellationToken)
+                () => repository.FindByConditionAsync(spec, cancellationToken),
+                options: null
             );
         }
         return repository.FindByConditionAsync(spec, cancellationToken);
@@ -63,10 +65,11 @@ public class CachedDynamicSpecRepository<T>(
         {
             string key = $"{spec.CacheKey}-{nameof(ListAsync)}";
             string hashingKey = RepositoryExtension.HashKey(key, queryParam);
-            logger.Information("checking cache for {key}", hashingKey);
+            logger.LogInformation("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                () => repository.ListAsync(spec, queryParam, cancellationToken)
+                () => repository.ListAsync(spec, queryParam, cancellationToken),
+                options: null
             )!;
         }
         return repository.ListAsync(spec, queryParam, cancellationToken);
@@ -84,10 +87,11 @@ public class CachedDynamicSpecRepository<T>(
         {
             string key = $"{spec.CacheKey}-{nameof(ListAsync)}";
             string hashingKey = RepositoryExtension.HashKey(key, queryParam);
-            logger.Information("checking cache for {key}", hashingKey);
+            logger.LogInformation("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                () => repository.ListAsync(spec, queryParam, mappingResult, cancellationToken)
+                () => repository.ListAsync(spec, queryParam, mappingResult, cancellationToken),
+                options: null
             )!;
         }
         return repository.ListAsync(spec, queryParam, mappingResult, cancellationToken);
@@ -104,10 +108,11 @@ public class CachedDynamicSpecRepository<T>(
         {
             string key = $"{spec.CacheKey}-{nameof(PagedListAsync)}";
             string hashingKey = RepositoryExtension.HashKey(key, queryParam);
-            logger.Information("checking cache for {key}", hashingKey);
+            logger.LogInformation("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                () => repository.PagedListAsync(spec, queryParam, mappingResult, cancellationToken)
+                () => repository.PagedListAsync(spec, queryParam, mappingResult, cancellationToken),
+                options: null
             )!;
         }
         return repository.PagedListAsync(spec, queryParam, mappingResult, cancellationToken);
@@ -126,7 +131,7 @@ public class CachedDynamicSpecRepository<T>(
         {
             string key = $"{spec.CacheKey}-{nameof(CursorPagedListAsync)}";
             string hashingKey = RepositoryExtension.HashKey(key, queryParam, uniqueSort);
-            logger.Information("checking cache for {key}", hashingKey);
+            logger.LogInformation("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
                 () =>
@@ -136,7 +141,8 @@ public class CachedDynamicSpecRepository<T>(
                         mappingResult,
                         uniqueSort,
                         cancellationToken
-                    )
+                    ),
+                options: null
             )!;
         }
         return repository.CursorPagedListAsync(

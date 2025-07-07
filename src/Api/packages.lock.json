@@ -142,6 +142,40 @@
           "OpenTelemetry.Api.ProviderBuilderExtensions": "[1.12.0, 2.0.0)"
         }
       },
+      "Serilog.AspNetCore": {
+        "type": "Direct",
+        "requested": "[9.0.0, )",
+        "resolved": "9.0.0",
+        "contentHash": "JslDajPlBsn3Pww1554flJFTqROvK9zz9jONNQgn0D8Lx2Trw8L0A8/n6zEQK1DAZWXrJwiVLw8cnTR3YFuYsg==",
+        "dependencies": {
+          "Serilog": "4.2.0",
+          "Serilog.Extensions.Hosting": "9.0.0",
+          "Serilog.Formatting.Compact": "3.0.0",
+          "Serilog.Settings.Configuration": "9.0.0",
+          "Serilog.Sinks.Console": "6.0.0",
+          "Serilog.Sinks.Debug": "3.0.0",
+          "Serilog.Sinks.File": "6.0.0"
+        }
+      },
+      "Serilog.Enrichers.Environment": {
+        "type": "Direct",
+        "requested": "[3.0.1, )",
+        "resolved": "3.0.1",
+        "contentHash": "9BqCE4C9FF+/rJb/CsQwe7oVf44xqkOvMwX//CUxvUR25lFL4tSS6iuxE5eW07quby1BAyAEP+vM6TWsnT3iqw==",
+        "dependencies": {
+          "Serilog": "4.0.0"
+        }
+      },
+      "Serilog.Sinks.Seq": {
+        "type": "Direct",
+        "requested": "[9.0.0, )",
+        "resolved": "9.0.0",
+        "contentHash": "aNU8A0K322q7+voPNmp1/qNPH+9QK8xvM1p72sMmCG0wGlshFzmtDW9QnVSoSYCj0MgQKcMOlgooovtBhRlNHw==",
+        "dependencies": {
+          "Serilog": "4.2.0",
+          "Serilog.Sinks.File": "6.0.0"
+        }
+      },
       "Swashbuckle.AspNetCore": {
         "type": "Direct",
         "requested": "[8.1.4, )",
@@ -994,28 +1028,6 @@
         "resolved": "4.2.0",
         "contentHash": "gmoWVOvKgbME8TYR+gwMf7osROiWAURterc6Rt2dQyX7wtjZYpqFiA/pY6ztjGQKKV62GGCyOcmtP1UKMHgSmA=="
       },
-      "Serilog.AspNetCore": {
-        "type": "Transitive",
-        "resolved": "9.0.0",
-        "contentHash": "JslDajPlBsn3Pww1554flJFTqROvK9zz9jONNQgn0D8Lx2Trw8L0A8/n6zEQK1DAZWXrJwiVLw8cnTR3YFuYsg==",
-        "dependencies": {
-          "Serilog": "4.2.0",
-          "Serilog.Extensions.Hosting": "9.0.0",
-          "Serilog.Formatting.Compact": "3.0.0",
-          "Serilog.Settings.Configuration": "9.0.0",
-          "Serilog.Sinks.Console": "6.0.0",
-          "Serilog.Sinks.Debug": "3.0.0",
-          "Serilog.Sinks.File": "6.0.0"
-        }
-      },
-      "Serilog.Enrichers.Environment": {
-        "type": "Transitive",
-        "resolved": "3.0.1",
-        "contentHash": "9BqCE4C9FF+/rJb/CsQwe7oVf44xqkOvMwX//CUxvUR25lFL4tSS6iuxE5eW07quby1BAyAEP+vM6TWsnT3iqw==",
-        "dependencies": {
-          "Serilog": "4.0.0"
-        }
-      },
       "Serilog.Extensions.Hosting": {
         "type": "Transitive",
         "resolved": "9.0.0",
@@ -1077,15 +1089,6 @@
         "contentHash": "lxjg89Y8gJMmFxVkbZ+qDgjl+T4yC5F7WSLTvA+5q0R04tfKVLRL/EHpYoJ/MEQd2EeCKDuylBIVnAYMotmh2A==",
         "dependencies": {
           "Serilog": "4.0.0"
-        }
-      },
-      "Serilog.Sinks.Seq": {
-        "type": "Transitive",
-        "resolved": "9.0.0",
-        "contentHash": "aNU8A0K322q7+voPNmp1/qNPH+9QK8xvM1p72sMmCG0wGlshFzmtDW9QnVSoSYCj0MgQKcMOlgooovtBhRlNHw==",
-        "dependencies": {
-          "Serilog": "4.2.0",
-          "Serilog.Sinks.File": "6.0.0"
         }
       },
       "StackExchange.Redis": {
@@ -1239,9 +1242,6 @@
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.16, )",
           "NRedisStack": "[1.0.0, )",
           "RazorLight": "[2.3.1, )",
-          "Serilog.AspNetCore": "[9.0.0, )",
-          "Serilog.Enrichers.Environment": "[3.0.1, )",
-          "Serilog.Sinks.Seq": "[9.0.0, )",
           "Wangkanai.Detection": "[8.17.0, )",
           "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": "[1.0.1-alpha, )"
         }

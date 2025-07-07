@@ -5,7 +5,7 @@ namespace Api.Extensions;
 
 public static class SerialogExtension
 {
-    public static void AddSerialogs(this WebApplicationBuilder builder)
+    public static void AddSerilog(this WebApplicationBuilder builder)
     {
         LoggerConfiguration loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(
             builder.Configuration

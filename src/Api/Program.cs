@@ -35,7 +35,7 @@ services.AddErrorDetails();
 services.AddSwagger(configuration);
 services.AddApiVersion();
 services.AddOpenTelemetryTracing(configuration);
-builder.AddSerialogs();
+builder.AddSerilog();
 services.AddHealthChecks();
 services.AddDatabaseHealthCheck(configuration);
 services.AddCors(options =>

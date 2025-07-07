@@ -1,49 +1,100 @@
 using Application.Common.Interfaces.Services.Cache;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Serilog;
 
 namespace Infrastructure.Services.Cache.MemoryCache;
 
-public class MemoryCacheService : IMemoryCacheService
+public class MemoryCacheService(
+    IMemoryCache cache,
+    IOptions<CacheSettings> options,
+    ILogger<MemoryCacheService> logger
+) : IMemoryCacheService
 {
-    private readonly IMemoryCache cache;
-    private readonly MemoryCacheEntryOptions cacheOptions;
-    private readonly CacheSettings cacheSettings;
-    private readonly ILogger logger;
+    private readonly CacheSettings cacheSettings = options.Value;
 
-    public MemoryCacheService(IMemoryCache cache, IOptions<CacheSettings> options, ILogger logger)
+    public T? GetOrSet<T>(string key, Func<T> func, CacheOptions? options = null)
     {
-        this.cache = cache;
-        cacheSettings = options.Value;
-        cacheOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(
-            relative: TimeSpan.FromMinutes(cacheSettings.RepositoryCachingTimeInMinute)
-        );
-        this.logger = logger;
-    }
-
-    public T? GetOrSet<T>(string key, Func<T> func, TimeSpan? expiry = null)
-    {
-        return cache.GetOrCreate(
+        return GetOrSetDefault(
             key,
-            entry =>
-            {
-                entry.SetOptions(cacheOptions);
-                logger.Warning("fetching source for {key}", key);
-                return func();
-            }
+            func,
+            options
+                ?? new CacheOptions()
+                {
+                    ExpirationType = CacheExpirationType.Absolute,
+                    Expiration = TimeSpan.FromMinutes(cacheSettings.CachingExpirationInMinute),
+                }
         );
     }
 
-    public Task<T?> GetOrSetAsync<T>(string key, Func<Task<T>> task, TimeSpan? expiry = null)
+    public async Task<T?> GetOrSetAsync<T>(
+        string key,
+        Func<Task<T>> task,
+        CacheOptions? options = null
+    )
     {
+        return await GetOrSetDefaultAsync(
+            key,
+            task,
+            options
+                ?? new CacheOptions()
+                {
+                    ExpirationType = CacheExpirationType.Absolute,
+                    Expiration = TimeSpan.FromMinutes(cacheSettings.CachingExpirationInMinute),
+                }
+        );
+    }
+
+    public void Remove(string key)
+    {
+        cache.Remove(key);
+        logger.LogDebug("Redis KeyDelete {Key}", key);
+    }
+
+    private Task<T?> GetOrSetDefaultAsync<T>(string key, Func<Task<T>> task, CacheOptions options)
+    {
+        var entryOptions = new MemoryCacheEntryOptions();
+        if (options.ExpirationType == CacheExpirationType.Absolute && options.Expiration.HasValue)
+        {
+            entryOptions.SetAbsoluteExpiration(options.Expiration.Value);
+        }
+
+        if (options.ExpirationType == CacheExpirationType.Sliding && options.Expiration.HasValue)
+        {
+            entryOptions.SetSlidingExpiration(options.Expiration.Value);
+        }
+
         return cache.GetOrCreateAsync(
             key,
             entry =>
             {
-                entry.SetOptions(cacheOptions);
-                logger.Warning("fetching source for {key}", key);
+                entry.SetOptions(entryOptions);
+                logger.LogWarning("fetching source for {key}", key);
                 return task();
+            }
+        );
+    }
+
+    private T? GetOrSetDefault<T>(string key, Func<T> func, CacheOptions options)
+    {
+        var entryOptions = new MemoryCacheEntryOptions();
+        if (options.ExpirationType == CacheExpirationType.Absolute && options.Expiration.HasValue)
+        {
+            entryOptions.SetAbsoluteExpiration(options.Expiration.Value);
+        }
+
+        if (options.ExpirationType == CacheExpirationType.Sliding && options.Expiration.HasValue)
+        {
+            entryOptions.SetSlidingExpiration(options.Expiration.Value);
+        }
+
+        return cache.GetOrCreate(
+            key,
+            entry =>
+            {
+                entry.SetOptions(entryOptions);
+                logger.LogWarning("fetching source for {key}", key);
+                return func();
             }
         );
     }

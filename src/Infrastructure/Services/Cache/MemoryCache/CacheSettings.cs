@@ -2,5 +2,5 @@ namespace Infrastructure.Services.Cache.MemoryCache;
 
 public class CacheSettings
 {
-    public int RepositoryCachingTimeInMinute { get; set; } = 5;
+    public int CachingExpirationInMinute { get; set; } = 5;
 }
