@@ -15,7 +15,7 @@ namespace Infrastructure.UnitOfWorks.Repositories;
 /// combine specification pattern and dynamic queries
 /// </summary>
 /// <typeparam name="T">must be BaseEntity or AggregateRoot</typeparam>
-/// <param name="dbContext">must be IDbcontext</param>
+/// <param name="dbContext">must be IDbContext</param>
 public class DynamicSpecificationRepository<T>(IDbContext dbContext)
     : IDynamicSpecificationRepository<T>
     where T : class

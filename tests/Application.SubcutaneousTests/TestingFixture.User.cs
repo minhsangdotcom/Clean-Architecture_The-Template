@@ -63,13 +63,14 @@ public partial class TestingFixture
     public async Task<User> CreateAdminUserAsync(
         UserAddress? address = null,
         IFormFile? avatar = null,
-        List<Ulid>? roleIds = null)
+        List<Ulid>? roleIds = null
+    )
     {
         address ??= GetDefaultAddress();
         Role role = await CreateAdminRoleAsync();
         List<Ulid> roles = roleIds ?? [];
         roles.Add(role.Id);
-        
+
         CreateUserCommand command =
             new()
             {
@@ -78,7 +79,7 @@ public partial class TestingFixture
                 Username = "super.admin",
                 Password = DEFAULT_USER_PASSWORD,
                 Email = "super.amdin@gmail.com",
-                DayOfBirth = DateTime.UtcNow,
+                DayOfBirth = new DateOnly(1990, 1, 2),
                 PhoneNumber = "0925123321",
                 Gender = Gender.Male,
                 ProvinceId = address.ProvinceId,
@@ -119,7 +120,7 @@ public partial class TestingFixture
                 Username = "steave.Roger",
                 Password = DEFAULT_USER_PASSWORD,
                 Email = "steave.roger@gmail.com",
-                DayOfBirth = DateTime.UtcNow,
+                DayOfBirth = new DateOnly(1990, 1, 3),
                 PhoneNumber = "0925321321",
                 Gender = Gender.Male,
                 ProvinceId = address.ProvinceId,
@@ -160,7 +161,7 @@ public partial class TestingFixture
                 Username = "sang.tran",
                 Password = DEFAULT_USER_PASSWORD,
                 Email = "sang.tran@gmail.com",
-                DayOfBirth = DateTime.UtcNow,
+                DayOfBirth = new DateOnly(1990, 1, 4),
                 PhoneNumber = "0925123124",
                 Gender = Gender.Male,
                 ProvinceId = address.ProvinceId,
@@ -199,7 +200,7 @@ public partial class TestingFixture
             .DynamicReadOnlyRepository<User>()
             .FindByConditionAsync(new GetUserByIdSpecification(userId));
     }
-    
+
     private static UserAddress GetDefaultAddress() =>
         new(
             Ulid.Parse("01JRQHWS3RQR1N0J84EV1DQXR1"),

@@ -18,12 +18,12 @@ public class UserProjection : BaseResponse
 
     public string? PhoneNumber { get; set; }
 
-    public DateTime? DayOfBirth { get; set; }
+    public DateOnly? DayOfBirth { get; set; }
 
     public Gender? Gender { get; set; }
 
     public string? Address { get; set; }
-    
+
     public Address? UserAddress { get; set; }
 
     [File]

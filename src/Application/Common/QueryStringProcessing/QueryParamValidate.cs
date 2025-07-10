@@ -304,26 +304,27 @@ public static partial class QueryParamValidate
                 {
                     return new { key = $"$and.{andIndex}.{key}", indexValue };
                 }
-                _ = int.TryParse(
-                    betweenOperator.CleanKey[betweenOperator.CleanKey.IndexOf("$or") + 1],
-                    out int orIndex
-                );
-
-                return new { key = $"$or.{orIndex}.{key}", indexValue };
+                if (
+                    int.TryParse(
+                        betweenOperator.CleanKey[betweenOperator.CleanKey.IndexOf("$or") + 1],
+                        out int orIndex
+                    )
+                )
+                {
+                    return new { key = $"$or.{orIndex}.{key}", indexValue };
+                }
+                return new { key = $"{key}", indexValue };
             })
             .GroupBy(x => x.key)
             .Select(x => new { x.Key, values = x.Select(x => x.indexValue).ToList() })
             .ToList();
 
-        if (
-            betweenOperatorsGroup.Count != 0
-            && (
-                betweenOperatorsGroup.Count != 1
-                || !betweenOperatorsGroup[0].values.SequenceEqual([0, 1])
-            )
-        )
+        foreach (var betweenOperator in betweenOperatorsGroup)
         {
-            return false;
+            if (!betweenOperator.values.SequenceEqual([0, 1]))
+            {
+                return false;
+            }
         }
 
         return true;

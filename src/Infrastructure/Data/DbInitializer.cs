@@ -179,7 +179,7 @@ public class DbInitializer
                 )
             )
             {
-                DayOfBirth = new DateTime(1990, 10, 1),
+                DayOfBirth = new DateOnly(1990, 10, 1),
                 Status = UserStatus.Active,
                 Gender = Gender.Female,
                 Id = Credential.CHLOE_KIM_ID,
@@ -206,7 +206,7 @@ public class DbInitializer
                 )
             )
             {
-                DayOfBirth = new DateTime(1985, 4, 23),
+                DayOfBirth = new DateOnly(1985, 4, 23),
                 Status = UserStatus.Active,
                 Gender = (Gender)new Random().Next(1, 3),
                 Id = Credential.JOHN_DOE_ID,
