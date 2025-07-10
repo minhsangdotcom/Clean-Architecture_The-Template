@@ -41,7 +41,7 @@ public class ListProvinceHandler(IUnitOfWork unitOfWork, ILogger<ListProvinceHan
                 new ListProvinceSpecification(),
                 query,
                 province => province.ToProvinceProjection(),
-                cancellationToken
+                cancellationToken: cancellationToken
             );
         return Result<PaginationResponse<ProvinceProjection>>.Success(response);
     }

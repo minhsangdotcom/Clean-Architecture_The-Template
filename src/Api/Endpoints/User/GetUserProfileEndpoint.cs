@@ -39,7 +39,7 @@ public class GetUserProfileEndpoint : IEndpoint
     {
         Ulid? userId = currentUser.Id;
         var result = await cacheService.GetOrSetAsync(
-            $"UserProfile:{userId}",
+            $"{nameof(GetUserProfileEndpoint)}:{userId}",
             () => sender.Send(new GetUserProfileQuery(), cancellationToken).AsTask(),
             new CacheOptions()
             {

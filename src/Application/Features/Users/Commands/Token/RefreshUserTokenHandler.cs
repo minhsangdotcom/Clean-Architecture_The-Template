@@ -59,7 +59,8 @@ public class RefreshUserTokenHandler(
                 {
                     Sort = $"{nameof(UserToken.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}",
                 },
-                cancellationToken
+                deep: 0,
+                cancellationToken: cancellationToken
             );
 
         if (refreshTokens.Count <= 0)

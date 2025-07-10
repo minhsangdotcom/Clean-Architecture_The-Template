@@ -69,7 +69,7 @@ public static class PaginationExtension
     {
         string sort = $"{request.Sort},{request.UniqueSort}";
 
-        int totalPage = await query.CountAsync();
+        int totalPage = query.Count();
         if (totalPage == 0)
         {
             return new PaginationResponse<T>(query, totalPage, request.Size);
@@ -84,10 +84,10 @@ public static class PaginationExtension
 
         IQueryable<T> sortedQuery = query.Sort(sort);
 
-        T? first = await sortedQuery.FirstOrDefaultAsync();
-        T? last = await sortedQuery.LastOrDefaultAsync();
+        T? first = sortedQuery.FirstOrDefault();
+        T? last = sortedQuery.LastOrDefault();
 
-        PaginationResult<T> result = await CusorPaginateAsync(
+        PaginationResult<T> result = await CursorPaginateAsync(
             new PaginationPayload<T>(
                 sortedQuery,
                 request.After ?? request.Before,
@@ -96,7 +96,8 @@ public static class PaginationExtension
                 last!,
                 originalSort,
                 sort,
-                request.Size
+                request.Size,
+                totalPage
             )
         );
 
@@ -115,34 +116,30 @@ public static class PaginationExtension
     /// <typeparam name="T"></typeparam>
     /// <param name="payload"></param>
     /// <returns></returns>
-    private static async Task<PaginationResult<T>> CusorPaginateAsync<T>(
+    private static async Task<PaginationResult<T>> CursorPaginateAsync<T>(
         PaginationPayload<T> payload
     )
     {
+        // this is the first page
         if (string.IsNullOrWhiteSpace(payload.Cursor))
         {
-            List<T> list = await payload.Query.Take(payload.Size).ToListAsync();
+            IQueryable<T> list = payload.Query.Take(payload.Size);
             T? theLast = list.LastOrDefault();
-            int length = list.Count;
 
-            if (
-                length < payload.Size
-                || (length == payload.Size && CompareToTheflag(theLast, payload.Last))
-            )
-            {
-                return new PaginationResult<T>(list, length);
-            }
-            return new PaginationResult<T>(list, length, EncodeCursor(theLast, payload.Sort));
+            List<T> pagedList = await list.ToListAsync();
+            string? theNextCursor =
+                payload.ActualSize > payload.Size ? EncodeCursor(theLast, payload.Sort) : null;
+            return new PaginationResult<T>(pagedList, pagedList.Count, theNextCursor);
         }
 
         Dictionary<string, object?>? cursorObject = DecodeCursor(payload.Cursor);
         IQueryable<T> data = MoveForwardOrBackwardAsync(payload.Query, cursorObject!, payload.Sort)
             .Take(payload.Size);
-        IQueryable<T> results = payload.IsPrevious ? data.Sort(payload.OriginalSort) : data;
+        IQueryable<T> sortedList = payload.IsPrevious ? data.Sort(payload.OriginalSort) : data;
 
-        T? last = await results.LastOrDefaultAsync();
-        T? first = await results.FirstOrDefaultAsync();
-        int count = await results.CountAsync();
+        T? last = sortedList.LastOrDefault();
+        T? first = sortedList.FirstOrDefault();
+        int count = sortedList.Count();
 
         // whether or not we're currently at first or last page
         string? next = EncodeCursor(last, payload.Sort);
@@ -150,7 +147,7 @@ public static class PaginationExtension
 
         var cursor = payload.IsPrevious ? first : last;
         var flag = payload.IsPrevious ? payload.Last : payload.First;
-        if (count < payload.Size || (count == payload.Size && CompareToTheflag(cursor, flag)))
+        if (count < payload.Size || (count == payload.Size && CompareToTheFlag(cursor, flag)))
         {
             if (!payload.IsPrevious)
             {
@@ -162,7 +159,7 @@ public static class PaginationExtension
             }
         }
 
-        return new PaginationResult<T>(results, count, next, pre);
+        return new PaginationResult<T>(await sortedList.ToListAsync(), count, next, pre);
     }
 
     /// <summary>
@@ -184,7 +181,7 @@ public static class PaginationExtension
         ParameterExpression parameter = Expression.Parameter(typeof(T), "x");
         Expression? body = null;
 
-        List<KeyValuePair<MemberExpression, object?>> CompararisonValues = [];
+        List<KeyValuePair<MemberExpression, object?>> ComparisonValues = [];
         for (int i = 0; i < sorts.Count; i++)
         {
             KeyValuePair<string, string> orderField = sorts[i];
@@ -194,38 +191,38 @@ public static class PaginationExtension
             //* x."property"
             Expression expressionMember = parameter.MemberExpression(typeof(T), field);
             object? value = cursors?[field];
-            CompararisonValues.Add(new((MemberExpression)expressionMember, value));
+            ComparisonValues.Add(new((MemberExpression)expressionMember, value));
 
-            BinaryExpression andClause = BuildAndClause<T>(i, CompararisonValues, order);
+            BinaryExpression andClause = BuildAndClause<T>(i, ComparisonValues, order);
             body = body == null ? andClause : Expression.OrElse(body, andClause);
         }
 
         //* x => x.Age < AgeValue ||
         //*     (x.Age == AgeValue && x.Name > NameValue) ||
         //*     (x.Age == AgeValue && x.Name == NameValue && x.Id > IdValue)
-        var lamda = Expression.Lambda<Func<T, bool>>(body!, parameter);
-        return query.Where(lamda);
+        var expression = Expression.Lambda<Func<T, bool>>(body!, parameter);
+        return query.Where(expression);
     }
 
     /// <summary>
-    /// build and clause (x.Age == AgeValue && x.Aname > NameValue)
+    /// build and clause (x.Age == AgeValue && x.Name > NameValue)
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="index"></param>
-    /// <param name="CompararisonValues"></param>
+    /// <param name="ComparisonValues"></param>
     /// <param name="propertyName"></param>
     /// <param name="order"></param>
     /// <returns></returns>
     private static BinaryExpression BuildAndClause<T>(
         int index,
-        List<KeyValuePair<MemberExpression, object?>> CompararisonValues,
+        List<KeyValuePair<MemberExpression, object?>> ComparisonValues,
         string order
     )
     {
-        BinaryExpression? innerExpression = BuildEqualOperationClause(index, CompararisonValues);
+        BinaryExpression? innerExpression = BuildEqualOperationClause(index, ComparisonValues);
 
-        MemberExpression expressionMember = CompararisonValues[index].Key;
-        object? value = CompararisonValues[index].Value;
+        MemberExpression expressionMember = ComparisonValues[index].Key;
+        object? value = ComparisonValues[index].Value;
 
         BinaryExpression binaryExpression = BuildCompareOperation(
             expressionMember.GetMemberExpressionType(),
@@ -279,28 +276,25 @@ public static class PaginationExtension
     /// Build equal query like (x.Age == AgeValue && .....)
     /// </summary>
     /// <param name="index"></param>
-    /// <param name="CompararisonValues"></param>
+    /// <param name="ComparisonValues"></param>
     /// <returns></returns>
     private static BinaryExpression? BuildEqualOperationClause(
         int index,
-        List<KeyValuePair<MemberExpression, object?>> CompararisonValues
+        List<KeyValuePair<MemberExpression, object?>> ComparisonValues
     )
     {
         BinaryExpression? body = null;
         for (int i = 0; i < index; i++)
         {
-            var compararisonValue = CompararisonValues[i];
-            MemberExpression memberExpression = compararisonValue.Key;
-            object? value = compararisonValue.Value;
+            var comparisonValue = ComparisonValues[i];
+            MemberExpression memberExpression = comparisonValue.Key;
+            object? value = comparisonValue.Value;
 
             BinaryExpression operation;
-            if (compararisonValue.Key.GetMemberExpressionType() == typeof(Ulid))
+            if (comparisonValue.Key.GetMemberExpressionType() == typeof(Ulid))
             {
-                MethodCallExpression compararison = CompareUlidByExpression(
-                    memberExpression,
-                    value
-                );
-                operation = Expression.Equal(compararison, Expression.Constant(0));
+                MethodCallExpression comparison = CompareUlidByExpression(memberExpression, value);
+                operation = Expression.Equal(comparison, Expression.Constant(0));
             }
             else
             {
@@ -354,13 +348,13 @@ public static class PaginationExtension
 
     private static MethodCallExpression CompareUlidByExpression(Expression left, object? value)
     {
-        Ulid compararisonValue = value == null ? Ulid.Empty : Ulid.Parse(value!.ToString());
+        Ulid comparisonValue = value == null ? Ulid.Empty : Ulid.Parse(value!.ToString());
         MethodInfo? compareToMethod = typeof(Ulid).GetMethod(
             nameof(Ulid.CompareTo),
             [typeof(Ulid)]
         );
 
-        return Expression.Call(left, compareToMethod!, Expression.Constant(compararisonValue));
+        return Expression.Call(left, compareToMethod!, Expression.Constant(comparisonValue));
     }
 
     private static MethodCallExpression CompareStringByExpression(
@@ -410,7 +404,7 @@ public static class PaginationExtension
     /// <param name="cursor"></param>
     /// <param name="destination"></param>
     /// <returns>true we're not gonna move</returns>
-    private static bool CompareToTheflag<T>(T cursor, T destination)
+    private static bool CompareToTheFlag<T>(T cursor, T destination)
     {
         PropertyInfo cursorPropertyInfo = typeof(T).GetNestedPropertyInfo(
             nameof(DefaultBaseResponse.Id)
@@ -514,7 +508,7 @@ public static class PaginationExtension
     }
 
     /// <summary>
-    /// get all of fiels of string sort
+    /// get all of fields of string sort
     /// </summary>
     /// <param name="sort">string sort</param>
     /// <returns></returns>
@@ -532,7 +526,8 @@ internal record PaginationPayload<T>(
     T Last,
     string OriginalSort,
     string Sort,
-    int Size
+    int Size,
+    int ActualSize
 );
 
 internal record ProcessResultPayload<T>(

@@ -58,7 +58,7 @@ public class UnitOfWork(
             value = isCached
                 ? CreateInstance<TEntity>(
                     typeof(CachedDynamicSpecRepository<>),
-                    repositoryInstance!,
+                    repositoryInstance,
                     logger,
                     memoryCacheService
                 )
@@ -66,7 +66,7 @@ public class UnitOfWork(
             repositories.Add(key, value);
         }
 
-        return (IDynamicSpecificationRepository<TEntity>)repositoryInstance!;
+        return (IDynamicSpecificationRepository<TEntity>)value!;
     }
 
     public ISpecificationRepository<TEntity> ReadOnlyRepository<TEntity>(bool isCached = false)
@@ -89,7 +89,7 @@ public class UnitOfWork(
             repositories.Add(key, value);
         }
 
-        return (ISpecificationRepository<TEntity>)repositoryInstance!;
+        return (ISpecificationRepository<TEntity>)value!;
     }
 
     public async Task<DbTransaction> BeginTransactionAsync(

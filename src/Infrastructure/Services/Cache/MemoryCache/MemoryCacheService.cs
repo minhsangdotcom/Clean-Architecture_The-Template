@@ -45,6 +45,11 @@ public class MemoryCacheService(
         );
     }
 
+    public bool HasKey(string key)
+    {
+        return cache.TryGetValue(key, out _);
+    }
+
     public void Remove(string key)
     {
         cache.Remove(key);

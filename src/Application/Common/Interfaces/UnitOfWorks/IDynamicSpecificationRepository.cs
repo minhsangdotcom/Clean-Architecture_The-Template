@@ -15,7 +15,7 @@ public interface IDynamicSpecificationRepository<T> : IRepository<T>
 
     Task<TResult?> FindByConditionAsync<TResult>(
         ISpecification<T> spec,
-        Expression<Func<T, TResult>> mappingResult,
+        Expression<Func<T, TResult>> selector,
         CancellationToken cancellationToken = default
     )
         where TResult : class;
@@ -23,13 +23,15 @@ public interface IDynamicSpecificationRepository<T> : IRepository<T>
     Task<IList<T>> ListAsync(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
+        int deep = 1,
         CancellationToken cancellationToken = default
     );
 
     Task<IList<TResult>> ListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TResult>> mappingResult,
+        Expression<Func<T, TResult>> selector,
+        int deep = 1,
         CancellationToken cancellationToken = default
     )
         where TResult : class;
@@ -37,14 +39,16 @@ public interface IDynamicSpecificationRepository<T> : IRepository<T>
     Task<PaginationResponse<TResult>> PagedListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TResult>> mappingResult,
+        Expression<Func<T, TResult>> selector,
+        int deep = 1,
         CancellationToken cancellationToken = default
     );
 
     Task<PaginationResponse<TResult>> CursorPagedListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TResult>> mappingResult,
+        Expression<Func<T, TResult>> selector,
+        int deep = 1,
         string? uniqueSort = null,
         CancellationToken cancellationToken = default
     )

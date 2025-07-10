@@ -1,7 +1,4 @@
 using System.Linq.Expressions;
-using Application.Features.Common.Mapping.Regions;
-using Application.Features.Regions.Queries.List.Districts;
-using Application.Features.Regions.Queries.List.Provinces;
 using Domain.Aggregates.Users;
 
 namespace Application.Features.Users.Queries.List;

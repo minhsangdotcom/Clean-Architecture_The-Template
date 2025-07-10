@@ -41,7 +41,7 @@ public class ListDistrictHandler(IUnitOfWork unitOfWork, ILogger<ListDistrictHan
                 new ListDistrictSpecification(),
                 query,
                 district => district.ToDistrictProjection(),
-                cancellationToken
+                cancellationToken: cancellationToken
             );
         return Result<PaginationResponse<DistrictProjection>>.Success(response);
     }

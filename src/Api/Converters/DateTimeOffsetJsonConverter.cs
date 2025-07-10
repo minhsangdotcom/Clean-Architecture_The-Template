@@ -21,7 +21,7 @@ public sealed class DateTimeOffsetJsonConverter : JsonConverter<DateTimeOffset>
         catch (Exception ex)
         {
             throw new JsonException(
-                $"Invalid DateTimeOffset value. Expected ISO‑8601 UTC format ({IsoUtcFormat}).",
+                $"Invalid DateTimeOffset value. Expected ISO-8601 UTC format ({IsoUtcFormat}).",
                 ex
             );
         }

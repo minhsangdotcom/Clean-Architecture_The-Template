@@ -7,7 +7,7 @@ public class ListUserSpecification : Specification<User>
 {
     public ListUserSpecification()
     {
-        Query.Include(x => x.Address).AsNoTracking().AsSplitQuery();
+        Query.Include(x => x.Address).AsNoTracking();
         string key = GetUniqueCachedKey();
         Query.EnableCache(key);
     }

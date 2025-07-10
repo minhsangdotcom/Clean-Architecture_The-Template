@@ -17,7 +17,7 @@ public class CachedDynamicSpecRepository<T>(
 {
     public Task<TResult?> FindByConditionAsync<TResult>(
         ISpecification<T> spec,
-        Expression<Func<T, TResult>> mappingResult,
+        Expression<Func<T, TResult>> selector,
         CancellationToken cancellationToken = default
     )
         where TResult : class
@@ -29,11 +29,11 @@ public class CachedDynamicSpecRepository<T>(
             logger.LogInformation("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                () => repository.FindByConditionAsync(spec, mappingResult, cancellationToken),
+                () => repository.FindByConditionAsync(spec, selector, cancellationToken),
                 options: null
             );
         }
-        return repository.FindByConditionAsync(spec, mappingResult, cancellationToken);
+        return repository.FindByConditionAsync(spec, selector, cancellationToken);
     }
 
     public Task<T?> FindByConditionAsync(
@@ -58,6 +58,7 @@ public class CachedDynamicSpecRepository<T>(
     public Task<IList<T>> ListAsync(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
+        int deep = 1,
         CancellationToken cancellationToken = default
     )
     {
@@ -68,17 +69,18 @@ public class CachedDynamicSpecRepository<T>(
             logger.LogInformation("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                () => repository.ListAsync(spec, queryParam, cancellationToken),
+                () => repository.ListAsync(spec, queryParam, deep, cancellationToken),
                 options: null
             )!;
         }
-        return repository.ListAsync(spec, queryParam, cancellationToken);
+        return repository.ListAsync(spec, queryParam, deep, cancellationToken);
     }
 
     public Task<IList<TResult>> ListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TResult>> mappingResult,
+        Expression<Func<T, TResult>> selector,
+        int deep = 1,
         CancellationToken cancellationToken = default
     )
         where TResult : class
@@ -90,17 +92,18 @@ public class CachedDynamicSpecRepository<T>(
             logger.LogInformation("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                () => repository.ListAsync(spec, queryParam, mappingResult, cancellationToken),
+                () => repository.ListAsync(spec, queryParam, selector, deep, cancellationToken),
                 options: null
             )!;
         }
-        return repository.ListAsync(spec, queryParam, mappingResult, cancellationToken);
+        return repository.ListAsync(spec, queryParam, selector, deep, cancellationToken);
     }
 
     public Task<PaginationResponse<TResult>> PagedListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TResult>> mappingResult,
+        Expression<Func<T, TResult>> selector,
+        int deep = 1,
         CancellationToken cancellationToken = default
     )
     {
@@ -111,17 +114,19 @@ public class CachedDynamicSpecRepository<T>(
             logger.LogInformation("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                () => repository.PagedListAsync(spec, queryParam, mappingResult, cancellationToken),
+                () =>
+                    repository.PagedListAsync(spec, queryParam, selector, deep, cancellationToken),
                 options: null
             )!;
         }
-        return repository.PagedListAsync(spec, queryParam, mappingResult, cancellationToken);
+        return repository.PagedListAsync(spec, queryParam, selector, deep, cancellationToken);
     }
 
     public Task<PaginationResponse<TResult>> CursorPagedListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TResult>> mappingResult,
+        Expression<Func<T, TResult>> selector,
+        int deep = 1,
         string? uniqueSort = null!,
         CancellationToken cancellationToken = default
     )
@@ -138,7 +143,8 @@ public class CachedDynamicSpecRepository<T>(
                     repository.CursorPagedListAsync(
                         spec,
                         queryParam,
-                        mappingResult,
+                        selector,
+                        deep,
                         uniqueSort,
                         cancellationToken
                     ),
@@ -148,7 +154,8 @@ public class CachedDynamicSpecRepository<T>(
         return repository.CursorPagedListAsync(
             spec,
             queryParam,
-            mappingResult,
+            selector,
+            deep,
             uniqueSort,
             cancellationToken
         );

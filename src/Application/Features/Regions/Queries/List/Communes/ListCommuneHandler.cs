@@ -43,7 +43,7 @@ public class ListCommuneHandler(IUnitOfWork unitOfWork, ILogger<ListCommuneHandl
                 new ListCommuneSpecification(),
                 query,
                 commune => commune.ToCommuneProjection(),
-                cancellationToken
+                cancellationToken: cancellationToken
             );
 
         return Result<PaginationResponse<CommuneProjection>>.Success(response);
