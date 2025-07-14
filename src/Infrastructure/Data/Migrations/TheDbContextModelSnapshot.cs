@@ -17,7 +17,7 @@ namespace Infrastructure.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.17")
+                .HasAnnotation("ProductVersion", "8.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "citext");
@@ -356,7 +356,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<DateOnly?>("DayOfBirth")
+                    b.Property<DateTime?>("DayOfBirth")
                         .HasColumnType("date")
                         .HasColumnName("day_of_birth");
 
@@ -631,7 +631,7 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
                 {
-                    b.OwnsOne("Domain.Aggregates.Users.ValueObjects.Address", "Address", b1 =>
+                    b.OwnsOne("Domain.Aggregates.Users.User.Address#Domain.Aggregates.Users.ValueObjects.Address", "Address", b1 =>
                         {
                             b1.Property<string>("UserId")
                                 .HasColumnType("character varying(26)")
@@ -672,7 +672,7 @@ namespace Infrastructure.Data.Migrations
 
                             b1.HasKey("UserId");
 
-                            b1.ToTable("user");
+                            b1.ToTable("user", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId")

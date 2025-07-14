@@ -12,7 +12,7 @@ public class UserPayload
 
     public string? PhoneNumber { get; set; }
 
-    public DateOnly? DayOfBirth { get; set; }
+    public DateTime? DayOfBirth { get; set; }
 
     public Ulid ProvinceId { get; set; }
 

@@ -24,7 +24,7 @@ public class User : AggregateRoot
 
     public string PhoneNumber { get; set; }
 
-    public DateOnly? DayOfBirth { get; set; }
+    public DateTime? DayOfBirth { get; set; }
 
     public Gender? Gender { get; set; }
 
@@ -83,7 +83,7 @@ public class User : AggregateRoot
         string? lastName,
         string? email,
         string? phoneNumber,
-        DateOnly? dayOfBirth
+        DateTime? dayOfBirth
     )
     {
         if (!string.IsNullOrWhiteSpace(firstName))
