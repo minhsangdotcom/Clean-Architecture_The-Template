@@ -208,7 +208,7 @@ public static partial class QueryParamValidate
         }
 
         // validate between operator is correct in format like [age][$between][0] = 1 & [age][$between][1] = 2
-        if (!ValidateBetweenAndInOperator("$between", queries))
+        if (!ValidateBetweenOperator("$between", queries))
         {
             return new(
                 Error: new BadRequestError(
@@ -218,23 +218,6 @@ public static partial class QueryParamValidate
                         .Property(x => x.Filter!)
                         .Message(MessageType.Valid)
                         .Object("BetweenOperator")
-                        .Negative()
-                        .Build()
-                )
-            );
-        }
-
-        // validate $in operator is correct in format like [age][$int][0] = 1 & [age][$in][1] = 2
-        if (!ValidateBetweenAndInOperator("$in", queries))
-        {
-            return new(
-                Error: new BadRequestError(
-                    Message,
-                    Messenger
-                        .Create<QueryParamRequest>("QueryParam")
-                        .Property(x => x.Filter!)
-                        .Message(MessageType.Valid)
-                        .Object("InOperator")
                         .Negative()
                         .Build()
                 )
@@ -266,10 +249,7 @@ public static partial class QueryParamValidate
         return new(request);
     }
 
-    private static bool ValidateBetweenAndInOperator(
-        string operation,
-        IEnumerable<QueryResult> queries
-    )
+    private static bool ValidateBetweenOperator(string operation, IEnumerable<QueryResult> queries)
     {
         IEnumerable<QueryResult> betweenOperators = queries.Where(x =>
             x.CleanKey.Contains(operation)
@@ -304,6 +284,7 @@ public static partial class QueryParamValidate
                 {
                     return new { key = $"$and.{andIndex}.{key}", indexValue };
                 }
+
                 if (
                     int.TryParse(
                         betweenOperator.CleanKey[betweenOperator.CleanKey.IndexOf("$or") + 1],
@@ -313,6 +294,7 @@ public static partial class QueryParamValidate
                 {
                     return new { key = $"$or.{orIndex}.{key}", indexValue };
                 }
+
                 return new { key = $"{key}", indexValue };
             })
             .GroupBy(x => x.key)
