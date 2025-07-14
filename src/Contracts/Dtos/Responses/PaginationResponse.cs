@@ -8,22 +8,27 @@ public class PaginationResponse<T>
 
     public Paging<T>? Paging { get; private set; }
 
-    public PaginationResponse(IEnumerable<T> data, int totalPage, int currentPage, int pageSize)
+    public PaginationResponse(
+        IEnumerable<T> data,
+        int totalItemCount,
+        int currentPage,
+        int pageSize
+    )
     {
         Data = data;
-        Paging = new Paging<T>(totalPage, currentPage, pageSize);
+        Paging = new Paging<T>(totalItemCount, currentPage, pageSize);
     }
 
     public PaginationResponse(
         IEnumerable<T> data,
-        int totalPage,
+        int totalItemCount,
         int pageSize,
         string? previousCursor = null,
         string? nextCursor = null
     )
     {
         Data = data;
-        Paging = new Paging<T>(totalPage, pageSize, previousCursor, nextCursor);
+        Paging = new Paging<T>(totalItemCount, pageSize, previousCursor, nextCursor);
     }
 }
 
@@ -44,25 +49,25 @@ public class Paging<T>
 
     public string? After { get; set; }
 
-    public Paging(int totalPage, int currentPage = 1, int pageSize = 10)
+    public Paging(int totalItemCount, int currentPage = 1, int pageSize = 10)
     {
         CurrentPage = currentPage;
         PageSize = pageSize;
-        TotalPage = totalPage;
+        TotalPage = (int)Math.Ceiling(totalItemCount / (double)pageSize);
 
-        HasNextPage = (currentPage + 1) * pageSize <= totalPage;
+        HasNextPage = CurrentPage < TotalPage;
         HasPreviousPage = currentPage > 1;
     }
 
     public Paging(
-        int totalPage,
+        int totalItemCount,
         int pageSize = 10,
         string? previousCursor = null,
         string? nextCursor = null
     )
     {
         PageSize = pageSize;
-        TotalPage = totalPage;
+        TotalPage = (int)Math.Ceiling(totalItemCount / (double)pageSize);
         After = nextCursor;
         HasNextPage = nextCursor != null;
         Before = previousCursor;
