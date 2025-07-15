@@ -109,7 +109,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             () => user.PhoneNumber.ShouldBe(response.PhoneNumber),
             () => user.DayOfBirth.ShouldBe(response.DayOfBirth),
             () => user.Gender.ShouldBe(response.Gender),
-            () => user.Address?.ToString().ShouldBe(response.Address),
+            () => user.Address?.ToString().ShouldBe(response.Address?.ToString()),
             () => user.Avatar.ShouldBe(response.Avatar),
             () => user.Status.ShouldBe(response.Status),
             () => user.UserRoles?.Select(x => x.RoleId).ShouldBe(response.Roles?.Select(x => x.Id)),

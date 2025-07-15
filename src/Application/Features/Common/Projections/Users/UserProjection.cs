@@ -22,9 +22,9 @@ public class UserProjection : BaseResponse
 
     public Gender? Gender { get; set; }
 
-    public string? Address { get; set; }
+    public string? FullAddress { get; set; }
 
-    public Address? UserAddress { get; set; }
+    public Address? Address { get; set; }
 
     [File]
     public string? Avatar { get; set; }
@@ -48,7 +48,7 @@ public class UserProjection : BaseResponse
         Gender = user.Gender;
         Avatar = user.Avatar;
         Status = user.Status;
-        UserAddress = user.Address;
-        Address = user.Address?.ToString();
+        Address = user.Address;
+        FullAddress = user.Address!.ToString();
     }
 }

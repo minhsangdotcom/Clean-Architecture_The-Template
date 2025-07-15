@@ -23,6 +23,6 @@ public static class ListUserMapping
             Gender = user.Gender,
             Avatar = user.Avatar,
             Status = user.Status,
-            Address = user.Address!.ToString(),
+            Address = user.Address,
         };
 }

@@ -117,7 +117,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             () => user.Email.ShouldBe(response.Email),
             () => user.PhoneNumber.ShouldBe(response.PhoneNumber),
             () => user.Gender.ShouldBe(response.Gender),
-            () => user.Address?.ToString().ShouldBe(response.Address),
+            () => user.Address?.ToString().ShouldBe(response.Address?.ToString()),
             () => user.Status.ShouldBe(response.Status),
             () =>
                 user
