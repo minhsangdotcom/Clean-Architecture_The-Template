@@ -72,7 +72,7 @@ public static class PaginationExtension
         int totalPage = query.Count();
         if (totalPage == 0)
         {
-            return new PaginationResponse<T>(query, totalPage, request.Size);
+            return new PaginationResponse<T>(await query.ToListAsync(), totalPage, request.Size);
         }
 
         bool IsPreviousMove = !string.IsNullOrWhiteSpace(request.Before);
