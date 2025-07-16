@@ -25,9 +25,7 @@ public class ListProvinceHandler(IUnitOfWork unitOfWork, ILogger<ListProvinceHan
             return Result<PaginationResponse<ProvinceProjection>>.Failure(validationResult.Error);
         }
 
-        var validationFilterResult = query.ValidateFilter<ListProvinceQuery, ProvinceProjection>(
-            logger
-        );
+        var validationFilterResult = query.ValidateFilter<ListProvinceQuery, Province>(logger);
 
         if (validationFilterResult.Error != null)
         {

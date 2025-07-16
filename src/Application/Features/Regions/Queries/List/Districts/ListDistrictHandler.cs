@@ -25,9 +25,7 @@ public class ListDistrictHandler(IUnitOfWork unitOfWork, ILogger<ListDistrictHan
             return Result<PaginationResponse<DistrictProjection>>.Failure(validationResult.Error);
         }
 
-        var validationFilterResult = query.ValidateFilter<ListDistrictQuery, DistrictProjection>(
-            logger
-        );
+        var validationFilterResult = query.ValidateFilter<ListDistrictQuery, District>(logger);
 
         if (validationFilterResult.Error != null)
         {

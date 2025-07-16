@@ -26,9 +26,7 @@ public class ListCommuneHandler(IUnitOfWork unitOfWork, ILogger<ListCommuneHandl
             return Result<PaginationResponse<CommuneProjection>>.Failure(validationResult.Error);
         }
 
-        var validationFilterResult = query.ValidateFilter<ListCommuneQuery, CommuneProjection>(
-            logger
-        );
+        var validationFilterResult = query.ValidateFilter<ListCommuneQuery, Commune>(logger);
 
         if (validationFilterResult.Error != null)
         {
