@@ -29,7 +29,7 @@ public static class StringExtension
 
     static dynamic ParseKey(List<string> keys, string value)
     {
-        dynamic leaf = value.IsDigit() ? long.Parse(value) : value;
+        dynamic leaf = value;
         for (int i = keys.Count - 1; i >= 0; i--)
         {
             dynamic obj = new ExpandoObject();

@@ -23,7 +23,7 @@ public class ListUserHandler(IUnitOfWork unitOfWork, ILogger<ListUserHandler> lo
             return Result<PaginationResponse<ListUserResponse>>.Failure(validationResult.Error);
         }
 
-        var validationFilterResult = query.ValidateFilter<ListUserQuery, ListUserResponse>(logger);
+        var validationFilterResult = query.ValidateFilter<ListUserQuery, User>(logger);
         if (validationFilterResult.Error != null)
         {
             return Result<PaginationResponse<ListUserResponse>>.Failure(
