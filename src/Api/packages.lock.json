@@ -250,6 +250,14 @@
         "resolved": "2.0.123",
         "contentHash": "RDFF4rBLLmbpi6pwkY7q/M6UXHRJEOerplDGE5jwEkP/JGJnBauAClYavNKJPW1yOTWRPIyfj4is3EaJxQXILQ=="
       },
+      "deniszykov.TypeConversion": {
+        "type": "Transitive",
+        "resolved": "3.2.3",
+        "contentHash": "RzdZjTJJc5funWyVpArmzI6B1UEkKRBhcQzJIOGuzuup+ImDVwjprWQnNSzfL7wc5sPp3NkGklJQ7yMkhK90NA==",
+        "dependencies": {
+          "Microsoft.Extensions.Options": "3.1.10"
+        }
+      },
       "EFCore.NamingConventions": {
         "type": "Transitive",
         "resolved": "8.0.3",
@@ -915,12 +923,15 @@
       },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Transitive",
-        "resolved": "1.0.8",
-        "contentHash": "rSM1Zv7NWhAOO+BQa+KsBo3hBUzOPdwUsH78Qqqt6g/TK98qnvO1Vy0XOLTEhE/5h4UGDL7rgkgoucKGWxhfXQ==",
+        "resolved": "1.0.9",
+        "contentHash": "jJUmZ4c/B4JgyW4OPB4ok0uYXXHWxXrRItKJNLzVW+a/r9UDpVIRoy3z29zDE89eob2rk6WDDxf/i0KQtRPOLg==",
         "dependencies": {
           "BouncyCastle.Cryptography": "2.5.1",
           "CaseConverter": "2.0.1",
-          "Ulid": "1.3.4"
+          "Newtonsoft.Json": "13.0.3",
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "8.0.11",
+          "Ulid": "1.3.4",
+          "deniszykov.TypeConversion": "3.2.3"
         }
       },
       "minhsangdotcom.TheTemplate.SpecificationPattern": {
@@ -1261,7 +1272,7 @@
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
           "Mediator.Abstractions": "[3.0.0-preview.65, )",
-          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.8, )",
+          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.9, )",
           "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.4, )"
         }
       },

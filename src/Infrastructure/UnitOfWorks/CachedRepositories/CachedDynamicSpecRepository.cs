@@ -2,8 +2,8 @@ using System.Linq.Expressions;
 using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Requests;
-using Contracts.Dtos.Responses;
 using Microsoft.Extensions.Logging;
+using SharedKernel.Models;
 using Specification.Interfaces;
 
 namespace Infrastructure.UnitOfWorks.CachedRepositories;

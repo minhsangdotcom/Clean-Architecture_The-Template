@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using Contracts.Dtos.Requests;
-using Contracts.Dtos.Responses;
+using SharedKernel.Models;
 using Specification.Interfaces;
 
 namespace Application.Common.Interfaces.UnitOfWorks;

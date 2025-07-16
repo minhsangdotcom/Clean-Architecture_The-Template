@@ -1,10 +1,10 @@
 using System.Linq.Expressions;
-using Application.Common.Extensions;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Requests;
-using Contracts.Dtos.Responses;
 using Domain.Common;
 using Microsoft.EntityFrameworkCore;
+using SharedKernel.Extensions.QueryExtensions;
+using SharedKernel.Models;
 using Specification.Evaluators;
 using Specification.Interfaces;
 

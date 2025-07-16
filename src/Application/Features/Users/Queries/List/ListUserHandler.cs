@@ -6,6 +6,7 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.Extensions.Logging;
+using SharedKernel.Models;
 
 namespace Application.Features.Users.Queries.List;
 

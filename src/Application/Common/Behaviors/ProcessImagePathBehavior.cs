@@ -6,6 +6,7 @@ using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.Extensions.Logging;
+using SharedKernel.Models;
 
 namespace Application.Common.Behaviors;
 

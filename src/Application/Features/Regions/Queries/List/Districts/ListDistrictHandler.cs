@@ -2,11 +2,11 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.QueryStringProcessing;
 using Application.Features.Common.Projections.Regions;
 using Contracts.ApiWrapper;
-using Contracts.Dtos.Responses;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Regions.Specifications;
 using Mediator;
 using Microsoft.Extensions.Logging;
+using SharedKernel.Models;
 
 namespace Application.Features.Regions.Queries.List.Districts;
 
