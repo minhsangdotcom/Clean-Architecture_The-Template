@@ -15,6 +15,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.Email).HasColumnType("citext");
         builder.HasIndex(x => x.Email).IsUnique();
 
+        builder.HasIndex(x => x.CreatedAt);
+
         builder.OwnsOne(
             x => x.Address,
             address =>
