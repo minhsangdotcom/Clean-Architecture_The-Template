@@ -1184,8 +1184,8 @@
       },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Transitive",
-        "resolved": "1.0.9",
-        "contentHash": "jJUmZ4c/B4JgyW4OPB4ok0uYXXHWxXrRItKJNLzVW+a/r9UDpVIRoy3z29zDE89eob2rk6WDDxf/i0KQtRPOLg==",
+        "resolved": "1.0.10",
+        "contentHash": "Le71da77WbILGZ6w9UYy1yXosDdR2W55PamXE8R65n8y8waCuqMOwfKbKpU4q4VkmYwIvQiS68h8GtC1bMyDFA==",
         "dependencies": {
           "BouncyCastle.Cryptography": "2.5.1",
           "CaseConverter": "2.0.1",
@@ -2656,7 +2656,7 @@
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
           "Mediator.Abstractions": "[3.0.0-preview.65, )",
-          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.9, )",
+          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.10, )",
           "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.4, )"
         }
       },
