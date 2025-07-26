@@ -4,15 +4,12 @@ namespace Api.Middlewares;
 
 public class UserMiddleware(RequestDelegate next)
 {
-    public async Task Invoke(HttpContext context, ICurrentUser currentUser)
+    public async Task Invoke(HttpContext context)
     {
-        if (context.User?.Identity?.IsAuthenticated == true)
-        {
-            currentUser.SetClaimPrinciple(context.User);
-        }
-
+        var currentUser = context.RequestServices.GetRequiredService<ICurrentUser>();
+        currentUser.Set(context.User);
         currentUser.SetClientIp(context);
-
+        
         await next.Invoke(context);
     }
 }

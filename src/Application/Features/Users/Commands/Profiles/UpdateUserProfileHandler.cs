@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
@@ -34,8 +35,13 @@ public class UpdateUserProfileHandler(
         {
             return Result<UpdateUserProfileResponse>.Failure(
                 new NotFoundError(
-                    "Resource is not found",
-                    Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
+                        .Create<User>()
+                        .Message(MessageType.Found)
+                        .Negative()
+                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
+                        .BuildMessage()
                 )
             );
         }
@@ -52,8 +58,8 @@ public class UpdateUserProfileHandler(
         {
             return Result<UpdateUserProfileResponse>.Failure<NotFoundError>(
                 new(
-                    "Resource is not found",
-                    Messager
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
                         .Create<User>()
                         .Property(nameof(UpdateUserProfileCommand.ProvinceId))
                         .Message(MessageType.Existence)
@@ -70,8 +76,8 @@ public class UpdateUserProfileHandler(
         {
             return Result<UpdateUserProfileResponse>.Failure<NotFoundError>(
                 new(
-                    "Resource is not found",
-                    Messager
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
                         .Create<User>()
                         .Property(nameof(UpdateUserProfileCommand.DistrictId))
                         .Message(MessageType.Existence)
@@ -92,8 +98,8 @@ public class UpdateUserProfileHandler(
             {
                 return Result<UpdateUserProfileResponse>.Failure<NotFoundError>(
                     new(
-                        "Resource is not found",
-                        Messager
+                        TitleMessage.RESOURCE_NOT_FOUND,
+                        Messenger
                             .Create<User>()
                             .Property(nameof(UpdateUserProfileCommand.CommuneId))
                             .Message(MessageType.Existence)

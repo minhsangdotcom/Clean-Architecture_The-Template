@@ -13,9 +13,10 @@ public static class Router
         public const string Profile = $"{nameof(Users)}/{nameof(Profile)}";
 
         public const string ChangePassword = $"{nameof(Users)}/{nameof(ChangePassword)}";
-        public const string RequestResetPassowrd =
-            $"{nameof(Users)}/{nameof(RequestResetPassowrd)}";
-        public const string ResetPassowrd = $"{nameof(Users)}/{nameof(ResetPassowrd)}";
+        public const string RequestResetPassword =
+            $"{nameof(Users)}/{nameof(RequestResetPassword)}";
+        public const string ResetPassword =
+            $"{nameof(Users)}/" + "{" + RoutePath.Id + "}" + $"/{nameof(ResetPassword)}";
 
         public const string Login = $"{nameof(Users)}/{nameof(Login)}";
         public const string RefreshToken = $"{nameof(Users)}/{nameof(RefreshToken)}";

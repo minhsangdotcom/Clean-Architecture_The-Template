@@ -2,7 +2,7 @@ using System.Text.Json;
 using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Regions;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Data;
 
@@ -11,6 +11,7 @@ public class RegionDataSeeding
     public static async Task SeedingAsync(IServiceProvider provider)
     {
         IUnitOfWork unitOfWork = provider.GetRequiredService<IUnitOfWork>();
+        ILogger logger = provider.GetRequiredService<ILogger<RegionDataSeeding>>();
 
         if (
             await unitOfWork.Repository<Province>().AnyAsync()
@@ -36,7 +37,7 @@ public class RegionDataSeeding
         string communeFilePath = Path.Combine(fullPath, "Wards.json");
         IEnumerable<Commune>? communes = Read<Commune>(communeFilePath);
         await unitOfWork.Repository<Commune>().AddRangeAsync(communes ?? []);
-        Log.Information("Seeding region data has finished....");
+        logger.LogInformation("Seeding region data has finished....");
 
         await unitOfWork.SaveAsync();
     }
@@ -45,7 +46,6 @@ public class RegionDataSeeding
         where T : class
     {
         using FileStream json = File.OpenRead(path);
-        List<T>? datas = JsonSerializer.Deserialize<List<T>>(json);
-        return datas;
+        return JsonSerializer.Deserialize<List<T>>(json);
     }
 }

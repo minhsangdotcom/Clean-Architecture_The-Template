@@ -28,7 +28,6 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
     private readonly DbSet<User> userDbSet = context.Set<User>();
     public DbSet<User> User => userDbSet;
 
-
     public async Task CreateAsync(
         User user,
         IEnumerable<Ulid> roleIds,
@@ -68,10 +67,7 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
 
         Guard.Against.NotFound($"{user.Id}", currentUser, nameof(user));
 
-        if (
-            await roleDbSet.CountAsync(x => rolesToProcess.Contains(x.Id))
-            != rolesToProcess.Count
-        )
+        if (await roleDbSet.CountAsync(x => rolesToProcess.Contains(x.Id)) != rolesToProcess.Count)
         {
             throw new ArgumentException($"{nameof(roleIds)} is not found", nameof(roleIds));
         }
@@ -86,7 +82,10 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
         }
 
         ICollection<UserRole> currentUserRoles = currentUser.UserRoles!;
-        List<Ulid> rolesToInsert = [..rolesToProcess.Except(currentUserRoles.Select(ur => ur.RoleId))];
+        List<Ulid> rolesToInsert =
+        [
+            .. rolesToProcess.Except(currentUserRoles.Select(ur => ur.RoleId)),
+        ];
         await userRoleDbSet.AddRangeAsync(
             rolesToInsert.Select(x => new UserRole { RoleId = x, UserId = currentUser.Id })
         );
@@ -96,7 +95,9 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
         List<RoleClaim> roleClaims = await roleManagerService.GetRoleClaimsAsync(rolesToInsert);
         List<UserClaim> userClaimsToInsert = roleClaims
             .FindAll(x =>
-                !currentUser.UserClaims!.Any(p => p.ClaimType == x.ClaimType && p.ClaimValue == x.ClaimValue)
+                !currentUser.UserClaims!.Any(p =>
+                    p.ClaimType == x.ClaimType && p.ClaimValue == x.ClaimValue
+                )
             )
             .ConvertAll(x => new UserClaim
             {
@@ -123,15 +124,12 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
 
         User currentUser = Guard.Against.NotFound(
             $"{user.Id}",
-            await userDbSet
-                .Include(x => x.UserRoles)
-                .FirstOrDefaultAsync(x => x.Id == user.Id),
+            await userDbSet.Include(x => x.UserRoles).FirstOrDefaultAsync(x => x.Id == user.Id),
             nameof(user)
         );
 
         if (
-            await roleDbSet.CountAsync(x => rolesToProcess!.Contains(x.Id))
-            != rolesToProcess!.Count
+            await roleDbSet.CountAsync(x => rolesToProcess!.Contains(x.Id)) != rolesToProcess!.Count
         )
         {
             throw new ArgumentException($"{nameof(roleIds)} is invalid");
@@ -142,7 +140,9 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
         IEnumerable<Ulid> rolesToRemove = currentUserRoles
             .Where(x => !rolesToProcess.Contains(x.RoleId))
             .Select(x => x.RoleId);
-        List<Ulid> rolesToInsert = rolesToProcess.FindAll(x => currentUserRoles.All(p => p.RoleId != x));
+        List<Ulid> rolesToInsert = rolesToProcess.FindAll(x =>
+            currentUserRoles.All(p => p.RoleId != x)
+        );
 
         await RemoveRolesFromUserAsync(currentUser, rolesToRemove);
         await AssignRolesToUserAsync(currentUser, rolesToInsert);
@@ -168,10 +168,7 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
             nameof(user)
         );
 
-        if (
-            await roleDbSet.CountAsync(x => rolesToProcess.Contains(x.Id))
-            != rolesToProcess.Count
-        )
+        if (await roleDbSet.CountAsync(x => rolesToProcess.Contains(x.Id)) != rolesToProcess.Count)
         {
             throw new ArgumentException($"{nameof(roleIds)} is invalid");
         }
@@ -188,7 +185,7 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
         [
             .. currentUserRoles.Where(x => rolesToProcess.Contains(x.RoleId)),
         ];
-        
+
         IEnumerable<UserClaim> userClaims = userRoles
             .Select(x => x.Role)
             .SelectMany(x => x!.RoleClaims!)
@@ -230,50 +227,46 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
         User? currentUser = Guard.Against.NotFound(
             $"{user}",
             await userDbSet
-                .Include(x => x.UserClaims!.Where(p =>
-                    p.Type == UserClaimType.Custom
-                ))
+                .Include(x => x.UserClaims!.Where(p => p.Type == UserClaimType.Custom))
                 .FirstOrDefaultAsync(x => x.Id == user.Id),
             nameof(user)
         );
 
         List<UserClaim> customClaims =
         [
-            ..currentUser.UserClaims!.Where(x =>
-                x.Type == UserClaimType.Custom
-            )
+            .. currentUser.UserClaims!.Where(x => x.Type == UserClaimType.Custom),
         ];
 
         var claimsToInsert = claimsToProcess!
             .Except(customClaims, new UserClaimComparer())
             .ToList();
-        
+
         var claimsToUpdate = customClaims
             .Intersect(claimsToProcess!, new UserClaimComparer())
             .ToList();
-        
+
         var claimsToRemove = customClaims
             .Where(cc => cc.RoleClaimId == null)
             .Except(claimsToProcess!, new UserClaimComparer())
             .ToList();
-        
+
         ProcessUserClaimUpdate(claimsToUpdate, claimsToProcess!);
-        
+
         if (claimsToRemove.Count > 0)
         {
             userClaimsDbSet.RemoveRange(claimsToRemove);
         }
-        
+
         if (claimsToUpdate.Count > 0)
         {
             userClaimsDbSet.UpdateRange(claimsToUpdate);
         }
-        
+
         if (claimsToInsert.Count > 0)
         {
             await userClaimsDbSet.AddRangeAsync(claimsToInsert);
         }
-        
+
         await context.SaveChangesAsync();
     }
 
@@ -289,19 +282,14 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
         IEnumerable<UserClaim> currentUserClaims = currentUser.UserClaims!.Where(p =>
             p.Type == UserClaimType.Custom
         );
-        List<UserClaim> claimsToRemove =
-        [
-            ..currentUserClaims.Where(x =>
-                ids.Contains(x.Id)
-            )
-        ];
+        List<UserClaim> claimsToRemove = [.. currentUserClaims.Where(x => ids.Contains(x.Id))];
         if (claimsToRemove.Count == 0)
         {
             throw new ArgumentException(
                 $"{nameof(claimIds)} is not existed in user {nameof(user.Id)}."
             );
         }
-        
+
         userClaimsDbSet.RemoveRange(claimsToRemove);
         await context.SaveChangesAsync();
     }
@@ -329,21 +317,27 @@ public class UserManagerService(IRoleManagerService roleManagerService, IDbConte
     )
     {
         ArgumentNullException.ThrowIfNull(claims);
-        List<KeyValuePair<string, string>> authorizeClaims = [..claims];
-        
+        List<KeyValuePair<string, string>> authorizeClaims = [.. claims];
+
         if (authorizeClaims.Count == 0)
         {
             return false;
         }
-        
+
         string key = authorizeClaims[0].Key;
         if (string.IsNullOrWhiteSpace(key))
         {
-            throw new ArgumentException($"{nameof(claims)} key must not be empty or white space.", nameof(claims));
+            throw new ArgumentException(
+                $"{nameof(claims)} key must not be empty or white space.",
+                nameof(claims)
+            );
         }
         if (authorizeClaims.Any(p => p.Key != key))
         {
-            throw new ArgumentException($"{nameof(claims)} doesn't has the same key.", nameof(claims));
+            throw new ArgumentException(
+                $"{nameof(claims)} doesn't has the same key.",
+                nameof(claims)
+            );
         }
 
         List<string> values = authorizeClaims.ConvertAll(x => x.Value);

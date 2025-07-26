@@ -3,6 +3,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using SharedKernel.Extensions.QueryExtensions;
 
 namespace Infrastructure.Data;
 
@@ -14,6 +15,12 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(op
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         modelBuilder.HasPostgresExtension("citext");
+
+        modelBuilder.HasDbFunction(
+            typeof(PostgresDbFunctionExtensions).GetMethod(
+                nameof(PostgresDbFunctionExtensions.Unaccent)
+            )!
+        );
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>

@@ -2,6 +2,7 @@ using System.Dynamic;
 using Contracts.Dtos.Requests;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
+using SharedKernel.Extensions;
 
 namespace Application.Common.Extensions;
 
@@ -29,7 +30,7 @@ public static class StringExtension
 
     static dynamic ParseKey(List<string> keys, string value)
     {
-        dynamic leaf = value.IsDigit() ? long.Parse(value) : value;
+        dynamic leaf = value;
         for (int i = keys.Count - 1; i >= 0; i--)
         {
             dynamic obj = new ExpandoObject();
@@ -129,21 +130,6 @@ public static class StringExtension
             }
             results[i] = rootValue;
         }
-    }
-
-    public static bool IsDigit(this string str)
-    {
-        if (string.IsNullOrEmpty(str))
-        {
-            return false;
-        }
-
-        foreach (var c in str)
-        {
-            if (c is < '0' or > '9')
-                return false;
-        }
-        return true;
     }
 
     public static IEnumerable<QueryResult> TransformStringQuery(string[] queries)

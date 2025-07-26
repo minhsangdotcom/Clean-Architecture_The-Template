@@ -17,7 +17,7 @@ public class GetUserDetailHandlerTest(TestingFixture testingFixture) : IAsyncLif
         //act
         var result = await testingFixture.SendAsync(new GetUserDetailQuery(Id));
         //assert
-        var expectedMessage = Messager.Create<User>().Message(MessageType.Found).Negative().Build();
+        var expectedMessage = Messenger.Create<User>().Message(MessageType.Found).Negative().Build();
         result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldNotBeNull();
         result.Error?.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());

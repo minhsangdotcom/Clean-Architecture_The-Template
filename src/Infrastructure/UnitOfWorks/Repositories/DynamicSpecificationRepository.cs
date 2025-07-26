@@ -1,12 +1,10 @@
 using System.Linq.Expressions;
-using Application.Common.Extensions;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Binds;
 using Contracts.Dtos.Requests;
-using Contracts.Dtos.Responses;
 using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Extensions.QueryExtensions;
+using SharedKernel.Models;
 using Specification.Evaluators;
 using Specification.Interfaces;
 
@@ -16,7 +14,7 @@ namespace Infrastructure.UnitOfWorks.Repositories;
 /// combine specification pattern and dynamic queries
 /// </summary>
 /// <typeparam name="T">must be BaseEntity or AggregateRoot</typeparam>
-/// <param name="dbContext">must be IDbcontext</param>
+/// <param name="dbContext">must be IDbContext</param>
 public class DynamicSpecificationRepository<T>(IDbContext dbContext)
     : IDynamicSpecificationRepository<T>
     where T : class
@@ -28,15 +26,16 @@ public class DynamicSpecificationRepository<T>(IDbContext dbContext)
 
     public async Task<TResult?> FindByConditionAsync<TResult>(
         ISpecification<T> spec,
-        Expression<Func<T, TResult>> mappingResult,
+        Expression<Func<T, TResult>> selector,
         CancellationToken cancellationToken = default
     )
         where TResult : class =>
-        await ApplySpecification(spec).Select(mappingResult).FirstOrDefaultAsync(cancellationToken);
+        await ApplySpecification(spec).Select(selector).FirstOrDefaultAsync(cancellationToken);
 
     public async Task<IList<T>> ListAsync(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
+        int deep = 1,
         CancellationToken cancellationToken = default
     )
     {
@@ -44,7 +43,7 @@ public class DynamicSpecificationRepository<T>(IDbContext dbContext)
 
         return await ApplySpecification(spec)
             .Filter(queryParam.Filter)
-            .Search(queryParam.Keyword, queryParam.Targets)
+            .Search(queryParam.Keyword, queryParam.Targets, deep)
             .Sort(uniqueSort)
             .ToListAsync(cancellationToken);
     }
@@ -52,7 +51,8 @@ public class DynamicSpecificationRepository<T>(IDbContext dbContext)
     public async Task<IList<TResult>> ListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TResult>> mappingResult,
+        Expression<Func<T, TResult>> selector,
+        int deep = 1,
         CancellationToken cancellationToken = default
     )
         where TResult : class
@@ -61,16 +61,17 @@ public class DynamicSpecificationRepository<T>(IDbContext dbContext)
 
         return await ApplySpecification(spec)
             .Filter(queryParam.Filter)
-            .Search(queryParam.Keyword, queryParam.Targets)
+            .Search(queryParam.Keyword, queryParam.Targets, deep)
             .Sort(uniqueSort)
-            .Select(mappingResult)
+            .Select(selector)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<PaginationResponse<TResult>> PagedListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TResult>> mappingResult,
+        Expression<Func<T, TResult>> selector,
+        int deep = 1,
         CancellationToken cancellationToken = default
     )
     {
@@ -78,24 +79,25 @@ public class DynamicSpecificationRepository<T>(IDbContext dbContext)
 
         return await ApplySpecification(spec)
             .Filter(queryParam.Filter)
-            .Search(queryParam.Keyword, queryParam.Targets)
+            .Search(queryParam.Keyword, queryParam.Targets, deep)
             .Sort(uniqueSort)
-            .Select(mappingResult)
+            .Select(selector)
             .ToPagedListAsync(queryParam.Page, queryParam.PageSize, cancellationToken);
     }
 
     public async Task<PaginationResponse<TResult>> CursorPagedListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        Expression<Func<T, TResult>> mappingResult,
+        Expression<Func<T, TResult>> selector,
+        int deep = 1,
         string? uniqueSort = null,
         CancellationToken cancellationToken = default
     )
         where TResult : class =>
         await ApplySpecification(spec)
             .Filter(queryParam.Filter)
-            .Search(queryParam.Keyword, queryParam.Targets)
-            .Select(mappingResult)
+            .Search(queryParam.Keyword, queryParam.Targets, deep)
+            .Select(selector)
             .ToCursorPagedListAsync(
                 new CursorPaginationRequest(
                     queryParam.Before,

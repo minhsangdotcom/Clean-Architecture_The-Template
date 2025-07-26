@@ -26,7 +26,7 @@ public class ChangeUserPasswordCommandTest
         var result = await validator.TestValidateAsync(command);
 
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<ChangeUserPasswordCommand>(nameof(User))
             .Property(x => x.OldPassword!)
             .Message(MessageType.Null)
@@ -50,7 +50,7 @@ public class ChangeUserPasswordCommandTest
         var result = await validator.TestValidateAsync(command);
 
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<ChangeUserPasswordCommand>(nameof(User))
             .Property(x => x.NewPassword!)
             .Message(MessageType.Null)
@@ -75,7 +75,7 @@ public class ChangeUserPasswordCommandTest
         var result = await validator.TestValidateAsync(command);
 
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<ChangeUserPasswordCommand>(nameof(User))
             .Property(x => x.NewPassword!)
             .Message(MessageType.Strong)

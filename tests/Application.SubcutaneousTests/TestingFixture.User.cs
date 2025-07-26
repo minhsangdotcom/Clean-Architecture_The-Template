@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Features.Common.Payloads.Users;
 using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Create;
 using Contracts.ApiWrapper;
@@ -62,13 +63,14 @@ public partial class TestingFixture
     public async Task<User> CreateAdminUserAsync(
         UserAddress? address = null,
         IFormFile? avatar = null,
-        List<Ulid>? roleIds = null)
+        List<Ulid>? roleIds = null
+    )
     {
         address ??= GetDefaultAddress();
         Role role = await CreateAdminRoleAsync();
         List<Ulid> roles = roleIds ?? [];
         roles.Add(role.Id);
-        
+
         CreateUserCommand command =
             new()
             {
@@ -77,7 +79,7 @@ public partial class TestingFixture
                 Username = "super.admin",
                 Password = DEFAULT_USER_PASSWORD,
                 Email = "super.amdin@gmail.com",
-                DayOfBirth = DateTime.UtcNow,
+                DayOfBirth = new DateTime(1990, 1, 2),
                 PhoneNumber = "0925123321",
                 Gender = Gender.Male,
                 ProvinceId = address.ProvinceId,
@@ -89,9 +91,9 @@ public partial class TestingFixture
                 Avatar = avatar,
                 UserClaims =
                 [
-                    new UserClaimModel() { ClaimType = "test1", ClaimValue = "test1.value" },
-                    new UserClaimModel() { ClaimType = "test2", ClaimValue = "test2.value" },
-                    new UserClaimModel() { ClaimType = "test3", ClaimValue = "test3.value" },
+                    new UserClaimPayload() { ClaimType = "test1", ClaimValue = "test1.value" },
+                    new UserClaimPayload() { ClaimType = "test2", ClaimValue = "test2.value" },
+                    new UserClaimPayload() { ClaimType = "test3", ClaimValue = "test3.value" },
                 ],
             };
 
@@ -118,7 +120,7 @@ public partial class TestingFixture
                 Username = "steave.Roger",
                 Password = DEFAULT_USER_PASSWORD,
                 Email = "steave.roger@gmail.com",
-                DayOfBirth = DateTime.UtcNow,
+                DayOfBirth = new DateTime(1990, 1, 3),
                 PhoneNumber = "0925321321",
                 Gender = Gender.Male,
                 ProvinceId = address.ProvinceId,
@@ -130,9 +132,9 @@ public partial class TestingFixture
                 Avatar = avatar,
                 UserClaims =
                 [
-                    new UserClaimModel() { ClaimType = "test1", ClaimValue = "test1.value" },
-                    new UserClaimModel() { ClaimType = "test2", ClaimValue = "test2.value" },
-                    new UserClaimModel() { ClaimType = "test3", ClaimValue = "test3.value" },
+                    new UserClaimPayload() { ClaimType = "test1", ClaimValue = "test1.value" },
+                    new UserClaimPayload() { ClaimType = "test2", ClaimValue = "test2.value" },
+                    new UserClaimPayload() { ClaimType = "test3", ClaimValue = "test3.value" },
                 ],
             };
 
@@ -159,7 +161,7 @@ public partial class TestingFixture
                 Username = "sang.tran",
                 Password = DEFAULT_USER_PASSWORD,
                 Email = "sang.tran@gmail.com",
-                DayOfBirth = DateTime.UtcNow,
+                DayOfBirth = new DateTime(1990, 1, 4),
                 PhoneNumber = "0925123124",
                 Gender = Gender.Male,
                 ProvinceId = address.ProvinceId,
@@ -171,9 +173,9 @@ public partial class TestingFixture
                 Avatar = avatar,
                 UserClaims =
                 [
-                    new UserClaimModel() { ClaimType = "test1", ClaimValue = "test1.value" },
-                    new UserClaimModel() { ClaimType = "test2", ClaimValue = "test2.value" },
-                    new UserClaimModel() { ClaimType = "test3", ClaimValue = "test3.value" },
+                    new UserClaimPayload() { ClaimType = "test1", ClaimValue = "test1.value" },
+                    new UserClaimPayload() { ClaimType = "test2", ClaimValue = "test2.value" },
+                    new UserClaimPayload() { ClaimType = "test3", ClaimValue = "test3.value" },
                 ],
             };
 
@@ -198,7 +200,7 @@ public partial class TestingFixture
             .DynamicReadOnlyRepository<User>()
             .FindByConditionAsync(new GetUserByIdSpecification(userId));
     }
-    
+
     private static UserAddress GetDefaultAddress() =>
         new(
             Ulid.Parse("01JRQHWS3RQR1N0J84EV1DQXR1"),

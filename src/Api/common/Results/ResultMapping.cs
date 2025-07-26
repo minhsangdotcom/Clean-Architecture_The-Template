@@ -1,4 +1,3 @@
-using Api.common.Routers;
 using Contracts.ApiWrapper;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -51,7 +50,7 @@ public static class ResultMapping
             Title = errorDetails.Title,
             Extensions = new Dictionary<string, object?>()
             {
-                { "ErrorDetail", errorDetails.ErrorMessage },
+                { "errorDetails", errorDetails.ErrorMessage },
             },
             Type = errorDetails.Type,
         };

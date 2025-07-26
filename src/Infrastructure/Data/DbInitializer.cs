@@ -8,19 +8,19 @@ using Domain.Aggregates.Users.ValueObjects;
 using Infrastructure.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 using SharedKernel.Constants;
 
 namespace Infrastructure.Data;
 
-public static class DbInitializer
+public class DbInitializer
 {
     public static async Task InitializeAsync(IServiceProvider provider)
     {
         var unitOfWork = provider.GetRequiredService<IUnitOfWork>();
         var roleManagerService = provider.GetRequiredService<IRoleManagerService>();
         var userManagerService = provider.GetRequiredService<IUserManagerService>();
-        var logger = provider.GetRequiredService<ILogger>();
+        var logger = provider.GetRequiredService<ILogger<DbInitializer>>();
 
         Role adminRole =
             new()
@@ -59,14 +59,14 @@ public static class DbInitializer
 
             if (!await roleManagerService.Roles.AnyAsync())
             {
-                logger.Information("Inserting roles is starting.............");
+                logger.LogInformation("Inserting roles is starting.............");
                 await roleManagerService.CreateRangeAsync(roles);
-                logger.Information("Inserting roles has finished.............");
+                logger.LogInformation("Inserting roles has finished.............");
             }
 
             if (!await unitOfWork.Repository<User>().AnyAsync())
             {
-                logger.Information("Seeding user data is starting.............");
+                logger.LogInformation("Seeding user data is starting.............");
 
                 await CreateAdminUserAsync(
                     unitOfWork,
@@ -75,7 +75,7 @@ public static class DbInitializer
                     managerRole.Id
                 );
 
-                logger.Information("Seeding user data has finished.............");
+                logger.LogInformation("Seeding user data has finished.............");
             }
 
             List<string> adminPermissions = Credential.ADMIN_CLAIMS;
@@ -94,7 +94,7 @@ public static class DbInitializer
         catch (Exception ex)
         {
             await unitOfWork.RollbackAsync();
-            logger.Information("error had occured while seeding data with {message}", ex);
+            logger.LogInformation("error had occurred while seeding data with {message}", ex);
             throw;
         }
     }
@@ -123,11 +123,8 @@ public static class DbInitializer
 
         if (claimsToDelete.Count > 0)
         {
-            await roleManagerService.RemoveClaimsFromRoleAsync(
-                role,
-                claimsToDelete
-            );
-            logger.Information(
+            await roleManagerService.RemoveClaimsFromRoleAsync(role, claimsToDelete);
+            logger.LogInformation(
                 "deleting {count} claims of {roleName} include {data}",
                 claimsToDelete.Count,
                 role.Name,
@@ -138,14 +135,14 @@ public static class DbInitializer
         if (claimsToInsert.Count > 0)
         {
             await roleManagerService.AssignClaimsToRoleAsync(
-                    role,
-                    claimsToInsert.ConvertAll(claim => new RoleClaim()
-                    {
-                        ClaimType = ClaimTypes.Permission,
-                        ClaimValue = claim,
-                    })
-                );
-            logger.Information(
+                role,
+                claimsToInsert.ConvertAll(claim => new RoleClaim()
+                {
+                    ClaimType = ClaimTypes.Permission,
+                    ClaimValue = claim,
+                })
+            );
+            logger.LogInformation(
                 "inserting {count} claims of {roleName} include {data}",
                 claimsToInsert.Count,
                 role.Name,

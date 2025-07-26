@@ -3,14 +3,15 @@ using Application.Common.QueryStringProcessing;
 using Application.Features.Common.Mapping.Regions;
 using Application.Features.Common.Projections.Regions;
 using Contracts.ApiWrapper;
-using Contracts.Dtos.Responses;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Regions.Specifications;
 using Mediator;
+using Microsoft.Extensions.Logging;
+using SharedKernel.Models;
 
 namespace Application.Features.Regions.Queries.List.Communes;
 
-public class ListCommuneHandler(IUnitOfWork unitOfWork)
+public class ListCommuneHandler(IUnitOfWork unitOfWork, ILogger<ListCommuneHandler> logger)
     : IRequestHandler<ListCommuneQuery, Result<PaginationResponse<CommuneProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<CommuneProjection>>> Handle(
@@ -25,7 +26,7 @@ public class ListCommuneHandler(IUnitOfWork unitOfWork)
             return Result<PaginationResponse<CommuneProjection>>.Failure(validationResult.Error);
         }
 
-        var validationFilterResult = query.ValidateFilter<ListCommuneQuery, CommuneProjection>();
+        var validationFilterResult = query.ValidateFilter<ListCommuneQuery, Commune>(logger);
 
         if (validationFilterResult.Error != null)
         {
@@ -40,7 +41,7 @@ public class ListCommuneHandler(IUnitOfWork unitOfWork)
                 new ListCommuneSpecification(),
                 query,
                 commune => commune.ToCommuneProjection(),
-                cancellationToken
+                cancellationToken: cancellationToken
             );
 
         return Result<PaginationResponse<CommuneProjection>>.Success(response);

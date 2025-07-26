@@ -8,5 +8,5 @@ public class UserTokenProjection
 
     public string? Token { get; set; }
 
-    public string? Refresh { get; set; }
+    public string? RefreshToken { get; set; }
 }

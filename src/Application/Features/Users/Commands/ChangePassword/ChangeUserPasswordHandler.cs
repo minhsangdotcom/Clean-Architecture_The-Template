@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -18,7 +19,6 @@ public class ChangeUserPasswordHandler(IUnitOfWork unitOfWork, ICurrentUser curr
     )
     {
         Ulid? userId = currentUser.Id;
-
         User? user = await unitOfWork
             .DynamicReadOnlyRepository<User>()
             .FindByConditionAsync(
@@ -30,8 +30,13 @@ public class ChangeUserPasswordHandler(IUnitOfWork unitOfWork, ICurrentUser curr
         {
             return Result<string>.Failure(
                 new NotFoundError(
-                    "The resource is not found",
-                    Messager.Create<User>().Message(MessageType.Found).Negative().Build()
+                    "The TitleMessage.RESOURCE_NOT_FOUND",
+                    Messenger
+                        .Create<User>()
+                        .Message(MessageType.Found)
+                        .Negative()
+                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
+                        .Build()
                 )
             );
         }
@@ -41,7 +46,7 @@ public class ChangeUserPasswordHandler(IUnitOfWork unitOfWork, ICurrentUser curr
             return Result<string>.Failure(
                 new BadRequestError(
                     "Error has occured with password",
-                    Messager
+                    Messenger
                         .Create<ChangeUserPasswordCommand>(nameof(User))
                         .Property(x => x.OldPassword!)
                         .Message(MessageType.Correct)

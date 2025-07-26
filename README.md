@@ -252,7 +252,13 @@ Modify PostgreSQL connection string (this template is using PostgreSQL currently
     "DatabaseConnection": "Host=localhost;Username=[your_username];Password=[your_password];Database=example"
 },
 ```
+Update migrations to your own database.
 
+```
+cd src/Infrastructure
+
+dotnet ef database update
+```
 The next step :point_right::
 
 ```

@@ -1,18 +1,18 @@
-using Application.Features.Common.Projections.Roles;
+using Application.Features.Common.Payloads.Roles;
 using Domain.Aggregates.Roles;
 using FluentValidation;
 using SharedKernel.Common.Messages;
 
 namespace Application.Features.Common.Validators.Roles;
 
-public class RoleClaimValidator : AbstractValidator<RoleClaimModel>
+public class RoleClaimValidator : AbstractValidator<RoleClaimPayload>
 {
     public RoleClaimValidator()
     {
         RuleFor(x => x.ClaimType)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<RoleClaim>(nameof(Role.RoleClaims))
                     .Property(x => x.ClaimType!)
                     .Message(MessageType.Null)
@@ -23,7 +23,7 @@ public class RoleClaimValidator : AbstractValidator<RoleClaimModel>
         RuleFor(x => x.ClaimValue)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<RoleClaim>(nameof(Role.RoleClaims))
                     .Property(x => x.ClaimValue!)
                     .Message(MessageType.Null)

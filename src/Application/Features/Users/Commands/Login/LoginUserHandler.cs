@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
@@ -38,8 +39,13 @@ public class LoginUserHandler(
         {
             return Result<LoginUserResponse>.Failure(
                 new NotFoundError(
-                    "Resource is not found",
-                    Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
+                        .Create<User>()
+                        .Message(MessageType.Found)
+                        .Negative()
+                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
+                        .BuildMessage()
                 )
             );
         }
@@ -47,8 +53,8 @@ public class LoginUserHandler(
         {
             return Result<LoginUserResponse>.Failure(
                 new BadRequestError(
-                    "Error has occured with password",
-                    Messager
+                    "Error has occurred with password",
+                    Messenger
                         .Create<User>()
                         .Property(x => x.Password)
                         .Message(MessageType.Correct)
@@ -58,7 +64,7 @@ public class LoginUserHandler(
             );
         }
 
-        DateTime refreshExpireTime = tokenFactory.RefreshtokenExpiredTime;
+        DateTime refreshExpireTime = tokenFactory.RefreshTokenExpiredTime;
         string familyId = StringExtension.GenerateRandomString(32);
 
         var userAgent = detectionService.UserAgent.ToString();
@@ -72,11 +78,10 @@ public class LoginUserHandler(
             ClientIp = currentUser.ClientIp,
         };
 
-        var accesstokenExpiredTime = tokenFactory.AccesstokenExpiredTime;
-
+        var accessTokenExpiredTime = tokenFactory.AccessTokenExpiredTime;
         string accessToken = tokenFactory.CreateToken(
             [new(JwtRegisteredClaimNames.Sub.ToString(), user.Id.ToString())],
-            accesstokenExpiredTime
+            accessTokenExpiredTime
         );
 
         string refreshToken = tokenFactory.CreateToken(
@@ -96,9 +101,9 @@ public class LoginUserHandler(
             new()
             {
                 Token = accessToken,
-                Refresh = refreshToken,
+                RefreshToken = refreshToken,
                 AccessTokenExpiredIn = (long)
-                    Math.Ceiling((accesstokenExpiredTime - DateTime.UtcNow).TotalSeconds),
+                    Math.Ceiling((accessTokenExpiredTime - DateTime.UtcNow).TotalSeconds),
                 TokenType = JwtBearerDefaults.AuthenticationScheme,
                 User = user.ToUserProjection(),
             }

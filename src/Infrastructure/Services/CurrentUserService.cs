@@ -10,17 +10,17 @@ public class CurrentUserService : ICurrentUser
 
     public string? ClientIp { get; private set; }
 
-    private ClaimsPrincipal user = null!;
-
-    public void SetClaimPrinciple(ClaimsPrincipal user)
+    public void Set(ClaimsPrincipal user)
     {
-        this.user ??= user;
-
-        string? id = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (!string.IsNullOrWhiteSpace(id))
+        if (user.Identity?.IsAuthenticated == false)
         {
-            Id = Ulid.Parse(id);
+            Id = null;
+            return;
+        }
+        
+        if (Ulid.TryParse(user?.FindFirst(ClaimTypes.NameIdentifier)?.Value, out Ulid id))
+        {
+            Id = id;
         }
     }
 

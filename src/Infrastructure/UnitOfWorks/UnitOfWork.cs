@@ -5,13 +5,13 @@ using Infrastructure.UnitOfWorks.CachedRepositories;
 using Infrastructure.UnitOfWorks.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.UnitOfWorks;
 
 public class UnitOfWork(
     IDbContext dbContext,
-    ILogger logger,
+    ILogger<UnitOfWork> logger,
     IMemoryCacheService memoryCacheService
 ) : IUnitOfWork
 {
@@ -58,7 +58,7 @@ public class UnitOfWork(
             value = isCached
                 ? CreateInstance<TEntity>(
                     typeof(CachedDynamicSpecRepository<>),
-                    repositoryInstance!,
+                    repositoryInstance,
                     logger,
                     memoryCacheService
                 )
@@ -66,7 +66,7 @@ public class UnitOfWork(
             repositories.Add(key, value);
         }
 
-        return (IDynamicSpecificationRepository<TEntity>)repositoryInstance!;
+        return (IDynamicSpecificationRepository<TEntity>)value!;
     }
 
     public ISpecificationRepository<TEntity> ReadOnlyRepository<TEntity>(bool isCached = false)
@@ -89,7 +89,7 @@ public class UnitOfWork(
             repositories.Add(key, value);
         }
 
-        return (ISpecificationRepository<TEntity>)repositoryInstance!;
+        return (ISpecificationRepository<TEntity>)value!;
     }
 
     public async Task<DbTransaction> BeginTransactionAsync(
@@ -134,7 +134,7 @@ public class UnitOfWork(
     {
         if (CurrentTransaction == null)
         {
-            logger.Warning("Thre is no transaction started.");
+            logger.LogWarning("There is no transaction started.");
             return;
         }
 

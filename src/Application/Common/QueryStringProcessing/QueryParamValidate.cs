@@ -2,7 +2,7 @@ using System.Reflection;
 using Application.Common.Errors;
 using Application.Common.Extensions;
 using Contracts.Dtos.Requests;
-using Serilog;
+using Microsoft.Extensions.Logging;
 using SharedKernel.Common.Messages;
 using SharedKernel.Extensions;
 using SharedKernel.Extensions.Reflections;
@@ -22,7 +22,7 @@ public static partial class QueryParamValidate
             return new(
                 Error: new BadRequestError(
                     Message,
-                    Messager
+                    Messenger
                         .Create<QueryParamRequest>("QueryParam")
                         .Property("Cursor")
                         .Message(MessageType.Redundant)
@@ -37,7 +37,7 @@ public static partial class QueryParamValidate
     public static ValidationRequestResult<TRequest, BadRequestError> ValidateFilter<
         TRequest,
         TResponse
-    >(this TRequest request)
+    >(this TRequest request, ILogger logger)
         where TResponse : class
         where TRequest : QueryParamRequest
     {
@@ -63,11 +63,11 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
                             .Message(MessageType.Missing)
-                            .ObjectName("ArrayIndex")
+                            .Object("ArrayIndex")
                             .Build()
                     )
                 );
@@ -79,12 +79,12 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
                             .Message(MessageType.Valid)
                             .Negative()
-                            .ObjectName("ArrayIndex")
+                            .Object("ArrayIndex")
                             .Build()
                     )
                 );
@@ -96,11 +96,11 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
                             .Message(MessageType.Missing)
-                            .ObjectName("Operator")
+                            .Object("Operator")
                             .Build()
                     )
                 );
@@ -112,11 +112,11 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
                             .Message(MessageType.Missing)
-                            .ObjectName("Element")
+                            .Object("Element")
                             .Build()
                     )
                 );
@@ -135,11 +135,11 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property(x => x.Filter!)
                             .Message(MessageType.Missing)
-                            .ObjectName("Property")
+                            .Object("Property")
                             .Build()
                     )
                 );
@@ -158,11 +158,11 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property("FilterValue")
                             .Negative()
-                            .ObjectName("Integer")
+                            .Object("Integer")
                             .Build()
                     )
                 );
@@ -180,11 +180,11 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property("FilterValue")
                             .Negative()
-                            .ObjectName("Datetime")
+                            .Object("Datetime")
                             .Build()
                     )
                 );
@@ -196,11 +196,11 @@ public static partial class QueryParamValidate
                 return new(
                     Error: new BadRequestError(
                         Message,
-                        Messager
+                        Messenger
                             .Create<QueryParamRequest>("QueryParam")
                             .Property("FilterValue")
                             .Negative()
-                            .ObjectName("Ulid")
+                            .Object("Ulid")
                             .Build()
                     )
                 );
@@ -208,33 +208,16 @@ public static partial class QueryParamValidate
         }
 
         // validate between operator is correct in format like [age][$between][0] = 1 & [age][$between][1] = 2
-        if (!ValidateBetweenAndInOperator("$between", queries))
+        if (!ValidateBetweenOperator("$between", queries))
         {
             return new(
                 Error: new BadRequestError(
                     Message,
-                    Messager
+                    Messenger
                         .Create<QueryParamRequest>("QueryParam")
                         .Property(x => x.Filter!)
                         .Message(MessageType.Valid)
-                        .ObjectName("BetweenOperator")
-                        .Negative()
-                        .Build()
-                )
-            );
-        }
-
-        // validate $in operator is correct in format like [age][$int][0] = 1 & [age][$in][1] = 2
-        if (!ValidateBetweenAndInOperator("$in", queries))
-        {
-            return new(
-                Error: new BadRequestError(
-                    Message,
-                    Messager
-                        .Create<QueryParamRequest>("QueryParam")
-                        .Property(x => x.Filter!)
-                        .Message(MessageType.Valid)
-                        .ObjectName("InOperator")
+                        .Object("BetweenOperator")
                         .Negative()
                         .Build()
                 )
@@ -248,7 +231,7 @@ public static partial class QueryParamValidate
             return new(
                 Error: new BadRequestError(
                     Message,
-                    Messager
+                    Messenger
                         .Create<QueryParamRequest>("QueryParam")
                         .Property("FilterElement")
                         .Message(MessageType.Unique)
@@ -260,18 +243,13 @@ public static partial class QueryParamValidate
 
         request.Filter = StringExtension.Parse(queries);
 
-        Log.Information(
-            "Filter has been bound {filter}",
-            SerializerExtension.Serialize(request.Filter!).StringJson
-        );
+        string filter = SerializerExtension.Serialize(request.Filter!).StringJson;
+        logger.LogInformation("Filter has been bound {filter}", filter);
 
         return new(request);
     }
 
-    private static bool ValidateBetweenAndInOperator(
-        string operation,
-        IEnumerable<QueryResult> queries
-    )
+    private static bool ValidateBetweenOperator(string operation, IEnumerable<QueryResult> queries)
     {
         IEnumerable<QueryResult> betweenOperators = queries.Where(x =>
             x.CleanKey.Contains(operation)
@@ -306,26 +284,29 @@ public static partial class QueryParamValidate
                 {
                     return new { key = $"$and.{andIndex}.{key}", indexValue };
                 }
-                _ = int.TryParse(
-                    betweenOperator.CleanKey[betweenOperator.CleanKey.IndexOf("$or") + 1],
-                    out int orInddex
-                );
 
-                return new { key = $"$or.{orInddex}.{key}", indexValue };
+                if (
+                    int.TryParse(
+                        betweenOperator.CleanKey[betweenOperator.CleanKey.IndexOf("$or") + 1],
+                        out int orIndex
+                    )
+                )
+                {
+                    return new { key = $"$or.{orIndex}.{key}", indexValue };
+                }
+
+                return new { key = $"{key}", indexValue };
             })
             .GroupBy(x => x.key)
             .Select(x => new { x.Key, values = x.Select(x => x.indexValue).ToList() })
             .ToList();
 
-        if (
-            betweenOperatorsGroup.Count != 0
-            && (
-                betweenOperatorsGroup.Count != 1
-                || !betweenOperatorsGroup[0].values.SequenceEqual([0, 1])
-            )
-        )
+        foreach (var betweenOperator in betweenOperatorsGroup)
         {
-            return false;
+            if (!betweenOperator.values.SequenceEqual([0, 1]))
+            {
+                return false;
+            }
         }
 
         return true;

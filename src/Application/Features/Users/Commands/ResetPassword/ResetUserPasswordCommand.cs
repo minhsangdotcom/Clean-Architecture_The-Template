@@ -3,5 +3,15 @@ using Mediator;
 
 namespace Application.Features.Users.Commands.ResetPassword;
 
-public record ResetUserPasswordCommand(string Token, Ulid UserId, string Password)
-    : IRequest<Result<string>>;
+public class ResetUserPasswordCommand : IRequest<Result<string>>
+{
+    public string UserId { get; set; } = string.Empty;
+    public UpdateUserPassword? UpdateUserPassword { get; set; } = null;
+}
+
+public class UpdateUserPassword
+{
+    public string? Token { get; set; }
+
+    public string? Password { get; set; }
+}

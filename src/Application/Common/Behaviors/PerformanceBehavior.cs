@@ -1,11 +1,12 @@
 using System.Diagnostics;
 using Mediator;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Common.Behaviors;
 
-public class PerformaceBehavior<TMessage, TResponse>(ILogger logger)
-    : IPipelineBehavior<TMessage, TResponse>
+public class PerformanceBehavior<TMessage, TResponse>(
+    ILogger<PerformanceBehavior<TMessage, TResponse>> logger
+) : IPipelineBehavior<TMessage, TResponse>
     where TMessage : notnull, IMessage
 {
     private readonly Stopwatch timer = new();
@@ -26,7 +27,7 @@ public class PerformaceBehavior<TMessage, TResponse>(ILogger logger)
 
         string requestName = typeof(TMessage).Name;
 
-        logger.Information(
+        logger.LogInformation(
             "\n\nProcessing {Name} request in ({ElapsedMilliseconds} milliseconds)\n\n",
             requestName,
             elapsedMilliseconds

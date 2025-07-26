@@ -11,15 +11,16 @@ public class UpdateUserCommandValidator : AbstractValidator<UserUpdateRequest>
 {
     public UpdateUserCommandValidator(
         IUserManagerService userManagerService,
-        IHttpContextAccessorService httpContextAccessorService
+        IHttpContextAccessorService httpContextAccessorService,
+        ICurrentUser currentUser
     )
     {
-        Include(new UserValidator(userManagerService, httpContextAccessorService)!);
+        Include(new UserValidator(userManagerService, httpContextAccessorService,currentUser)!);
 
         RuleFor(x => x.Roles)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<UserUpdateRequest>(nameof(User))
                     .Property(x => x.Roles!)
                     .Message(MessageType.Null)

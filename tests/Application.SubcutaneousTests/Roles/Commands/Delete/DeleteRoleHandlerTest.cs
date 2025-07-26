@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Features.Roles.Commands.Delete;
 using Application.SubcutaneousTests.Extensions;
 using Contracts.ApiWrapper;
@@ -19,10 +20,11 @@ public class DeleteRoleHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
 
         Result<string> result = await testingFixture.SendAsync(new DeleteRoleCommand(notFoundId));
 
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<Role>()
             .Message(MessageType.Found)
             .Negative()
+            .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
             .BuildMessage();
 
         result.Error.ShouldNotBeNull();

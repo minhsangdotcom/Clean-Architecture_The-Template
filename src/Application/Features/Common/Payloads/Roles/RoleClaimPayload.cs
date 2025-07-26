@@ -1,6 +1,6 @@
-namespace Application.Features.Common.Projections.Users;
+namespace Application.Features.Common.Payloads.Roles;
 
-public class UserClaimModel
+public class RoleClaimPayload
 {
     public Ulid? Id { get; set; }
 

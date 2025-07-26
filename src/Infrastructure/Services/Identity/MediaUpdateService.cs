@@ -2,12 +2,14 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.Services.Storage;
 using Contracts.Dtos.Responses;
 using Microsoft.AspNetCore.Http;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services.Identity;
 
-public class MediaUpdateService<T>(IStorageService storageService, ILogger logger)
-    : IMediaUpdateService<T>
+public class MediaUpdateService<T>(
+    IStorageService storageService,
+    ILogger<MediaUpdateService<T>> logger
+) : IMediaUpdateService<T>
     where T : class
 {
     private readonly string Directory = $"{typeof(T).Name}s";
@@ -23,11 +25,15 @@ public class MediaUpdateService<T>(IStorageService storageService, ILogger logge
 
         if (!response.IsSuccess)
         {
-            logger.Information("Remove object {key} fail with error: {error}", key, response.Error);
+            logger.LogInformation(
+                "Remove object {key} fail with error: {error}",
+                key,
+                response.Error
+            );
             return;
         }
 
-        logger.Information("Remove object {key} successfully.", key);
+        logger.LogInformation("Remove object {key} successfully.", key);
     }
 
     public string? GetKey(IFormFile? avatar)
@@ -51,14 +57,14 @@ public class MediaUpdateService<T>(IStorageService storageService, ILogger logge
 
         if (!response.IsSuccess)
         {
-            logger.Information(
+            logger.LogInformation(
                 "\nUpdate User has had error with file upload: {error}.\n",
                 response.Error
             );
             return null;
         }
 
-        logger.Information(
+        logger.LogInformation(
             "\nUpdate avatar success full with the path: {path}.\n",
             response.FilePath
         );

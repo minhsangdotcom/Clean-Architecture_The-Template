@@ -1,3 +1,4 @@
+using Application.Features.Common.Payloads.Users;
 using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Profiles;
 using Application.Features.Users.Commands.Update;
@@ -27,7 +28,7 @@ public static class UserMappingExtension
                 UserClaims =
                 [
                     .. user.UserClaims!.Where(x => x.Type == UserClaimType.Custom)
-                        .Select(x => new UserClaimModel()
+                        .Select(x => new UserClaimPayload()
                         {
                             ClaimType = x.ClaimType,
                             ClaimValue = x.ClaimValue,

@@ -1,11 +1,13 @@
 using Application.Common.Interfaces.Services;
 using Mediator;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Common.Behaviors;
 
-public class LoggingBehavior<TMessage, TResponse>(ILogger logger, ICurrentUser currentUser)
-    : MessagePreProcessor<TMessage, TResponse>
+public class LoggingBehavior<TMessage, TResponse>(
+    ILogger<LoggingBehavior<TMessage, TResponse>> logger,
+    ICurrentUser currentUser
+) : MessagePreProcessor<TMessage, TResponse>
     where TMessage : notnull, IMessage
 {
     protected override ValueTask Handle(TMessage message, CancellationToken cancellationToken)
@@ -15,10 +17,9 @@ public class LoggingBehavior<TMessage, TResponse>(ILogger logger, ICurrentUser c
 
         const string replacePhrase = "for user {userId}";
         string loggingMessage =
-            "\n\n Incomming request: {Name} " + replacePhrase + " with payload \n {@Request} \n";
+            "\n\n Incoming request: {Name} " + replacePhrase + " with payload \n {@Request} \n";
 
-        List<object> parameters = [requestName, id, message];
-
+        List<object?> parameters = [requestName, id, message];
         if (id == null)
         {
             loggingMessage = loggingMessage.Replace(
@@ -29,7 +30,7 @@ public class LoggingBehavior<TMessage, TResponse>(ILogger logger, ICurrentUser c
             parameters.RemoveAt(1);
         }
 
-        logger.Information(loggingMessage, [.. parameters]);
+        logger.LogInformation(loggingMessage, [.. parameters]);
         return default!;
     }
 }

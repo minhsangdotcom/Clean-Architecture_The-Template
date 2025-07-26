@@ -5,11 +5,11 @@ using Api.common.Routers;
 using Application.Features.Common.Projections.Regions;
 using Application.Features.Regions.Queries.List.Communes;
 using Contracts.ApiWrapper;
-using Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
+using SharedKernel.Models;
 
 namespace Api.Endpoints.Regions;
 

@@ -6,6 +6,7 @@ using Ardalis.GuardClauses;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
+using Infrastructure.Constants;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Constants;
 
@@ -75,16 +76,13 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         }
     }
 
-    public async Task<Role?> GetByIdAsync(Ulid id) =>
-        await roleDbSet.FindAsync(id);
+    public async Task<Role?> GetByIdAsync(Ulid id) => await roleDbSet.FindAsync(id);
 
     public async Task<Role?> FindByIdAsync(Ulid id) =>
         await roleDbSet.Include(x => x.RoleClaims).FirstOrDefaultAsync(x => x.Id == id);
 
     public async Task<Role?> FindByNameAsync(string name) =>
-        await roleDbSet
-            .Include(x => x.RoleClaims)
-            .FirstOrDefaultAsync(x => x.Name == name);
+        await roleDbSet.Include(x => x.RoleClaims).FirstOrDefaultAsync(x => x.Name == name);
 
     public async Task<List<Role>> ListAsync() => await roleDbSet.ToListAsync();
 
@@ -103,19 +101,26 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         List<RoleClaim> rolesClaimsToProcess = roleClaims.ToListIfNot();
         ICollection<RoleClaim> currentRoleClaims = currentRole.RoleClaims!;
 
-        IEnumerable<RoleClaim> claimsToAdd = rolesClaimsToProcess.Except(currentRoleClaims, new RoleClaimComparer());
+        IEnumerable<RoleClaim> claimsToAdd = rolesClaimsToProcess.Except(
+            currentRoleClaims,
+            new RoleClaimComparer()
+        );
         List<RoleClaim> claimsToUpdate =
-            [..currentRoleClaims.Intersect(rolesClaimsToProcess, new RoleClaimComparer())];
-        IEnumerable<RoleClaim> claimsToRemove =
-            currentRoleClaims.Except(rolesClaimsToProcess, new RoleClaimComparer());
+        [
+            .. currentRoleClaims.Intersect(rolesClaimsToProcess, new RoleClaimComparer()),
+        ];
+        IEnumerable<RoleClaim> claimsToRemove = currentRoleClaims.Except(
+            rolesClaimsToProcess,
+            new RoleClaimComparer()
+        );
 
-        IEnumerable<UserClaim> userClaims = ProcessUserClaimUpdate(currentRoleClaims, rolesClaimsToProcess);
+        IEnumerable<UserClaim> userClaims = ProcessUserClaimUpdate(
+            currentRoleClaims,
+            rolesClaimsToProcess
+        );
 
         // remove
-        await RemoveClaimsFromRoleAsync(
-            role,
-            claimsToRemove
-        );
+        await RemoveClaimsFromRoleAsync(role, claimsToRemove);
 
         //update
         roleClaimDbSet.UpdateRange(claimsToUpdate);
@@ -127,10 +132,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         await AssignClaimsToRoleAsync(role, claimsToAdd);
     }
 
-    public async Task AssignClaimsToRoleAsync(
-        Role role,
-        IEnumerable<RoleClaim> claims
-    )
+    public async Task AssignClaimsToRoleAsync(Role role, IEnumerable<RoleClaim> claims)
     {
         Role currentRole = Guard.Against.NotFound(
             $"{role.Id}",
@@ -147,7 +149,9 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
 
         if (
             roleClaimsToProcess.Exists(x =>
-                currentRoleClaims.Any(p => p.ClaimType == x.ClaimType && p.ClaimValue == x.ClaimValue)
+                currentRoleClaims.Any(p =>
+                    p.ClaimType == x.ClaimType && p.ClaimValue == x.ClaimValue
+                )
             )
         )
         {
@@ -164,15 +168,16 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         // update new user claims for users who are in role
         List<UserClaim> userClaims =
         [
-            ..currentRole.UserRoles!
-                .SelectMany(userRole => newRoleClaims.ConvertAll(roleClaim => new UserClaim()
+            .. currentRole.UserRoles!.SelectMany(userRole =>
+                newRoleClaims.ConvertAll(roleClaim => new UserClaim()
                 {
                     ClaimType = roleClaim.ClaimType,
                     ClaimValue = roleClaim.ClaimValue,
                     RoleClaimId = roleClaim.Id,
                     UserId = userRole.UserId,
                     Type = UserClaimType.Custom,
-                }))
+                })
+            ),
         ];
 
         if (newRoleClaims.Count > 0)
@@ -188,10 +193,7 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         }
     }
 
-    public async Task RemoveClaimsFromRoleAsync(
-        Role role,
-        IEnumerable<RoleClaim> roleClaims
-    )
+    public async Task RemoveClaimsFromRoleAsync(Role role, IEnumerable<RoleClaim> roleClaims)
     {
         List<RoleClaim> roleClaimsToDelete = roleClaims.ToListIfNot();
         if (roleClaimsToDelete.Count <= 0)
@@ -208,7 +210,9 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         ICollection<RoleClaim> currentRoleClaims = currentRole.RoleClaims!;
         if (
             roleClaimsToDelete.Exists(x =>
-                !currentRoleClaims.Any(p => p.ClaimType == x.ClaimType && p.ClaimValue == x.ClaimValue)
+                !currentRoleClaims.Any(p =>
+                    p.ClaimType == x.ClaimType && p.ClaimValue == x.ClaimValue
+                )
             )
         )
         {
@@ -219,12 +223,17 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         await context.SaveChangesAsync();
     }
 
-    public async Task<IList<KeyValuePair<string, string>>> GetRolePermissionClaimsAsync() =>
-        await RoleClaims
+    public async Task<IList<Dictionary<string, List<string>>>> GetRolePermissionClaimsAsync()
+    {
+        var permissions = await RoleClaims
             .Where(claim => claim.ClaimType == ClaimTypes.Permission)
             .GroupBy(x => x.ClaimValue)
-            .Select(x => new KeyValuePair<string, string>(ClaimTypes.Permission, x.Key))
+            //.Select(x => new KeyValuePair<string, string>(ClaimTypes.Permission, x.Key))
+            .Select(x => x.Key)
             .ToListAsync();
+
+        return Credential.permissions.FindAll(x => permissions.Exists(p => x.ContainsKey(p)));
+    }
 
     public Task<List<RoleClaim>> GetRoleClaimsAsync(Ulid roleId) => GetRoleClaimsAsync([roleId]);
 
@@ -255,7 +264,9 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
             .SelectMany(x => x.RoleClaims!)
             .ToListAsync();
 
-        return roleClaims.Exists(x => claims.Any(p => p.Key == x.ClaimType && p.Value == x.ClaimValue));
+        return roleClaims.Exists(x =>
+            claims.Any(p => p.Key == x.ClaimType && p.Value == x.ClaimValue)
+        );
     }
 
     private static IEnumerable<UserClaim> ProcessUserClaimUpdate(
@@ -287,8 +298,9 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
     private async Task ClearAllClaimsAsync(Ulid roleId)
     {
         var claims = await roleClaimDbSet.Where(c => c.RoleId == roleId).ToListAsync();
-        if (claims.Count == 0) return;
-        
+        if (claims.Count == 0)
+            return;
+
         roleClaimDbSet.RemoveRange(claims);
         await context.SaveChangesAsync();
     }

@@ -13,7 +13,7 @@ public abstract class ErrorDetails
     public List<InvalidParam>? InvalidParams { get; set; }
     public MessageResult? ErrorMessage { get; set; }
 
-    public ErrorDetails(string title, string detail, string? type = null, int? status = null)
+    protected ErrorDetails(string title, string detail, string? type = null, int? status = null)
     {
         Title = title;
         Status = status ?? StatusCodes.Status500InternalServerError;
@@ -21,7 +21,7 @@ public abstract class ErrorDetails
         Type = type ?? "InternalException";
     }
 
-    public ErrorDetails(
+    protected ErrorDetails(
         string title,
         List<InvalidParam> invalidParams,
         string? type = null,
@@ -34,16 +34,16 @@ public abstract class ErrorDetails
         Type = type ?? "InternalException";
     }
 
-    public ErrorDetails(
+    protected ErrorDetails(
         string title,
-        MessageResult erorMessage,
+        MessageResult errorMessage,
         string? type = null,
         int? status = null
     )
     {
         Title = title;
         Status = status ?? StatusCodes.Status500InternalServerError;
-        ErrorMessage = erorMessage;
+        ErrorMessage = errorMessage;
         Type = type ?? "InternalException";
     }
 }

@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
@@ -28,8 +29,13 @@ public class GetUserDetailHandler(IUnitOfWork unitOfWork)
         {
             return Result<GetUserDetailResponse>.Failure(
                 new NotFoundError(
-                    "",
-                    Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
+                        .Create<User>()
+                        .Message(MessageType.Found)
+                        .Negative()
+                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
+                        .Build()
                 )
             );
         }

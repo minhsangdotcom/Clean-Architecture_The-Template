@@ -267,7 +267,13 @@ Chỉnh sửa connection string của PostgreSQL (Bởi vì template này đang 
     "DatabaseConnection": "Host=localhost;Username=[your_username];Password=[your_password];Database=example"
 },
 ```
+Cập nhật migration lên database
 
+```
+cd src/Infrastructure
+
+dotnet ef database update
+```
 Bước tiếp theo nha :point_right::
 
 ```

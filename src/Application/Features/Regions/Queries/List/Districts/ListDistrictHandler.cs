@@ -2,14 +2,15 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.QueryStringProcessing;
 using Application.Features.Common.Projections.Regions;
 using Contracts.ApiWrapper;
-using Contracts.Dtos.Responses;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Regions.Specifications;
 using Mediator;
+using Microsoft.Extensions.Logging;
+using SharedKernel.Models;
 
 namespace Application.Features.Regions.Queries.List.Districts;
 
-public class ListDistrictHandler(IUnitOfWork unitOfWork)
+public class ListDistrictHandler(IUnitOfWork unitOfWork, ILogger<ListDistrictHandler> logger)
     : IRequestHandler<ListDistrictQuery, Result<PaginationResponse<DistrictProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<DistrictProjection>>> Handle(
@@ -24,7 +25,7 @@ public class ListDistrictHandler(IUnitOfWork unitOfWork)
             return Result<PaginationResponse<DistrictProjection>>.Failure(validationResult.Error);
         }
 
-        var validationFilterResult = query.ValidateFilter<ListDistrictQuery, DistrictProjection>();
+        var validationFilterResult = query.ValidateFilter<ListDistrictQuery, District>(logger);
 
         if (validationFilterResult.Error != null)
         {
@@ -38,7 +39,7 @@ public class ListDistrictHandler(IUnitOfWork unitOfWork)
                 new ListDistrictSpecification(),
                 query,
                 district => district.ToDistrictProjection(),
-                cancellationToken
+                cancellationToken: cancellationToken
             );
         return Result<PaginationResponse<DistrictProjection>>.Success(response);
     }

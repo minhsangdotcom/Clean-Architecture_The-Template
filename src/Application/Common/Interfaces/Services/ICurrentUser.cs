@@ -11,5 +11,5 @@ public interface ICurrentUser
 
     void SetClientIp(HttpContext httpContext);
 
-    void SetClaimPrinciple(ClaimsPrincipal user);
+    void Set(ClaimsPrincipal user);
 }

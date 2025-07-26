@@ -1,5 +1,5 @@
 using System.Text;
-using Application.Common.Exceptions;
+using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Token;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;

@@ -1,7 +1,7 @@
-using System.Text.RegularExpressions;
+using Application.Common.Extensions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
-using Application.Features.Common.Projections.Users;
+using Application.Features.Common.Payloads.Users;
 using Domain.Aggregates.Users;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -9,29 +9,36 @@ using SharedKernel.Common.Messages;
 
 namespace Application.Features.Common.Validators.Users;
 
-public partial class UserValidator : AbstractValidator<UserModel>
+public partial class UserValidator : AbstractValidator<UserPayload>
 {
     private readonly IHttpContextAccessorService httpContextAccessorService;
     private readonly IUserManagerService userManagerService;
 
     public UserValidator(
         IUserManagerService userManagerService,
-        IHttpContextAccessorService httpContextAccessorService
+        IHttpContextAccessorService httpContextAccessorService,
+        ICurrentUser currentUser
     )
     {
         this.httpContextAccessorService = httpContextAccessorService;
         this.userManagerService = userManagerService;
-        ApplyRules();
+        ApplyRules(currentUser);
     }
 
-    private void ApplyRules()
+    private void ApplyRules(ICurrentUser currentUser)
     {
         _ = Ulid.TryParse(httpContextAccessorService.GetId(), out Ulid id);
+        string? requestPath = httpContextAccessorService.GetRequestPath();
+
+        if (requestPath == "/api/v1/users/profile")
+        {
+            id = currentUser.Id!.Value;
+        }
 
         RuleFor(x => x.LastName)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<User>()
                     .Property(x => x.LastName)
                     .Message(MessageType.Null)
@@ -40,7 +47,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
             )
             .MaximumLength(256)
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<User>()
                     .Property(x => x.LastName)
                     .Message(MessageType.MaximumLength)
@@ -50,7 +57,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
         RuleFor(x => x.FirstName)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<User>()
                     .Property(x => x.FirstName)
                     .Message(MessageType.Null)
@@ -59,7 +66,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
             )
             .MaximumLength(256)
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<User>()
                     .Property(x => x.FirstName)
                     .Message(MessageType.MaximumLength)
@@ -70,20 +77,16 @@ public partial class UserValidator : AbstractValidator<UserModel>
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<User>()
                     .Property(x => x.Email)
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
             )
-            .Must(x =>
-            {
-                Regex regex = EmailValidationRegex();
-                return regex.IsMatch(x!);
-            })
+            .Must(x => x!.IsValidEmail())
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<User>()
                     .Property(x => x.Email)
                     .Message(MessageType.Valid)
@@ -98,7 +101,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
                 ApplyConditionTo.CurrentValidator
             )
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<User>()
                     .Property(x => x.Email)
                     .Message(MessageType.Existence)
@@ -113,7 +116,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
                 ApplyConditionTo.CurrentValidator
             )
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<User>()
                     .Property(x => x.Email)
                     .Message(MessageType.Existence)
@@ -124,20 +127,16 @@ public partial class UserValidator : AbstractValidator<UserModel>
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<User>()
                     .Property(x => x.PhoneNumber)
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
             )
-            .Must(x =>
-            {
-                Regex regex = PhoneValidationRegex();
-                return regex.IsMatch(x!);
-            })
+            .Must(x => x!.IsValidPhoneNumber())
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<User>()
                     .Property(x => x.PhoneNumber)
                     .Message(MessageType.Valid)
@@ -148,7 +147,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
         RuleFor(x => x.ProvinceId)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<User>()
                     .Property(nameof(x.ProvinceId))
                     .Message(MessageType.Null)
@@ -159,9 +158,9 @@ public partial class UserValidator : AbstractValidator<UserModel>
         RuleFor(x => x.DistrictId)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<User>()
-                    .Property(nameof(UserModel.DistrictId))
+                    .Property(nameof(UserPayload.DistrictId))
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
@@ -170,9 +169,9 @@ public partial class UserValidator : AbstractValidator<UserModel>
         RuleFor(x => x.Street)
             .NotEmpty()
             .WithState(x =>
-                Messager
+                Messenger
                     .Create<User>()
-                    .Property(nameof(UserModel.Street))
+                    .Property(nameof(UserPayload.Street))
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
@@ -185,13 +184,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
         CancellationToken cancellationToken = default
     ) =>
         !await userManagerService.User.AnyAsync(
-            x => (!id.HasValue && x.Email == email) || (x.Id != id && x.Email == email),
+            x => x.Email == email && (!id.HasValue || x.Id != id.Value),
             cancellationToken
         );
-
-    [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
-    private static partial Regex EmailValidationRegex();
-
-    [GeneratedRegex(@"^\+?\d{7,15}$")]
-    private static partial Regex PhoneValidationRegex();
 }

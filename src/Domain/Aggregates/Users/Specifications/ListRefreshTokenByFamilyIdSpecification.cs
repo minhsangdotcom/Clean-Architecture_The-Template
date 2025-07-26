@@ -3,9 +3,9 @@ using Specification.Builders;
 
 namespace Domain.Aggregates.Users.Specifications;
 
-public class ListRefreshtokenByFamillyIdSpecification : Specification<UserToken>
+public class ListRefreshTokenByFamilyIdSpecification : Specification<UserToken>
 {
-    public ListRefreshtokenByFamillyIdSpecification(string familyId, Ulid userId)
+    public ListRefreshTokenByFamilyIdSpecification(string familyId, Ulid userId)
     {
         Query.Where(x => x.FamilyId == familyId && x.UserId == userId).Include(x => x.User);
     }

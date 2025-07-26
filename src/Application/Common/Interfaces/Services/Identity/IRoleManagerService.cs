@@ -27,7 +27,7 @@ public interface IRoleManagerService
 
     Task DeleteAsync(Role role);
 
-    Task<IList<KeyValuePair<string, string>>> GetRolePermissionClaimsAsync();
+    Task<IList<Dictionary<string, List<string>>>> GetRolePermissionClaimsAsync();
 
     Task UpdateRoleClaimsAsync(IEnumerable<RoleClaim> roleClaims, Role role);
 

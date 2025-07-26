@@ -1,3 +1,4 @@
+using Application.Features.Common.Payloads.Users;
 using Application.Features.Common.Projections.Users;
 using Application.Features.Users.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
@@ -28,7 +29,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
 
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<User>()
             .Property(nameof(CreateUserCommand.ProvinceId))
             .Message(MessageType.Existence)
@@ -48,7 +49,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
 
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<User>()
             .Property(nameof(CreateUserCommand.DistrictId))
             .Message(MessageType.Existence)
@@ -68,7 +69,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         Result<CreateUserResponse> result = await testingFixture.SendAsync(command);
 
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<User>()
             .Property(nameof(CreateUserCommand.CommuneId))
             .Message(MessageType.Existence)
@@ -108,7 +109,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             () => user.PhoneNumber.ShouldBe(response.PhoneNumber),
             () => user.DayOfBirth.ShouldBe(response.DayOfBirth),
             () => user.Gender.ShouldBe(response.Gender),
-            () => user.Address?.ToString().ShouldBe(response.Address),
+            () => user.Address?.ToString().ShouldBe(response.Address?.ToString()),
             () => user.Avatar.ShouldBe(response.Avatar),
             () => user.Status.ShouldBe(response.Status),
             () => user.UserRoles?.Select(x => x.RoleId).ShouldBe(response.Roles?.Select(x => x.Id)),
@@ -148,7 +149,7 @@ public class CreateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
                 x => x.UserClaims,
                 [
                     .. Credential
-                        .MANAGER_CLAIMS.Select(x => new UserClaimModel()
+                        .MANAGER_CLAIMS.Select(x => new UserClaimPayload()
                         {
                             ClaimType = ClaimTypes.Permission,
                             ClaimValue = x,
