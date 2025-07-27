@@ -35,7 +35,7 @@ jobs:
             ${{ runner.os }}-nuget-
       - name: Install dependencies
         if: steps.cache-nuget.outputs.cache-hit != 'true'
-        run: dotnet restore --locked-mode
+        run: dotnet restore
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Test
