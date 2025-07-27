@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Features.Users.Queries.Detail;
 using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Users;
@@ -17,7 +18,12 @@ public class GetUserDetailHandlerTest(TestingFixture testingFixture) : IAsyncLif
         //act
         var result = await testingFixture.SendAsync(new GetUserDetailQuery(Id));
         //assert
-        var expectedMessage = Messenger.Create<User>().Message(MessageType.Found).Negative().Build();
+        var expectedMessage = Messenger
+            .Create<User>()
+            .Message(MessageType.Found)
+            .Negative()
+            .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
+            .Build();
         result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldNotBeNull();
         result.Error?.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
