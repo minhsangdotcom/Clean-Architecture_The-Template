@@ -2646,9 +2646,7 @@
         "dependencies": {
           "Microsoft.AspNetCore.Http": "[2.3.0, )",
           "Microsoft.AspNetCore.Mvc.Core": "[2.3.0, )",
-          "Newtonsoft.Json": "[13.0.3, )",
-          "Ulid": "[1.3.4, )",
-          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.5, )"
+          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.10, )"
         }
       },
       "domain": {
