@@ -9,7 +9,6 @@ on:
       - main
 
 env:
-  DOTNET_INSTALL_DIR: "./.dotnet"
   DOCKER_BUILDKIT: "1"
 
 jobs:
@@ -31,17 +30,8 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.412"
-      - name: Cache NuGet packages
-        id: cache-nuget
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/packages.lock.json') }}-${{ hashFiles('tests/**/packages.lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
       - name: Install dependencies
-        if: steps.cache-nuget.outputs.cache-hit != 'true'
-        run: dotnet restore --configfile nuget.config
+        run: dotnet restore --verbosity detailed
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Test
@@ -54,6 +44,7 @@ jobs:
           name: app-build
           path: |
             ${{ github.workspace }}/app/publish
+          retention-days: 3
   docker:
     name: 🐳 Build & Push Docker Image
     needs: build
