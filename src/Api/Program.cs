@@ -104,6 +104,7 @@ try
     app.UseCors("AllowLocalhost3000");
     app.UseStatusCodePages();
     app.UseExceptionHandler();
+    app.UseStaticFiles();
     app.UseAuthentication();
     app.CurrentUser();
     app.UseAuthorization();

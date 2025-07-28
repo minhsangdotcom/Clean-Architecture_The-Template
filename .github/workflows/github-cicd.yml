@@ -21,10 +21,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: 🧪 Test NuGet connectivity
+        run: curl -v https://api.nuget.org/v3/index.json
+      - name: 🧪 Test GitHub (confirm internet)
+        run: curl -I https://github.com
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.408"
+          dotnet-version: "8.0.412"
       - name: Cache NuGet packages
         id: cache-nuget
         uses: actions/cache@v4
@@ -35,7 +41,7 @@ jobs:
             ${{ runner.os }}-nuget-
       - name: Install dependencies
         if: steps.cache-nuget.outputs.cache-hit != 'true'
-        run: dotnet restore --locked-mode
+        run: dotnet restore --configfile nuget.config
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Test
