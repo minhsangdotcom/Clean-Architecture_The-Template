@@ -9,7 +9,8 @@ on:
       - main
 
 env:
-  DOTNET_INSTALL_DIR: "./dotnet"
+  DOTNET_INSTALL_DIR: "./.dotnet"
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
   DOCKER_BUILDKIT: "1"
 
 jobs:
@@ -21,18 +22,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: 🧪 Test NuGet connectivity
-        run: curl -v https://api.nuget.org/v3/index.json
-      - name: 🧪 Test GitHub (confirm internet)
-        run: curl -I https://github.com
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.412"
+          cache: true
+          cache-dependency-path: |
+            src/*/packages.lock.json
+            tests/*/packages.lock.json
+      - name: Clean the solution
+        run: dotnet clean
       - name: Install dependencies
-        run: dotnet restore --verbosity detailed
+        run: dotnet restore --locked-mode
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Test
