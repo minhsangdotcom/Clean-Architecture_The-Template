@@ -33,7 +33,7 @@ jobs:
       - name: Clean the solution
         run: dotnet clean
       - name: Install dependencies
-        run: dotnet restore --locked-mode
+        run: dotnet restore --locked-mode -v diag
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Test

@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
-    <ProjectReference Include="..\Domain\Domain.csproj" />
     <Using Include="BCrypt.Net.BCrypt" Static="True" />
   </ItemGroup>
 
