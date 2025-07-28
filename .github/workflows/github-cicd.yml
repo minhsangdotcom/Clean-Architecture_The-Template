@@ -9,6 +9,7 @@ on:
       - main
 
 env:
+  DOTNET_INSTALL_DIR: "./dotnet"
   DOCKER_BUILDKIT: "1"
 
 jobs:
