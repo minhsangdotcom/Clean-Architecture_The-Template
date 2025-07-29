@@ -33,7 +33,11 @@ jobs:
       - name: Clean the solution
         run: dotnet clean
       - name: Install dependencies
-        run: dotnet restore --locked-mode -v diag
+        # my vm server got a problem with ipv6
+        #I use "export DOTNET_SYSTEM_NET_DISABLEIPV6=1" command to disable it it you don't remove this
+        run: |
+          export DOTNET_SYSTEM_NET_DISABLEIPV6=1
+          dotnet restore --locked-mode
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Test
