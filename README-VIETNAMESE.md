@@ -247,6 +247,29 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
         └── /Templates/                   # email/html templates, static assets
 ```
 
+```
+            +-----------------------------------------------+
+            |                   Api                         |
+            +-----------------------------------------------+
+             |                     |                    |
+             |                     |                    |
+             ↓                     |                    |
+        +------------------+       |                    |
+        |  Infrastructure  |       |                    |
+        +------------------+       |                    |
+                        |          |                    |
+                        ↓          ↓                    ↓
+                    +--------------------+    +---------------------+
+                    |   Application      | -> | Contracts           |
+                    +--------------------+    +---------------------+
+                             |
+                             ↓
+            +---------------------------+
+            |          Domain           |
+            +---------------------------+
+
+```
+
 # Bắt đầu thôi nào
 
 ## Cách để chạy ứng dụng
@@ -267,6 +290,7 @@ Chỉnh sửa connection string của PostgreSQL (Bởi vì template này đang 
     "DatabaseConnection": "Host=localhost;Username=[your_username];Password=[your_password];Database=example"
 },
 ```
+
 Cập nhật migration lên database
 
 ```
@@ -274,6 +298,7 @@ cd src/Infrastructure
 
 dotnet ef database update
 ```
+
 Bước tiếp theo nha :point_right::
 
 ```
