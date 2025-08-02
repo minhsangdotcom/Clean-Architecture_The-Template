@@ -49,6 +49,7 @@ jobs:
           SecuritySettings__JwtSettings__SecretKey: ${{ secrets.JWT_SECRET }}
         run: |
           echo "ENV: $ASPNETCORE_ENVIRONMENT"
+          echo "jwt: $SecuritySettings__JwtSettings__SecretKey"
           dotnet test --no-restore --verbosity normal
       - name: Publish Application
         run: dotnet publish -c Release --property:PublishDir=${{ github.workspace }}/app/publish
