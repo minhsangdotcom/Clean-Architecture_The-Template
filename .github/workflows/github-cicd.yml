@@ -41,7 +41,7 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: App Settings Variable Substitution
-      - uses: cschleiden/replace-tokens@v1
+        uses: cschleiden/replace-tokens@v1
         with:
           files: '${{ github.workspace }}/src/Api/appsettings.Testing-Deployment.json'
         env:
