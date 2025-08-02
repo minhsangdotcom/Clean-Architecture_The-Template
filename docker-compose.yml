@@ -11,9 +11,6 @@ services:
       - RedisDatabaseSettings__Password=${REDIS_PASSWORD}
       - ElasticsearchSettings__Password=${ELASTICSEARCH_PASSWORD}
       - DatabaseSettings__DatabaseConnection=${DATABASE_CONNECTION}
-      - HangfireSettings__Storage__ConnectionString=${DATABASE_CONNECTION}
-      - HangfireSettings__Credentials__Username=${HANGFIRE_USERNAME}
-      - HangfireSettings__Credentials__Password=${HANGFIRE_PASSWORD}
       - SecuritySettings__JwtSettings__SecretKey=${JWT_SECRET_KEY}
     networks:
       - the-template-network
