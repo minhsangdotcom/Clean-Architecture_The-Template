@@ -47,7 +47,9 @@ jobs:
           S3AwsSettings__AccessKey: ${{ secrets.S3_KEY }}
           S3AwsSettings__SecretKey: ${{ secrets.S3_SECRET }}
           SecuritySettings__JwtSettings__SecretKey: ${{ secrets.JWT_SECRET }}
-        run: dotnet test --no-restore --verbosity normal
+        run: |
+          echo "ENV: $ASPNETCORE_ENVIRONMENT"
+          dotnet test --no-restore --verbosity normal
       - name: Publish Application
         run: dotnet publish -c Release --property:PublishDir=${{ github.workspace }}/app/publish
       - name: Upload artifact
