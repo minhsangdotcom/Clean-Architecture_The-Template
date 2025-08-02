@@ -40,8 +40,17 @@ jobs:
           dotnet restore --locked-mode
       - name: Build
         run: dotnet build --configuration Release --no-restore
+      - name: App Settings Variable Substitution
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: "${{env.DOTNET_ROOT}}/src/Api/appsettings.Testing-Deployment.json"
+        env:
+          DatabaseSettings.DatabaseConnection: ${{secrets.DB_CONNECTION_STRING}}
+          S3AwsSettings.AccessKey: ${{ secrets.S3_KEY }}
+          S3AwsSettings.SecretKey: ${{ secrets.S3_SECRET }}
+          SecuritySettings.JwtSettings.SecretKey: ${{ secrets.JWT_SECRET }}
       - name: Test
-        run: dotnet test --no-restore --verbosity normal -e ASPNETCORE_ENVIRONMENT=Deployment -e DatabaseSettings__DatabaseConnection=${{secrets.DB_CONNECTION_STRING}} -e S3AwsSettings__AccessKey=${{ secrets.S3_KEY }} -e S3AwsSettings__SecretKey=${{ secrets.S3_SECRET }} -e SecuritySettings__JwtSettings__SecretKey=${{ secrets.JWT_SECRET }}
+        run: dotnet test --no-restore --verbosity normal -e ASPNETCORE_ENVIRONMENT=Deployment
       - name: Publish Application
         run: dotnet publish -c Release --property:PublishDir=${{ github.workspace }}/app/publish
       - name: Upload artifact
