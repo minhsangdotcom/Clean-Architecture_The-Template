@@ -49,6 +49,11 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         with:
           input-files: ${{ github.workspace }}/src/Api/appsettings.Testing-Deployment.json
+      
+      - name: Show substituted appsettings
+        run: |
+          echo "===== Substituted JSON ====="
+          cat "${{ github.workspace }}/src/Api/appsettings.Testing-Deployment.json"
       - name: Test
         run: dotnet test --no-restore --verbosity normal -e ASPNETCORE_ENVIRONMENT=Deployment
       - name: Publish Application
