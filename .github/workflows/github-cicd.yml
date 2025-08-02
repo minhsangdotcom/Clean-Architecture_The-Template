@@ -41,19 +41,7 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Test
-        env:
-          ASPNETCORE_ENVIRONMENT: Deployment
-          DatabaseSettings__DatabaseConnection: "Host=database;Port=5432;Username=theusername;Password=123456;Database=the_database"
-          S3AwsSettings__AccessKey: ${{ secrets.S3_KEY }}
-          S3AwsSettings__SecretKey: ${{ secrets.S3_SECRET }}
-          SecuritySettings__JwtSettings__SecretKey: ${{ secrets.JWT_SECRET }}
-        run: |
-          echo "Environment: $ASPNETCORE_ENVIRONMENT"
-          echo "Database Connection exists: $([[ ! -z "$DatabaseSettings__DatabaseConnection" ]] && echo 'Yes' || echo 'No')"
-          echo "S3 Key exists: $([[ ! -z "$S3AwsSettings__AccessKey" ]] && echo 'Yes' || echo 'No')"
-          echo "S3 Secret exists: $([[ ! -z "$S3AwsSettings__SecretKey" ]] && echo 'Yes' || echo 'No')"
-          echo "JWT Secret exists: $([[ ! -z "$SecuritySettings__JwtSettings__SecretKey" ]] && echo 'Yes' || echo 'No')"
-          dotnet test --no-restore --verbosity normal -e ASPNETCORE_ENVIRONMENT=Deployment
+        run: dotnet test --no-restore --verbosity normal -e ASPNETCORE_ENVIRONMENT=Deployment -e DatabaseSettings__DatabaseConnection=${{secrets.DB_CONNECTION_STRING}} -e S3AwsSettings__AccessKey=${{ secrets.S3_KEY }} -e S3AwsSettings__SecretKey=${{ secrets.S3_SECRET }} -e SecuritySettings__JwtSettings__SecretKey=${{ secrets.JWT_SECRET }}
       - name: Publish Application
         run: dotnet publish -c Release --property:PublishDir=${{ github.workspace }}/app/publish
       - name: Upload artifact
