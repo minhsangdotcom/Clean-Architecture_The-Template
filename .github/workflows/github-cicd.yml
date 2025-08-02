@@ -43,7 +43,7 @@ jobs:
       - name: App Settings Variable Substitution
         uses: microsoft/variable-substitution@v1
         with:
-          files: "${GITHUB_WORKSPACE}/src/Api/appsettings.Testing-Deployment.json"
+          files: "${{ github.workspace }}/src/Api/appsettings.Testing-Deployment.json"
         env:
           DatabaseSettings.DatabaseConnection: ${{secrets.DB_CONNECTION_STRING}}
           S3AwsSettings.AccessKey: ${{ secrets.S3_KEY }}
