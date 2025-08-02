@@ -48,8 +48,11 @@ jobs:
           S3AwsSettings__SecretKey: ${{ secrets.S3_SECRET }}
           SecuritySettings__JwtSettings__SecretKey: ${{ secrets.JWT_SECRET }}
         run: |
-          echo "ENV: $ASPNETCORE_ENVIRONMENT"
-          echo "jwt: $SecuritySettings__JwtSettings__SecretKey"
+          echo "Environment: $ASPNETCORE_ENVIRONMENT"
+          echo "Database Connection exists: $([[ ! -z "$DatabaseSettings__DatabaseConnection" ]] && echo 'Yes' || echo 'No')"
+          echo "S3 Key exists: $([[ ! -z "$S3AwsSettings__AccessKey" ]] && echo 'Yes' || echo 'No')"
+          echo "S3 Secret exists: $([[ ! -z "$S3AwsSettings__SecretKey" ]] && echo 'Yes' || echo 'No')"
+          echo "JWT Secret exists: $([[ ! -z "$SecuritySettings__JwtSettings__SecretKey" ]] && echo 'Yes' || echo 'No')"
           dotnet test --no-restore --verbosity normal
       - name: Publish Application
         run: dotnet publish -c Release --property:PublishDir=${{ github.workspace }}/app/publish
