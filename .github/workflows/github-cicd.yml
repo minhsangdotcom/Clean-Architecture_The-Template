@@ -41,14 +41,14 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: App Settings Variable Substitution
-        uses: cschleiden/replace-tokens@v1
-        with:
-          files: '${{ github.workspace }}/src/Api/appsettings.Testing-Deployment.json'
+        uses: iamazeem/substitute-action@v1
         env:
           DB_CONNECTION: ${{ secrets.DB_CONNECTION_STRING }}
           S3_KEY: ${{ secrets.S3_KEY }}
           S3_SECRET: ${{ secrets.S3_SECRET }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        with:
+          input-files: ${{ github.workspace }}/src/Api/appsettings.Testing-Deployment.json
       - name: Test
         run: dotnet test --no-restore --verbosity normal -e ASPNETCORE_ENVIRONMENT=Deployment
       - name: Publish Application
