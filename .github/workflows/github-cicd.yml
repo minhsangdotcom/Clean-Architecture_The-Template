@@ -34,7 +34,7 @@ jobs:
         run: dotnet clean
       - name: Install dependencies
         # my vm server got a problem with ipv6
-        #I use "export DOTNET_SYSTEM_NET_DISABLEIPV6=1" command to disable it it you don't remove this
+        #I use "export DOTNET_SYSTEM_NET_DISABLEIPV6=1" command to disable it if you don't remove this
         run: |
           export DOTNET_SYSTEM_NET_DISABLEIPV6=1
           dotnet restore --locked-mode
@@ -43,7 +43,7 @@ jobs:
       - name: App Settings Variable Substitution
         uses: microsoft/variable-substitution@v1
         with:
-          files: "${{env.DOTNET_ROOT}}/src/Api/appsettings.Testing-Deployment.json"
+          files: "${GITHUB_WORKSPACE}/src/Api/appsettings.Testing-Deployment.json"
         env:
           DatabaseSettings.DatabaseConnection: ${{secrets.DB_CONNECTION_STRING}}
           S3AwsSettings.AccessKey: ${{ secrets.S3_KEY }}
