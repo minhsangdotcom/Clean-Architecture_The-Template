@@ -8,7 +8,6 @@ using Cysharp.Serialization.Json;
 using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.Data;
-using Infrastructure.Services.Hangfire;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -84,8 +83,6 @@ try
         await DbInitializer.InitializeAsync(serviceProvider);
     }
     #endregion
-
-    app.UseHangfireDashboard(configuration);
 
     string routeRefix = configuration.GetSection("SwaggerRoutePrefix").Get<string>() ?? "docs";
     if (isDevelopment)

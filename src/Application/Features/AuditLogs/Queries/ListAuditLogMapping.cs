@@ -4,11 +4,11 @@ namespace Application.Features.AuditLogs.Queries;
 
 public static class ListAuditLogMapping
 {
-    public static IEnumerable<ListAuditlogResponse> ToListAuditlogResponse(
+    public static IEnumerable<ListAuditLogResponse> ToListAuditLogResponse(
         this IEnumerable<AuditLog> auditLogs
     )
     {
-        return auditLogs.Select(auditLog => new ListAuditlogResponse()
+        return auditLogs.Select(auditLog => new ListAuditLogResponse()
         {
             Id = auditLog.Id,
             CreatedAt = auditLog.CreatedAt,

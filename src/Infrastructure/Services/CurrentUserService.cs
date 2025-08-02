@@ -17,7 +17,7 @@ public class CurrentUserService : ICurrentUser
             Id = null;
             return;
         }
-        
+
         if (Ulid.TryParse(user?.FindFirst(ClaimTypes.NameIdentifier)?.Value, out Ulid id))
         {
             Id = id;

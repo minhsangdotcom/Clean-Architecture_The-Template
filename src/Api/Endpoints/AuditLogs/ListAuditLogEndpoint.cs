@@ -29,9 +29,9 @@ public class ListAuditLogEndpoint : IEndpoint
     }
 
     private async Task<
-        Results<Ok<ApiResponse<PaginationResponse<ListAuditlogResponse>>>, ProblemHttpResult>
+        Results<Ok<ApiResponse<PaginationResponse<ListAuditLogResponse>>>, ProblemHttpResult>
     > HandleAsync(
-        ListAuditlogQuery request,
+        ListAuditLogQuery request,
         [FromServices] ISender sender,
         CancellationToken cancellationToken = default
     )

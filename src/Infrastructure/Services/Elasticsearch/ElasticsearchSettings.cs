@@ -1,4 +1,4 @@
-namespace Infrastructure.Services.ElasticSeach;
+namespace Infrastructure.Services.Elasticsearch;
 
 public class ElasticsearchSettings
 {

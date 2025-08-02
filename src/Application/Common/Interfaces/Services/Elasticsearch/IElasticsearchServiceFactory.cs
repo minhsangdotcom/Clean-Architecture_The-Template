@@ -1,4 +1,4 @@
-namespace Application.Common.Interfaces.Services.Elastics;
+namespace Application.Common.Interfaces.Services.Elasticsearch;
 
 public interface IElasticsearchServiceFactory
 {

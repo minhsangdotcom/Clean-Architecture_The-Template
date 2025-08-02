@@ -6,8 +6,7 @@ using Infrastructure.Services;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.Cache.DistributedCache;
 using Infrastructure.Services.Cache.MemoryCache;
-using Infrastructure.Services.ElasticSeach;
-using Infrastructure.Services.Hangfire;
+using Infrastructure.Services.Elasticsearch;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Mail;
 using Infrastructure.Services.Queue;
@@ -70,7 +69,6 @@ public static class DependencyInjection
             .AddScoped<IHttpContextAccessorService, HttpContextAccessorService>()
             .AddJwt(configuration)
             .AddQueue(configuration)
-            .AddHangfireConfiguration(configuration)
             .AddElasticSearch(configuration)
             .AddIdentity()
             .AddMail(configuration)

@@ -44,8 +44,8 @@ public class TokenFactoryService(IOptions<JwtSettings> jwtSettings) : ITokenFact
     }
 
     private DateTime GetAccessTokenExpiredTime() =>
-        DateTime.UtcNow.AddMinutes(double.Parse(settings.ExpireTimeAccessToken!));
+        DateTime.UtcNow.AddMinutes(double.Parse(settings.ExpireTimeAccessTokenInMinute!));
 
     private DateTime GetRefreshTokenExpiredTime() =>
-        DateTime.UtcNow.AddDays(double.Parse(settings.ExpireTimeRefreshToken!));
+        DateTime.UtcNow.AddDays(double.Parse(settings.ExpireTimeRefreshTokenInDay!));
 }

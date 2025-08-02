@@ -1,12 +1,12 @@
 using System.Reflection;
-using Application.Common.Interfaces.Services.Elastics;
+using Application.Common.Interfaces.Services.Elasticsearch;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
 using FluentConfiguration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.Services.ElasticSeach;
+namespace Infrastructure.Services.Elasticsearch;
 
 public static class ElasticSearchExtension
 {
@@ -40,19 +40,19 @@ public static class ElasticSearchExtension
                     .ServerCertificateValidationCallback(CertificateValidations.AllowAll);
             }
 
-            IEnumerable<ElasticConfigureResult> elkConfigbuilder =
+            IEnumerable<ElasticConfigureResult> elkConfigBuilder =
                 ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
                     Assembly.GetExecutingAssembly(),
                     elasticsearch.PrefixIndex!
                 );
 
             // add configurations of id, ignore properties
-            ElasticsearchRegisterHelper.ConfigureConnectionSettings(ref settings, elkConfigbuilder);
+            ElasticsearchRegisterHelper.ConfigureConnectionSettings(ref settings, elkConfigBuilder);
 
             var client = new ElasticsearchClient(settings);
 
             ElasticsearchRegisterHelper
-                .ElasticFluentConfigAsync(client, elkConfigbuilder)
+                .ElasticFluentConfigAsync(client, elkConfigBuilder)
                 .ConfigureAwait(false)
                 .GetAwaiter();
 

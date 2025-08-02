@@ -41,7 +41,13 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Test
-        run: dotnet dotnet test --no-restore --verbosity normal -e ASPNETCORE_ENVIRONMENT=Deployment
+        env:
+          ASPNETCORE_ENVIRONMENT: Deployment
+          DatabaseSettings__DatabaseConnection: ${{ secrets.DB_CONNECTION_STRING }}
+          S3AwsSettings__AccessKey: ${{ secrets.S3_KEY }}
+          S3AwsSettings__SecretKey: ${{ secrets.S3_SECRET }}
+          SecuritySettings__JwtSettings__SecretKey: ${{ secrets.JWT_SECRET }}
+        run: dotnet dotnet test --no-restore --verbosity normal
       - name: Publish Application
         run: dotnet publish -c Release --property:PublishDir=${{ github.workspace }}/app/publish
       - name: Upload artifact

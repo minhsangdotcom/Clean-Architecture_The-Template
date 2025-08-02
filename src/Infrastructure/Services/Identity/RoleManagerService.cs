@@ -228,7 +228,6 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
         var permissions = await RoleClaims
             .Where(claim => claim.ClaimType == ClaimTypes.Permission)
             .GroupBy(x => x.ClaimValue)
-            //.Select(x => new KeyValuePair<string, string>(ClaimTypes.Permission, x.Key))
             .Select(x => x.Key)
             .ToListAsync();
 

@@ -6,12 +6,12 @@ using SharedKernel.Models;
 
 namespace Application.Features.AuditLogs.Queries;
 
-public class ListAuditlogQuery
+public class ListAuditLogQuery
     : QueryParamRequest,
-        IRequest<Result<PaginationResponse<ListAuditlogResponse>>>
+        IRequest<Result<PaginationResponse<ListAuditLogResponse>>>
 {
-    public static ValueTask<ListAuditlogQuery> BindAsync(HttpContext context)
+    public static ValueTask<ListAuditLogQuery> BindAsync(HttpContext context)
     {
-        return ValueTask.FromResult(QueryParamRequestExtension.Bind<ListAuditlogQuery>(context));
+        return ValueTask.FromResult(QueryParamRequestExtension.Bind<ListAuditLogQuery>(context));
     }
 }

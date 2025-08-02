@@ -4,7 +4,7 @@ public class JwtSettings
 {
     public string? SecretKey { get; set; }
 
-    public string? ExpireTimeAccessToken { get; set; }
+    public string? ExpireTimeAccessTokenInMinute { get; set; }
 
-    public string? ExpireTimeRefreshToken { get; set; }
+    public string? ExpireTimeRefreshTokenInDay { get; set; }
 }

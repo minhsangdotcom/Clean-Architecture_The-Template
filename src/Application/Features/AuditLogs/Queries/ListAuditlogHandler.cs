@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Services.Elastics;
+using Application.Common.Interfaces.Services.Elasticsearch;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.AuditLogs;
 using Elastic.Clients.Elasticsearch;
@@ -7,11 +7,11 @@ using SharedKernel.Models;
 
 namespace Application.Features.AuditLogs.Queries;
 
-public class ListAuditlogHandler(IElasticsearchServiceFactory? elasticsearch = null)
-    : IRequestHandler<ListAuditlogQuery, Result<PaginationResponse<ListAuditlogResponse>>>
+public class ListAuditLogHandler(IElasticsearchServiceFactory? elasticsearch = null)
+    : IRequestHandler<ListAuditLogQuery, Result<PaginationResponse<ListAuditLogResponse>>>
 {
-    public async ValueTask<Result<PaginationResponse<ListAuditlogResponse>>> Handle(
-        ListAuditlogQuery request,
+    public async ValueTask<Result<PaginationResponse<ListAuditLogResponse>>> Handle(
+        ListAuditLogQuery request,
         CancellationToken cancellationToken
     )
     {
@@ -24,14 +24,14 @@ public class ListAuditlogHandler(IElasticsearchServiceFactory? elasticsearch = n
             .Get<AuditLog>()
             .ListAsync(request);
 
-        PaginationResponse<ListAuditlogResponse> paginationResponse =
+        PaginationResponse<ListAuditLogResponse> paginationResponse =
             new(
-                searchResponse.Documents.ToListAuditlogResponse(),
+                searchResponse.Documents.ToListAuditLogResponse(),
                 (int)searchResponse.Total,
                 request.Page,
                 request.PageSize
             );
 
-        return Result<PaginationResponse<ListAuditlogResponse>>.Success(paginationResponse);
+        return Result<PaginationResponse<ListAuditLogResponse>>.Success(paginationResponse);
     }
 }
