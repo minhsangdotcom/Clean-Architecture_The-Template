@@ -22,6 +22,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -30,16 +31,19 @@ jobs:
           cache-dependency-path: |
             src/*/packages.lock.json
             tests/*/packages.lock.json
+      
       - name: Clean the solution
         run: dotnet clean
+
+      # my vm server got a problem with ipv6
+      #I use "export DOTNET_SYSTEM_NET_DISABLEIPV6=1" command to disable it if you don't remove this
       - name: Install dependencies
-        # my vm server got a problem with ipv6
-        #I use "export DOTNET_SYSTEM_NET_DISABLEIPV6=1" command to disable it if you don't remove this
         run: |
           export DOTNET_SYSTEM_NET_DISABLEIPV6=1
           dotnet restore --locked-mode
       - name: Build
         run: dotnet build --configuration Release --no-restore
+
       - name: App Settings Variable Substitution
         uses: iamazeem/substitute-action@v1
         env:
@@ -49,11 +53,7 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         with:
           input-files: ${{ github.workspace }}/src/Api/appsettings.Testing-Deployment.json
-      
-      - name: Show substituted appsettings
-        run: |
-          echo "===== Substituted JSON ====="
-          cat "${{ github.workspace }}/src/Api/appsettings.Testing-Deployment.json"
+
       - name: Test
         run: dotnet test --no-restore --verbosity normal -e ASPNETCORE_ENVIRONMENT=Deployment
       - name: Publish Application
