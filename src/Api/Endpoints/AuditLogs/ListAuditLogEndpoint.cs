@@ -4,11 +4,11 @@ using Api.common.Results;
 using Api.common.Routers;
 using Application.Features.AuditLogs.Queries;
 using Contracts.ApiWrapper;
-using Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
+using SharedKernel.Models;
 
 namespace Api.Endpoints.AuditLogs;
 

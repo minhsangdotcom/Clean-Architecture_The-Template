@@ -4,12 +4,12 @@ using Api.common.Results;
 using Api.common.Routers;
 using Application.Features.Users.Queries.List;
 using Contracts.ApiWrapper;
-using Contracts.Dtos.Responses;
 using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
+using SharedKernel.Models;
 
 namespace Api.Endpoints.User;
 

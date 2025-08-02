@@ -63,19 +63,17 @@ public static class DependencyInjection
             }
         );
 
-        services.AddOptions<EmailSettings>().Bind(configuration.GetSection(nameof(EmailSettings)));
-
         services
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentUser, CurrentUserService>()
             .AddHttpContextAccessor()
-            .AddSingleton<IHttpContextAccessorService, HttpContextAccessorService>()
+            .AddScoped<IHttpContextAccessorService, HttpContextAccessorService>()
             .AddJwt(configuration)
             .AddQueue(configuration)
             .AddHangfireConfiguration(configuration)
             .AddElasticSearch(configuration)
             .AddIdentity()
-            .AddMail()
+            .AddMail(configuration)
             .AddMemoryCaching(configuration)
             .AddDistributedCache(configuration);
 

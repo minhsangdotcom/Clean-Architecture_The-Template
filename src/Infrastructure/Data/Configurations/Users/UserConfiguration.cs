@@ -2,7 +2,7 @@ using Domain.Aggregates.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Data.Configurations.Identity;
+namespace Infrastructure.Data.Configurations.Users;
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {
@@ -14,6 +14,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(x => x.Username).IsUnique();
         builder.Property(x => x.Email).HasColumnType("citext");
         builder.HasIndex(x => x.Email).IsUnique();
+
+        builder.HasIndex(x => x.CreatedAt);
 
         builder.OwnsOne(
             x => x.Address,

@@ -290,4 +290,12 @@
     <value>the current one</value>
     <comment>   </comment>
   </data>
+  <data name="OldPassword" xml:space="preserve">
+    <value>Old password</value>
+    <comment>   </comment>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>New password</value>
+    <comment>   </comment>
+  </data>
 </root>

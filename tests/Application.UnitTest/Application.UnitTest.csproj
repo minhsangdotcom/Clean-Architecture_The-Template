@@ -22,7 +22,6 @@
   <ItemGroup>
     <Using Include="Xunit" />
     <ProjectReference Include="..\..\src\Application\Application.csproj" />
-    <ProjectReference Include="..\..\src\Contracts\Contracts.csproj" />
 
     <None Include="..\..\src\Api\Resources\Translations\Message.en.resx">
       <Link>Resources\Translations\Message.en.resx</Link>

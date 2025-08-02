@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -28,8 +29,13 @@ public class UpdateUserHandler(
         {
             return Result<UpdateUserResponse>.Failure(
                 new NotFoundError(
-                    "Your resource is not found",
-                    Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
+                        .Create<User>()
+                        .Message(MessageType.Found)
+                        .Negative()
+                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
+                        .BuildMessage()
                 )
             );
         }
@@ -48,8 +54,8 @@ public class UpdateUserHandler(
         {
             return Result<UpdateUserResponse>.Failure<NotFoundError>(
                 new(
-                    "Resource is not found",
-                    Messager
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
                         .Create<User>()
                         .Property(nameof(UserUpdateRequest.ProvinceId))
                         .Message(MessageType.Existence)
@@ -66,8 +72,8 @@ public class UpdateUserHandler(
         {
             return Result<UpdateUserResponse>.Failure<NotFoundError>(
                 new(
-                    "Resource is not found",
-                    Messager
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
                         .Create<User>()
                         .Property(nameof(updateData.DistrictId))
                         .Message(MessageType.Existence)
@@ -88,8 +94,8 @@ public class UpdateUserHandler(
             {
                 return Result<UpdateUserResponse>.Failure<NotFoundError>(
                     new(
-                        "Resource is not found",
-                        Messager
+                        TitleMessage.RESOURCE_NOT_FOUND,
+                        Messenger
                             .Create<User>()
                             .Property(nameof(UserUpdateRequest.CommuneId))
                             .Message(MessageType.Existence)
@@ -149,9 +155,6 @@ public class UpdateUserHandler(
     {
         return await unitOfWork
             .DynamicReadOnlyRepository<User>()
-            .FindByConditionAsync(
-                new GetUserByIdSpecification(id),
-                cancellationToken
-            );
+            .FindByConditionAsync(new GetUserByIdSpecification(id), cancellationToken);
     }
 }

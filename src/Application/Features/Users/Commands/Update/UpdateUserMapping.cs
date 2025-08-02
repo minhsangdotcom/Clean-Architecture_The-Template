@@ -1,3 +1,4 @@
+using Application.Features.Common.Payloads.Users;
 using Application.Features.Common.Projections.Users;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -27,7 +28,7 @@ public static class UpdateUserMapping
     }
 
     public static List<UserClaim> ToListUserClaim(
-        this List<UserClaimModel> userClaims,
+        this List<UserClaimPayload> userClaims,
         UserClaimType claimType,
         Ulid userId
     )

@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Features.Roles.Queries.Detail;
 using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Roles;
@@ -17,7 +18,12 @@ public class GetRoleDetailHanlderTest(TestingFixture testingFixture) : IAsyncLif
         //act
         var result = await testingFixture.SendAsync(new GetRoleDetailQuery(Id));
         //assert
-        var expectedMessage = Messager.Create<Role>().Message(MessageType.Found).Negative().Build();
+        var expectedMessage = Messenger
+            .Create<Role>()
+            .Message(MessageType.Found)
+            .Negative()
+            .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
+            .Build();
         result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldNotBeNull();
         result.Error?.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());

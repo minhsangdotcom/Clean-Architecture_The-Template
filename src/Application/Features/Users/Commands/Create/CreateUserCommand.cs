@@ -1,3 +1,4 @@
+using Application.Features.Common.Payloads.Users;
 using Application.Features.Common.Projections.Users;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Users.Enums;
@@ -5,7 +6,7 @@ using Mediator;
 
 namespace Application.Features.Users.Commands.Create;
 
-public class CreateUserCommand : UserModel, IRequest<Result<CreateUserResponse>>
+public class CreateUserCommand : UserPayload, IRequest<Result<CreateUserResponse>>
 {
     public string? Username { get; set; }
 
@@ -17,5 +18,5 @@ public class CreateUserCommand : UserModel, IRequest<Result<CreateUserResponse>>
 
     public List<Ulid>? Roles { get; set; }
 
-    public List<UserClaimModel>? UserClaims { get; set; }
+    public List<UserClaimPayload>? UserClaims { get; set; }
 }

@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Contracts.ApiWrapper;
@@ -21,8 +22,13 @@ public class GetRoleDetailHandler(IRoleManagerService roleManagerService)
         {
             return Result<RoleDetailResponse>.Failure(
                 new NotFoundError(
-                    "Your resource is not found",
-                    Messager.Create<Role>().Message(MessageType.Found).Negative().Build()
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
+                        .Create<Role>()
+                        .Message(MessageType.Found)
+                        .Negative()
+                        .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
+                        .Build()
                 )
             );
         }

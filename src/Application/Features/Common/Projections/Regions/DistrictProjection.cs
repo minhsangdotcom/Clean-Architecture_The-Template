@@ -4,6 +4,8 @@ namespace Application.Features.Common.Projections.Regions;
 
 public class DistrictProjection : Region
 {
+    public Ulid ProvinceId { get; set; }
+
     public virtual void MappingFrom(District district)
     {
         Code = district.Code;
@@ -12,6 +14,7 @@ public class DistrictProjection : Region
         FullName = district.FullName;
         EnglishFullName = district.EnglishFullName;
         CustomName = district.CustomName;
+        ProvinceId = district.ProvinceId;
 
         Id = district.Id;
         CreatedAt = district.CreatedAt;

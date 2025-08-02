@@ -1,6 +1,8 @@
 using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
+using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Cache;
 using Application.Features.Users.Commands.Profiles;
 using Contracts.ApiWrapper;
 using Mediator;
@@ -24,7 +26,8 @@ public class UpdateUserProfileEndpoint : IEndpoint
                 Tags = [new OpenApiTag() { Name = Router.UserRoute.Tags }],
             })
             .WithRequestValidation<UpdateUserProfileCommand>()
-            .RequireAuth();
+            .RequireAuth()
+            .DisableAntiforgery();
     }
 
     private async Task<
@@ -32,9 +35,18 @@ public class UpdateUserProfileEndpoint : IEndpoint
     > HandleAsync(
         [FromForm] UpdateUserProfileCommand request,
         [FromServices] ISender sender,
+        [FromServices] ICurrentUser currentUser,
+        [FromServices] IMemoryCacheService cacheService,
         CancellationToken cancellationToken = default
     )
     {
+        Ulid? userId = currentUser.Id;
+        string key = $"{nameof(GetUserProfileEndpoint)}:{userId}";
+        bool isExisted = cacheService.HasKey(key);
+        if (isExisted)
+        {
+            cacheService.Remove(key);
+        }
         var result = await sender.Send(request, cancellationToken);
         return result.ToResult();
     }

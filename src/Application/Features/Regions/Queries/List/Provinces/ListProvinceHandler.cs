@@ -2,14 +2,15 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Common.QueryStringProcessing;
 using Application.Features.Common.Projections.Regions;
 using Contracts.ApiWrapper;
-using Contracts.Dtos.Responses;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Regions.Specifications;
 using Mediator;
+using Microsoft.Extensions.Logging;
+using SharedKernel.Models;
 
 namespace Application.Features.Regions.Queries.List.Provinces;
 
-public class ListProvinceHandler(IUnitOfWork unitOfWork)
+public class ListProvinceHandler(IUnitOfWork unitOfWork, ILogger<ListProvinceHandler> logger)
     : IRequestHandler<ListProvinceQuery, Result<PaginationResponse<ProvinceProjection>>>
 {
     public async ValueTask<Result<PaginationResponse<ProvinceProjection>>> Handle(
@@ -24,7 +25,7 @@ public class ListProvinceHandler(IUnitOfWork unitOfWork)
             return Result<PaginationResponse<ProvinceProjection>>.Failure(validationResult.Error);
         }
 
-        var validationFilterResult = query.ValidateFilter<ListProvinceQuery, ProvinceProjection>();
+        var validationFilterResult = query.ValidateFilter<ListProvinceQuery, Province>(logger);
 
         if (validationFilterResult.Error != null)
         {
@@ -38,7 +39,7 @@ public class ListProvinceHandler(IUnitOfWork unitOfWork)
                 new ListProvinceSpecification(),
                 query,
                 province => province.ToProvinceProjection(),
-                cancellationToken
+                cancellationToken: cancellationToken
             );
         return Result<PaginationResponse<ProvinceProjection>>.Success(response);
     }

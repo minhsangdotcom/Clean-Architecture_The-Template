@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Contracts.ApiWrapper;
@@ -21,8 +22,13 @@ public class DeleteRoleHandler(IRoleManagerService roleManagerService)
         {
             return Result<string>.Failure(
                 new NotFoundError(
-                    "Your Resource is not found",
-                    Messager.Create<Role>().Message(MessageType.Found).Negative().BuildMessage()
+                    TitleMessage.RESOURCE_NOT_FOUND,
+                    Messenger
+                        .Create<Role>()
+                        .Message(MessageType.Found)
+                        .Negative()
+                        .VietnameseTranslation(TranslatableMessage.VI_ROLE_NOT_FOUND)
+                        .BuildMessage()
                 )
             );
         }

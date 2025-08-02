@@ -17,7 +17,7 @@ namespace Infrastructure.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.13")
+                .HasAnnotation("ProductVersion", "8.0.17")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "citext");
@@ -747,6 +747,9 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_user");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_user_created_at");
 
                     b.HasIndex("Email")
                         .IsUnique()

@@ -21,7 +21,7 @@ public static class DependencyInjection
             .AddMediator(option => option.ServiceLifetime = ServiceLifetime.Scoped)
             .AddSingleton(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>))
             .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ProcessImagePathBehavior<,>))
-            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(PerformaceBehavior<,>))
+            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>))
             .AddValidatorsFromAssembly(currentAssembly)
             .AddSingleton<IAuthorizationPolicyProvider, AuthorizePolicyProvider>()
             .AddSingleton<IAuthorizationHandler, AuthorizeHandler>();

@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Features.Users.Commands.ChangePassword;
 using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Users;
@@ -19,7 +20,12 @@ public class ChangeUserPasswordHandlerTest(TestingFixture testingFixture) : IAsy
         //act
         var result = await testingFixture.SendAsync(new ChangeUserPasswordCommand());
         //assert
-        var expectedMessage = Messager.Create<User>().Message(MessageType.Found).Negative().Build();
+        var expectedMessage = Messenger
+            .Create<User>()
+            .Message(MessageType.Found)
+            .Negative()
+            .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
+            .Build();
         result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldNotBeNull();
         result.Error?.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());
@@ -33,7 +39,7 @@ public class ChangeUserPasswordHandlerTest(TestingFixture testingFixture) : IAsy
             new ChangeUserPasswordCommand() { OldPassword = "Admin@423", NewPassword = "Admin@456" }
         );
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<ChangeUserPasswordCommand>(nameof(User))
             .Property(x => x.OldPassword!)
             .Message(MessageType.Correct)

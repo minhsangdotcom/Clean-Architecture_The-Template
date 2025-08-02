@@ -1,4 +1,4 @@
-using Application.Common.Exceptions;
+using Application.Common.Errors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,14 +25,11 @@ public class TokenErrorExtension
                 Title = forbiddenError.Title,
                 Type = forbiddenError.Type,
                 Status = forbiddenError.Status,
-                Detail = forbiddenError.Detail,
+                Extensions = new Dictionary<string, object?>()
+                {
+                    { "errorDetails", forbiddenError.ErrorMessage },
+                },
             };
-
-        // await httpContext.Response.WriteAsJsonAsync(
-        //     problemDetails,
-        //     SerializerExtension.Options(),
-        //     contentType: "application/problem+json"
-        // );
 
         await problemDetailsService.TryWriteAsync(
             new() { ProblemDetails = problemDetails, HttpContext = httpContext.HttpContext }
@@ -56,7 +53,10 @@ public class TokenErrorExtension
                 Title = unauthorizedError.Title,
                 Type = unauthorizedError.Type,
                 Status = unauthorizedError.Status,
-                Detail = unauthorizedError.Detail,
+                Extensions = new Dictionary<string, object?>()
+                {
+                    { "errorDetails", unauthorizedError.ErrorMessage },
+                },
             };
 
         await problemDetailsService.TryWriteAsync(

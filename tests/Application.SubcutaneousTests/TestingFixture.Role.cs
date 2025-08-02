@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Services.Identity;
+using Application.Features.Common.Payloads.Roles;
 using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Create;
 using Application.SubcutaneousTests.Extensions;
@@ -30,9 +31,9 @@ public partial class TestingFixture
 
     public async Task<Role> CreateAdminRoleAsync()
     {
-        List<RoleClaimModel> roleClaimModels =
+        List<RoleClaimPayload> roleClaimModels =
         [
-            .. Credential.ADMIN_CLAIMS.Select(permission => new RoleClaimModel()
+            .. Credential.ADMIN_CLAIMS.Select(permission => new RoleClaimPayload()
             {
                 ClaimType = ClaimTypes.Permission,
                 ClaimValue = permission,
@@ -44,9 +45,9 @@ public partial class TestingFixture
 
     public async Task<Role> CreateManagerRoleAsync()
     {
-        List<RoleClaimModel> roleClaimModels =
+        List<RoleClaimPayload> roleClaimModels =
         [
-            .. Credential.MANAGER_CLAIMS.Select(permission => new RoleClaimModel()
+            .. Credential.MANAGER_CLAIMS.Select(permission => new RoleClaimPayload()
             {
                 ClaimType = ClaimTypes.Permission,
                 ClaimValue = permission,
@@ -59,7 +60,7 @@ public partial class TestingFixture
     public async Task<Role> CreateNormalRoleAsync() =>
         await CreateRoleAsync("user", DefaultUserClaims());
 
-    public async Task<Role> CreateRoleAsync(string roleName, List<RoleClaimModel> roleClaims)
+    public async Task<Role> CreateRoleAsync(string roleName, List<RoleClaimPayload> roleClaims)
     {
         CreateRoleCommand role = new() { Name = roleName, RoleClaims = roleClaims };
         factory.ThrowIfNull();
@@ -68,24 +69,24 @@ public partial class TestingFixture
         return (await FindRoleByIdIncludeRoleClaimsAsync(response.Id))!;
     }
 
-    public static List<RoleClaimModel> DefaultUserClaims() =>
+    public static List<RoleClaimPayload> DefaultUserClaims() =>
         [
-            new RoleClaimModel()
+            new RoleClaimPayload()
             {
                 ClaimType = ClaimTypes.Permission,
                 ClaimValue = $"{PermissionAction.List}:{PermissionResource.Role}",
             },
-            new RoleClaimModel()
+            new RoleClaimPayload()
             {
                 ClaimType = ClaimTypes.Permission,
                 ClaimValue = $"{PermissionAction.Detail}:{PermissionResource.Role}",
             },
-            new RoleClaimModel()
+            new RoleClaimPayload()
             {
                 ClaimType = ClaimTypes.Permission,
                 ClaimValue = $"{PermissionAction.List}:{PermissionResource.User}",
             },
-            new RoleClaimModel()
+            new RoleClaimPayload()
             {
                 ClaimType = ClaimTypes.Permission,
                 ClaimValue = $"{PermissionAction.Detail}:{PermissionResource.User}",

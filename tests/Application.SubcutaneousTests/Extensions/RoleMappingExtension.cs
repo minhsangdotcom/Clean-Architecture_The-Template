@@ -1,3 +1,4 @@
+using Application.Features.Common.Payloads.Roles;
 using Application.Features.Common.Projections.Roles;
 using Application.Features.Roles.Commands.Update;
 using Domain.Aggregates.Roles;
@@ -17,7 +18,7 @@ public static class RoleMappingExtension
                 Description = role.Description,
                 RoleClaims =
                 [
-                    .. role.RoleClaims!.Select(x => new RoleClaimModel()
+                    .. role.RoleClaims!.Select(x => new RoleClaimPayload()
                     {
                         ClaimType = x.ClaimType,
                         ClaimValue = x.ClaimValue,

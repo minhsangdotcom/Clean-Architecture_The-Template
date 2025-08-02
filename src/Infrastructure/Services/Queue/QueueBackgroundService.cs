@@ -5,8 +5,8 @@ using Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Serilog;
 
 namespace Infrastructure.Services.Queue;
 
@@ -22,7 +22,7 @@ public class QueueBackgroundService(
     {
         using IServiceScope scope = serviceProvider.CreateScope();
         ISender sender = scope.ServiceProvider.GetRequiredService<ISender>();
-        ILogger logger = scope.ServiceProvider.GetRequiredService<ILogger>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<QueueBackgroundService>>();
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -33,7 +33,7 @@ public class QueueBackgroundService(
 
             if (!await queueService.PingAsync())
             {
-                logger.Warning("Redis server is unavailable!");
+                logger.LogWarning("Redis server is unavailable!");
                 continue;
             }
 
@@ -54,7 +54,7 @@ public class QueueBackgroundService(
     private async Task ProcessWithRetryAsync<TRequest, TResponse>(
         TRequest request,
         ISender sender,
-        ILogger logger,
+        ILogger<QueueBackgroundService> logger,
         CancellationToken cancellationToken
     )
         where TRequest : class
@@ -73,7 +73,7 @@ public class QueueBackgroundService(
             // success case
             if (queueResponse!.IsSuccess)
             {
-                logger.Information(
+                logger.LogInformation(
                     "Executing request {payloadId} has been success!",
                     queueResponse.PayloadId
                 );
@@ -94,7 +94,7 @@ public class QueueBackgroundService(
                 await sender.Send(createQueueLogCommand, cancellationToken);
                 break;
             }
-            
+
             // transient error retry
             attempt++;
             if (attempt > maximumRetryAttempt)
@@ -111,7 +111,11 @@ public class QueueBackgroundService(
             double delay = Math.Min(backoff + jitter, maximumDelay);
 
             TimeSpan delayTime = TimeSpan.FromSeconds(delay);
-            logger.Warning("Retry {Attempt} in {DelayTimeTotalSeconds:F2} seconds...", attempt, delayTime.TotalSeconds);
+            logger.LogWarning(
+                "Retry {Attempt} in {DelayTimeTotalSeconds:F2} seconds...",
+                attempt,
+                delayTime.TotalSeconds
+            );
             await Task.Delay(delayTime, cancellationToken);
         }
 

@@ -1,6 +1,8 @@
 using Api.common.EndpointConfigurations;
 using Api.common.Results;
 using Api.common.Routers;
+using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Cache;
 using Application.Features.Users.Queries.Profiles;
 using Contracts.ApiWrapper;
 using Mediator;
@@ -28,9 +30,23 @@ public class GetUserProfileEndpoint : IEndpoint
 
     private async Task<
         Results<Ok<ApiResponse<GetUserProfileResponse>>, ProblemHttpResult>
-    > HandleAsync([FromServices] ISender sender, CancellationToken cancellationToken = default)
+    > HandleAsync(
+        [FromServices] ISender sender,
+        [FromServices] ICurrentUser currentUser,
+        [FromServices] IMemoryCacheService cacheService,
+        CancellationToken cancellationToken = default
+    )
     {
-        var result = await sender.Send(new GetUserProfileQuery(), cancellationToken);
-        return result.ToResult();
+        Ulid? userId = currentUser.Id;
+        var result = await cacheService.GetOrSetAsync(
+            $"{nameof(GetUserProfileEndpoint)}:{userId}",
+            () => sender.Send(new GetUserProfileQuery(), cancellationToken).AsTask(),
+            new CacheOptions()
+            {
+                ExpirationType = CacheExpirationType.Sliding,
+                Expiration = TimeSpan.FromMinutes(15),
+            }
+        );
+        return result!.ToResult();
     }
 }

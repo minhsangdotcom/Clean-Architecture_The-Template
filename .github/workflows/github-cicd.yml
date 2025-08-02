@@ -10,6 +10,7 @@ on:
 
 env:
   DOTNET_INSTALL_DIR: "./.dotnet"
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
   DOCKER_BUILDKIT: "1"
 
 jobs:
@@ -24,17 +25,19 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.408"
-      - name: Cache NuGet packages
-        id: cache-nuget
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/packages.lock.json','tests/**/packages.lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
+          dotnet-version: "8.0.412"
+          cache: true
+          cache-dependency-path: |
+            src/*/packages.lock.json
+            tests/*/packages.lock.json
+      - name: Clean the solution
+        run: dotnet clean
       - name: Install dependencies
-        run: dotnet restore --locked-mode
+        # my vm server got a problem with ipv6
+        #I use "export DOTNET_SYSTEM_NET_DISABLEIPV6=1" command to disable it it you don't remove this
+        run: |
+          export DOTNET_SYSTEM_NET_DISABLEIPV6=1
+          dotnet restore --locked-mode
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Test
@@ -47,6 +50,7 @@ jobs:
           name: app-build
           path: |
             ${{ github.workspace }}/app/publish
+          retention-days: 3
   docker:
     name: 🐳 Build & Push Docker Image
     needs: build

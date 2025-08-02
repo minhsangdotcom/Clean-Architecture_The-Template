@@ -287,4 +287,12 @@
     <value>mã làm mới hiện tại</value>
     <comment>    </comment>
   </data>
+  <data name="OldPassword" xml:space="preserve">
+    <value>Mật khẩu cũ</value>
+    <comment>   </comment>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>Mật khẩu mới</value>
+    <comment>   </comment>
+  </data>
 </root>

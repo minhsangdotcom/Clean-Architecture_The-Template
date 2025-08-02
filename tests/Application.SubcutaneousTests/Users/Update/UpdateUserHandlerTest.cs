@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Features.Users.Commands.Update;
 using Application.SubcutaneousTests.Extensions;
 using Contracts.ApiWrapper;
@@ -21,7 +22,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
 
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<User>()
             .Property(nameof(UserUpdateRequest.ProvinceId))
             .Message(MessageType.Existence)
@@ -41,7 +42,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
 
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<User>()
             .Property(nameof(UserUpdateRequest.DistrictId))
             .Message(MessageType.Existence)
@@ -61,7 +62,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
         Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
 
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<User>()
             .Property(nameof(UserUpdateRequest.CommuneId))
             .Message(MessageType.Existence)
@@ -78,10 +79,11 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
     {
         updateUserCommand.UserId = Ulid.NewUlid().ToString();
         Result<UpdateUserResponse> result = await testingFixture.SendAsync(updateUserCommand);
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<User>()
             .Message(MessageType.Found)
             .Negative()
+            .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
             .BuildMessage();
 
         result.Error.ShouldNotBeNull();
@@ -115,7 +117,7 @@ public class UpdateUserHandlerTest(TestingFixture testingFixture) : IAsyncLifeti
             () => user.Email.ShouldBe(response.Email),
             () => user.PhoneNumber.ShouldBe(response.PhoneNumber),
             () => user.Gender.ShouldBe(response.Gender),
-            () => user.Address?.ToString().ShouldBe(response.Address),
+            () => user.Address?.ToString().ShouldBe(response.Address?.ToString()),
             () => user.Status.ShouldBe(response.Status),
             () =>
                 user

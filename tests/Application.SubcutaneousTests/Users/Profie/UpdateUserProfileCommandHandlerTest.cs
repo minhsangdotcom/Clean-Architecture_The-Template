@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Features.Users.Commands.Profiles;
 using Application.SubcutaneousTests.Extensions;
 using Contracts.ApiWrapper;
@@ -24,7 +25,7 @@ public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) 
         );
 
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<User>()
             .Property(nameof(UpdateUserProfileCommand.ProvinceId))
             .Message(MessageType.Existence)
@@ -46,7 +47,7 @@ public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) 
         );
 
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<User>()
             .Property(nameof(UpdateUserProfileCommand.DistrictId))
             .Message(MessageType.Existence)
@@ -68,7 +69,7 @@ public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) 
         );
 
         //assert
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<User>()
             .Property(nameof(UpdateUserProfileCommand.CommuneId))
             .Message(MessageType.Existence)
@@ -87,10 +88,11 @@ public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) 
         Result<UpdateUserProfileResponse> result = await testingFixture.SendAsync(
             updateUserCommand
         );
-        var expectedMessage = Messager
+        var expectedMessage = Messenger
             .Create<User>()
             .Message(MessageType.Found)
             .Negative()
+            .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
             .BuildMessage();
 
         result.Error.ShouldNotBeNull();
@@ -124,7 +126,7 @@ public class UpdateUserProfileCommandHandlerTest(TestingFixture testingFixture) 
             () => user.Email.ShouldBe(response.Email),
             () => user.PhoneNumber.ShouldBe(response.PhoneNumber),
             () => user.Gender.ShouldBe(response.Gender),
-            () => user.Address?.ToString().ShouldBe(response.Address),
+            () => user.Address?.ToString().ShouldBe(response.Address?.ToString()),
             () => user.Status.ShouldBe(response.Status)
         );
     }

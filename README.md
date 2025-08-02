@@ -232,6 +232,29 @@ What makes this Clean Architecture template stand out from the rest?
         └── /Templates/                   # email/html templates, static assets
 ```
 
+```
+            +-----------------------------------------------+
+            |                   Api                         |
+            +-----------------------------------------------+
+             |                     |                    |
+             |                     |                    |
+             ↓                     |                    |
+        +------------------+       |                    |
+        |  Infrastructure  |       |                    |
+        +------------------+       |                    |
+                        |          |                    |
+                        ↓          ↓                    ↓
+                    +--------------------+    +---------------------+
+                    |   Application      | -> | Contracts           |
+                    +--------------------+    +---------------------+
+                             |
+                             ↓
+            +---------------------------+
+            |          Domain           |
+            +---------------------------+
+
+```
+
 # 8. Getting started
 
 ## 8.1. Run .NET Core Clean Architecture Project
@@ -251,6 +274,14 @@ Modify PostgreSQL connection string (this template is using PostgreSQL currently
 "DatabaseSettings": {
     "DatabaseConnection": "Host=localhost;Username=[your_username];Password=[your_password];Database=example"
 },
+```
+
+Update migrations to your own database.
+
+```
+cd src/Infrastructure
+
+dotnet ef database update
 ```
 
 The next step :point_right::

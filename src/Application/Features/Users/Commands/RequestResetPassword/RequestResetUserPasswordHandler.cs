@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -35,8 +36,13 @@ public class RequestResetUserPasswordHandler(
         {
             return Result<string>.Failure(
                 new NotFoundError(
-                    "the resource is not found",
-                    Messager.Create<User>().Message(MessageType.Found).Negative().Build()
+                    "the TitleMessage.RESOURCE_NOT_FOUND",
+                    Messenger
+                        .Create<User>()
+                        .Message(MessageType.Found)
+                        .Negative()
+                        .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
+                        .Build()
                 )
             );
         }

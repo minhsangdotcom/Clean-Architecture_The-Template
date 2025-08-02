@@ -1,3 +1,4 @@
+using Application.Common.Constants;
 using Application.Features.Users.Queries.Profiles;
 using Application.SubcutaneousTests.Extensions;
 using Domain.Aggregates.Users;
@@ -15,7 +16,12 @@ public class GetUserProfileHandlerTest(TestingFixture testingFixture) : IAsyncLi
         //act
         var result = await testingFixture.SendAsync(new GetUserProfileQuery());
         //assert
-        var expectedMessage = Messager.Create<User>().Message(MessageType.Found).Negative().Build();
+        var expectedMessage = Messenger
+            .Create<User>()
+            .Message(MessageType.Found)
+            .Negative()
+            .VietnameseTranslation(TranslatableMessage.VI_USER_NOT_FOUND)
+            .Build();
         result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldNotBeNull();
         result.Error?.ErrorMessage.ShouldBe(expectedMessage, new MessageResultComparer());

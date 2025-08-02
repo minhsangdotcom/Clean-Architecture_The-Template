@@ -1,7 +1,7 @@
 using Application.Common.Interfaces.Services.Identity;
 using Contracts.ApiWrapper;
-using Domain.Aggregates.Roles;
 using Mediator;
+using SharedKernel.Constants;
 
 namespace Application.Features.Permissions;
 
@@ -13,14 +13,18 @@ public class ListPermissionHandler(IRoleManagerService roleManagerService)
         CancellationToken cancellationToken
     )
     {
-        IList<KeyValuePair<string, string>> roleClaims =
-            await roleManagerService.GetRolePermissionClaimsAsync();
-        IEnumerable<ListPermissionResponse> responses = roleClaims.Select(
-            claim => new ListPermissionResponse()
+        var roleClaims = await roleManagerService.GetRolePermissionClaimsAsync();
+        var responses = roleClaims.SelectMany(claim =>
+            claim.Select(parent => new ListPermissionResponse()
             {
-                ClaimType = claim.Key,
-                ClaimValue = claim.Value,
-            }
+                ClaimType = ClaimTypes.Permission,
+                ClaimValue = parent.Key,
+                Children = parent.Value.ConvertAll(child => new PermissionResponse()
+                {
+                    ClaimType = ClaimTypes.Permission,
+                    ClaimValue = child,
+                }),
+            })
         );
         return Result<IEnumerable<ListPermissionResponse>>.Success(responses);
     }

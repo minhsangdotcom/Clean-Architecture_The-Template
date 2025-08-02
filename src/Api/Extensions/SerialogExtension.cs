@@ -5,7 +5,7 @@ namespace Api.Extensions;
 
 public static class SerialogExtension
 {
-    public static void AddSerialogs(this WebApplicationBuilder builder)
+    public static void AddSerilog(this WebApplicationBuilder builder)
     {
         LoggerConfiguration loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(
             builder.Configuration
@@ -23,7 +23,6 @@ public static class SerialogExtension
         Log.Logger = loggerConfiguration.CreateLogger();
 
         builder.Host.UseSerilog(Log.Logger);
-
         builder.Services.AddSingleton(Log.Logger);
     }
 }

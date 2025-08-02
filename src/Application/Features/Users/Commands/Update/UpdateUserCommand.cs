@@ -1,4 +1,4 @@
-using Application.Features.Common.Projections.Users;
+using Application.Features.Common.Payloads.Users;
 using Contracts.ApiWrapper;
 using Mediator;
 
@@ -11,9 +11,9 @@ public class UpdateUserCommand : IRequest<Result<UpdateUserResponse>>
     public UserUpdateRequest UpdateData { get; set; } = null!;
 }
 
-public class UserUpdateRequest : UserModel
+public class UserUpdateRequest : UserPayload
 {
     public List<Ulid>? Roles { get; set; }
 
-    public List<UserClaimModel>? UserClaims { get; set; }
+    public List<UserClaimPayload>? UserClaims { get; set; }
 }

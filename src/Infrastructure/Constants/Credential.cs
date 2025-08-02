@@ -14,8 +14,8 @@ public static class Credential
 
     public static readonly List<Dictionary<string, List<string>>> permissions =
     [
-        Permission.CreatebasicPermissions(PermissionResource.User),
-        Permission.CreatebasicPermissions(PermissionResource.Role),
+        Permission.CreateBasicPermissions(PermissionResource.User),
+        Permission.CreateBasicPermissions(PermissionResource.Role),
     ];
 
     public static readonly List<string> ADMIN_CLAIMS =
@@ -39,7 +39,7 @@ public static class Permission
     public static string Generate(string action, string resource) =>
         $"{action.ToSnakeCase()}:{resource.ToSnakeCase()}";
 
-    public static Dictionary<string, List<string>> CreatebasicPermissions(string resource) =>
+    public static Dictionary<string, List<string>> CreateBasicPermissions(string resource) =>
         new()
         {
             { Generate(PermissionAction.List, resource), [] },

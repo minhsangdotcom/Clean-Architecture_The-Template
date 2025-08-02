@@ -5,16 +5,16 @@ namespace Domain.Aggregates.Users.ValueObjects;
 
 public class Address : ValueObject
 {
-    public string? Street { get; set; }
+    public string? Street { get; private set; }
 
-    public Ulid ProvinceId { get; set; }
-    public string Province { get; set; } = string.Empty;
+    public Ulid ProvinceId { get; private set; }
+    public string Province { get; private set; } = string.Empty;
 
-    public Ulid DistrictId { get; set; }
-    public string District { get; set; } = string.Empty;
+    public Ulid DistrictId { get; private set; }
+    public string District { get; private set; } = string.Empty;
 
-    public Ulid? CommuneId { get; set; }
-    public string? Commune { get; set; }
+    public Ulid? CommuneId { get; private set; }
+    public string? Commune { get; private set; }
 
     private Address() { }
 
@@ -28,6 +28,12 @@ public class Address : ValueObject
         string street
     )
     {
+        Guard.Against.StringTooLong(province, 256, nameof(province));
+        Guard.Against.StringTooLong(district, 256, nameof(district));
+        if (commune is not null)
+        {
+            Guard.Against.StringTooLong(commune, 256, nameof(commune));
+        }
         Province = Guard.Against.NullOrEmpty(province);
         District = Guard.Against.NullOrEmpty(district);
         Street = Guard.Against.NullOrEmpty(street);

@@ -1,15 +1,15 @@
 using Application.Common.Interfaces.Services.Cache;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Requests;
-using Contracts.Dtos.Responses;
-using Serilog;
+using Microsoft.Extensions.Logging;
+using SharedKernel.Models;
 using Specification.Interfaces;
 
 namespace Infrastructure.UnitOfWorks.CachedRepositories;
 
 public class CachedSpecificationRepository<T>(
     ISpecificationRepository<T> repository,
-    ILogger logger,
+    ILogger<UnitOfWork> logger,
     IMemoryCacheService memoryCacheService
 ) : ISpecificationRepository<T>
     where T : class
@@ -17,7 +17,7 @@ public class CachedSpecificationRepository<T>(
     public Task<PaginationResponse<TResult>> CursorPagedListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        System.Linq.Expressions.Expression<Func<T, TResult>> mappingResult,
+        System.Linq.Expressions.Expression<Func<T, TResult>> selector,
         string? uniqueSort = null,
         CancellationToken cancellationToken = default
     )
@@ -27,23 +27,24 @@ public class CachedSpecificationRepository<T>(
         {
             string key = $"{spec.CacheKey}-{nameof(CursorPagedListAsync)}";
             string hashingKey = RepositoryExtension.HashKey(key, queryParam, uniqueSort);
-            logger.Information("checking cache for {key}", hashingKey);
+            logger.LogInformation("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
                 () =>
                     repository.CursorPagedListAsync(
                         spec,
                         queryParam,
-                        mappingResult,
+                        selector,
                         uniqueSort,
                         cancellationToken
-                    )
+                    ),
+                options: null
             )!;
         }
         return repository.CursorPagedListAsync(
             spec,
             queryParam,
-            mappingResult,
+            selector,
             uniqueSort,
             cancellationToken
         );
@@ -51,7 +52,7 @@ public class CachedSpecificationRepository<T>(
 
     public Task<TResult?> FindByConditionAsync<TResult>(
         ISpecification<T> spec,
-        System.Linq.Expressions.Expression<Func<T, TResult>> mappingResult,
+        System.Linq.Expressions.Expression<Func<T, TResult>> selector,
         CancellationToken cancellationToken = default
     )
         where TResult : class
@@ -60,19 +61,20 @@ public class CachedSpecificationRepository<T>(
         {
             string key = $"{spec.CacheKey}-{nameof(FindByConditionAsync)}";
             string hashingKey = RepositoryExtension.HashKey(key);
-            logger.Information("checking cache for {key}", hashingKey);
+            logger.LogInformation("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                () => repository.FindByConditionAsync(spec, mappingResult, cancellationToken)
+                () => repository.FindByConditionAsync(spec, selector, cancellationToken),
+                options: null
             );
         }
-        return repository.FindByConditionAsync(spec, mappingResult, cancellationToken);
+        return repository.FindByConditionAsync(spec, selector, cancellationToken);
     }
 
     public Task<PaginationResponse<TResult>> PagedListAsync<TResult>(
         ISpecification<T> spec,
         QueryParamRequest queryParam,
-        System.Linq.Expressions.Expression<Func<T, TResult>> mappingResult,
+        System.Linq.Expressions.Expression<Func<T, TResult>> selector,
         CancellationToken cancellationToken = default
     )
     {
@@ -80,12 +82,13 @@ public class CachedSpecificationRepository<T>(
         {
             string key = $"{spec.CacheKey}-{nameof(PagedListAsync)}";
             string hashingKey = RepositoryExtension.HashKey(key, queryParam);
-            logger.Information("checking cache for {key}", hashingKey);
+            logger.LogInformation("checking cache for {key}", hashingKey);
             return memoryCacheService.GetOrSetAsync(
                 hashingKey,
-                () => repository.PagedListAsync(spec, queryParam, mappingResult, cancellationToken)
+                () => repository.PagedListAsync(spec, queryParam, selector, cancellationToken),
+                options: null
             )!;
         }
-        return repository.PagedListAsync(spec, queryParam, mappingResult, cancellationToken);
+        return repository.PagedListAsync(spec, queryParam, selector, cancellationToken);
     }
 }
