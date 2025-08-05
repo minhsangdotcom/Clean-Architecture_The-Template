@@ -90,7 +90,7 @@ What makes this Clean Architecture template stand out from the rest on Github?
 1. [Cross-cutting concern](/src/Application/Common/Behaviors/) :scissors:
 1. [Mail Sender](/src/Infrastructure/Services/Mail/) :mailbox:
 1. [Cached Repository](/src/Infrastructure/UnitOfWorks/CachedRepositories/) :computer:
-1. [Queue](/src/Infrastructure/Services/Queue/) :walking:
+1. [Queue](/src/Infrastructure/Services/Queue/) [Example at feature/TicketSale](https://github.com/minhsangdotcom/clean-architecture/tree/feature/TicketSale) :walking:
 1. [Logging](/src/Api/Extensions/SerialogExtension.cs) :pencil:
 1. [Tracing](/src/Api/Extensions/OpenTelemetryExtensions.cs) :chart_with_upwards_trend:
 1. [Automatical translatable messages](https://github.com/minhsangdotcom/the-template_shared-kernel) :globe_with_meridians:
@@ -610,7 +610,7 @@ var response = await unitOfWork
 
 # 10. Support
 
-If you are having problems, please let me know at [issue section](https://github.com/minhsangdotcom/Clean-Architecture_The-Template/issues).
+If you are having problems, please let me know at [issue section](https://github.com/minhsangdotcom/clean-architecture/issues).
 
 # 11. Credits
 

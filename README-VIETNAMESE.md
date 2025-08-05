@@ -95,7 +95,7 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
 1. [Cross-cutting concern](/src/Application/Common/Behaviors/) :scissors:
 1. [Mail Sender](/src/Infrastructure/Services/Mail/) :mailbox:
 1. [Cached Repository](/src/Infrastructure/UnitOfWorks/CachedRepositories/) :computer:
-1. [Queue](/src/Infrastructure/Services/Queue/) :walking:
+1. [Queue](/src/Infrastructure/Services/Queue/) [Example at feature/TicketSale](https://github.com/minhsangdotcom/clean-architecture/tree/feature/TicketSale) :walking:
 1. [Logging](/src/Api/Extensions/SerialogExtension.cs) :pencil:
 1. [Tracing](/src/Api/Extensions/OpenTelemetryExtensions.cs) :chart_with_upwards_trend:
 1. [Automatical translatable messages](https://github.com/minhsangdotcom/the-template_shared-kernel) :globe_with_meridians:
@@ -623,7 +623,7 @@ var response = await unitOfWork
 
 # Hỗ trợ
 
-Nếu như có bất kì vấn đề nào thì cho mình biết qua [phần issue ](https://github.com/minhsangdotcom/Clean-Architecture_The-Template/issues) nhé.
+Nếu như có bất kì vấn đề nào thì cho mình biết qua [phần issue ](https://github.com/minhsangdotcom/clean-architecture/issues) nhé.
 
 # Lời cảm ơn
 
