@@ -1,6 +1,5 @@
-using Application.Common.Interfaces.Services.Elastics;
+using Application.Common.Interfaces.Services.Elasticsearch;
 using Contracts.Dtos.Requests;
-using Contracts.Dtos.Responses;
 using Domain.Common;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.Fluent;
@@ -9,7 +8,7 @@ using FluentConfiguration.Configurations;
 using Microsoft.Extensions.Options;
 using SharedKernel.Models;
 
-namespace Infrastructure.Services.ElasticSeach;
+namespace Infrastructure.Services.Elasticsearch;
 
 public class ElasticsearchService<T>(
     ElasticsearchClient elasticClient,

@@ -3,7 +3,7 @@ using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using SharedKernel.Models;
 
-namespace Application.Common.Interfaces.Services.Elastics;
+namespace Application.Common.Interfaces.Services.Elasticsearch;
 
 public interface IElasticsearchService<T>
     where T : class

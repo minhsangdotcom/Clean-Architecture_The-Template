@@ -3,7 +3,6 @@ using System.Reflection;
 using Application.Common.Interfaces.Services.Storage;
 using Application.Common.Security;
 using Contracts.ApiWrapper;
-using Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Models;
@@ -104,9 +103,9 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
     private void UpdatePropertyIfNotPublicUrl(object target, PropertyInfo property, object key)
     {
         string imageKeyStr = key.ToString()!;
-        if (!imageKeyStr.StartsWith(storageService.GetPublicUrl()!))
+        if (!imageKeyStr.StartsWith(storageService.PublicUrl))
         {
-            string? fullPath = storageService.GetFullpath(imageKeyStr);
+            string? fullPath = storageService.GetFullPath(imageKeyStr);
             logger.LogInformation("image path {value}", fullPath);
             property.SetValue(target, fullPath);
         }

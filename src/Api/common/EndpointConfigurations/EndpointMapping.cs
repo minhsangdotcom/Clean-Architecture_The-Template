@@ -1,13 +1,12 @@
 using System.Reflection;
 using Api.common.Routers;
-using Api.Extensions;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
 using Contracts.Constants;
 
 namespace Api.common.EndpointConfigurations;
 
-public static class EnpointMapping
+public static class EndpointMapping
 {
     public static IServiceCollection AddEndpoints(this IServiceCollection services)
     {

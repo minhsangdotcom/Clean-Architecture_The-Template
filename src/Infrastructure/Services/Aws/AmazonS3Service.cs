@@ -8,10 +8,12 @@ using SharedKernel.Extensions;
 
 namespace Infrastructure.Services.Aws;
 
-public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSetting)
+public class AmazonS3Service(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSetting)
     : IStorageService
 {
     private readonly S3AwsSettings s3AwsSettings = awsSetting.Value;
+
+    public string PublicUrl => s3AwsSettings.PublicUrl!;
 
     public async Task<StorageResponse> UploadAsync(Stream stream, string key) =>
         await UploadAsync(
@@ -165,9 +167,7 @@ public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSet
         return $"{name}.{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}{extension}";
     }
 
-    public string? GetPublicUrl() => s3AwsSettings.PublicUrl;
-
-    public string? GetFullpath(string? key) =>
+    public string? GetFullPath(string? key) =>
         string.IsNullOrWhiteSpace(key) ? null : GeneratePreSignedURL(key);
 
     private string GeneratePreSignedURL(string key)

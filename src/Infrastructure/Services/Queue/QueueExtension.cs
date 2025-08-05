@@ -1,6 +1,6 @@
 namespace Infrastructure.Services.Queue;
 
-public static class QueueExtention
+public static class QueueExtension
 {
     public const int INIT_DELAY = 2;
     public const double MAXIMUM_JITTER = 0.2;

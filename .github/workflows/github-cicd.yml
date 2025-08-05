@@ -22,6 +22,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -30,18 +31,31 @@ jobs:
           cache-dependency-path: |
             src/*/packages.lock.json
             tests/*/packages.lock.json
+      
       - name: Clean the solution
         run: dotnet clean
+
+      # my vm server got a problem with ipv6
+      #I use "export DOTNET_SYSTEM_NET_DISABLEIPV6=1" command to disable it if you don't remove this
       - name: Install dependencies
-        # my vm server got a problem with ipv6
-        #I use "export DOTNET_SYSTEM_NET_DISABLEIPV6=1" command to disable it it you don't remove this
         run: |
           export DOTNET_SYSTEM_NET_DISABLEIPV6=1
           dotnet restore --locked-mode
       - name: Build
         run: dotnet build --configuration Release --no-restore
+
+      - name: App Settings Variable Substitution
+        uses: iamazeem/substitute-action@v1
+        env:
+          DB_CONNECTION: ${{ secrets.DB_CONNECTION_STRING }}
+          S3_KEY: ${{ secrets.S3_KEY }}
+          S3_SECRET: ${{ secrets.S3_SECRET }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        with:
+          input-files: ${{ github.workspace }}/src/Api/appsettings.Testing-Deployment.json
+
       - name: Test
-        run: dotnet dotnet test --no-restore --verbosity normal -e ASPNETCORE_ENVIRONMENT=Deployment
+        run: dotnet test --no-restore --verbosity normal -e ASPNETCORE_ENVIRONMENT=Deployment
       - name: Publish Application
         run: dotnet publish -c Release --property:PublishDir=${{ github.workspace }}/app/publish
       - name: Upload artifact

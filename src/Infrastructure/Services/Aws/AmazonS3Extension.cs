@@ -18,7 +18,7 @@ public static class AmazonS3Extension
             configuration.GetSection(nameof(S3AwsSettings)).Bind(options)
         );
         services.TryAddSingleton<IValidateOptions<S3AwsSettings>, ValidateS3AwsSettings>();
-        services.AddSingleton<IStorageService, AwsAmazonService>();
+        services.AddSingleton<IStorageService, AmazonS3Service>();
 
         S3AwsSettings s3AwsSettings =
             configuration.GetSection(nameof(S3AwsSettings)).Get<S3AwsSettings>() ?? new();

@@ -1,4 +1,4 @@
-#
+# Clean Architecture The Template
 
 [English](README.md) | [Vietnamese](README-VIETNAMESE.md)
 
@@ -6,14 +6,14 @@
 
 ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?logo=visual-studio-code&logoColor=white) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?color=orange) ![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?color=pink) ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?color=%23f61d9c) [![NuGet Version](https://img.shields.io/nuget/v/minhsangdotcom.TheTemplate.SharedKernel?label=SharedKernel&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SharedKernel) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.SpecificationPattern?style=flat&label=SpecificationPattern&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SpecificationPattern/) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig/1.0.1-alpha)
 
-# Bảng nội dung
+# Bảng nội dung <div id= "bang-noi-dung"/>
 
 - [Ngôn ngữ](#)
 - [Nhãn](#)
-- [Bảng nội dung](#Bảng-nội-dung)
-- [Mô Hình Kiến Trúc Sạch (Clean Architecture)](#mô-hình-kiến-trúc-sạch-clean-architecture)
-- [Cho mình 1 ⭐ nhé](#cho-minh-1sao-nhe)
-- [Định Nghĩa](#định-nghĩa)
+- [Bảng nội dung](#bang-noi-dung)
+- [Giới thiệu](#gioi-thieu)
+- [Cho mình 1 ⭐ nhé](#cho-minh-sao-nhe)
+- [Định Nghĩa](#dinh-nghia)
   - [Lợi ích](#lợi-ích)
   - [Nhược điểm](#nhược-điểm)
 - [Tính năng :rocket:](#tinh-nang)
@@ -34,20 +34,21 @@
 - [Hỗ trợ](#hỗ-trợ)
 - [Lời cảm ơn](#lời-cảm-ơn)
 - [Cấp phép](#cấp-phép)
+<div id="gioi-thieu" />
 
-# Mô Hình Kiến Trúc Sạch (Clean Architecture)
+# Giới thiệu 
 
 Template này được thiết kế dành cho các bạn backend làm việc với ASP.NET Core. Nó cung cấp một cách hiệu quả để xây dựng các ứng dụng enterprise một cách đơn giản bằng cách tận dụng lợi thế từ kiến trúc Clean Architecture và .NET Core framework.
 
 Với template này, tất cả đã được thiết lập sẵn :smiley:.
+<div id='cho-minh-sao-nhe'/>
 
-<div id='cho-minh-1sao-nhe'/>
-
-# Cho mình 1 ⭐ nhé
+# Cho mình 1 ⭐ nhé 
 
 Nếu bạn thấy template này hữu ích và học được điều gì đó từ nó, hãy cân nhắc cho mình một :star:.
 
 Sự hỗ trợ của bạn là động lực giúp mình mang đến những tính năng mới và cải tiến tốt hơn trong các phiên bản sắp tới.
+<div id ="dinh-nghia"/>
 
 # Định Nghĩa
 
@@ -71,7 +72,6 @@ Kiến trúc Sạch (Clean Architecture) là một phương pháp thiết kế p
 - **_Khó khăn khi học tập_**: Các developer không quen thuộc với nguyên tắc này có thể mất thời gian để hiểu rõ cấu trúc và lợi ích của nó.
 - **_Nguy cơ về cấu trúc quá phức tạp_**: Đối với các ứng dụng nhỏ, các tầng bổ sung có thể không cần thiết và dẫn đến sự phức tạp hóa.
 - **_Hiệu năng bị suy giảm_**: Sự trích dẫn và trừa tượng(interface) giữa các tầng có thể giảm hiệu năng, tuy nhiên thường là không đáng kể.
-
 <div id='tinh-nang'/>
 
 # Tính năng :rocket:
@@ -95,12 +95,11 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
 1. [Cross-cutting concern](/src/Application/Common/Behaviors/) :scissors:
 1. [Mail Sender](/src/Infrastructure/Services/Mail/) :mailbox:
 1. [Cached Repository](/src/Infrastructure/UnitOfWorks/CachedRepositories/) :computer:
-1. [Queue](/src/Infrastructure/Services/Queue/) :walking:
+1. [Queue](/src/Infrastructure/Services/Queue/) [Example at feature/TicketSale](https://github.com/minhsangdotcom/clean-architecture/tree/feature/TicketSale) :walking:
 1. [Logging](/src/Api/Extensions/SerialogExtension.cs) :pencil:
 1. [Tracing](/src/Api/Extensions/OpenTelemetryExtensions.cs) :chart_with_upwards_trend:
 1. [Automatical translatable messages](https://github.com/minhsangdotcom/the-template_shared-kernel) :globe_with_meridians:
 1. [S3 AWS](/src/Infrastructure/Services/Aws/) :cloud:
-
 <div id= 'nha-hang-cho-cac-tinh-nang'/>
 
 # Nhá hàng cho các tính năng :fire:
@@ -110,19 +109,16 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
 ![User Apis](/Screenshots/user-api.png)
 
 ![Role Apis](/Screenshots/role-api.png)
-
 <div id='truy-vet'/>
 
 ### Truy Vết
 
 ![Tracing](/Screenshots/trace.png)
-
 <div id='minio-storage'/>
 
 ### Lưu trử file media bằng Minio
 
 ![AWS s3 feature](Screenshots/AWS_S3_Feature.png)
-
 <div id='message-translation'/>
 
 ### Tự động dịch message
@@ -143,7 +139,6 @@ Có gì đặc biệt khiến cho template này trở nên khác biệt so với
   "spanId": "8623dbe038a6dede"
 }
 ```
-
 <div id='so-luot-ve-cau-truc'/>
 
 # Sơ lượt về Cấu trúc :mag_right:
@@ -440,8 +435,7 @@ public class PermissionResource
 }
 ```
 
-Tạo ra permission mới sau đó thêm nó vào permission, tắt và chạy lại ứng dụng.
-
+Tạo ra permission mới sau đó thêm nó vào list tên là permissions, tắt và chạy lại ứng dụng.
 <div id='filtering'/>
 
 ### Bộ lọc
@@ -543,7 +537,6 @@ Mình đã nhúng sẳn filter tự động vào tất cả các hàm lấy danh
 ```csharp
 unitOfWork.DynamicReadOnlyRepository<User>()
 ```
-
 <div id='pagination'/>
 
 ### Phân trang
@@ -630,7 +623,7 @@ var response = await unitOfWork
 
 # Hỗ trợ
 
-Nếu như có bất kì vấn đề nào thì cho mình biết qua [phần issue ](https://github.com/minhsangdotcom/Clean-Architecture_The-Template/issues) nhé.
+Nếu như có bất kì vấn đề nào thì cho mình biết qua [phần issue ](https://github.com/minhsangdotcom/clean-architecture/issues) nhé.
 
 # Lời cảm ơn
 
@@ -643,7 +636,6 @@ Nếu như có bất kì vấn đề nào thì cho mình biết qua [phần issu
 - [Specification pattern](https://github.com/ardalis/Specification)
 - [REPR Pattern](https://github.com/ardalis/ApiEndpoints)
 - [Clean testing by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture/tree/main/tests)
-
 <div id="license"/>
 
 # Cấp phép
