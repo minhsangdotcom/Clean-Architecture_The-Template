@@ -1,17 +1,17 @@
-#
+# Clean Architecture The Template
 
 [English](README.md) | [Vietnamese](README-VIETNAMESE.md)
 
 #
 
-![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?logo=visual-studio-code&logoColor=white) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/Clean-Architecture_The-Template?color=orange) ![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2FClean-Architecture_The-Template?color=pink) ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/Clean-Architecture_The-Template?color=%23f61d9c) [![NuGet Version](https://img.shields.io/nuget/v/minhsangdotcom.TheTemplate.SharedKernel?label=SharedKernel&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SharedKernel) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.SpecificationPattern?style=flat&label=SpecificationPattern&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SpecificationPattern/) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig/1.0.1-alpha)
+![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?logo=visual-studio-code&logoColor=white) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) ![GitHub Release](https://img.shields.io/github/v/release/minhsangdotcom/clean-architecture?color=orange) ![GitHub Org's stars](https://img.shields.io/github/stars/minhsangdotcom%2Fclean-architecture?color=pink) ![GitHub forks](https://img.shields.io/github/forks/minhsangdotcom/clean-architecture?color=%23f61d9c) [![NuGet Version](https://img.shields.io/nuget/v/minhsangdotcom.TheTemplate.SharedKernel?label=SharedKernel&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SharedKernel) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.SpecificationPattern?style=flat&label=SpecificationPattern&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.SpecificationPattern/) [![NuGet Version](https://img.shields.io/nuget/vpre/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig?style=flat&label=ElasticsearchFluentConfig&color=red)](https://www.nuget.org/packages/minhsangdotcom.TheTemplate.ElasticsearchFluentConfig/1.0.1-alpha)
 
 # Table of Contents
 
 - [1. Language](#1-languages)
 - [2. Badges](#2-badge)
 - [3. Table of Contents](#3-table-of-contents)
-- [2. .NET Core Clean Architecture The Template Introduction](#2-net-core-clean-architecture-the-template-introduction)
+- [2. Introduction](#2-introduction)
 - [3. Give a Star! ⭐](#3-give-a-star)
 - [4. What is Clean Architecture?](#4-what-is-clean-architecture)
   - [4.0.1. Pros](#401-pros)
@@ -36,9 +36,9 @@
 - [11. Credits](#11-credits)
 - [12. Licence](#12-licence)
 
-# 2. .NET Core Clean Architecture The Template Introduction
+# 2. Introduction
 
-This template is designed for backend developer working with ASP.NET Core. It provides you an efficient way to build enterprise applications effortlessly by leveraging advantages of clean architecture structre and .NET Core framework.
+Clean Architecture template is designed for backend developer working with ASP.NET Core. It provides you an efficient way to build enterprise applications effortlessly by leveraging advantages of clean architecture structure and .NET Core framework.
 
 With this template, everything is already set up :smiley:.
 
@@ -71,7 +71,7 @@ Clean Architecture is a software design approach introduced by Robert C. Martin 
 
 # 5. Features
 
-What makes this Clean Architecture template stand out from the rest?
+What makes this Clean Architecture template stand out from the rest on Github?
 
 ### Most common features:
 
@@ -318,11 +318,11 @@ input the keys at your appsettings.json
 
 ```json
 "S3AwsSettings": {
-      "ServiceUrl": "[your_host]:9000",
-      "AccessKey": "[yours]",
-      "SecretKey": "[yours]",
+      "ServiceUrl": "http://localhost:9000",
+      "AccessKey": "***",
+      "SecretKey": "***",
       "BucketName": "the-template-project",
-      "PublicUrl": "[your_host]:9000",
+      "PublicUrl": "http://localhost:9000",
       "PreSignedUrlExpirationInMinutes": 1440,
       "Protocol": 1
     },
@@ -385,7 +385,7 @@ Json payload is like
 
 ### 8.2.3. How to add new permissions in your app
 
-To get this, let's navigate to constants folder in Infrastructure layer, then open Credential.cs file and pay your attention on permissions dictionary
+To get this, let's navigate to constants folder in Infrastructure layer, then open Credential.cs file and pay your attention on permissions list
 
 ```csharp
 public static readonly List<Dictionary<string, List<string>>> permissions =
@@ -425,7 +425,7 @@ public class PermissionResource
 }
 ```
 
-Define your new one at permissions dictionary then stop and start application again
+Define your new one at permissions list then stop and start application again
 
 ### 8.2.4. Filtering
 
@@ -613,8 +613,6 @@ var response = await unitOfWork
 If you are having problems, please let me know at [issue section](https://github.com/minhsangdotcom/Clean-Architecture_The-Template/issues).
 
 # 11. Credits
-
-:heart: Thank you guys so much :heart: :pray:.
 
 - [Clean architecture by Jayson Taylor](https://github.com/jasontaylordev/CleanArchitecture)
 
