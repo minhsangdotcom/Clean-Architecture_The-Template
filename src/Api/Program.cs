@@ -103,7 +103,6 @@ try
     app.UseExceptionHandler();
     app.UseStaticFiles();
     app.UseAuthentication();
-    app.CurrentUser();
     app.UseAuthorization();
     app.UseDetection();
 

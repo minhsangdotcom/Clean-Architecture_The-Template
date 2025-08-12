@@ -347,8 +347,8 @@
       },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
         "type": "Transitive",
-        "resolved": "8.0.16",
-        "contentHash": "WtKPOmlqzwWGQZCOixnOE+3bIYzxmUw7zjfs7VRWDhZlxfcmw5Qw2c4r87XWPk+kkurntzvE0sWyruI6KDpTiA==",
+        "resolved": "8.0.19",
+        "contentHash": "vkGkpvEGGLFHeYhlBqdJiOL/7aYiUmLg2PTfuDDjBDUDb5QTpoeWLNOOoodTlu88J+GluGE+DFF1kd9hxJd5bA==",
         "dependencies": {
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "7.1.2"
         }
@@ -1172,9 +1172,7 @@
           "Contracts": "[1.0.0, )",
           "Domain": "[1.0.0, )",
           "FluentValidation.DependencyInjectionExtensions": "[12.0.0, )",
-          "JWT": "[11.0.0, )",
           "Mediator.Abstractions": "[3.0.0-preview.65, )",
-          "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.16, )",
           "NRedisStack": "[1.0.0, )",
           "RazorLight": "[2.3.1, )",
           "Wangkanai.Detection": "[8.17.0, )",
@@ -1204,7 +1202,9 @@
           "AWSSDK.S3": "[4.0.1.3, )",
           "Application": "[1.0.0, )",
           "EFCore.NamingConventions": "[8.0.3, )",
+          "JWT": "[11.0.0, )",
           "MailKit": "[4.12.1, )",
+          "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.19, )",
           "Ulid": "[1.3.4, )"
         }
       }

@@ -1,4 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
@@ -113,19 +112,15 @@ public class RefreshUserTokenHandler(
 
         var accessTokenExpiredTime = tokenFactory.AccessTokenExpiredTime;
         var accessToken = tokenFactory.CreateToken(
-            [new(JwtRegisteredClaimNames.Sub, decodeToken.Sub!)],
+            [new(ClaimTypes.Sub, decodeToken.Sub!)],
             accessTokenExpiredTime
         );
 
         var refreshTokenExpiredTime = tokenFactory.RefreshTokenExpiredTime;
         string refreshToken = tokenFactory.CreateToken(
             [
-                new(JwtRegisteredClaimNames.Sub, decodeToken.Sub!),
+                new(ClaimTypes.Sub, decodeToken.Sub!),
                 new(ClaimTypes.TokenFamilyId, decodeToken.FamilyId!),
-                new(
-                    JwtRegisteredClaimNames.UniqueName,
-                    DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()
-                ),
             ],
             refreshTokenExpiredTime
         );
