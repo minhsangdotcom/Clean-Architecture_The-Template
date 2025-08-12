@@ -20,18 +20,18 @@
       },
       "Mediator.Abstractions": {
         "type": "Direct",
-        "requested": "[3.0.0-preview.65, )",
-        "resolved": "3.0.0-preview.65",
-        "contentHash": "SqmWbc0kbIFFBKuLJZPicJy8FXOAO9WtbnUYaa+HeeX5eyI500basAP7DqT/vbVyiNyJP2CoeBdpfLOD+ajkHQ==",
+        "requested": "[3.0.1, )",
+        "resolved": "3.0.1",
+        "contentHash": "WLWp7S7pt818wsK2IiFwGwvUhwq0E/7F0LkglDQKx+4rSzRWVKD3CHtaCi1fpeURH+v44ZPxaRVBCNV7uWOBYQ==",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0"
         }
       },
       "Mediator.SourceGenerator": {
         "type": "Direct",
-        "requested": "[3.0.0-preview.65, )",
-        "resolved": "3.0.0-preview.65",
-        "contentHash": "pNRzIv00FWkTvpmBsRtRqOxKQ20VOOQ55QiLDVd5ODuWHCktzqHIvmXFMZARhCtdsHPdUKRqzhHLIEDhxX9dMg==",
+        "requested": "[3.0.1, )",
+        "resolved": "3.0.1",
+        "contentHash": "i/SQaPyUjICSr4Bz8zSrpaMymHEBt1qn2G2bNHsitoWPI9dXsYjgt+Xt21oy4a0Mi2AtuvfOx7H5UzmOi69U7Q==",
         "dependencies": {
           "Scriban": "6.2.0"
         }
@@ -686,7 +686,7 @@
         "type": "Project",
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
-          "Mediator.Abstractions": "[3.0.0-preview.65, )",
+          "Mediator.Abstractions": "[3.0.1, )",
           "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.10, )",
           "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.4, )"
         }

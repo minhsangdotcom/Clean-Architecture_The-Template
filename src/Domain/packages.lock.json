@@ -10,9 +10,9 @@
       },
       "Mediator.Abstractions": {
         "type": "Direct",
-        "requested": "[3.0.0-preview.65, )",
-        "resolved": "3.0.0-preview.65",
-        "contentHash": "SqmWbc0kbIFFBKuLJZPicJy8FXOAO9WtbnUYaa+HeeX5eyI500basAP7DqT/vbVyiNyJP2CoeBdpfLOD+ajkHQ==",
+        "requested": "[3.0.1, )",
+        "resolved": "3.0.1",
+        "contentHash": "WLWp7S7pt818wsK2IiFwGwvUhwq0E/7F0LkglDQKx+4rSzRWVKD3CHtaCi1fpeURH+v44ZPxaRVBCNV7uWOBYQ==",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0"
         }

@@ -296,8 +296,8 @@
       },
       "Mediator.Abstractions": {
         "type": "Transitive",
-        "resolved": "3.0.0-preview.65",
-        "contentHash": "SqmWbc0kbIFFBKuLJZPicJy8FXOAO9WtbnUYaa+HeeX5eyI500basAP7DqT/vbVyiNyJP2CoeBdpfLOD+ajkHQ==",
+        "resolved": "3.0.1",
+        "contentHash": "WLWp7S7pt818wsK2IiFwGwvUhwq0E/7F0LkglDQKx+4rSzRWVKD3CHtaCi1fpeURH+v44ZPxaRVBCNV7uWOBYQ==",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0"
         }
@@ -2555,7 +2555,7 @@
           "Contracts": "[1.0.0, )",
           "Domain": "[1.0.0, )",
           "FluentValidation.DependencyInjectionExtensions": "[12.0.0, )",
-          "Mediator.Abstractions": "[3.0.0-preview.65, )",
+          "Mediator.Abstractions": "[3.0.1, )",
           "NRedisStack": "[1.0.0, )",
           "RazorLight": "[2.3.1, )",
           "Wangkanai.Detection": "[8.17.0, )",
@@ -2574,7 +2574,7 @@
         "type": "Project",
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
-          "Mediator.Abstractions": "[3.0.0-preview.65, )",
+          "Mediator.Abstractions": "[3.0.1, )",
           "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.10, )",
           "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.4, )"
         }
