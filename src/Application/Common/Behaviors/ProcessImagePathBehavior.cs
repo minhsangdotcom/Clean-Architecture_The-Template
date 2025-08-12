@@ -106,7 +106,8 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
         if (!imageKeyStr.StartsWith(storageService.PublicUrl))
         {
             string? fullPath = storageService.GetFullPath(imageKeyStr);
-            logger.LogInformation("image path {value}", fullPath);
+            string? publicPath = storageService.GetPublicPath(fullPath!);
+            logger.LogInformation("image path {value}", publicPath);
             property.SetValue(target, fullPath);
         }
     }
