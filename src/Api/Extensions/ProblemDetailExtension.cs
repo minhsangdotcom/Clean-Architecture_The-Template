@@ -1,10 +1,9 @@
-using System.Diagnostics;
 using Api.Middlewares;
 using Microsoft.AspNetCore.Http.Features;
 
 namespace Api.Extensions;
 
-public static class ProblemDetailExtention
+public static class ProblemDetailExtension
 {
     public static IServiceCollection AddErrorDetails(this IServiceCollection services)
     {

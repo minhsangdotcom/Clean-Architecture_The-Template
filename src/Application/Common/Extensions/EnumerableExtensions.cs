@@ -13,6 +13,6 @@ public static class EnumerableExtensions
         {
             return list;
         }
-        return [..source];
+        return [.. source];
     }
 }

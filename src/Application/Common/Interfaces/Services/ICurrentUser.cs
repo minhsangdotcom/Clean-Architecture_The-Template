@@ -9,7 +9,9 @@ public interface ICurrentUser
 
     public string? ClientIp { get; }
 
-    void SetClientIp(HttpContext httpContext);
+    public string? AuthenticationScheme { get; }
 
-    void Set(ClaimsPrincipal user);
+    // void SetClientIp(HttpContext httpContext);
+
+    // void Set(ClaimsPrincipal user);
 }

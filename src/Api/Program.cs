@@ -3,6 +3,7 @@ using Api.common.EndpointConfigurations;
 using Api.common.Routers;
 using Api.Converters;
 using Api.Extensions;
+using Api.Settings;
 using Application;
 using Cysharp.Serialization.Json;
 using HealthChecks.UI.Client;
@@ -37,19 +38,33 @@ services.AddOpenTelemetryTracing(configuration);
 builder.AddSerilog();
 services.AddHealthChecks();
 services.AddDatabaseHealthCheck(configuration);
+
+List<CorsProfileSettings> corsProfiles =
+    configuration.GetSection(nameof(CorsProfileSettings)).Get<List<CorsProfileSettings>>()
+    ??
+    [
+        new CorsProfileSettings()
+        {
+            Name = "AllowClientWith3000Port",
+            Origin = "http://localhost:3000",
+        },
+    ];
 services.AddCors(options =>
 {
-    options.AddPolicy(
-        "AllowLocalhost3000",
-        policy =>
-        {
-            policy
-                .WithOrigins("http://localhost:3000")
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials();
-        }
-    );
+    foreach (CorsProfileSettings profile in corsProfiles)
+    {
+        options.AddPolicy(
+            profile.Name!,
+            policy =>
+            {
+                policy
+                    .WithOrigins(profile.Origin!)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            }
+        );
+    }
 });
 #endregion
 
@@ -98,12 +113,14 @@ try
         app.AddLog(Log.Logger, routeRefix, healthCheckPath);
     }
 
-    app.UseCors("AllowLocalhost3000");
+    foreach (var profile in corsProfiles)
+    {
+        app.UseCors(profile.Name!);
+    }
     app.UseStatusCodePages();
     app.UseExceptionHandler();
     app.UseStaticFiles();
     app.UseAuthentication();
-    app.CurrentUser();
     app.UseAuthorization();
     app.UseDetection();
 

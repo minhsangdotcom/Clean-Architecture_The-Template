@@ -1,4 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
 using Application.Common.Constants;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
@@ -9,7 +8,6 @@ using Contracts.ApiWrapper;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using SharedKernel.Common.Messages;
 using SharedKernel.Constants;
 using SharedKernel.Extensions;
@@ -80,15 +78,12 @@ public class LoginUserHandler(
 
         var accessTokenExpiredTime = tokenFactory.AccessTokenExpiredTime;
         string accessToken = tokenFactory.CreateToken(
-            [new(JwtRegisteredClaimNames.Sub.ToString(), user.Id.ToString())],
+            [new(ClaimTypes.Sub, user.Id.ToString())],
             accessTokenExpiredTime
         );
 
         string refreshToken = tokenFactory.CreateToken(
-            [
-                new(ClaimTypes.TokenFamilyId, familyId),
-                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            ],
+            [new(ClaimTypes.TokenFamilyId, familyId), new(ClaimTypes.Sub, user.Id.ToString())],
             refreshExpireTime
         );
 
@@ -104,7 +99,7 @@ public class LoginUserHandler(
                 RefreshToken = refreshToken,
                 AccessTokenExpiredIn = (long)
                     Math.Ceiling((accessTokenExpiredTime - DateTime.UtcNow).TotalSeconds),
-                TokenType = JwtBearerDefaults.AuthenticationScheme,
+                TokenType = currentUser.AuthenticationScheme,
                 User = user.ToUserProjection(),
             }
         );

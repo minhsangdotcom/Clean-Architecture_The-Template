@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -31,9 +30,5 @@ public sealed class DateTimeOffsetJsonConverter : JsonConverter<DateTimeOffset>
         Utf8JsonWriter writer,
         DateTimeOffset value,
         JsonSerializerOptions options
-    )
-    {
-        var utc = value.ToUniversalTime();
-        writer.WriteStringValue(utc.ToString(IsoUtcFormat, CultureInfo.InvariantCulture));
-    }
+    ) => writer.WriteStringValue(value.ToUniversalTime().ToString(IsoUtcFormat));
 }

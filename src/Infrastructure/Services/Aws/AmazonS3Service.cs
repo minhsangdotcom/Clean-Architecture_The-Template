@@ -167,8 +167,21 @@ public class AmazonS3Service(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSett
         return $"{name}.{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}{extension}";
     }
 
-    public string? GetFullPath(string? key) =>
-        string.IsNullOrWhiteSpace(key) ? null : GeneratePreSignedURL(key);
+    public string? GetFullPath(string key) => GeneratePreSignedURL(key);
+
+    public string? GetPublicPath(string originalPath)
+    {
+        if (string.IsNullOrWhiteSpace(originalPath))
+        {
+            return string.Empty;
+        }
+
+        return originalPath.Replace(
+            s3AwsSettings.ServiceUrl!,
+            s3AwsSettings.PublicUrl,
+            StringComparison.OrdinalIgnoreCase
+        );
+    }
 
     private string GeneratePreSignedURL(string key)
     {
@@ -182,12 +195,6 @@ public class AmazonS3Service(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSett
             Protocol = s3AwsSettings.Protocol,
         };
 
-        string url = amazonS3.GetPreSignedURL(request);
-
-        return url.Replace(
-            s3AwsSettings.ServiceUrl!,
-            s3AwsSettings.PublicUrl,
-            StringComparison.OrdinalIgnoreCase
-        );
+        return amazonS3.GetPreSignedURL(request);
     }
 }

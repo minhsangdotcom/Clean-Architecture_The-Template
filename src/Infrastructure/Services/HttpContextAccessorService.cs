@@ -10,23 +10,11 @@ public class HttpContextAccessorService(IHttpContextAccessor httpContextAccessor
 {
     public HttpContext? HttpContext => httpContextAccessor.HttpContext;
 
-    public string? GetRouteValue(string key)
-    {
-        return HttpContext?.GetRouteValue(key)?.ToString();
-    }
+    public string? GetRouteValue(string key) => HttpContext?.GetRouteValue(key)?.ToString();
 
-    public string? GetHttpMethod()
-    {
-        return HttpContext?.Request.Method;
-    }
+    public string? GetHttpMethod() => HttpContext?.Request.Method;
 
-    public string? GetRequestPath()
-    {
-        return HttpContext?.Request.Path;
-    }
+    public string? GetRequestPath() => HttpContext?.Request.Path;
 
-    public string? GetId()
-    {
-        return GetRouteValue(RoutePath.Id);
-    }
+    public string? GetId() => GetRouteValue(RoutePath.Id);
 }

@@ -64,8 +64,8 @@ public static class DependencyInjection
 
         services
             .AddAmazonS3(configuration)
-            .AddSingleton<ICurrentUser, CurrentUserService>()
             .AddHttpContextAccessor()
+            .AddSingleton<ICurrentUser, CurrentUserService>()
             .AddScoped<IHttpContextAccessorService, HttpContextAccessorService>()
             .AddJwt(configuration)
             .AddQueue(configuration)

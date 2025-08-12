@@ -1,31 +1,33 @@
 using System.Security.Claims;
 using Application.Common.Interfaces.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 
 namespace Infrastructure.Services;
 
-public class CurrentUserService : ICurrentUser
+public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUser
 {
-    public Ulid? Id { get; private set; }
+    public Ulid? Id => GetId(ClaimTypes.NameIdentifier);
 
-    public string? ClientIp { get; private set; }
+    public string? ClientIp =>
+        httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
-    public void Set(ClaimsPrincipal user)
+    public string? AuthenticationScheme =>
+        httpContextAccessor
+            .HttpContext?.Features.Get<IAuthenticateResultFeature>()
+            ?.AuthenticateResult?.Ticket?.AuthenticationScheme
+        ?? JwtBearerDefaults.AuthenticationScheme;
+
+    private Ulid? GetId(string claimType)
     {
-        if (user.Identity?.IsAuthenticated == false)
+        string? id = httpContextAccessor.HttpContext?.User?.FindFirstValue(claimType);
+
+        if (id is null)
         {
-            Id = null;
-            return;
+            return Ulid.Empty;
         }
 
-        if (Ulid.TryParse(user?.FindFirst(ClaimTypes.NameIdentifier)?.Value, out Ulid id))
-        {
-            Id = id;
-        }
-    }
-
-    public void SetClientIp(HttpContext httpContext)
-    {
-        ClientIp = httpContext.Connection.RemoteIpAddress?.ToString();
+        return Ulid.Parse(id);
     }
 }

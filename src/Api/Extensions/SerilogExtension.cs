@@ -3,7 +3,7 @@ using Serilog;
 
 namespace Api.Extensions;
 
-public static class SerialogExtension
+public static class SerilogExtension
 {
     public static void AddSerilog(this WebApplicationBuilder builder)
     {
