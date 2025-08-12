@@ -17,12 +17,7 @@ public class DateTimeJsonConverter : JsonConverter<DateTime>
         var str = reader.GetString()!;
         try
         {
-            return DateTime.ParseExact(
-                str,
-                IsoUtcFormat,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal
-            );
+            return DateTime.ParseExact(str, IsoUtcFormat, CultureInfo.InvariantCulture);
         }
         catch (FormatException ex)
         {
