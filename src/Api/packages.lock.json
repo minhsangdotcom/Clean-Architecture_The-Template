@@ -856,14 +856,12 @@
       },
       "minhsangdotcom.TheTemplate.SharedKernel": {
         "type": "Transitive",
-        "resolved": "1.0.10",
-        "contentHash": "Le71da77WbILGZ6w9UYy1yXosDdR2W55PamXE8R65n8y8waCuqMOwfKbKpU4q4VkmYwIvQiS68h8GtC1bMyDFA==",
+        "resolved": "1.0.12",
+        "contentHash": "rNZNITeOvtSMquDNFYQJ5Gl0haDsR4RAm0qflKTDSJ8Em5wue0OJQQzAOPrW+cS/Fj7+L+1Fh+bFdqHYiRxf0A==",
         "dependencies": {
           "BouncyCastle.Cryptography": "2.5.1",
           "CaseConverter": "2.0.1",
-          "Newtonsoft.Json": "13.0.3",
-          "Npgsql.EntityFrameworkCore.PostgreSQL": "8.0.11",
-          "Ulid": "1.3.4",
+          "Ulid": "1.4.1",
           "deniszykov.TypeConversion": "3.2.3"
         }
       },
@@ -886,8 +884,8 @@
       },
       "Newtonsoft.Json": {
         "type": "Transitive",
-        "resolved": "13.0.3",
-        "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
+        "resolved": "13.0.4-beta1",
+        "contentHash": "6V0WDUzcU5p3R2/RN6UC+1wJtWfCB9YahSUe37mSGbPoH+Q84HTOjmsLIgynkZwJb/NYv0vFARSvDdUse3ZODA=="
       },
       "Npgsql": {
         "type": "Transitive",
@@ -1138,10 +1136,20 @@
         "resolved": "4.6.0",
         "contentHash": "I5G6Y8jb0xRtGUC9Lahy7FUvlYlnGMMkbuKAQBy8Jb7Y6Yn8OlBEiUOY0PqZ0hy6Ua8poVA1ui1tAIiXNxGdsg=="
       },
+      "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": {
+        "type": "Transitive",
+        "resolved": "0.1.1",
+        "contentHash": "WuAuBhWQFv5lqoZxnJg+0DxslViksz6J5n5o70uppQXFzJ597Z+0cUlIn+lwtXrnv3sqMF1sq5UUi0M+KVH9NQ==",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.4-beta1",
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "8.0.11",
+          "minhsangdotcom.TheTemplate.SharedKernel": "1.0.12"
+        }
+      },
       "Ulid": {
         "type": "Transitive",
-        "resolved": "1.3.4",
-        "contentHash": "6IaGquwjjfW+BoHSV844y12Uy2kxbboYNmsibxr2lotcSPAA3LKy1CKcAQ8JOdAdL4xMoDNXA1oxG41w7fbr6Q=="
+        "resolved": "1.4.1",
+        "contentHash": "V6crLJ8a29raWeNwxYGfH9RTKA3H0nR0D9LAGzN3KtEsbiiaWkUjDor6OT5Oz7pxCK+NaY2hu2FLoYEOa8oCkA=="
       },
       "Wangkanai.Detection": {
         "type": "Transitive",
@@ -1184,7 +1192,7 @@
         "dependencies": {
           "Microsoft.AspNetCore.Http": "[2.3.0, )",
           "Microsoft.AspNetCore.Mvc.Core": "[2.3.0, )",
-          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.10, )"
+          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.12, )"
         }
       },
       "domain": {
@@ -1192,7 +1200,7 @@
         "dependencies": {
           "Ardalis.GuardClauses": "[5.0.0, )",
           "Mediator.Abstractions": "[3.0.1, )",
-          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.10, )",
+          "minhsangdotcom.TheTemplate.SharedKernel": "[1.0.12, )",
           "minhsangdotcom.TheTemplate.SpecificationPattern": "[1.0.4, )"
         }
       },
@@ -1205,7 +1213,7 @@
           "JWT": "[11.0.0, )",
           "MailKit": "[4.12.1, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.19, )",
-          "Ulid": "[1.3.4, )"
+          "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[0.1.1, )"
         }
       }
     }
