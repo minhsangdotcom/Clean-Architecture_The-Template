@@ -1,7 +1,5 @@
 using Application.Features.Common.Projections.Tickets.Carts;
 using Domain.Aggregates.Carts;
-using Domain.Aggregates.Customers;
-using RazorLight.Extensions;
 
 namespace Application.Features.Tickets.Carts.Create;
 
