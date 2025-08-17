@@ -1,9 +1,9 @@
 using System.Reflection;
 using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Common;
+using DynamicQuery.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using SharedKernel.Extensions.QueryExtensions;
 
 namespace Infrastructure.Data;
 

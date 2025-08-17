@@ -15,7 +15,9 @@ public class RazorViewToStringRenderer
         try
         {
             return await razorLightEngine.CompileRenderAsync(
-                Path.Combine("Templates", $"{mailTemplate.ViewName}.cshtml"), mailTemplate.Template);
+                Path.Combine("Templates", $"{mailTemplate.ViewName}.cshtml"),
+                mailTemplate.Template
+            );
         }
         catch (Exception ex)
         {
