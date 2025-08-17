@@ -874,14 +874,6 @@
           "Microsoft.EntityFrameworkCore.Relational": "8.0.17"
         }
       },
-      "NetTopologySuite": {
-        "type": "Transitive",
-        "resolved": "2.5.0",
-        "contentHash": "5/+2O2ADomEdUn09mlSigACdqvAf0m/pVPGtIPEPQWnyrVykYY0NlfXLIdkMgi41kvH9kNrPqYaFBTZtHYH7Xw==",
-        "dependencies": {
-          "System.Memory": "4.5.4"
-        }
-      },
       "Newtonsoft.Json": {
         "type": "Transitive",
         "resolved": "13.0.4-beta1",
@@ -908,11 +900,10 @@
       },
       "NRedisStack": {
         "type": "Transitive",
-        "resolved": "1.0.0",
-        "contentHash": "vCSwHNibWIgDic2sXAP23s7m7IMu3dlWdfv8LIufFfVGm+yyZ9MXCTFQaGw6zv4hE7k9RhJp64ObvLYx+2sQIQ==",
+        "resolved": "1.1.0",
+        "contentHash": "yXAaqhKT2hkapUBdpMEz7evNRwSGPP0KDd6E1GEIWPyLfnlTEHgEE8bsOD0I21ZHLvoMvKwbE4ibuOuVkOEE2Q==",
         "dependencies": {
-          "NetTopologySuite": "2.5.0",
-          "StackExchange.Redis": "2.8.24"
+          "StackExchange.Redis": "2.8.58"
         }
       },
       "OpenTelemetry.Api": {
@@ -1026,10 +1017,10 @@
       },
       "StackExchange.Redis": {
         "type": "Transitive",
-        "resolved": "2.8.24",
-        "contentHash": "GWllmsFAtLyhm4C47cOCipGxyEi1NQWTFUHXnJ8hiHOsK/bH3T5eLkWPVW+LRL6jDiB3g3izW3YEHgLuPoJSyA==",
+        "resolved": "2.8.58",
+        "contentHash": "0XGRE2UoF/n2/qhCpcyBBZovpGhHu4hRtkdsx4fZFu1H5Q/Z8Q+U/z/nWwnosWDRJnEasntNatd9Mf+Isc8plg==",
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "6.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.0",
           "Pipelines.Sockets.Unofficial": "2.2.8"
         }
       },
@@ -1181,8 +1172,6 @@
           "Domain": "[1.0.0, )",
           "FluentValidation.DependencyInjectionExtensions": "[12.0.0, )",
           "Mediator.Abstractions": "[3.0.1, )",
-          "NRedisStack": "[1.0.0, )",
-          "RazorLight": "[2.3.1, )",
           "Wangkanai.Detection": "[8.17.0, )",
           "minhsangdotcom.TheTemplate.ElasticsearchFluentConfig": "[1.0.1-alpha, )"
         }
@@ -1213,6 +1202,8 @@
           "JWT": "[11.0.0, )",
           "MailKit": "[4.12.1, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.19, )",
+          "NRedisStack": "[1.1.0, )",
+          "RazorLight": "[2.3.1, )",
           "TranMinhSang.DynamicQueryExtension.EntityFrameworkCore": "[0.1.1, )"
         }
       }
