@@ -14,8 +14,6 @@
     </PackageReference>
     <PackageReference Include="minhsangdotcom.TheTemplate.ElasticsearchFluentConfig" Version="1.0.1-alpha" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
-    <PackageReference Include="NRedisStack" Version="1.0.0" />
-    <PackageReference Include="RazorLight" Version="2.3.1" />
     <PackageReference Include="Wangkanai.Detection" Version="8.17.0" />
 
     <Using Include="BCrypt.Net.BCrypt" Static="True" />

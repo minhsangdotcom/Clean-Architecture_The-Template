@@ -7,13 +7,12 @@ using StackExchange.Redis;
 namespace Infrastructure.Services.Cache.DistributedCache;
 
 public class RedisCacheService(
+    IDatabase redis,
     IOptions<RedisDatabaseSettings> options,
     ILogger<RedisCacheService> logger
 ) : IDistributedCacheService
 {
     private readonly RedisDatabaseSettings redisDatabaseSettings = options.Value;
-
-    public IDatabase Database => GetDatabase();
 
     public T? GetOrSet<T>(string key, Func<T> func, CacheOptions? options = null)
     {
@@ -53,7 +52,7 @@ public class RedisCacheService(
 
     public void Remove(string key)
     {
-        bool isSuccess = Database.KeyDelete(key);
+        bool isSuccess = redis.KeyDelete(key);
         if (isSuccess)
         {
             logger.LogDebug("Redis KeyDelete {Key}", key);
@@ -66,7 +65,7 @@ public class RedisCacheService(
 
     public async Task RemoveAsync(string key)
     {
-        bool isSuccess = await Database.KeyDeleteAsync(key);
+        bool isSuccess = await redis.KeyDeleteAsync(key);
 
         if (isSuccess)
         {
@@ -78,26 +77,13 @@ public class RedisCacheService(
         }
     }
 
-    private IDatabase GetDatabase()
-    {
-        ConfigurationOptions options =
-            new()
-            {
-                EndPoints = { { redisDatabaseSettings.Host!, redisDatabaseSettings.Port!.Value } },
-                Password = redisDatabaseSettings.Password,
-            };
-        ConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect(options);
-
-        return multiplexer.GetDatabase();
-    }
-
     private async Task<T?> GetOrSetDefaultAsync<T>(
         string key,
         Func<Task<T>> task,
         CacheOptions options
     )
     {
-        RedisValue redisValue = await Database.StringGetAsync(key);
+        RedisValue redisValue = await redis.StringGetAsync(key);
         if (redisValue.HasValue)
         {
             logger.LogWarning("Redis HIT for {Key}", key);
@@ -106,7 +92,7 @@ public class RedisCacheService(
                 && options.Expiration.HasValue
             )
             {
-                await Database.KeyExpireAsync(key, options.Expiration);
+                await redis.KeyExpireAsync(key, options.Expiration);
             }
 
             return SerializerExtension.Deserialize<T>(redisValue!).Object;
@@ -125,13 +111,13 @@ public class RedisCacheService(
             _ => null,
         };
 
-        await Database.StringSetAsync(key, json, expiry);
+        await redis.StringSetAsync(key, json, expiry);
         return result;
     }
 
     private T? GetOrSetDefault<T>(string key, Func<T> func, CacheOptions options)
     {
-        RedisValue redisValue = Database.StringGet(key);
+        RedisValue redisValue = redis.StringGet(key);
         if (redisValue.HasValue)
         {
             logger.LogWarning("Redis HIT for {Key}", key);
@@ -140,7 +126,7 @@ public class RedisCacheService(
                 && options.Expiration.HasValue
             )
             {
-                Database.KeyExpire(key, options.Expiration);
+                redis.KeyExpire(key, options.Expiration);
             }
 
             return SerializerExtension.Deserialize<T>(redisValue!).Object;
@@ -159,7 +145,7 @@ public class RedisCacheService(
             _ => null,
         };
 
-        Database.StringSet(key, json, expiry);
+        redis.StringSet(key, json, expiry);
         return result;
     }
 }
